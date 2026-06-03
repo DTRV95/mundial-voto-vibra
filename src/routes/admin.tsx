@@ -73,12 +73,13 @@ function Stat({ label, value }: { label: string; value: number }) {
 }
 
 function Tabs() {
-  const [tab, setTab] = useState<"groups" | "teams" | "matches" | "prizes">("matches");
+  const [tab, setTab] = useState<"matches" | "analysis" | "teams" | "groups" | "prizes">("matches");
   const tabs = [
-    { k: "matches", label: "Jogos" },
-    { k: "teams", label: "Equipas" },
-    { k: "groups", label: "Grupos" },
-    { k: "prizes", label: "Prémios" },
+    { k: "matches",  label: "Jogos" },
+    { k: "analysis", label: "ScoreLab" },
+    { k: "teams",    label: "Equipas" },
+    { k: "groups",   label: "Grupos" },
+    { k: "prizes",   label: "Prémios" },
   ] as const;
   return (
     <>
@@ -90,10 +91,11 @@ function Tabs() {
             }`}>{t.label}</button>
         ))}
       </div>
-      {tab === "groups" && <GroupsAdmin />}
-      {tab === "teams" && <TeamsAdmin />}
-      {tab === "matches" && <MatchesAdmin />}
-      {tab === "prizes" && <PrizesAdmin />}
+      {tab === "matches"  && <MatchesAdmin />}
+      {tab === "analysis" && <AnalysisAdmin />}
+      {tab === "groups"   && <GroupsAdmin />}
+      {tab === "teams"    && <TeamsAdmin />}
+      {tab === "prizes"   && <PrizesAdmin />}
     </>
   );
 }
@@ -318,6 +320,97 @@ function PrizesAdmin() {
           </li>
         ))}
       </ul>
+    </Section>
+  );
+}
+
+function AnalysisAdmin() {
+  const qc = useQueryClient();
+  const [matchId, setMatchId] = useState("");
+  const [form, setForm] = useState({
+    prob_home: 0, prob_draw: 0, prob_away: 0,
+    prob_btts_yes: 0, prob_btts_no: 0,
+    prob_over25: 0, prob_under25: 0,
+    prob_over35: 0, prob_under35: 0,
+    prob_1x: 0, prob_x2: 0,
+    prob_combo15_1x_over: 0, prob_combo15_1x_under: 0, prob_combo15_x2_over: 0, prob_combo15_x2_under: 0,
+    prob_combo35_1x_over: 0, prob_combo35_1x_under: 0, prob_combo35_x2_over: 0, prob_combo35_x2_under: 0,
+  });
+
+  const { data: matches = [] } = useQuery({
+    queryKey: ["admin", "matches"],
+    queryFn: async () => (await supabase.from("matches")
+      .select("id,kickoff_at,home:home_team_id(name),away:away_team_id(name)")
+      .order("kickoff_at")).data ?? [],
+  });
+
+  const { data: existing } = useQuery({
+    queryKey: ["admin", "analysis", matchId],
+    enabled: !!matchId,
+    queryFn: async () => {
+      const { data } = await supabase.from("match_analysis").select("*").eq("match_id", matchId).maybeSingle();
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (existing) setForm({ ...form, ...existing });
+  }, [existing]);
+
+  const set = (k: string, v: number) => setForm((f) => ({ ...f, [k]: v }));
+
+  async function save() {
+    if (!matchId) { toast.error("Seleciona um jogo"); return; }
+    const payload = { match_id: matchId, ...form };
+    const { error } = await supabase.from("match_analysis").upsert(payload, { onConflict: "match_id" });
+    if (error) toast.error(error.message);
+    else { toast.success("Análise ScoreLab guardada!"); qc.invalidateQueries({ queryKey: ["admin", "analysis", matchId] }); }
+  }
+
+  const markets = [
+    { label: "Resultado 90 min", fields: [{ k: "prob_home", label: "Casa" }, { k: "prob_draw", label: "Empate" }, { k: "prob_away", label: "Fora" }] },
+    { label: "Ambas marcam", fields: [{ k: "prob_btts_yes", label: "Sim" }, { k: "prob_btts_no", label: "Não" }] },
+    { label: "Total 2.5", fields: [{ k: "prob_over25", label: "Mais 2.5" }, { k: "prob_under25", label: "Menos 2.5" }] },
+    { label: "Total 3.5", fields: [{ k: "prob_over35", label: "Mais 3.5" }, { k: "prob_under35", label: "Menos 3.5" }] },
+    { label: "Dupla hipótese", fields: [{ k: "prob_1x", label: "1X" }, { k: "prob_x2", label: "X2" }] },
+    { label: "Combo 1.5", fields: [{ k: "prob_combo15_1x_over", label: "1X+Mais1.5" }, { k: "prob_combo15_1x_under", label: "1X+Menos1.5" }, { k: "prob_combo15_x2_over", label: "X2+Mais1.5" }, { k: "prob_combo15_x2_under", label: "X2+Menos1.5" }] },
+    { label: "Combo 3.5", fields: [{ k: "prob_combo35_1x_over", label: "1X+Mais3.5" }, { k: "prob_combo35_1x_under", label: "1X+Menos3.5" }, { k: "prob_combo35_x2_over", label: "X2+Mais3.5" }, { k: "prob_combo35_x2_under", label: "X2+Menos3.5" }] },
+  ];
+
+  return (
+    <Section>
+      <p className="mb-3 text-xs text-muted-foreground">Insere as probabilidades do <span className="font-bold text-gold">ScoreLab</span> por mercado (valores em %).</p>
+      <select value={matchId} onChange={(e) => setMatchId(e.target.value)} className={`${inputCls} w-full mb-4`}>
+        <option value="">Selecionar jogo…</option>
+        {matches.map((m: any) => (
+          <option key={m.id} value={m.id}>{m.home?.name} vs {m.away?.name} — {new Date(m.kickoff_at).toLocaleDateString("pt-PT")}</option>
+        ))}
+      </select>
+
+      {matchId && (
+        <div className="space-y-4">
+          {markets.map((mkt) => (
+            <div key={mkt.label} className="rounded-xl border border-border bg-card/50 p-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{mkt.label}</p>
+              <div className="flex flex-wrap gap-2">
+                {mkt.fields.map((f) => (
+                  <label key={f.k} className="flex flex-col items-center gap-1">
+                    <span className="text-[10px] text-muted-foreground">{f.label}</span>
+                    <input
+                      type="number" min={0} max={100}
+                      value={(form as any)[f.k]}
+                      onChange={(e) => set(f.k, Number(e.target.value))}
+                      className="w-16 rounded-lg border border-border bg-input px-2 py-1.5 text-center text-sm font-bold outline-none focus:border-gold/60"
+                    />
+                    <span className="text-[10px] text-muted-foreground">%</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+          <button onClick={save} className={`${btnCls} w-full justify-center`}>Guardar Análise ScoreLab</button>
+        </div>
+      )}
     </Section>
   );
 }

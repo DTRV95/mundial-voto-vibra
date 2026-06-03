@@ -37,9 +37,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </Link>
           <div className="flex items-center gap-2">
-            {isAdmin && (
+            {user && isAdmin && (
               <Link to="/admin" className="flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-gold">
                 <Shield className="h-3 w-3" /> Admin
+              </Link>
+            )}
+            {user && !isAdmin && (
+              <Link to="/perfil" className="grid h-8 w-8 place-items-center rounded-full bg-secondary font-display text-sm text-foreground">
+                {(user.user_metadata?.display_name ?? user.email ?? "U").charAt(0).toUpperCase()}
               </Link>
             )}
             {!user && (

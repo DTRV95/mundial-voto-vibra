@@ -11,10 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as PremiosRouteImport } from './routes/premios'
+import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as JogosRouteImport } from './routes/jogos'
 import { Route as GruposRouteImport } from './routes/grupos'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as JogoIdRouteImport } from './routes/jogo.$id'
 
 const RankingsRoute = RankingsRouteImport.update({
   id: '/rankings',
@@ -24,6 +27,11 @@ const RankingsRoute = RankingsRouteImport.update({
 const PremiosRoute = PremiosRouteImport.update({
   id: '/premios',
   path: '/premios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JogosRoute = JogosRouteImport.update({
@@ -41,59 +49,102 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JogoIdRoute = JogoIdRouteImport.update({
+  id: '/jogo/$id',
+  path: '/jogo/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
+  '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
   '/rankings': typeof RankingsRoute
+  '/jogo/$id': typeof JogoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
+  '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
   '/rankings': typeof RankingsRoute
+  '/jogo/$id': typeof JogoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
+  '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
   '/rankings': typeof RankingsRoute
+  '/jogo/$id': typeof JogoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/grupos' | '/jogos' | '/premios' | '/rankings'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/grupos' | '/jogos' | '/premios' | '/rankings'
-  id:
-    | '__root__'
+  fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/grupos'
     | '/jogos'
+    | '/perfil'
     | '/premios'
     | '/rankings'
+    | '/jogo/$id'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/grupos'
+    | '/jogos'
+    | '/perfil'
+    | '/premios'
+    | '/rankings'
+    | '/jogo/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/grupos'
+    | '/jogos'
+    | '/perfil'
+    | '/premios'
+    | '/rankings'
+    | '/jogo/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   GruposRoute: typeof GruposRoute
   JogosRoute: typeof JogosRoute
+  PerfilRoute: typeof PerfilRoute
   PremiosRoute: typeof PremiosRoute
   RankingsRoute: typeof RankingsRoute
+  JogoIdRoute: typeof JogoIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -110,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/premios'
       fullPath: '/premios'
       preLoaderRoute: typeof PremiosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jogos': {
@@ -133,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -140,16 +205,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jogo/$id': {
+      id: '/jogo/$id'
+      path: '/jogo/$id'
+      fullPath: '/jogo/$id'
+      preLoaderRoute: typeof JogoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   GruposRoute: GruposRoute,
   JogosRoute: JogosRoute,
+  PerfilRoute: PerfilRoute,
   PremiosRoute: PremiosRoute,
   RankingsRoute: RankingsRoute,
+  JogoIdRoute: JogoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

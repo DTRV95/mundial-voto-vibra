@@ -205,6 +205,11 @@ function MatchesAdmin() {
     await supabase.from("matches").update({ home_score: h, away_score: a, status: "finished" }).eq("id", id);
     toast.success("Resultado registado"); qc.invalidateQueries({ queryKey: ["admin", "matches"] });
   }
+  async function calcPoints(id: string) {
+    const { error } = await supabase.rpc("calculate_match_points", { p_match_id: id });
+    if (error) toast.error(error.message);
+    else { toast.success("Pontos calculados!"); qc.invalidateQueries({ queryKey: ["admin", "matches"] }); }
+  }
   async function del(id: string) {
     if (!confirm("Eliminar jogo?")) return;
     await supabase.from("matches").delete().eq("id", id);
@@ -241,6 +246,12 @@ function MatchesAdmin() {
                 {m.voting_open ? "Votação aberta" : "Votação fechada"}
               </button>
               <ScoreSet match={m} onSubmit={(h, a) => setScore(m.id, h, a)} />
+              {m.home_score != null && m.away_score != null && (
+                <button onClick={() => calcPoints(m.id)}
+                  className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-semibold text-primary">
+                  Calcular pts
+                </button>
+              )}
               <button onClick={() => del(m.id)} className="ml-auto text-destructive"><Trash2 className="h-4 w-4" /></button>
             </div>
           </li>

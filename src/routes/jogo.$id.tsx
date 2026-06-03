@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
-import { Lock, Users2, Info, TrendingUp } from "lucide-react";
+import { Lock, Users2, Info, TrendingUp, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/jogo/$id")({
   head: () => ({ meta: [{ title: "Análise & Previsão — Voz do Mundial" }] }),
@@ -57,6 +57,8 @@ function JogoPage() {
   });
 
   const [pred, setPred] = useState<Record<string, any>>({});
+  const [scorelabOpen, setScorelabOpen] = useState(false);
+
   useEffect(() => { if (myPrediction) setPred(myPrediction); }, [myPrediction]);
 
   const status = match ? votingStatus(match) : null;
@@ -73,15 +75,11 @@ function JogoPage() {
     if (closed) return;
     const payload = {
       user_id: user.id, match_id: id,
-      result_90: pred.result_90 ?? null,
-      btts: pred.btts ?? null,
-      total_25: pred.total_25 ?? null,
-      total_35: pred.total_35 ?? null,
+      result_90: pred.result_90 ?? null, btts: pred.btts ?? null,
+      total_25: pred.total_25 ?? null, total_35: pred.total_35 ?? null,
       double_chance: pred.double_chance ?? null,
-      exact_home: pred.exact_home ?? null,
-      exact_away: pred.exact_away ?? null,
-      combo_15: pred.combo_15 ?? null,
-      combo_35: pred.combo_35 ?? null,
+      exact_home: pred.exact_home ?? null, exact_away: pred.exact_away ?? null,
+      combo_15: pred.combo_15 ?? null, combo_35: pred.combo_35 ?? null,
     };
     const { error } = await supabase.from("predictions").upsert(payload, { onConflict: "user_id,match_id" });
     if (error) { toast.error(error.message); return; }
@@ -137,100 +135,125 @@ function JogoPage() {
         </div>
       )}
 
-      {/* Powered by ScoreLab badge */}
+      {/* ── Previsão ScoreLab colapsável ── */}
       {analysis && (
-        <div className="mt-4 flex items-center justify-between rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-gold" />
-            <span className="text-sm font-semibold text-gold">Análise disponível</span>
-            <span className="text-xs text-muted-foreground">— probabilidades para cada mercado</span>
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold/60">
-            Powered by ScoreLab
-          </span>
+        <div className="mt-4 overflow-hidden rounded-2xl border border-gold/30 bg-gold/5">
+          <button
+            onClick={() => setScorelabOpen((o) => !o)}
+            className="flex w-full items-center justify-between px-4 py-3 transition-smooth hover:bg-gold/10"
+          >
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-gold" />
+              <span className="font-display text-base text-gold">Previsão ScoreLab</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-gold/50">Powered by ScoreLab</span>
+              <ChevronDown className={`h-4 w-4 text-gold transition-transform duration-200 ${scorelabOpen ? "rotate-180" : ""}`} />
+            </div>
+          </button>
+
+          {scorelabOpen && (
+            <div className="border-t border-gold/20 px-4 py-4 space-y-3">
+              <SLRow label="Resultado 90 min" entries={[
+                { label: home.name, pct: analysis.prob_home },
+                { label: "Empate", pct: analysis.prob_draw },
+                { label: away.name, pct: analysis.prob_away },
+              ]} />
+              <SLRow label="Ambas marcam" entries={[
+                { label: "Sim", pct: analysis.prob_btts_yes },
+                { label: "Não", pct: analysis.prob_btts_no },
+              ]} />
+              <SLRow label="Total 2.5" entries={[
+                { label: "Mais", pct: analysis.prob_over25 },
+                { label: "Menos", pct: analysis.prob_under25 },
+              ]} />
+              <SLRow label="Total 3.5" entries={[
+                { label: "Mais", pct: analysis.prob_over35 },
+                { label: "Menos", pct: analysis.prob_under35 },
+              ]} />
+              <SLRow label="Dupla hipótese" entries={[
+                { label: "1X", pct: analysis.prob_1x },
+                { label: "X2", pct: analysis.prob_x2 },
+              ]} />
+              <SLRow label="Combo 1.5" entries={[
+                { label: "1X+Mais", pct: analysis.prob_combo15_1x_over },
+                { label: "1X+Menos", pct: analysis.prob_combo15_1x_under },
+                { label: "X2+Mais", pct: analysis.prob_combo15_x2_over },
+                { label: "X2+Menos", pct: analysis.prob_combo15_x2_under },
+              ]} />
+              <SLRow label="Combo 3.5" entries={[
+                { label: "1X+Mais", pct: analysis.prob_combo35_1x_over },
+                { label: "1X+Menos", pct: analysis.prob_combo35_1x_under },
+                { label: "X2+Mais", pct: analysis.prob_combo35_x2_over },
+                { label: "X2+Menos", pct: analysis.prob_combo35_x2_under },
+              ]} />
+            </div>
+          )}
         </div>
       )}
 
-      {/* Markets */}
+      {/* ── Markets ── */}
       <section className="mt-4 space-y-3">
 
         <MarketCard title="Resultado em 90 minutos" closed={closed}>
-          {analysis && <ScoreLabBars entries={[
-            { label: `Vitória ${home.name}`, pct: analysis.prob_home },
-            { label: "Empate", pct: analysis.prob_draw },
-            { label: `Vitória ${away.name}`, pct: analysis.prob_away },
-          ]} />}
-          {showCommunity && <CommunityBars total={community.length} entries={[
-            { label: `Vitória ${home.name}`, value: "home" },
-            { label: "Empate", value: "draw" },
-            { label: `Vitória ${away.name}`, value: "away" },
-          ]} votes={community.map((c) => c.result_90)} />}
           <VoteOptions value={pred.result_90} disabled={closed}
-            options={[{ v: "home", label: home.name }, { v: "draw", label: "Empate" }, { v: "away", label: away.name }]}
+            options={[
+              { v: "home", label: home.name, pct: analysis?.prob_home },
+              { v: "draw", label: "Empate", pct: analysis?.prob_draw },
+              { v: "away", label: away.name, pct: analysis?.prob_away },
+            ]}
             onChange={(v) => set("result_90", v)} />
+          {showCommunity && <CommunityLine votes={community.map(c => c.result_90)}
+            labels={{ home: home.name, draw: "Empate", away: away.name }} total={community.length} />}
         </MarketCard>
 
         <MarketCard title="Ambas as equipas marcam" closed={closed}>
-          {analysis && <ScoreLabBars entries={[
-            { label: "Sim", pct: analysis.prob_btts_yes },
-            { label: "Não", pct: analysis.prob_btts_no },
-          ]} />}
-          {showCommunity && <CommunityBars total={community.length} entries={[
-            { label: "Sim", value: "yes" }, { label: "Não", value: "no" },
-          ]} votes={community.map((c) => c.btts)} />}
           <VoteOptions value={pred.btts} disabled={closed}
-            options={[{ v: "yes", label: "Sim" }, { v: "no", label: "Não" }]}
+            options={[
+              { v: "yes", label: "Sim", pct: analysis?.prob_btts_yes },
+              { v: "no", label: "Não", pct: analysis?.prob_btts_no },
+            ]}
             onChange={(v) => set("btts", v)} />
+          {showCommunity && <CommunityLine votes={community.map(c => c.btts)}
+            labels={{ yes: "Sim", no: "Não" }} total={community.length} />}
         </MarketCard>
 
         <MarketCard title="Total de golos — 2.5" closed={closed}>
-          {analysis && <ScoreLabBars entries={[
-            { label: "Mais de 2.5", pct: analysis.prob_over25 },
-            { label: "Menos de 2.5", pct: analysis.prob_under25 },
-          ]} />}
-          {showCommunity && <CommunityBars total={community.length} entries={[
-            { label: "Mais de 2.5", value: "over" }, { label: "Menos de 2.5", value: "under" },
-          ]} votes={community.map((c) => c.total_25)} />}
           <VoteOptions value={pred.total_25} disabled={closed}
-            options={[{ v: "over", label: "Mais de 2.5" }, { v: "under", label: "Menos de 2.5" }]}
+            options={[
+              { v: "over", label: "Mais de 2.5", pct: analysis?.prob_over25 },
+              { v: "under", label: "Menos de 2.5", pct: analysis?.prob_under25 },
+            ]}
             onChange={(v) => set("total_25", v)} />
+          {showCommunity && <CommunityLine votes={community.map(c => c.total_25)}
+            labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
         </MarketCard>
 
         <MarketCard title="Total de golos — 3.5" closed={closed}>
-          {analysis && <ScoreLabBars entries={[
-            { label: "Mais de 3.5", pct: analysis.prob_over35 },
-            { label: "Menos de 3.5", pct: analysis.prob_under35 },
-          ]} />}
-          {showCommunity && <CommunityBars total={community.length} entries={[
-            { label: "Mais de 3.5", value: "over" }, { label: "Menos de 3.5", value: "under" },
-          ]} votes={community.map((c) => c.total_35)} />}
           <VoteOptions value={pred.total_35} disabled={closed}
-            options={[{ v: "over", label: "Mais de 3.5" }, { v: "under", label: "Menos de 3.5" }]}
+            options={[
+              { v: "over", label: "Mais de 3.5", pct: analysis?.prob_over35 },
+              { v: "under", label: "Menos de 3.5", pct: analysis?.prob_under35 },
+            ]}
             onChange={(v) => set("total_35", v)} />
+          {showCommunity && <CommunityLine votes={community.map(c => c.total_35)}
+            labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
         </MarketCard>
 
         <MarketCard title="Dupla hipótese" closed={closed}>
-          {analysis && <ScoreLabBars entries={[
-            { label: "1X (Casa ou Empate)", pct: analysis.prob_1x },
-            { label: "X2 (Empate ou Fora)", pct: analysis.prob_x2 },
-          ]} />}
-          {showCommunity && <CommunityBars total={community.length} entries={[
-            { label: "1X", value: "1x" }, { label: "X2", value: "x2" },
-          ]} votes={community.map((c) => c.double_chance)} />}
           <VoteOptions value={pred.double_chance} disabled={closed}
-            options={[{ v: "1x", label: "1X" }, { v: "x2", label: "X2" }]}
+            options={[
+              { v: "1x", label: "1X — Casa ou Empate", pct: analysis?.prob_1x },
+              { v: "x2", label: "X2 — Empate ou Fora", pct: analysis?.prob_x2 },
+            ]}
             onChange={(v) => set("double_chance", v)} />
+          {showCommunity && <CommunityLine votes={community.map(c => c.double_chance)}
+            labels={{ "1x": "1X", x2: "X2" }} total={community.length} />}
         </MarketCard>
 
-        {/* Resultado exacto — sem ScoreLab */}
-        <MarketCard title="Resultado exacto" closed={closed} noScorelab>
-          {showCommunity && community.filter((c) => c.exact_home != null).length > 0 && (
-            <div className="rounded-xl border border-border bg-secondary/30 p-3 mb-2">
-              <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                <Users2 className="h-3.5 w-3.5" /> Resultados mais votados
-              </p>
-              <ExactScoreCommunity votes={community} />
-            </div>
+        <MarketCard title="Resultado exacto" closed={closed}>
+          {showCommunity && community.filter(c => c.exact_home != null).length > 0 && (
+            <ExactScoreCommunity votes={community} />
           )}
           <div className="flex items-center justify-center gap-4 py-2">
             <div className="flex flex-col items-center gap-1">
@@ -246,41 +269,29 @@ function JogoPage() {
         </MarketCard>
 
         <MarketCard title="Combinação · 1X/X2 + 1.5 golos" closed={closed}>
-          {analysis && <ScoreLabBars entries={[
-            { label: "1X + Mais 1.5", pct: analysis.prob_combo15_1x_over },
-            { label: "1X + Menos 1.5", pct: analysis.prob_combo15_1x_under },
-            { label: "X2 + Mais 1.5", pct: analysis.prob_combo15_x2_over },
-            { label: "X2 + Menos 1.5", pct: analysis.prob_combo15_x2_under },
-          ]} />}
-          {showCommunity && <CommunityBars total={community.length} entries={[
-            { label: "1X + Mais 1.5", value: "1x_over" }, { label: "1X + Menos 1.5", value: "1x_under" },
-            { label: "X2 + Mais 1.5", value: "x2_over" }, { label: "X2 + Menos 1.5", value: "x2_under" },
-          ]} votes={community.map((c) => c.combo_15)} />}
           <VoteOptions value={pred.combo_15} disabled={closed} grid={2}
             options={[
-              { v: "1x_over", label: "1X · Mais 1.5" }, { v: "1x_under", label: "1X · Menos 1.5" },
-              { v: "x2_over", label: "X2 · Mais 1.5" }, { v: "x2_under", label: "X2 · Menos 1.5" },
+              { v: "1x_over",  label: "1X · Mais 1.5",  pct: analysis?.prob_combo15_1x_over },
+              { v: "1x_under", label: "1X · Menos 1.5", pct: analysis?.prob_combo15_1x_under },
+              { v: "x2_over",  label: "X2 · Mais 1.5",  pct: analysis?.prob_combo15_x2_over },
+              { v: "x2_under", label: "X2 · Menos 1.5", pct: analysis?.prob_combo15_x2_under },
             ]}
             onChange={(v) => set("combo_15", v)} />
+          {showCommunity && <CommunityLine votes={community.map(c => c.combo_15)}
+            labels={{ "1x_over": "1X+Mais", "1x_under": "1X+Menos", x2_over: "X2+Mais", x2_under: "X2+Menos" }} total={community.length} />}
         </MarketCard>
 
         <MarketCard title="Combinação · 1X/X2 + 3.5 golos" closed={closed}>
-          {analysis && <ScoreLabBars entries={[
-            { label: "1X + Mais 3.5", pct: analysis.prob_combo35_1x_over },
-            { label: "1X + Menos 3.5", pct: analysis.prob_combo35_1x_under },
-            { label: "X2 + Mais 3.5", pct: analysis.prob_combo35_x2_over },
-            { label: "X2 + Menos 3.5", pct: analysis.prob_combo35_x2_under },
-          ]} />}
-          {showCommunity && <CommunityBars total={community.length} entries={[
-            { label: "1X + Mais 3.5", value: "1x_over" }, { label: "1X + Menos 3.5", value: "1x_under" },
-            { label: "X2 + Mais 3.5", value: "x2_over" }, { label: "X2 + Menos 3.5", value: "x2_under" },
-          ]} votes={community.map((c) => c.combo_35)} />}
           <VoteOptions value={pred.combo_35} disabled={closed} grid={2}
             options={[
-              { v: "1x_over", label: "1X · Mais 3.5" }, { v: "1x_under", label: "1X · Menos 3.5" },
-              { v: "x2_over", label: "X2 · Mais 3.5" }, { v: "x2_under", label: "X2 · Menos 3.5" },
+              { v: "1x_over",  label: "1X · Mais 3.5",  pct: analysis?.prob_combo35_1x_over },
+              { v: "1x_under", label: "1X · Menos 3.5", pct: analysis?.prob_combo35_1x_under },
+              { v: "x2_over",  label: "X2 · Mais 3.5",  pct: analysis?.prob_combo35_x2_over },
+              { v: "x2_under", label: "X2 · Menos 3.5", pct: analysis?.prob_combo35_x2_under },
             ]}
             onChange={(v) => set("combo_35", v)} />
+          {showCommunity && <CommunityLine votes={community.map(c => c.combo_35)}
+            labels={{ "1x_over": "1X+Mais", "1x_under": "1X+Menos", x2_over: "X2+Mais", x2_under: "X2+Menos" }} total={community.length} />}
         </MarketCard>
 
       </section>
@@ -293,12 +304,10 @@ function JogoPage() {
         </button>
       </div>
 
-      {/* Community lock hint */}
       {!showCommunity && (
-        <div className="mt-4 rounded-2xl border border-gold/30 bg-gold/5 p-5 text-center">
-          <Lock className="mx-auto mb-2 h-5 w-5 text-gold" />
-          <p className="text-sm font-medium">Vota para desbloquear a opinião da comunidade</p>
-          <p className="text-xs text-muted-foreground mt-1">As percentagens ficam visíveis depois de submeteres a tua previsão.</p>
+        <div className="mt-4 rounded-2xl border border-border bg-card/40 p-4 text-center">
+          <Lock className="mx-auto mb-1.5 h-4 w-4 text-muted-foreground" />
+          <p className="text-xs text-muted-foreground">Vota para desbloquear a opinião da comunidade.</p>
         </div>
       )}
     </div>
@@ -316,88 +325,41 @@ function TeamBlock({ flag, name }: { flag: string | null; name: string }) {
   );
 }
 
-function MarketCard({ title, closed, noScorelab, children }: {
-  title: string; closed: boolean; noScorelab?: boolean; children: React.ReactNode;
-}) {
+function MarketCard({ title, closed, children }: { title: string; closed: boolean; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-border bg-card/70 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-background/20">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
         <h3 className="font-display text-base">{title}</h3>
-        <div className="flex items-center gap-2">
-          {!noScorelab && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-gold/80">
-              <TrendingUp className="h-3 w-3" /> ScoreLab
-            </span>
-          )}
-          {closed && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
-        </div>
+        {closed && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
       </div>
       <div className="p-4 space-y-3">{children}</div>
     </div>
   );
 }
 
-function ScoreLabBars({ entries }: { entries: { label: string; pct: number }[] }) {
-  if (entries.every((e) => e.pct === 0)) return null;
+function SLRow({ label, entries }: { label: string; entries: { label: string; pct: number }[] }) {
   return (
-    <div className="rounded-xl border border-gold/30 bg-gold/5 p-3">
-      <div className="mb-2.5 flex items-center justify-between">
-        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gold">
-          <TrendingUp className="h-3.5 w-3.5" /> Análise ScoreLab
-        </p>
-        <span className="text-[9px] font-bold uppercase tracking-widest text-gold/50">Powered by ScoreLab</span>
-      </div>
-      <div className="space-y-2">
-        {entries.map((e) => (
-          <div key={e.label}>
-            <div className="mb-1 flex items-center justify-between text-xs">
-              <span className="text-foreground/80">{e.label}</span>
-              <span className="font-bold text-gold">{e.pct}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-gold/15">
-              <div className="h-full rounded-full bg-gold transition-all duration-500" style={{ width: `${e.pct}%` }} />
-            </div>
-          </div>
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-xs text-muted-foreground w-28 shrink-0">{label}</span>
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
+        {entries.filter(e => e.pct > 0).map((e) => (
+          <span key={e.label} className="text-xs">
+            <span className="text-foreground/70">{e.label}</span>
+            {" "}
+            <span className="font-bold text-gold">{e.pct}%</span>
+          </span>
         ))}
       </div>
     </div>
   );
 }
 
-function CommunityBars({ total, entries, votes }: {
-  total: number; entries: { label: string; value: string }[]; votes: (string | null)[];
-}) {
-  const filtered = votes.filter(Boolean) as string[];
-  const n = filtered.length || 1;
-  const counts: Record<string, number> = {};
-  filtered.forEach((v) => (counts[v] = (counts[v] ?? 0) + 1));
-  return (
-    <div className="rounded-xl border border-border bg-secondary/30 p-3">
-      <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        <Users2 className="h-3.5 w-3.5" /> Comunidade · {total} votos
-      </p>
-      <div className="space-y-2">
-        {entries.map((e) => {
-          const pct = Math.round(((counts[e.value] ?? 0) / n) * 100);
-          return (
-            <div key={e.value}>
-              <div className="mb-1 flex items-center justify-between text-xs">
-                <span className="text-foreground/70">{e.label}</span>
-                <span className="font-semibold">{pct}%</span>
-              </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-border">
-                <div className="h-full rounded-full bg-primary/70 transition-all duration-500" style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function VoteOptions({ value, options, onChange, disabled, grid = 0 }: {
-  value: any; options: { v: string; label: string }[]; onChange: (v: string) => void; disabled?: boolean; grid?: number;
+  value: any;
+  options: { v: string; label: string; pct?: number }[];
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  grid?: number;
 }) {
   const cols = grid === 2 ? "grid-cols-2" : options.length === 3 ? "grid-cols-3" : "grid-cols-2";
   return (
@@ -406,14 +368,38 @@ function VoteOptions({ value, options, onChange, disabled, grid = 0 }: {
         const active = value === o.v;
         return (
           <button key={o.v} type="button" disabled={disabled} onClick={() => onChange(o.v)}
-            className={`rounded-xl border px-3 py-2.5 text-xs font-bold transition-smooth disabled:opacity-50 ${
+            className={`flex flex-col items-center rounded-xl border px-3 py-2.5 text-xs font-bold transition-smooth disabled:opacity-50 ${
               active ? "border-gold bg-gold text-background shadow-gold" : "border-border bg-secondary/50 hover:border-gold/40"
             }`}>
-            {o.label}
+            <span>{o.label}</span>
+            {o.pct != null && o.pct > 0 && (
+              <span className={`mt-0.5 text-[10px] font-semibold ${active ? "text-background/70" : "text-gold/70"}`}>
+                {o.pct}%
+              </span>
+            )}
           </button>
         );
       })}
     </div>
+  );
+}
+
+function CommunityLine({ votes, labels, total }: { votes: (string | null)[]; labels: Record<string, string>; total: number }) {
+  const filtered = votes.filter(Boolean) as string[];
+  const n = filtered.length || 1;
+  const counts: Record<string, number> = {};
+  filtered.forEach((v) => (counts[v] = (counts[v] ?? 0) + 1));
+
+  const parts = Object.entries(labels).map(([k, label]) => {
+    const pct = Math.round(((counts[k] ?? 0) / n) * 100);
+    return `${label} ${pct}%`;
+  });
+
+  return (
+    <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+      <Users2 className="h-3 w-3 shrink-0" />
+      <span>Comunidade ({total}): {parts.join(" · ")}</span>
+    </p>
   );
 }
 
@@ -434,15 +420,15 @@ function ExactScoreCommunity({ votes }: { votes: any[] }) {
       counts[key] = (counts[key] ?? 0) + 1;
     }
   });
-  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
   const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
   return (
-    <div className="space-y-1.5">
+    <div className="flex flex-wrap gap-3 pb-2">
       {sorted.map(([score, n]) => (
-        <div key={score} className="flex items-center justify-between text-xs">
-          <span className="font-display text-base">{score.replace("-", " : ")}</span>
-          <span className="text-muted-foreground">{Math.round((n / total) * 100)}% · {n} votos</span>
-        </div>
+        <span key={score} className="text-xs text-muted-foreground">
+          <span className="font-display text-sm text-foreground">{score.replace("-", " : ")}</span>
+          {" "}{Math.round((n / total) * 100)}%
+        </span>
       ))}
     </div>
   );

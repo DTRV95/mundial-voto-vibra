@@ -137,8 +137,22 @@ function JogoPage() {
         </div>
       )}
 
+      {/* Powered by ScoreLab badge */}
+      {analysis && (
+        <div className="mt-4 flex items-center justify-between rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-gold" />
+            <span className="text-sm font-semibold text-gold">Análise disponível</span>
+            <span className="text-xs text-muted-foreground">— probabilidades para cada mercado</span>
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gold/60">
+            Powered by ScoreLab
+          </span>
+        </div>
+      )}
+
       {/* Markets */}
-      <section className="mt-5 space-y-3">
+      <section className="mt-4 space-y-3">
 
         <MarketCard title="Resultado em 90 minutos" closed={closed}>
           {analysis && <ScoreLabBars entries={[
@@ -327,9 +341,12 @@ function ScoreLabBars({ entries }: { entries: { label: string; pct: number }[] }
   if (entries.every((e) => e.pct === 0)) return null;
   return (
     <div className="rounded-xl border border-gold/30 bg-gold/5 p-3">
-      <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gold">
-        <TrendingUp className="h-3.5 w-3.5" /> Análise ScoreLab
-      </p>
+      <div className="mb-2.5 flex items-center justify-between">
+        <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gold">
+          <TrendingUp className="h-3.5 w-3.5" /> Análise ScoreLab
+        </p>
+        <span className="text-[9px] font-bold uppercase tracking-widest text-gold/50">Powered by ScoreLab</span>
+      </div>
       <div className="space-y-2">
         {entries.map((e) => (
           <div key={e.label}>

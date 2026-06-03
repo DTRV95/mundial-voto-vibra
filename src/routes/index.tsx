@@ -106,10 +106,10 @@ function Home() {
         </div>
       </section>
 
-      {/* DESKTOP hero — two columns */}
+      {/* DESKTOP hero — two columns, full width quando não logado */}
       <section className="relative hidden md:block overflow-hidden bg-hero">
         <div className="pointer-events-none absolute inset-0 pitch-lines opacity-40" />
-        <div className="relative grid grid-cols-2 items-center gap-8 px-10 py-16">
+        <div className="relative mx-auto grid max-w-7xl grid-cols-2 items-center gap-8 px-10 py-16">
           {/* Left: text */}
           <div className="space-y-6">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-gold">

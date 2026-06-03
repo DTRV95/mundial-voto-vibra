@@ -58,7 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* ── CONTEÚDO ─────────────────────────────────────────── */}
       <main className={`pb-24 md:pb-10 ${loggedIn ? "md:ml-56" : ""}`}>
-        <div className={`mx-auto ${loggedIn ? "max-w-4xl" : "max-w-7xl"}`}>
+        <div className={`mx-auto ${loggedIn ? "max-w-6xl" : "max-w-7xl"}`}>
           {children}
         </div>
       </main>

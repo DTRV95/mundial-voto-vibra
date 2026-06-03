@@ -28,12 +28,60 @@ function Rankings() {
   const { data: rows = [] } = useQuery({
     queryKey: ["ranking", phase],
     queryFn: async () => {
-      const { data } = await supabase
+      if (phase === "geral") {
+        const { data } = await supabase
+          .from("profiles")
+          .select("id,display_name,total_points,predictions_made,predictions_correct")
+          .order("total_points", { ascending: false })
+          .limit(50);
+        return (data ?? []).map((r) => ({
+          id: r.id,
+          display_name: r.display_name,
+          points: r.total_points,
+          predictions_made: r.predictions_made,
+          predictions_correct: r.predictions_correct,
+        }));
+      }
+
+      // Ranking por fase: somar pontos de predictions cujo jogo pertence à fase
+      const { data: preds } = await supabase
+        .from("predictions")
+        .select("user_id,points,match:match_id(phase)")
+        .eq("match.phase", phase);
+
+      if (!preds || preds.length === 0) return [];
+
+      // Agregar por utilizador
+      const map: Record<string, { points: number; made: number; correct: number }> = {};
+      for (const p of preds) {
+        if (!map[p.user_id]) map[p.user_id] = { points: 0, made: 0, correct: 0 };
+        map[p.user_id].points += p.points ?? 0;
+        map[p.user_id].made += 1;
+        if ((p.points ?? 0) > 0) map[p.user_id].correct += 1;
+      }
+
+      const userIds = Object.keys(map);
+      const { data: profiles } = await supabase
         .from("profiles")
-        .select("id,display_name,total_points,predictions_made,predictions_correct")
-        .order("total_points", { ascending: false })
-        .limit(50);
-      return data ?? [];
+        .select("id,display_name")
+        .in("id", userIds);
+
+      return (profiles ?? [])
+        .map((pr) => ({
+          id: pr.id,
+          display_name: pr.display_name,
+          points: map[pr.id]?.points ?? 0,
+          predictions_made: map[pr.id]?.made ?? 0,
+          predictions_correct: map[pr.id]?.correct ?? 0,
+        }))
+        .sort((a, b) => {
+          if (b.points !== a.points) return b.points - a.points;
+          const accA = a.predictions_made > 0 ? a.predictions_correct / a.predictions_made : 0;
+          const accB = b.predictions_made > 0 ? b.predictions_correct / b.predictions_made : 0;
+          if (accB !== accA) return accB - accA;
+          return a.predictions_made - b.predictions_made;
+        })
+        .slice(0, 50);
     },
   });
 
@@ -93,7 +141,7 @@ function Rankings() {
                       }`}>{i + 1}</span>
                     </td>
                     <td className="px-3 py-2.5 font-medium">{r.display_name ?? "Adepto"}</td>
-                    <td className="px-2 py-2.5 text-right font-display text-gold">{r.total_points}</td>
+                    <td className="px-2 py-2.5 text-right font-display text-gold">{r.points}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{acc}%</td>
                   </tr>

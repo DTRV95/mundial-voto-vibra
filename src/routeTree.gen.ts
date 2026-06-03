@@ -9,8 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RankingsRouteImport } from './routes/rankings'
+import { Route as PremiosRouteImport } from './routes/premios'
+import { Route as JogosRouteImport } from './routes/jogos'
+import { Route as GruposRouteImport } from './routes/grupos'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 
+const RankingsRoute = RankingsRouteImport.update({
+  id: '/rankings',
+  path: '/rankings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PremiosRoute = PremiosRouteImport.update({
+  id: '/premios',
+  path: '/premios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JogosRoute = JogosRouteImport.update({
+  id: '/jogos',
+  path: '/jogos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GruposRoute = GruposRouteImport.update({
+  id: '/grupos',
+  path: '/grupos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +49,90 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/grupos': typeof GruposRoute
+  '/jogos': typeof JogosRoute
+  '/premios': typeof PremiosRoute
+  '/rankings': typeof RankingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/grupos': typeof GruposRoute
+  '/jogos': typeof JogosRoute
+  '/premios': typeof PremiosRoute
+  '/rankings': typeof RankingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/grupos': typeof GruposRoute
+  '/jogos': typeof JogosRoute
+  '/premios': typeof PremiosRoute
+  '/rankings': typeof RankingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/auth' | '/grupos' | '/jogos' | '/premios' | '/rankings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/auth' | '/grupos' | '/jogos' | '/premios' | '/rankings'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/grupos'
+    | '/jogos'
+    | '/premios'
+    | '/rankings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  GruposRoute: typeof GruposRoute
+  JogosRoute: typeof JogosRoute
+  PremiosRoute: typeof PremiosRoute
+  RankingsRoute: typeof RankingsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/rankings': {
+      id: '/rankings'
+      path: '/rankings'
+      fullPath: '/rankings'
+      preLoaderRoute: typeof RankingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/premios': {
+      id: '/premios'
+      path: '/premios'
+      fullPath: '/premios'
+      preLoaderRoute: typeof PremiosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jogos': {
+      id: '/jogos'
+      path: '/jogos'
+      fullPath: '/jogos'
+      preLoaderRoute: typeof JogosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/grupos': {
+      id: '/grupos'
+      path: '/grupos'
+      fullPath: '/grupos'
+      preLoaderRoute: typeof GruposRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +145,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  GruposRoute: GruposRoute,
+  JogosRoute: JogosRoute,
+  PremiosRoute: PremiosRoute,
+  RankingsRoute: RankingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

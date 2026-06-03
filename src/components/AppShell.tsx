@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { BottomNav } from "./BottomNav";
+import { SideNav } from "./SideNav";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { Shield } from "lucide-react";
 
@@ -9,14 +10,18 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isAdmin = useIsAdmin(user?.id);
 
   return (
-    <div className="relative min-h-screen pb-20">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
+    <div className="relative min-h-screen">
+      {/* Desktop sidebar */}
+      <SideNav />
+
+      {/* Mobile sticky header — hidden on desktop */}
+      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl lg:hidden">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-gold text-background font-display text-lg">V</span>
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-gold font-display text-lg text-background">V</span>
             <div className="leading-tight">
               <div className="font-display text-base tracking-wide">VOZ DO MUNDIAL</div>
-              <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Comunidade · Previsões</div>
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Comunidade</div>
             </div>
           </Link>
           <div className="flex items-center gap-2">
@@ -25,15 +30,23 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Shield className="h-3 w-3" /> Admin
               </Link>
             )}
-            {!user ? (
+            {!user && (
               <Link to="/auth" className="rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-background">
                 Entrar
               </Link>
-            ) : null}
+            )}
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-3xl">{children}</main>
+
+      {/* Main content — offset by sidebar on desktop, padded bottom for mobile nav */}
+      <main className="lg:ml-56 pb-24 lg:pb-10">
+        <div className="mx-auto max-w-3xl lg:max-w-4xl">
+          {children}
+        </div>
+      </main>
+
+      {/* Mobile bottom nav — hidden on desktop */}
       <BottomNav />
     </div>
   );

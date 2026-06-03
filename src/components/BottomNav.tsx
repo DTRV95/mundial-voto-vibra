@@ -1,35 +1,35 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarClock, Users, Trophy, Gift, User } from "lucide-react";
+import { Home, CalendarClock, Trophy, Gift, User } from "lucide-react";
 
 const items = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/jogos", label: "Jogos", icon: CalendarClock },
-  { to: "/grupos", label: "Grupos", icon: Users },
+  { to: "/",         label: "Home",     icon: Home },
+  { to: "/jogos",    label: "Jogos",    icon: CalendarClock },
   { to: "/rankings", label: "Rankings", icon: Trophy },
-  { to: "/premios", label: "Prémios", icon: Gift },
-  { to: "/perfil", label: "Perfil", icon: User },
+  { to: "/premios",  label: "Prémios",  icon: Gift },
+  { to: "/perfil",   label: "Perfil",   icon: User },
 ];
 
 export function BottomNav() {
   const { location } = useRouterState();
+
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-border bg-card/85 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
-      <ul className="mx-auto grid max-w-3xl grid-cols-6">
+    <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-border bg-card/90 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] lg:hidden">
+      <ul className="mx-auto grid max-w-lg grid-cols-5">
         {items.map(({ to, label, icon: Icon }) => {
-          const active =
-            to === "/"
-              ? location.pathname === "/"
-              : location.pathname.startsWith(to);
+          const active = to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
           return (
             <li key={to}>
               <Link
                 to={to}
-                className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-smooth ${
-                  active ? "text-gold" : "text-muted-foreground hover:text-foreground"
+                className={`relative flex flex-col items-center gap-1 py-3 text-[11px] font-semibold tracking-wide uppercase transition-smooth ${
+                  active ? "text-gold" : "text-muted-foreground"
                 }`}
               >
-                <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 1.8} />
-                <span className="tracking-wide uppercase">{label}</span>
+                {active && (
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full bg-gold" />
+                )}
+                <Icon className="h-6 w-6" strokeWidth={active ? 2.4 : 1.6} />
+                <span>{label}</span>
               </Link>
             </li>
           );

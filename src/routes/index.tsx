@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Trophy, Users2, BarChart3, Sparkles } from "lucide-react";
+import { ArrowRight, Trophy, BarChart3, Users2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import trophyImg from "@/assets/trophy-hero.jpg";
@@ -46,51 +46,126 @@ function Home() {
 
   return (
     <div className="pb-10">
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-hero">
-        <div className="pointer-events-none absolute inset-0 pitch-lines opacity-50" />
-        <div className="relative grid gap-6 px-5 pt-8 pb-12 sm:grid-cols-2 sm:items-center sm:gap-4 sm:pb-16">
-          <div className="space-y-5">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-gold">
-              <Sparkles className="h-3 w-3" /> Comunidade do Mundial
-            </span>
-            <h1 className="font-display text-5xl leading-none text-balance sm:text-6xl">
+
+      {/* ===================== HERO ===================== */}
+
+      {/* MOBILE hero — taça em destaque no topo */}
+      <section className="relative lg:hidden">
+        {/* Trophy image — full width, top of page */}
+        <div className="relative h-[58vw] min-h-[220px] max-h-[340px] w-full overflow-hidden">
+          <img
+            src={trophyImg}
+            alt="Troféu do Mundial"
+            className="h-full w-full object-cover object-center"
+          />
+          {/* Bottom gradient over image */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+          {/* Badge top-left */}
+          <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-gold backdrop-blur">
+            <Sparkles className="h-3 w-3" /> Mundial 2026
+          </span>
+        </div>
+
+        {/* Text content below image */}
+        <div className="px-5 pt-4 pb-8 space-y-4">
+          <div>
+            <h1 className="font-display text-5xl leading-none">
               VOZ DO <span className="text-gold">MUNDIAL</span>
             </h1>
-            <p className="text-lg font-medium text-foreground/90">
+            <p className="mt-2 text-base font-medium text-foreground/90">
               Vota, compara e vibra com a comunidade.
             </p>
-            <p className="max-w-md text-sm text-muted-foreground">
-              A comunidade onde os adeptos deixam as suas previsões, acompanham os jogos e
-              competem nos rankings do Mundial.
+          </div>
+          <div className="flex gap-3">
+            <Link
+              to="/jogos"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth active:scale-95"
+            >
+              Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a
+              href="#como-funciona"
+              className="inline-flex items-center justify-center rounded-2xl border border-border bg-card/60 px-4 py-3 text-sm font-semibold backdrop-blur transition-smooth"
+            >
+              Como?
+            </a>
+          </div>
+          {/* Quick stats strip */}
+          <div className="grid grid-cols-3 gap-2 pt-1">
+            {[
+              { label: "Jogos", value: "48" },
+              { label: "Mercados", value: "8" },
+              { label: "Fases", value: "4" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl border border-border bg-card/50 py-2.5 text-center">
+                <div className="font-display text-xl text-gold">{s.value}</div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* DESKTOP hero — two columns */}
+      <section className="relative hidden lg:block overflow-hidden bg-hero">
+        <div className="pointer-events-none absolute inset-0 pitch-lines opacity-40" />
+        <div className="relative grid grid-cols-2 items-center gap-8 px-10 py-16">
+          {/* Left: text */}
+          <div className="space-y-6">
+            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-gold">
+              <Sparkles className="h-3.5 w-3.5" /> Comunidade do Mundial 2026
+            </span>
+            <h1 className="font-display text-7xl leading-none text-balance">
+              VOZ DO <br /><span className="text-gold">MUNDIAL</span>
+            </h1>
+            <p className="text-xl font-medium text-foreground/90 max-w-md">
+              Vota, compara e vibra com a comunidade.
             </p>
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <Link to="/jogos" className="inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-background shadow-gold transition-smooth hover:scale-[1.02]">
+            <p className="text-sm text-muted-foreground max-w-sm">
+              A plataforma de previsões do Mundial onde os adeptos competem por fase e ganham prémios.
+            </p>
+            <div className="flex items-center gap-4 pt-2">
+              <Link
+                to="/jogos"
+                className="inline-flex items-center gap-2 rounded-2xl bg-gold px-7 py-3.5 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02]"
+              >
                 Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
               </Link>
-              <a href="#como-funciona" className="rounded-full border border-border bg-card/60 px-5 py-2.5 text-sm font-semibold backdrop-blur transition-smooth hover:border-gold/40">
-                Como Funciona
+              <a
+                href="#como-funciona"
+                className="rounded-2xl border border-border bg-card/60 px-6 py-3.5 text-sm font-semibold backdrop-blur transition-smooth hover:border-gold/40"
+              >
+                Como funciona
               </a>
             </div>
+            {/* Stats */}
+            <div className="flex gap-6 pt-2">
+              {[{ label: "Jogos na fase de grupos", value: "48" }, { label: "Mercados por jogo", value: "8" }, { label: "Fases com prémios", value: "4" }].map((s) => (
+                <div key={s.label}>
+                  <div className="font-display text-3xl text-gold">{s.value}</div>
+                  <div className="text-xs text-muted-foreground">{s.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="relative mx-auto h-[320px] w-full max-w-sm sm:h-[420px]">
-            <div className="absolute inset-0 rounded-3xl bg-gold/20 blur-3xl" />
+
+          {/* Right: trophy */}
+          <div className="relative flex justify-center">
+            <div className="absolute inset-0 rounded-3xl bg-gold/15 blur-3xl" />
             <img
               src={trophyImg}
-              alt="Troféu do Mundial com luzes de estádio"
-              width={1024}
-              height={1024}
-              className="relative h-full w-full rounded-3xl object-cover shadow-elegant"
+              alt="Troféu do Mundial"
+              className="relative h-[480px] w-full max-w-md rounded-3xl object-cover shadow-elegant"
             />
           </div>
         </div>
       </section>
 
-      {/* JOGOS DE HOJE */}
-      <section className="px-5 pt-8">
+      {/* ===================== JOGOS DE HOJE ===================== */}
+      <section className="px-5 pt-8 lg:px-8">
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <h2 className="font-display text-2xl">Jogos de Hoje</h2>
+            <h2 className="font-display text-2xl lg:text-3xl">Jogos de Hoje</h2>
             <p className="text-xs text-muted-foreground">Dá a tua previsão antes do apito inicial.</p>
           </div>
           <Link to="/jogos" className="text-xs font-semibold text-gold">Ver todos →</Link>
@@ -101,47 +176,77 @@ function Home() {
             subtitle="Volta amanhã ou explora as próximas fases."
           />
         ) : (
-          <div className="grid gap-3">
+          <div className="grid gap-3 lg:grid-cols-2">
             {todays.map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
         )}
       </section>
 
-      {/* RANKING + PRIZES */}
-      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2">
-        <Card icon={<BarChart3 className="h-5 w-5 text-gold" />} title="Líderes do Ranking" href="/rankings" cta="Ver rankings">
+      {/* ===================== RANKING + PRÉMIOS ===================== */}
+      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 lg:px-8">
+        {/* Ranking — destaque maior */}
+        <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/10 to-card/70 p-5 backdrop-blur-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="grid h-9 w-9 place-items-center rounded-full bg-gold/20">
+                <BarChart3 className="h-5 w-5 text-gold" />
+              </div>
+              <h3 className="font-display text-xl">Líderes</h3>
+            </div>
+            <Link to="/rankings" className="text-xs font-semibold text-gold">Ver rankings →</Link>
+          </div>
           {topLeaders.length === 0 ? (
             <p className="text-sm text-muted-foreground">Ainda sem dados — sê o primeiro a marcar pontos.</p>
           ) : (
-            <ol className="space-y-2">
+            <ol className="space-y-3">
               {topLeaders.map((u, i) => (
-                <li key={i} className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2">
-                    <span className={`grid h-6 w-6 place-items-center rounded-full text-xs font-bold ${i === 0 ? "bg-gold text-background" : "bg-secondary"}`}>{i + 1}</span>
-                    <span className="font-medium">{u.display_name ?? "Adepto"}</span>
+                <li key={i} className="flex items-center justify-between">
+                  <span className="flex items-center gap-3">
+                    <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
+                      i === 0 ? "bg-gold text-background" : i === 1 ? "bg-gold/40 text-foreground" : "bg-secondary"
+                    }`}>{i + 1}</span>
+                    <span className="font-medium text-sm">{u.display_name ?? "Adepto"}</span>
                   </span>
-                  <span className="font-display text-gold">{u.total_points} pts</span>
+                  <span className="font-display text-lg text-gold">{u.total_points} <span className="text-xs font-sans text-muted-foreground">pts</span></span>
                 </li>
               ))}
             </ol>
           )}
-        </Card>
-        <Card icon={<Trophy className="h-5 w-5 text-gold" />} title="Prémios por Fase" href="/premios" cta="Ver prémios">
-          <p className="text-sm text-muted-foreground">
-            Vence o ranking da Fase de Grupos, Oitavos, Quartos ou Meias-Finais e ganha prémios da comunidade.
+        </div>
+
+        {/* Prémios */}
+        <div className="rounded-2xl border border-border bg-card/70 p-5 backdrop-blur-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="grid h-9 w-9 place-items-center rounded-full bg-secondary">
+                <Trophy className="h-5 w-5 text-gold" />
+              </div>
+              <h3 className="font-display text-xl">Prémios</h3>
+            </div>
+            <Link to="/premios" className="text-xs font-semibold text-gold">Ver prémios →</Link>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Um prémio exclusivo para o vencedor de cada fase — Grupos, Oitavos, Quartos e Meias-Finais.
           </p>
-        </Card>
+          <div className="mt-4 grid grid-cols-4 gap-1.5">
+            {["Grupos", "Oitavos", "Quartos", "Meias"].map((f) => (
+              <div key={f} className="rounded-lg border border-border bg-secondary/50 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                {f}
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* COMO FUNCIONA */}
-      <section id="como-funciona" className="px-5 pt-12">
-        <h2 className="mb-5 font-display text-2xl">Como funciona</h2>
+      {/* ===================== COMO FUNCIONA ===================== */}
+      <section id="como-funciona" className="px-5 pt-12 lg:px-8">
+        <h2 className="mb-5 font-display text-2xl lg:text-3xl">Como funciona</h2>
         <div className="grid gap-3 sm:grid-cols-3">
           <Step n="1" title="Vê os jogos">Consulta os jogos do dia e escolhe os que te interessam.</Step>
           <Step n="2" title="Deixa a tua previsão">Vota nos mercados que quiseres até 5 minutos antes do jogo.</Step>
           <Step n="3" title="Compete">Soma pontos pelo teu palpite e sobe no ranking da fase.</Step>
         </div>
-        <div className="mt-6 rounded-2xl border border-gold/30 bg-gold/5 p-5 text-sm">
+        <div className="mt-4 rounded-2xl border border-gold/30 bg-gold/5 p-5 text-sm">
           <div className="mb-1 flex items-center gap-2 font-semibold text-gold">
             <Users2 className="h-4 w-4" /> Opinião da Comunidade
           </div>
@@ -151,21 +256,6 @@ function Home() {
           </p>
         </div>
       </section>
-    </div>
-  );
-}
-
-function Card({ icon, title, href, cta, children }: { icon: React.ReactNode; title: string; href: string; cta: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-border bg-card/70 p-5 backdrop-blur-sm">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {icon}
-          <h3 className="font-display text-lg">{title}</h3>
-        </div>
-        <Link to={href} className="text-xs font-semibold text-gold">{cta} →</Link>
-      </div>
-      {children}
     </div>
   );
 }

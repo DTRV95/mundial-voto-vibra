@@ -26,49 +26,64 @@ export function MatchCard({ match }: { match: MatchCardData }) {
     <Link
       to="/jogo/$id"
       params={{ id: match.id }}
-      className="group block rounded-2xl border border-border bg-card/70 p-4 pitch-lines backdrop-blur-sm transition-smooth hover:border-gold/40 hover:shadow-gold"
+      className="group block rounded-2xl border border-border bg-card/70 pitch-lines backdrop-blur-sm transition-smooth hover:border-gold/50 hover:shadow-gold overflow-hidden"
     >
-      <div className="mb-3 flex items-center justify-between text-xs">
-        <span className="font-semibold uppercase tracking-wider text-muted-foreground">
+      {/* Top bar: fase + status */}
+      <div className="flex items-center justify-between px-4 pt-3.5 pb-0">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           {PHASE_LABEL[match.phase] ?? match.phase}
         </span>
-        <span className={`rounded-full border px-2.5 py-0.5 font-semibold uppercase tracking-wider ${toneClass}`}>
+        <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${toneClass}`}>
           {status.label}
         </span>
       </div>
 
-      <div className="flex items-center justify-between gap-3">
-        <TeamSide flag={match.home.flag} name={match.home.name} />
-        <div className="flex flex-col items-center px-2">
+      {/* Teams row */}
+      <div className="flex items-center justify-between gap-2 px-4 py-4">
+        {/* Home team */}
+        <div className="flex flex-1 flex-col items-center gap-2">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/80 text-3xl shadow-sm lg:h-16 lg:w-16 lg:text-4xl">
+            {match.home.flag ?? "⚽"}
+          </div>
+          <span className="text-center text-xs font-bold leading-tight lg:text-sm">
+            {match.home.name}
+          </span>
+        </div>
+
+        {/* Centre: time + vs */}
+        <div className="flex flex-col items-center gap-1 px-2">
           <div className="flex items-center gap-1 text-gold">
             <Clock className="h-3.5 w-3.5" />
-            <span className="font-display text-xl tabular-nums">{formatTime(match.kickoff_at)}</span>
+            <span className="font-display text-2xl tabular-nums lg:text-3xl">
+              {formatTime(match.kickoff_at)}
+            </span>
           </div>
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">vs</span>
+          <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            vs
+          </span>
         </div>
-        <TeamSide flag={match.away.flag} name={match.away.name} align="right" />
+
+        {/* Away team */}
+        <div className="flex flex-1 flex-col items-center gap-2">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/80 text-3xl shadow-sm lg:h-16 lg:w-16 lg:text-4xl">
+            {match.away.flag ?? "⚽"}
+          </div>
+          <span className="text-center text-xs font-bold leading-tight lg:text-sm">
+            {match.away.name}
+          </span>
+        </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+      {/* Bottom bar: votes + CTA */}
+      <div className="flex items-center justify-between border-t border-border/60 bg-background/20 px-4 py-2.5">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Users2 className="h-3.5 w-3.5" />
           <span>{match.votes_count ?? 0} previsões</span>
         </div>
-        <span className="text-xs font-semibold text-gold group-hover:underline">
+        <span className="text-xs font-bold text-gold transition-smooth group-hover:underline">
           {match.already_voted ? "Ver Comunidade →" : "Dar Previsão →"}
         </span>
       </div>
     </Link>
-  );
-}
-
-function TeamSide({ flag, name, align = "left" }: { flag: string | null; name: string; align?: "left" | "right" }) {
-  return (
-    <div className={`flex flex-1 items-center gap-2 ${align === "right" ? "flex-row-reverse text-right" : ""}`}>
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-xl">
-        {flag ?? "⚽"}
-      </div>
-      <span className="line-clamp-1 text-sm font-semibold">{name}</span>
-    </div>
   );
 }

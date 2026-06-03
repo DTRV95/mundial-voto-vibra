@@ -368,15 +368,10 @@ function VoteOptions({ value, options, onChange, disabled, grid = 0 }: {
         const active = value === o.v;
         return (
           <button key={o.v} type="button" disabled={disabled} onClick={() => onChange(o.v)}
-            className={`flex flex-col items-center rounded-xl border px-3 py-2.5 text-xs font-bold transition-smooth disabled:opacity-50 ${
+            className={`rounded-xl border px-3 py-2.5 text-xs font-bold transition-smooth disabled:opacity-50 ${
               active ? "border-gold bg-gold text-background shadow-gold" : "border-border bg-secondary/50 hover:border-gold/40"
             }`}>
-            <span>{o.label}</span>
-            {o.pct != null && o.pct > 0 && (
-              <span className={`mt-0.5 text-[10px] font-semibold ${active ? "text-background/70" : "text-gold/70"}`}>
-                {o.pct}%
-              </span>
-            )}
+            {o.label}
           </button>
         );
       })}
@@ -392,14 +387,27 @@ function CommunityLine({ votes, labels, total }: { votes: (string | null)[]; lab
 
   const parts = Object.entries(labels).map(([k, label]) => {
     const pct = Math.round(((counts[k] ?? 0) / n) * 100);
-    return `${label} ${pct}%`;
+    return { label, pct };
   });
 
   return (
-    <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-      <Users2 className="h-3 w-3 shrink-0" />
-      <span>Comunidade ({total}): {parts.join(" · ")}</span>
-    </p>
+    <div className="rounded-xl border border-border/50 bg-secondary/20 px-3 py-2">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Users2 className="h-3 w-3 text-muted-foreground shrink-0" />
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Opinião da Comunidade · {total} {total === 1 ? "voto" : "votos"}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
+        {parts.map(({ label, pct }) => (
+          <span key={label} className="text-xs">
+            <span className="text-muted-foreground">{label}</span>
+            {" "}
+            <span className="font-bold text-foreground">{pct}%</span>
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 

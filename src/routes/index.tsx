@@ -109,10 +109,10 @@ function Home() {
       {/* DESKTOP hero — two columns, full width quando não logado */}
       <section className="relative hidden md:block overflow-hidden bg-hero">
         <div className="pointer-events-none absolute inset-0 pitch-lines opacity-40" />
-        <div className="relative grid grid-cols-2 items-stretch gap-0">
+        <div className="relative grid grid-cols-2 items-center gap-8 px-10 py-16">
           {/* Left: text */}
-          <div className="flex flex-col justify-center space-y-6 px-10 py-16">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-gold w-fit">
+          <div className="space-y-6">
+            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-gold">
               <Sparkles className="h-3.5 w-3.5" /> Comunidade do Mundial 2026
             </span>
             <h1 className="font-display text-7xl leading-none text-balance">
@@ -138,7 +138,7 @@ function Home() {
                 Como funciona
               </a>
             </div>
-            <div className="flex gap-8 pt-2">
+            <div className="flex gap-6 pt-2">
               {[{ label: "Jogos na fase de grupos", value: "48" }, { label: "Mercados por jogo", value: "8" }, { label: "Fases com prémios", value: "4" }].map((s) => (
                 <div key={s.label}>
                   <div className="font-display text-3xl text-gold">{s.value}</div>
@@ -148,15 +148,14 @@ function Home() {
             </div>
           </div>
 
-          {/* Right: trophy — full height, edge to edge */}
-          <div className="relative min-h-[520px]">
-            <div className="absolute inset-0 bg-gold/10 blur-3xl" />
+          {/* Right: trophy */}
+          <div className="relative flex justify-center">
+            <div className="absolute inset-0 rounded-3xl bg-gold/15 blur-3xl" />
             <img
               src={trophyImg}
               alt="Troféu do Mundial"
-              className="absolute inset-0 h-full w-full object-cover shadow-elegant"
+              className="relative h-[480px] w-full max-w-md rounded-3xl object-cover shadow-elegant"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-transparent" />
           </div>
         </div>
       </section>

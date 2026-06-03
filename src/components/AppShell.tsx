@@ -15,7 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <SideNav />
 
       {/* Mobile sticky header — hidden on desktop */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl lg:hidden">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl md:hidden">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-gold font-display text-lg text-background">V</span>
@@ -40,8 +40,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       {/* Main content — offset by sidebar on desktop, padded bottom for mobile nav */}
-      <main className="lg:ml-56 pb-24 lg:pb-10">
-        <div className="mx-auto max-w-3xl lg:max-w-4xl">
+      <main className="md:ml-56 pb-24 md:pb-10">
+        <div className="mx-auto max-w-3xl md:max-w-4xl">
           {children}
         </div>
       </main>

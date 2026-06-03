@@ -50,7 +50,7 @@ function Home() {
       {/* ===================== HERO ===================== */}
 
       {/* MOBILE hero — taça em destaque no topo */}
-      <section className="relative lg:hidden">
+      <section className="relative md:hidden">
         {/* Trophy image — full width, top of page */}
         <div className="relative h-[58vw] min-h-[220px] max-h-[340px] w-full overflow-hidden">
           <img
@@ -107,7 +107,7 @@ function Home() {
       </section>
 
       {/* DESKTOP hero — two columns */}
-      <section className="relative hidden lg:block overflow-hidden bg-hero">
+      <section className="relative hidden md:block overflow-hidden bg-hero">
         <div className="pointer-events-none absolute inset-0 pitch-lines opacity-40" />
         <div className="relative grid grid-cols-2 items-center gap-8 px-10 py-16">
           {/* Left: text */}
@@ -162,10 +162,10 @@ function Home() {
       </section>
 
       {/* ===================== JOGOS DE HOJE ===================== */}
-      <section className="px-5 pt-8 lg:px-8">
+      <section className="px-5 pt-8 md:px-8">
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <h2 className="font-display text-2xl lg:text-3xl">Jogos de Hoje</h2>
+            <h2 className="font-display text-2xl md:text-3xl">Jogos de Hoje</h2>
             <p className="text-xs text-muted-foreground">Dá a tua previsão antes do apito inicial.</p>
           </div>
           <Link to="/jogos" className="text-xs font-semibold text-gold">Ver todos →</Link>
@@ -176,14 +176,14 @@ function Home() {
             subtitle="Volta amanhã ou explora as próximas fases."
           />
         ) : (
-          <div className="grid gap-3 lg:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2">
             {todays.map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
         )}
       </section>
 
       {/* ===================== RANKING + PRÉMIOS ===================== */}
-      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 lg:px-8">
+      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
         {/* Ranking — destaque maior */}
         <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/10 to-card/70 p-5 backdrop-blur-sm">
           <div className="mb-4 flex items-center justify-between">
@@ -239,8 +239,8 @@ function Home() {
       </section>
 
       {/* ===================== COMO FUNCIONA ===================== */}
-      <section id="como-funciona" className="px-5 pt-12 lg:px-8">
-        <h2 className="mb-5 font-display text-2xl lg:text-3xl">Como funciona</h2>
+      <section id="como-funciona" className="px-5 pt-12 md:px-8">
+        <h2 className="mb-5 font-display text-2xl md:text-3xl">Como funciona</h2>
         <div className="grid gap-3 sm:grid-cols-3">
           <Step n="1" title="Vê os jogos">Consulta os jogos do dia e escolhe os que te interessam.</Step>
           <Step n="2" title="Deixa a tua previsão">Vota nos mercados que quiseres até 5 minutos antes do jogo.</Step>

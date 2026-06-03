@@ -13,7 +13,7 @@ export function BottomNav() {
   const { location } = useRouterState();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-border bg-card/90 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-border bg-card/90 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] md:hidden">
       <ul className="mx-auto grid max-w-lg grid-cols-5">
         {items.map(({ to, label, icon: Icon }) => {
           const active = to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);

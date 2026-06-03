@@ -194,8 +194,13 @@ function MatchesAdmin() {
   });
   async function add() {
     if (!home || !away || !kickoff) { toast.error("Preenche todos os campos"); return; }
+    const kickoffDate = new Date(kickoff);
     const { error } = await supabase.from("matches").insert({
-      home_team_id: home, away_team_id: away, kickoff_at: new Date(kickoff).toISOString(), phase: phase as any,
+      home_team_id: home,
+      away_team_id: away,
+      kickoff_at: kickoffDate.toISOString(),
+      phase: phase as any,
+      voting_open: kickoffDate.getTime() > Date.now(),
     });
     if (error) toast.error(error.message); else { toast.success("Jogo criado"); qc.invalidateQueries({ queryKey: ["admin", "matches"] }); }
   }

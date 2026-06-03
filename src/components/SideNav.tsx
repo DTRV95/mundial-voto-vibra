@@ -16,7 +16,7 @@ export function SideNav() {
   const isAdmin = useIsAdmin(user?.id);
 
   return (
-    <aside className="hidden lg:flex fixed left-0 top-0 h-full w-56 flex-col border-r border-border bg-card/60 backdrop-blur-xl z-40">
+    <aside className="hidden md:flex fixed left-0 top-0 h-full w-56 flex-col border-r border-border bg-card/60 backdrop-blur-xl z-40">
       {/* Logo */}
       <div className="px-5 py-6 border-b border-border">
         <Link to="/" className="flex items-center gap-3">

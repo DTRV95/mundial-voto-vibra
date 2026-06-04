@@ -1,27 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <!-- Fundo: vermelho -->
   <rect width="48" height="48" rx="12" fill="#E61D25"/>
 
-  <!-- Contorno branco subtil (efeito camisola vintage) -->
-  <text
-    x="24" y="38"
-    text-anchor="middle"
-    font-family="Arial Black, Impact, sans-serif"
-    font-weight="900"
-    font-size="34"
-    fill="none"
-    stroke="white"
-    stroke-width="5"
-    stroke-linejoin="round"
-  >7</text>
-
-  <!-- 7 branco por cima -->
-  <text
-    x="24" y="38"
-    text-anchor="middle"
-    font-family="Arial Black, Impact, sans-serif"
-    font-weight="900"
-    font-size="34"
-    fill="white"
-  >7</text>
+  <!-- 7 desenhado à mão como path — fino, geométrico, com traço europeu -->
+  <!-- Barra horizontal do topo -->
+  <line x1="13" y1="12" x2="35" y2="12" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Diagonal -->
+  <line x1="34" y1="12" x2="17" y2="38" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Traço europeu no meio (símbolo de autenticidade) -->
+  <line x1="21" y1="26" x2="30" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/>
 </svg>

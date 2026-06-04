@@ -1,0 +1,27 @@
+{
+  "name": "Uma Geração",
+  "short_name": "Uma Geração",
+  "description": "Vota, compara e vibra com a comunidade do Mundial 2026.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a2820",
+  "theme_color": "#1a2820",
+  "orientation": "portrait",
+  "lang": "pt-PT",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "entertainment"],
+  "screenshots": []
+}

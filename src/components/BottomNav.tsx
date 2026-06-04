@@ -13,7 +13,7 @@ export function BottomNav() {
   const { location } = useRouterState();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] md:hidden shadow-lg">
+    <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-border bg-card/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] md:hidden shadow-elegant">
       <ul className="mx-auto grid max-w-lg grid-cols-5">
         {items.map(({ to, label, icon: Icon }) => {
           const active = to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
@@ -21,7 +21,7 @@ export function BottomNav() {
             <li key={to}>
               <Link to={to}
                 className={`relative flex flex-col items-center gap-1 py-3 text-[10px] font-bold tracking-wide uppercase transition-smooth ${
-                  active ? "text-wc-red" : "text-gray-400"
+                  active ? "text-wc-red" : "text-muted-foreground"
                 }`}
               >
                 {active && (

@@ -85,16 +85,14 @@ function Home() {
           className="relative overflow-hidden rounded-3xl bg-wc-red panini-stripes"
           style={{ boxShadow: "0 12px 48px oklch(0.54 0.24 27 / 0.35)", minHeight: "260px" }}
         >
-          {/* ── Canto superior direito: bloco azul com troféu ─── */}
+          {/* ── Canto superior direito: troféu cores originais ─── */}
           <div className="absolute top-0 right-0 h-[75%] w-[38%] md:h-full md:w-[36%] overflow-hidden"
             style={{ borderBottomLeftRadius: "48px" }}>
-            <div className="absolute inset-0 bg-wc-blue panini-stripes opacity-90" />
             <img
               src={trophyImg}
               alt="Troféu do Mundial"
-              className="relative h-full w-full object-cover object-center trophy-shine"
+              className="h-full w-full object-cover object-center trophy-shine"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-wc-blue/50 to-transparent" />
           </div>
 
           {/* ── Canto inferior esquerdo: bloco verde ──────────── */}

@@ -26,23 +26,23 @@ export function AppShell({ children }: { children: ReactNode }) {
       {loggedIn && <SideNav />}
 
       {/* ── MOBILE header ─────────────────────────────────── */}
-      <header className="sticky top-[3px] z-40 border-b border-gray-200 bg-white/90 backdrop-blur-xl shadow-sm md:hidden">
+      <header className="sticky top-[3px] z-40 border-b border-border bg-background/90 backdrop-blur-xl shadow-elegant md:hidden">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-wc-red font-display text-lg text-white">V</span>
             <div className="leading-tight">
-              <div className="font-display text-base tracking-wide text-gray-900">UMA GERAÇÃO</div>
-              <div className="text-[11px] uppercase tracking-widest text-gray-400">Mundial 2026</div>
+              <div className="font-display text-base tracking-wide text-foreground">UMA GERAÇÃO</div>
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Mundial 2026</div>
             </div>
           </Link>
           <div className="flex items-center gap-2">
             {user && isAdmin && (
-              <Link to="/admin" className="flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-wc-red">
+              <Link to="/admin" className="flex items-center gap-1 rounded-full border border-wc-red/30 bg-wc-red/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-wc-red">
                 <Shield className="h-3 w-3" /> Admin
               </Link>
             )}
             {user && !isAdmin && (
-              <Link to="/perfil" className="grid h-8 w-8 place-items-center rounded-full bg-gray-100 font-display text-sm text-gray-700">
+              <Link to="/perfil" className="grid h-8 w-8 place-items-center rounded-full bg-muted font-display text-sm text-foreground">
                 {(user.user_metadata?.display_name ?? user.email ?? "U").charAt(0).toUpperCase()}
               </Link>
             )}

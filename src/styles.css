@@ -3,9 +3,8 @@
 @import "tw-animate-css";
 
 /*
- * FIFA World Cup 2026 — Panini Sticker Album Design System
- * Cores oficiais: Vermelho Canadá · Verde México · Azul EUA
- * Tema claro com padrões geométricos da caderneta Panini.
+ * FIFA World Cup 2026 — Design System
+ * Hero Panini vermelho · Tema escuro premium · Cores oficiais WC26
  */
 
 @theme inline {
@@ -55,50 +54,49 @@
   --wc-green: oklch(0.55 0.20 142);   /* Mexico  #3CAC3B */
   --wc-blue:  oklch(0.40 0.18 265);   /* USA     #2A398D */
 
-  /* Fundo claro — papel da caderneta Panini */
-  --background: oklch(0.96 0.004 60);
-  --foreground: oklch(0.12 0.005 0);
+  /* Tema escuro premium */
+  --background: oklch(0.13 0.008 265);
+  --foreground: oklch(0.97 0.01 95);
 
-  --card: oklch(1.00 0 0);
-  --card-foreground: oklch(0.12 0.005 0);
+  --card: oklch(0.18 0.012 265);
+  --card-foreground: oklch(0.97 0.01 95);
 
-  --popover: oklch(1.00 0 0);
-  --popover-foreground: oklch(0.12 0.005 0);
+  --popover: oklch(0.18 0.012 265);
+  --popover-foreground: oklch(0.97 0.01 95);
 
-  /* Verde México — confirmações e sucesso */
+  /* Verde México */
   --primary: oklch(0.55 0.20 142);
-  --primary-foreground: oklch(1.00 0 0);
+  --primary-foreground: oklch(0.10 0.02 142);
 
-  --secondary: oklch(0.92 0.005 60);
-  --secondary-foreground: oklch(0.20 0.005 0);
+  --secondary: oklch(0.24 0.015 265);
+  --secondary-foreground: oklch(0.97 0.01 95);
 
-  --muted: oklch(0.91 0.005 0);
-  --muted-foreground: oklch(0.48 0.01 0);
+  --muted: oklch(0.22 0.010 265);
+  --muted-foreground: oklch(0.68 0.012 220);
 
-  --accent: oklch(0.94 0.005 0);
-  --accent-foreground: oklch(0.12 0.005 0);
+  --accent: oklch(0.26 0.015 265);
+  --accent-foreground: oklch(0.97 0.01 95);
 
-  /* Vermelho Canadá — alertas */
+  /* Vermelho Canadá */
   --destructive: oklch(0.54 0.24 27);
-  --destructive-foreground: oklch(1.00 0 0);
+  --destructive-foreground: oklch(0.98 0.01 95);
 
-  --border: oklch(0.88 0.005 0);
-  --input: oklch(0.95 0.004 60);
+  --border: oklch(0.28 0.015 265 / 65%);
+  --input: oklch(0.24 0.012 265 / 80%);
   --ring: oklch(0.54 0.24 27);
 
   /* Acento principal: Vermelho WC26 */
   --pitch: oklch(0.55 0.20 142);
-  --pitch-deep: oklch(0.32 0.15 142);
+  --pitch-deep: oklch(0.28 0.10 142);
   --gold: oklch(0.54 0.24 27);
-  --gold-soft: oklch(0.93 0.06 27);
+  --gold-soft: oklch(0.25 0.06 27);
 
-  /* Hero: vermelho bold Panini */
   --gradient-hero: linear-gradient(135deg, oklch(0.54 0.24 27) 0%, oklch(0.46 0.22 15) 100%);
   --gradient-gold: linear-gradient(135deg, oklch(0.58 0.24 27) 0%, oklch(0.48 0.22 18) 100%);
-  --gradient-pitch: linear-gradient(180deg, oklch(0.55 0.20 142) 0%, oklch(0.35 0.14 142) 100%);
+  --gradient-pitch: linear-gradient(180deg, oklch(0.55 0.20 142) 0%, oklch(0.30 0.10 142) 100%);
 
-  --shadow-elegant: 0 20px 60px -20px oklch(0 0 0 / 0.15);
-  --shadow-gold: 0 4px 20px -4px oklch(0.54 0.24 27 / 0.35);
+  --shadow-elegant: 0 30px 80px -20px oklch(0 0 0 / 0.70);
+  --shadow-gold: 0 6px 24px -4px oklch(0.54 0.24 27 / 0.45);
 
   --transition-smooth: all 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -128,8 +126,7 @@
 
   /* Barra tricolor oficial */
   .wc-tricolor {
-    background: linear-gradient(
-      90deg,
+    background: linear-gradient(90deg,
       var(--wc-red)   0%   33.3%,
       var(--wc-green) 33.3% 66.6%,
       var(--wc-blue)  66.6% 100%
@@ -140,24 +137,12 @@
   .panini-stripes {
     background-image: repeating-linear-gradient(
       -45deg,
-      transparent 0px,
-      transparent 8px,
-      oklch(1 0 0 / 0.10) 8px,
-      oklch(1 0 0 / 0.10) 10px
+      transparent 0px, transparent 8px,
+      oklch(1 0 0 / 0.09) 8px, oklch(1 0 0 / 0.09) 10px
     );
   }
 
-  /* Padrão de pontos Panini — sobre fundos claros */
-  .panini-dots {
-    background-image: radial-gradient(
-      circle,
-      oklch(0.54 0.24 27 / 0.10) 1.5px,
-      transparent 1.5px
-    );
-    background-size: 18px 18px;
-  }
-
-  /* Stripe colorida no topo dos cards — estilo caderneta */
+  /* Stripe tricolor no topo dos cards */
   .card-stripe {
     background: linear-gradient(90deg,
       oklch(0.54 0.24 27) 0% 33%,
@@ -167,25 +152,20 @@
     height: 4px;
   }
 
-  /* Linhas de campo — mais subtis em tema claro */
   .pitch-lines {
-    background-image:
-      repeating-linear-gradient(
-        90deg,
-        oklch(0 0 0 / 0.04) 0px,
-        oklch(0 0 0 / 0.04) 1px,
-        transparent 1px,
-        transparent 40px
-      );
+    background-image: repeating-linear-gradient(
+      90deg,
+      oklch(1 0 0 / 0.03) 0px, oklch(1 0 0 / 0.03) 1px,
+      transparent 1px, transparent 40px
+    );
   }
 
   .text-balance { text-wrap: balance; }
 
-  /* Shimmer loader — tema claro */
   .shimmer {
     position: relative;
     overflow: hidden;
-    background: oklch(0.91 0.005 0);
+    background: oklch(0.20 0.012 265);
   }
   .shimmer::after {
     content: "";
@@ -194,35 +174,23 @@
     background: linear-gradient(
       90deg,
       transparent 0%,
-      oklch(1 0 0 / 0.60) 40%,
-      oklch(1 0 0 / 0.80) 50%,
-      oklch(1 0 0 / 0.60) 60%,
+      oklch(1 0 0 / 0.05) 40%,
+      oklch(1 0 0 / 0.10) 50%,
+      oklch(1 0 0 / 0.05) 60%,
       transparent 100%
     );
     animation: shimmer 1.6s ease-in-out infinite;
     transform: translateX(-100%);
   }
-  @keyframes shimmer {
-    to { transform: translateX(100%); }
-  }
+  @keyframes shimmer { to { transform: translateX(100%); } }
 
-  .trophy-shine {
-    position: relative;
-    overflow: hidden;
-  }
+  .trophy-shine { position: relative; overflow: hidden; }
   .trophy-shine::after {
     content: "";
     position: absolute;
-    top: -50%;
-    left: -75%;
-    width: 50%;
-    height: 200%;
-    background: linear-gradient(
-      105deg,
-      transparent 20%,
-      oklch(1 0 0 / 0.18) 50%,
-      transparent 80%
-    );
+    top: -50%; left: -75%;
+    width: 50%; height: 200%;
+    background: linear-gradient(105deg, transparent 20%, oklch(1 0 0 / 0.18) 50%, transparent 80%);
     transform: skewX(-15deg);
     animation: trophy-shine 4s ease-in-out infinite;
     animation-delay: 1.5s;

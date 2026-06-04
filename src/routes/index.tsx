@@ -220,9 +220,33 @@ function Home() {
             subtitle="Volta amanhã ou explora as próximas fases."
           />
         ) : (
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-2">
-            {todays.map((m) => <MatchCard key={m.id} match={m} />)}
-          </div>
+          <>
+            {/* Mobile — carrossel horizontal com scroll snap */}
+            <div className="md:hidden -mx-5 px-5">
+              <div
+                className="flex gap-3 overflow-x-auto pb-3"
+                style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}
+              >
+                {todays.map((m) => (
+                  <div key={m.id} style={{ scrollSnapAlign: "start", minWidth: "82vw", maxWidth: "82vw" }}>
+                    <MatchCard match={m} />
+                  </div>
+                ))}
+              </div>
+              {/* Indicador de scroll */}
+              {todays.length > 1 && (
+                <div className="flex justify-center gap-1.5 pt-1">
+                  {todays.map((_, i) => (
+                    <div key={i} className={`h-1 rounded-full bg-gold/40 ${i === 0 ? "w-4 bg-gold/80" : "w-1.5"}`} />
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* Desktop — grid normal */}
+            <div className="hidden md:grid gap-3 md:grid-cols-2">
+              {todays.map((m) => <MatchCard key={m.id} match={m} />)}
+            </div>
+          </>
         )}
       </section>
 

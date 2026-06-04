@@ -1,12 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarClock, Trophy, Gift, User } from "lucide-react";
+import { Home, CalendarClock, Trophy, Newspaper, User } from "lucide-react";
 
 const items = [
-  { to: "/",         label: "Home",     icon: Home },
-  { to: "/jogos",    label: "Jogos",    icon: CalendarClock },
-  { to: "/rankings", label: "Rankings", icon: Trophy },
-  { to: "/premios",  label: "Prémios",  icon: Gift },
-  { to: "/perfil",   label: "Perfil",   icon: User },
+  { to: "/",          label: "Home",      icon: Home },
+  { to: "/jogos",     label: "Jogos",     icon: CalendarClock },
+  { to: "/noticias",  label: "Notícias",  icon: Newspaper },
+  { to: "/rankings",  label: "Rankings",  icon: Trophy },
+  { to: "/perfil",    label: "Perfil",    icon: User },
 ];
 
 export function BottomNav() {

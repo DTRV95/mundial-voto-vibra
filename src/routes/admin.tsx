@@ -73,10 +73,11 @@ function Stat({ label, value }: { label: string; value: number }) {
 }
 
 function Tabs() {
-  const [tab, setTab] = useState<"matches" | "analysis" | "teams" | "groups" | "prizes">("matches");
+  const [tab, setTab] = useState<"matches" | "analysis" | "news" | "teams" | "groups" | "prizes">("matches");
   const tabs = [
     { k: "matches",  label: "Jogos" },
     { k: "analysis", label: "ScoreLab" },
+    { k: "news",     label: "Notícias" },
     { k: "teams",    label: "Equipas" },
     { k: "groups",   label: "Grupos" },
     { k: "prizes",   label: "Prémios" },
@@ -93,6 +94,7 @@ function Tabs() {
       </div>
       {tab === "matches"  && <MatchesAdmin />}
       {tab === "analysis" && <AnalysisAdmin />}
+      {tab === "news"     && <NewsAdmin />}
       {tab === "groups"   && <GroupsAdmin />}
       {tab === "teams"    && <TeamsAdmin />}
       {tab === "prizes"   && <PrizesAdmin />}
@@ -415,6 +417,106 @@ function AnalysisAdmin() {
           ))}
           <button onClick={save} className={`${btnCls} w-full justify-center`}>Guardar Análise ScoreLab</button>
         </div>
+      )}
+    </Section>
+  );
+}
+
+function NewsAdmin() {
+  const qc = useQueryClient();
+  const [title, setTitle] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [content, setContent] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [category, setCategory] = useState("noticia");
+  const [published, setPublished] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+
+  const { data: articles = [] } = useQuery({
+    queryKey: ["admin", "news"],
+    queryFn: async () => (await supabase.from("news").select("*").order("created_at", { ascending: false })).data ?? [],
+  });
+
+  function reset() { setTitle(""); setExcerpt(""); setContent(""); setImageUrl(""); setCategory("noticia"); setPublished(false); setEditId(null); }
+
+  function loadEdit(a: any) {
+    setEditId(a.id); setTitle(a.title); setExcerpt(a.excerpt ?? ""); setContent(a.content ?? "");
+    setImageUrl(a.image_url ?? ""); setCategory(a.category); setPublished(a.published);
+  }
+
+  async function save() {
+    if (!title.trim()) { toast.error("Título obrigatório"); return; }
+    const payload = { title, excerpt: excerpt || null, content: content || null, image_url: imageUrl || null, category, published };
+    const { error } = editId
+      ? await supabase.from("news").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", editId)
+      : await supabase.from("news").insert(payload);
+    if (error) { toast.error(error.message); return; }
+    toast.success(editId ? "Artigo actualizado!" : "Artigo criado!");
+    reset(); qc.invalidateQueries({ queryKey: ["admin", "news"] });
+  }
+
+  async function del(id: string) {
+    if (!confirm("Eliminar artigo?")) return;
+    await supabase.from("news").delete().eq("id", id);
+    qc.invalidateQueries({ queryKey: ["admin", "news"] });
+  }
+
+  async function togglePublish(id: string, current: boolean) {
+    await supabase.from("news").update({ published: !current }).eq("id", id);
+    qc.invalidateQueries({ queryKey: ["admin", "news"] });
+  }
+
+  return (
+    <Section>
+      <p className="mb-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{editId ? "Editar artigo" : "Novo artigo"}</p>
+      <div className="space-y-2">
+        <input placeholder="Título" value={title} onChange={e => setTitle(e.target.value)} className={`${inputCls} w-full`} />
+        <input placeholder="Resumo (excerpt)" value={excerpt} onChange={e => setExcerpt(e.target.value)} className={`${inputCls} w-full`} />
+        <input placeholder="URL da imagem de capa" value={imageUrl} onChange={e => setImageUrl(e.target.value)} className={`${inputCls} w-full`} />
+        <div className="flex gap-2">
+          <select value={category} onChange={e => setCategory(e.target.value)} className={`${inputCls} flex-1`}>
+            <option value="noticia">Notícia</option>
+            <option value="analise">Análise ScoreLab</option>
+            <option value="antevisao">Antevisão</option>
+            <option value="opiniao">Opinião</option>
+          </select>
+          <label className="flex items-center gap-2 rounded-xl border border-border bg-input px-3 py-2 text-sm cursor-pointer">
+            <input type="checkbox" checked={published} onChange={e => setPublished(e.target.checked)} className="accent-gold" />
+            Publicar
+          </label>
+        </div>
+        <textarea placeholder="Conteúdo do artigo..." value={content} onChange={e => setContent(e.target.value)}
+          className={`${inputCls} w-full min-h-[140px] resize-y`} />
+        <div className="flex gap-2">
+          <button onClick={save} className={`${btnCls} flex-1 justify-center`}>{editId ? "Actualizar" : "Criar artigo"}</button>
+          {editId && <button onClick={reset} className="rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground">Cancelar</button>}
+        </div>
+      </div>
+
+      {articles.length > 0 && (
+        <ul className="mt-4 space-y-2">
+          {articles.map((a: any) => (
+            <li key={a.id} className={rowItemCls}>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium text-sm">{a.title}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{a.category}</span>
+                  <span className={`text-[10px] font-bold uppercase ${a.published ? "text-primary" : "text-muted-foreground"}`}>
+                    {a.published ? "• Publicado" : "Rascunho"}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 ml-2 shrink-0">
+                <button onClick={() => togglePublish(a.id, a.published)}
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${a.published ? "bg-destructive/15 text-destructive" : "bg-primary/15 text-primary"}`}>
+                  {a.published ? "Despublicar" : "Publicar"}
+                </button>
+                <button onClick={() => loadEdit(a)} className="text-muted-foreground hover:text-foreground text-xs">Editar</button>
+                <button onClick={() => del(a.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </Section>
   );

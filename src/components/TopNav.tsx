@@ -1,10 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarClock, Users, Trophy, Gift, Shield } from "lucide-react";
+import { Home, CalendarClock, Users, Trophy, Newspaper, Gift, Shield } from "lucide-react";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 
 const items = [
   { to: "/",         label: "Home",     icon: Home },
   { to: "/jogos",    label: "Jogos",    icon: CalendarClock },
+  { to: "/noticias", label: "Notícias", icon: Newspaper },
   { to: "/grupos",   label: "Grupos",   icon: Users },
   { to: "/rankings", label: "Rankings", icon: Trophy },
   { to: "/premios",  label: "Prémios",  icon: Gift },

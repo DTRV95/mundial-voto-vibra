@@ -323,9 +323,28 @@ function Home() {
         </div>
       </section>
 
+      {/* ===================== COMO FUNCIONA ===================== */}
+      <section id="como-funciona" className="px-5 pt-12 md:px-8">
+        <h2 className="mb-5 font-display text-2xl md:text-3xl">Como funciona</h2>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Step n="1" title="Vê os jogos">Consulta os jogos do dia e escolhe os que te interessam.</Step>
+          <Step n="2" title="Deixa a tua previsão">Vota nos mercados que quiseres até 5 minutos antes do jogo.</Step>
+          <Step n="3" title="Compete">Soma pontos pelo teu palpite e sobe no ranking da fase.</Step>
+        </div>
+        <div className="mt-4 rounded-2xl border border-gold/30 bg-gold/5 p-5 text-sm">
+          <div className="mb-1 flex items-center gap-2 font-semibold text-gold">
+            <Users2 className="h-4 w-4" /> Opinião da Comunidade
+          </div>
+          <p className="text-muted-foreground">
+            Depois de votares, desbloqueias as percentagens e a tendência da comunidade para cada mercado.
+            Todas as previsões são consideradas no tempo regulamentar (90 minutos).
+          </p>
+        </div>
+      </section>
+
       {/* ===================== NOTÍCIA EM DESTAQUE ===================== */}
       {featuredNews && (
-        <section className="px-5 pt-8 md:px-8">
+        <section className="px-5 pt-8 pb-2 md:px-8">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Newspaper className="h-4 w-4 text-muted-foreground" />
@@ -338,17 +357,14 @@ function Home() {
           <Link
             to="/noticias/$id"
             params={{ id: (featuredNews as any).id }}
-            className="group flex gap-4 overflow-hidden rounded-2xl border border-border bg-card/70 p-4 transition-smooth hover:border-gold/40"
+            className="group flex gap-4 overflow-hidden rounded-2xl border border-border bg-card/70 p-4 hover:border-gold/40"
             style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 32px -6px oklch(0.82 0.15 88 / 0.15)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
           >
             {(featuredNews as any).image_url && (
-              <img
-                src={(featuredNews as any).image_url}
-                alt={(featuredNews as any).title}
-                className="h-20 w-28 shrink-0 rounded-xl object-cover"
-              />
+              <img src={(featuredNews as any).image_url} alt={(featuredNews as any).title}
+                className="h-20 w-28 shrink-0 rounded-xl object-cover" />
             )}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1">
@@ -370,25 +386,6 @@ function Home() {
           </Link>
         </section>
       )}
-
-      {/* ===================== COMO FUNCIONA ===================== */}
-      <section id="como-funciona" className="px-5 pt-12 md:px-8">
-        <h2 className="mb-5 font-display text-2xl md:text-3xl">Como funciona</h2>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Step n="1" title="Vê os jogos">Consulta os jogos do dia e escolhe os que te interessam.</Step>
-          <Step n="2" title="Deixa a tua previsão">Vota nos mercados que quiseres até 5 minutos antes do jogo.</Step>
-          <Step n="3" title="Compete">Soma pontos pelo teu palpite e sobe no ranking da fase.</Step>
-        </div>
-        <div className="mt-4 rounded-2xl border border-gold/30 bg-gold/5 p-5 text-sm">
-          <div className="mb-1 flex items-center gap-2 font-semibold text-gold">
-            <Users2 className="h-4 w-4" /> Opinião da Comunidade
-          </div>
-          <p className="text-muted-foreground">
-            Depois de votares, desbloqueias as percentagens e a tendência da comunidade para cada mercado.
-            Todas as previsões são consideradas no tempo regulamentar (90 minutos).
-          </p>
-        </div>
-      </section>
     </div>
   );
 }

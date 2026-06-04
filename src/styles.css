@@ -55,34 +55,34 @@
   --wc-blue:  oklch(0.40 0.18 265);   /* USA     #2A398D */
 
   /* Tema escuro premium */
-  --background: oklch(0.13 0.008 265);
-  --foreground: oklch(0.97 0.01 95);
+  --background: oklch(0.13 0.005 0);
+  --foreground: oklch(0.97 0.005 0);
 
-  --card: oklch(0.18 0.012 265);
-  --card-foreground: oklch(0.97 0.01 95);
+  --card: oklch(0.18 0.005 0);
+  --card-foreground: oklch(0.97 0.005 0);
 
-  --popover: oklch(0.18 0.012 265);
-  --popover-foreground: oklch(0.97 0.01 95);
+  --popover: oklch(0.18 0.005 0);
+  --popover-foreground: oklch(0.97 0.005 0);
 
   /* Verde México */
   --primary: oklch(0.55 0.20 142);
   --primary-foreground: oklch(0.10 0.02 142);
 
-  --secondary: oklch(0.24 0.015 265);
-  --secondary-foreground: oklch(0.97 0.01 95);
+  --secondary: oklch(0.24 0.005 0);
+  --secondary-foreground: oklch(0.97 0.005 0);
 
-  --muted: oklch(0.22 0.010 265);
-  --muted-foreground: oklch(0.68 0.012 220);
+  --muted: oklch(0.22 0.005 0);
+  --muted-foreground: oklch(0.68 0.005 0);
 
-  --accent: oklch(0.26 0.015 265);
-  --accent-foreground: oklch(0.97 0.01 95);
+  --accent: oklch(0.26 0.005 0);
+  --accent-foreground: oklch(0.97 0.005 0);
 
   /* Vermelho Canadá */
   --destructive: oklch(0.54 0.24 27);
   --destructive-foreground: oklch(0.98 0.01 95);
 
-  --border: oklch(0.28 0.015 265 / 65%);
-  --input: oklch(0.24 0.012 265 / 80%);
+  --border: oklch(0.28 0.005 0 / 65%);
+  --input: oklch(0.24 0.005 0 / 80%);
   --ring: oklch(0.54 0.24 27);
 
   /* Acento principal: Vermelho WC26 */

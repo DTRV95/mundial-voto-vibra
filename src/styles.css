@@ -51,63 +51,66 @@
   --radius: 0.875rem;
 
   /* ── Cores oficiais FIFA World Cup 2026 ─────────────── */
-  /* USA Blue  #2A398D — Pantone 7687 C */
-  --wc-blue:  oklch(0.38 0.18 265);
   /* Canada Red  #E61D25 — Pantone 485 C */
-  --wc-red:   oklch(0.52 0.22 25);
+  --wc-red:   oklch(0.54 0.23 27);
   /* Mexico Green  #3CAC3B — Pantone 7738 C */
   --wc-green: oklch(0.65 0.19 142);
+  /* USA Blue  #2A398D — Pantone 7687 C */
+  --wc-blue:  oklch(0.42 0.18 265);
 
-  /* Deep stadium night — azul escuro oficial WC26 */
-  --background: oklch(0.14 0.030 265);
-  --foreground: oklch(0.97 0.01 95);
+  /* Fundo neutro escuro — sem tint de cor, mais respirável */
+  --background: oklch(0.13 0.005 0);
+  --foreground: oklch(0.97 0.005 0);
 
-  --card: oklch(0.19 0.035 265);
-  --card-foreground: oklch(0.97 0.01 95);
+  --card: oklch(0.18 0.005 0);
+  --card-foreground: oklch(0.97 0.005 0);
 
-  --popover: oklch(0.18 0.035 265);
-  --popover-foreground: oklch(0.97 0.01 95);
+  --popover: oklch(0.17 0.005 0);
+  --popover-foreground: oklch(0.97 0.005 0);
 
-  /* Verde oficial México — Pantone 7738 C */
-  --primary: oklch(0.65 0.19 142);
-  --primary-foreground: oklch(0.12 0.02 142);
+  /* Verde oficial México — confirmações e sucesso */
+  --primary: oklch(0.66 0.20 142);
+  --primary-foreground: oklch(0.10 0.02 142);
 
-  --secondary: oklch(0.24 0.04 265);
-  --secondary-foreground: oklch(0.97 0.01 95);
+  --secondary: oklch(0.24 0.008 0);
+  --secondary-foreground: oklch(0.97 0.005 0);
 
-  --muted: oklch(0.22 0.03 265);
-  --muted-foreground: oklch(0.72 0.02 220);
+  --muted: oklch(0.22 0.005 0);
+  --muted-foreground: oklch(0.68 0.008 0);
 
-  --accent: oklch(0.28 0.06 265);
-  --accent-foreground: oklch(0.97 0.01 95);
+  --accent: oklch(0.26 0.01 0);
+  --accent-foreground: oklch(0.97 0.005 0);
 
-  /* Vermelho oficial Canadá — Pantone 485 C */
-  --destructive: oklch(0.52 0.22 25);
-  --destructive-foreground: oklch(0.98 0.01 95);
+  /* Vermelho oficial Canadá — erros e alertas */
+  --destructive: oklch(0.54 0.23 27);
+  --destructive-foreground: oklch(0.98 0.005 0);
 
-  --border: oklch(0.32 0.05 265 / 55%);
-  --input: oklch(0.26 0.04 265 / 70%);
-  --ring: oklch(0.62 0.20 262);
+  --border: oklch(0.28 0.008 0 / 65%);
+  --input: oklch(0.24 0.008 0 / 75%);
+  --ring: oklch(0.62 0.23 27);
 
-  /* ── Acento principal: azul vibrante WC26 ─────────── */
-  /* Versão brightened do #2A398D para legibilidade em fundo escuro */
-  --pitch: oklch(0.65 0.19 142);
-  --pitch-deep: oklch(0.32 0.12 265);
-  --gold: oklch(0.62 0.20 262);
-  --gold-soft: oklch(0.72 0.14 262);
+  /* ── Acento principal: Vermelho WC26 — a cor dominante da marca ── */
+  --pitch: oklch(0.66 0.20 142);
+  --pitch-deep: oklch(0.30 0.12 142);
+  --gold: oklch(0.62 0.23 27);        /* vermelho vibrante #E61D25 */
+  --gold-soft: oklch(0.72 0.16 27);   /* vermelho suave para fundos */
 
-  /* Gradiente tricolor oficial: Vermelho → Verde → Azul */
+  /* Hero: glow vermelho WC26 no topo */
   --gradient-hero: radial-gradient(
-      ellipse 80% 60% at 50% 0%,
-      oklch(0.38 0.18 265 / 0.50),
-      transparent 70%
+      ellipse 80% 50% at 50% 0%,
+      oklch(0.54 0.23 27 / 0.40),
+      transparent 65%
     ),
-    linear-gradient(180deg, oklch(0.12 0.04 265) 0%, oklch(0.16 0.04 265) 100%);
-  --gradient-gold: linear-gradient(135deg, oklch(0.52 0.22 25), oklch(0.65 0.19 142), oklch(0.62 0.20 262));
-  --gradient-pitch: linear-gradient(180deg, oklch(0.65 0.19 142) 0%, oklch(0.35 0.12 265) 100%);
+    linear-gradient(180deg, oklch(0.11 0.005 0) 0%, oklch(0.15 0.005 0) 100%);
 
-  --shadow-elegant: 0 30px 80px -30px oklch(0 0 0 / 0.60);
-  --shadow-gold: 0 10px 40px -10px oklch(0.62 0.20 262 / 0.40);
+  /* CTA gradient: vermelho → azul (Canadá + EUA) */
+  --gradient-gold: linear-gradient(135deg, oklch(0.62 0.23 27), oklch(0.50 0.20 350));
+
+  /* Pitch: verde México oficial */
+  --gradient-pitch: linear-gradient(180deg, oklch(0.66 0.20 142) 0%, oklch(0.32 0.10 142) 100%);
+
+  --shadow-elegant: 0 30px 80px -30px oklch(0 0 0 / 0.65);
+  --shadow-gold: 0 10px 40px -10px oklch(0.54 0.23 27 / 0.45);
 
   --transition-smooth: all 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -135,13 +138,13 @@
   .shadow-gold { box-shadow: var(--shadow-gold); }
   .transition-smooth { transition: var(--transition-smooth); }
 
-  /* Linhas subtis de campo — agora com tint azul WC26 */
+  /* Linhas subtis de campo */
   .pitch-lines {
     background-image:
       repeating-linear-gradient(
         90deg,
-        oklch(0.62 0.20 262 / 0.04) 0px,
-        oklch(0.62 0.20 262 / 0.04) 2px,
+        oklch(1 0 0 / 0.03) 0px,
+        oklch(1 0 0 / 0.03) 2px,
         transparent 2px,
         transparent 40px
       );
@@ -162,7 +165,7 @@
   .shimmer {
     position: relative;
     overflow: hidden;
-    background: oklch(0.21 0.03 165);
+    background: oklch(0.20 0.005 0);
   }
   .shimmer::after {
     content: "";

@@ -5,6 +5,7 @@ import { SideNav } from "./SideNav";
 import { TopNav } from "./TopNav";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { Shield } from "lucide-react";
+import logoSvg from "@/assets/logo.svg";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -29,7 +30,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-[3px] z-40 border-b border-border bg-background/90 backdrop-blur-xl shadow-elegant md:hidden">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-wc-red font-display text-lg text-white">V</span>
+            <img src={logoSvg} alt="Logo" className="h-8 w-8" />
             <div className="leading-tight">
               <div className="font-display text-base tracking-wide text-foreground">UMA GERAÇÃO</div>
               <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Mundial 2026</div>

@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, CalendarClock, Users, Trophy, Newspaper, Gift, Shield } from "lucide-react";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
+import logoSvg from "@/assets/logo.svg";
 
 const items = [
   { to: "/",         label: "Home",     icon: Home },
@@ -22,9 +23,7 @@ export function TopNav() {
 
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 shrink-0">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-wc-red font-display text-lg text-white shadow-gold">
-            V
-          </span>
+          <img src={logoSvg} alt="Logo" className="h-9 w-9" />
           <div className="leading-tight">
             <div className="font-display text-base tracking-wide text-foreground">UMA GERAÇÃO</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Mundial 2026</div>

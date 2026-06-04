@@ -3,6 +3,7 @@ import { Home, CalendarClock, Trophy, Gift, User, Shield, LogOut, Newspaper, Use
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import logoSvg from "@/assets/logo.svg";
 
 const items = [
   { to: "/",        label: "Home",     icon: Home },
@@ -40,9 +41,7 @@ export function SideNav() {
       {/* Logo */}
       <div className="px-5 py-4 border-b border-border">
         <Link to="/" className="flex items-center gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-wc-red font-display text-lg text-white shadow-gold">
-            V
-          </span>
+          <img src={logoSvg} alt="Logo" className="h-9 w-9 shrink-0" />
           <div className="leading-tight">
             <div className="font-display text-sm tracking-wide text-foreground">UMA GERAÇÃO</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Comunidade</div>

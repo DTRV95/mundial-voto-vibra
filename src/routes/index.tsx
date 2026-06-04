@@ -79,44 +79,68 @@ function Home() {
 
       {/* ===================== HERO ===================== */}
 
-      {/* MOBILE hero — estilo Panini: vermelho bold com padrão diagonal */}
-      <section className="relative md:hidden">
-        <div className="relative overflow-hidden bg-wc-red panini-stripes" style={{ boxShadow: "0 8px 32px oklch(0.54 0.24 27 / 0.30)" }}>
-          {/* Bloco azul decorativo canto superior direito */}
-          <div className="absolute top-0 right-0 h-24 w-24 rounded-bl-[48px] bg-wc-blue opacity-80" />
-          {/* Bloco verde decorativo canto inferior esquerdo */}
-          <div className="absolute bottom-0 left-0 h-20 w-20 rounded-tr-[40px] bg-wc-green opacity-80" />
+      {/* ===================== HERO — Panini WC2026 (mobile + desktop) ===================== */}
+      <section className="relative px-4 pt-4 md:px-6 md:pt-5">
+        <div
+          className="relative overflow-hidden rounded-3xl bg-wc-red panini-stripes"
+          style={{ boxShadow: "0 12px 48px oklch(0.54 0.24 27 / 0.35)", minHeight: "260px" }}
+        >
+          {/* ── Canto superior direito: bloco azul com troféu ─── */}
+          <div className="absolute top-0 right-0 h-[75%] w-[38%] md:h-full md:w-[36%] overflow-hidden"
+            style={{ borderBottomLeftRadius: "48px" }}>
+            <div className="absolute inset-0 bg-wc-blue panini-stripes opacity-90" />
+            <img
+              src={trophyImg}
+              alt="Troféu do Mundial"
+              className="relative h-full w-full object-cover object-center trophy-shine"
+              style={{ mixBlendMode: "luminosity", opacity: 0.85 }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-wc-blue/50 to-transparent" />
+          </div>
 
-          <div className="relative flex items-center gap-4 px-5 py-6">
-            {/* Troféu */}
-            <div className="relative h-32 w-28 shrink-0 overflow-hidden rounded-2xl shadow-elegant trophy-shine">
-              <img src={trophyImg} alt="Troféu" className="h-full w-full object-cover scale-110" />
-            </div>
-            {/* Texto */}
-            <div className="flex-1 text-white">
-              <p className="text-[11px] font-bold uppercase tracking-widest opacity-80 mb-1">⚽ Mundial 2026</p>
-              <h1 className="font-display text-5xl leading-none">
-                UMA<br />GERAÇÃO
-              </h1>
-              <p className="mt-2 text-sm font-semibold opacity-90">
-                Vota, compara e vibra com a comunidade.
-              </p>
+          {/* ── Canto inferior esquerdo: bloco verde ──────────── */}
+          <div
+            className="absolute bottom-0 left-0 h-16 w-16 md:h-20 md:w-20 bg-wc-green"
+            style={{ borderTopRightRadius: "40px" }}
+          />
+
+          {/* ── Conteúdo principal ────────────────────────────── */}
+          <div className="relative px-5 py-6 md:px-10 md:py-10 pr-[42%] md:pr-[40%]">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-2 flex items-center gap-1.5">
+              <Sparkles className="h-3 w-3" /> Mundial 2026
+            </p>
+            <h1 className="font-display text-[clamp(3rem,10vw,6rem)] leading-none text-white">
+              UMA<br />GERAÇÃO
+            </h1>
+            <p className="mt-3 text-sm md:text-base font-semibold text-white/90 max-w-xs">
+              Vota, compara e vibra com a comunidade.
+            </p>
+            {/* CTAs — só desktop (mobile tem abaixo) */}
+            <div className="hidden md:flex items-center gap-3 mt-6">
+              <Link to="/jogos"
+                className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
+                Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a href="#como-funciona"
+                className="rounded-2xl border-2 border-white/40 px-5 py-3 text-sm font-bold text-white transition-smooth hover:bg-white/10">
+                Como funciona
+              </a>
             </div>
           </div>
 
-          {/* Stats strip — branco sobre vermelho */}
-          <div className="relative grid grid-cols-3 gap-px bg-white/20 border-t border-white/20">
+          {/* ── Stats strip ───────────────────────────────────── */}
+          <div className="relative grid grid-cols-3 gap-px border-t border-white/20 bg-white/20">
             {[{ label: "Jogos", value: "48" }, { label: "Mercados", value: "8" }, { label: "Fases", value: "4" }].map((s) => (
               <div key={s.label} className="bg-white/10 py-3 text-center text-white">
-                <div className="font-display text-2xl leading-none">{s.value}</div>
+                <div className="font-display text-2xl md:text-3xl leading-none">{s.value}</div>
                 <div className="text-[10px] uppercase tracking-wider opacity-70 mt-0.5">{s.label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* CTAs abaixo do hero vermelho */}
-        <div className="flex gap-3 px-4 pt-4">
+        {/* CTAs mobile — abaixo do card */}
+        <div className="flex gap-3 pt-4 md:hidden">
           <Link to="/jogos"
             className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
             Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
@@ -125,60 +149,6 @@ function Home() {
             className="inline-flex items-center justify-center rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 transition-smooth">
             Como?
           </a>
-        </div>
-      </section>
-
-      {/* DESKTOP hero — Panini: vermelho à esquerda, troféu à direita */}
-      <section className="relative hidden md:block px-6 pt-5">
-        <div className="relative overflow-hidden rounded-3xl" style={{ boxShadow: "0 24px 60px oklch(0.54 0.24 27 / 0.20)" }}>
-          <div className="grid grid-cols-2 min-h-[420px]">
-            {/* Esquerda: vermelho bold com padrão Panini */}
-            <div className="relative bg-wc-red panini-stripes flex flex-col justify-center px-10 py-12">
-              {/* Bloco decorativo */}
-              <div className="absolute top-0 left-0 h-full w-6 bg-wc-blue opacity-60" />
-              <div className="relative pl-4 space-y-5 text-white">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-widest">
-                  <Sparkles className="h-3.5 w-3.5" /> Comunidade do Mundial 2026
-                </span>
-                <h1 className="font-display text-8xl leading-none">
-                  UMA<br />GERAÇÃO
-                </h1>
-                <p className="text-xl font-semibold opacity-90 max-w-sm">
-                  Vota, compara e vibra com a comunidade.
-                </p>
-                <div className="flex items-center gap-4 pt-2">
-                  <Link to="/jogos"
-                    className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-3.5 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
-                    Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <a href="#como-funciona"
-                    className="rounded-2xl border-2 border-white/40 px-6 py-3.5 text-sm font-bold text-white transition-smooth hover:bg-white/10">
-                    Como funciona
-                  </a>
-                </div>
-                <div className="flex gap-8 pt-2 border-t border-white/20">
-                  {[{ label: "Jogos grupos", value: "48" }, { label: "Mercados/jogo", value: "8" }, { label: "Fases/prémios", value: "4" }].map((s) => (
-                    <div key={s.label}>
-                      <div className="font-display text-4xl leading-none">{s.value}</div>
-                      <div className="text-xs opacity-70 mt-1">{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Direita: troféu sobre azul escuro */}
-            <div className="relative bg-wc-blue overflow-hidden">
-              <div className="absolute inset-0 panini-stripes opacity-30" />
-              {/* Bloco verde decorativo */}
-              <div className="absolute bottom-0 right-0 h-32 w-32 rounded-tl-[64px] bg-wc-green opacity-70" />
-              <div className="relative h-full trophy-shine">
-                <img src={trophyImg} alt="Troféu do Mundial"
-                  className="h-full w-full object-cover object-center mix-blend-luminosity opacity-90" />
-                <div className="absolute inset-0 bg-gradient-to-t from-wc-blue/60 via-transparent to-transparent" />
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 

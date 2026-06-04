@@ -4,8 +4,9 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -72,10 +73,37 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function PageTransition() {
+  const isLoading = useRouterState({ select: s => s.isLoading });
+  const [visible, setVisible] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (isLoading) {
+      setVisible(true);
+    } else {
+      timerRef.current = setTimeout(() => setVisible(false), 350);
+    }
+    return () => clearTimeout(timerRef.current);
+  }, [isLoading]);
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 9999, pointerEvents: "none",
+        background: "oklch(0.12 0.02 165)",
+        opacity: visible ? (isLoading ? 1 : 0) : 0,
+        transition: isLoading ? "opacity 80ms ease-in" : "opacity 320ms ease-out",
+      }}
+    />
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <PageTransition />
       <AppShell>
         <Outlet />
       </AppShell>

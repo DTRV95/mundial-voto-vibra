@@ -1,16 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <!-- Fundo rounded square vermelho -->
-  <rect width="48" height="48" rx="13" fill="#E61D25"/>
+  <!-- Fundo rounded square escuro -->
+  <rect width="48" height="48" rx="13" fill="#1a1a1a"/>
 
-  <!-- G geométrico em branco -->
-  <!-- Arco do G: círculo aberto no canto superior direito -->
-  <path
-    d="M33 16.5
-       A12 12 0 1 0 33 31.5
-       L33 25
-       L26 25"
-    stroke="white"
-    stroke-width="3.8"
+  <!-- Linha de pulso / onda — representa "vibra" -->
+  <polyline
+    points="4,24 10,24 14,14 18,34 22,20 26,28 30,10 34,38 38,24 44,24"
+    stroke="#E61D25"
+    stroke-width="3"
     stroke-linecap="round"
     stroke-linejoin="round"
     fill="none"

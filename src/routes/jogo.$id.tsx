@@ -5,10 +5,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
-import { Lock, Users2, Info, TrendingUp, ChevronDown } from "lucide-react";
+import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check } from "lucide-react";
 
 export const Route = createFileRoute("/jogo/$id")({
-  head: () => ({ meta: [{ title: "Análise & Previsão — Uma Geração" }] }),
+  head: () => ({
+    meta: [
+      { title: "Análise & Previsão — Voz do Mundial" },
+      { name: "description", content: "Dá a tua previsão e compara com a comunidade." },
+      { property: "og:title", content: "Voz do Mundial — Dá a tua previsão!" },
+      { property: "og:description", content: "Vota, compara e vibra com a comunidade. Grátis." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: JogoPage,
 });
 
@@ -58,6 +67,24 @@ function JogoPage() {
 
   const [pred, setPred] = useState<Record<string, any>>({});
   const [scorelabOpen, setScorelabOpen] = useState(false);
+  const [shared, setShared] = useState(false);
+
+  async function share() {
+    const home = (match?.home as any)?.name ?? "Casa";
+    const away = (match?.away as any)?.name ?? "Fora";
+    const text = hasVoted
+      ? `Já dei a minha previsão em ${home} vs ${away}! E tu? 🏆`
+      : `${home} vs ${away} — dá a tua previsão! 🏆`;
+    const url = window.location.href;
+    if (navigator.share) {
+      await navigator.share({ title: `${home} vs ${away} — Voz do Mundial`, text, url }).catch(() => {});
+    } else {
+      await navigator.clipboard.writeText(url);
+      setShared(true);
+      setTimeout(() => setShared(false), 2000);
+      toast.success("Link copiado!");
+    }
+  }
 
   useEffect(() => { if (myPrediction) setPred(myPrediction); }, [myPrediction]);
 
@@ -96,7 +123,16 @@ function JogoPage() {
 
   return (
     <div className="px-4 pt-4 pb-10 md:px-8">
-      <Link to="/jogos" className="text-xs text-muted-foreground">← Jogos</Link>
+      <div className="flex items-center justify-between">
+        <Link to="/jogos" className="text-xs text-muted-foreground">← Jogos</Link>
+        <button
+          onClick={share}
+          className="flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-smooth hover:border-gold/40 hover:text-gold"
+        >
+          {shared ? <Check className="h-3.5 w-3.5 text-primary" /> : <Share2 className="h-3.5 w-3.5" />}
+          {shared ? "Copiado!" : "Partilhar"}
+        </button>
+      </div>
 
       {/* Match header */}
       <header className="mt-3 overflow-hidden rounded-2xl border border-border bg-card/70 pitch-lines">

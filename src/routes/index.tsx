@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Trophy, BarChart3, Users2, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, Trophy, BarChart3, Users2, Sparkles, Timer } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import trophyImg from "@/assets/trophy-hero.jpg";
@@ -41,6 +42,21 @@ function Home() {
         .order("total_points", { ascending: false })
         .limit(3);
       return data ?? [];
+    },
+  });
+
+  const { data: nextMatch } = useQuery({
+    queryKey: ["matches", "next"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("matches")
+        .select("id,kickoff_at,home:home_team_id(name,flag),away:away_team_id(name,flag)")
+        .gt("kickoff_at", new Date().toISOString())
+        .eq("status", "scheduled")
+        .order("kickoff_at")
+        .limit(1)
+        .maybeSingle();
+      return data;
     },
   });
 
@@ -178,6 +194,15 @@ function Home() {
         </div>
       </section>
 
+      {/* ===================== COUNTDOWN ===================== */}
+      {nextMatch && (
+        <Countdown
+          kickoff_at={nextMatch.kickoff_at}
+          home={(nextMatch as any).home}
+          away={(nextMatch as any).away}
+        />
+      )}
+
       {/* ===================== JOGOS DE HOJE ===================== */}
       <section className="px-5 pt-8 md:px-8 relative">
         {/* Gradiente de fundo subtil */}
@@ -295,6 +320,72 @@ function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
     <div className="rounded-2xl border border-dashed border-border bg-card/40 p-8 text-center">
       <p className="font-display text-lg">{title}</p>
       <p className="text-sm text-muted-foreground">{subtitle}</p>
+    </div>
+  );
+}
+
+function Countdown({ kickoff_at, home, away }: { kickoff_at: string; home: any; away: any }) {
+  const [diff, setDiff] = useState(new Date(kickoff_at).getTime() - Date.now());
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setDiff(new Date(kickoff_at).getTime() - Date.now());
+    }, 1000);
+    return () => clearInterval(t);
+  }, [kickoff_at]);
+
+  if (diff <= 0) return null;
+
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  return (
+    <div className="mx-5 mt-4 overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-r from-card/80 via-gold/5 to-card/80 p-4 md:mx-8">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Timer className="h-4 w-4 text-gold" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Próximo jogo</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span>{home?.flag ?? "⚽"}</span>
+          <span className="font-semibold text-foreground">{home?.name}</span>
+          <span className="text-muted-foreground mx-1">vs</span>
+          <span className="font-semibold text-foreground">{away?.name}</span>
+          <span>{away?.flag ?? "⚽"}</span>
+        </div>
+      </div>
+      <div className="mt-3 flex items-end gap-1">
+        {h > 0 && (
+          <>
+            <div className="text-center">
+              <div className="font-display text-4xl leading-none text-gold" style={{
+                background: "linear-gradient(180deg, oklch(0.90 0.12 92), oklch(0.72 0.16 75))",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+              }}>{pad(h)}</div>
+              <div className="text-[9px] uppercase tracking-widest text-muted-foreground mt-0.5">horas</div>
+            </div>
+            <span className="font-display text-2xl text-gold/40 mb-4">:</span>
+          </>
+        )}
+        <div className="text-center">
+          <div className="font-display text-4xl leading-none" style={{
+            background: "linear-gradient(180deg, oklch(0.90 0.12 92), oklch(0.72 0.16 75))",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+          }}>{pad(m)}</div>
+          <div className="text-[9px] uppercase tracking-widest text-muted-foreground mt-0.5">min</div>
+        </div>
+        <span className="font-display text-2xl text-gold/40 mb-4">:</span>
+        <div className="text-center">
+          <div className="font-display text-4xl leading-none" style={{
+            background: "linear-gradient(180deg, oklch(0.90 0.12 92), oklch(0.72 0.16 75))",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+          }}>{pad(s)}</div>
+          <div className="text-[9px] uppercase tracking-widest text-muted-foreground mt-0.5">seg</div>
+        </div>
+      </div>
     </div>
   );
 }

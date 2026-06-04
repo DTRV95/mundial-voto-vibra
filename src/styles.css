@@ -3,8 +3,8 @@
 @import "tw-animate-css";
 
 /*
- * UMA GERAÇÃO — cinematic World Cup design system
- * Portugal · Mundial · Futebol
+ * UMA GERAÇÃO — premium World Cup design system
+ * Dark stadium atmosphere, grass green, gold accents.
  */
 
 @theme inline {
@@ -13,7 +13,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 16px);
+  --radius-3xl: calc(var(--radius) + 12px);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -38,78 +38,68 @@
   --color-pitch-deep: var(--pitch-deep);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
-  --color-red: var(--red);
 
   --font-display: "Bebas Neue", "Oswald", "Inter", system-ui, sans-serif;
   --font-sans: "Inter", system-ui, sans-serif;
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 0.875rem;
 
-  /* Fundo — noite de estádio, muito escuro */
-  --background: oklch(0.11 0.018 240);
-  --foreground: oklch(0.97 0.008 95);
+  /* Deep stadium night */
+  --background: oklch(0.16 0.025 165);
+  --foreground: oklch(0.97 0.01 95);
 
-  --card: oklch(0.16 0.022 240);
-  --card-foreground: oklch(0.97 0.008 95);
+  --card: oklch(0.21 0.03 165);
+  --card-foreground: oklch(0.97 0.01 95);
 
-  --popover: oklch(0.15 0.02 240);
-  --popover-foreground: oklch(0.97 0.008 95);
+  --popover: oklch(0.20 0.03 165);
+  --popover-foreground: oklch(0.97 0.01 95);
 
-  /* Verde relvado */
-  --primary: oklch(0.60 0.18 148);
-  --primary-foreground: oklch(0.10 0.02 165);
+  /* Grass green */
+  --primary: oklch(0.62 0.16 150);
+  --primary-foreground: oklch(0.12 0.02 165);
 
-  --secondary: oklch(0.22 0.025 240);
-  --secondary-foreground: oklch(0.97 0.008 95);
+  --secondary: oklch(0.27 0.04 165);
+  --secondary-foreground: oklch(0.97 0.01 95);
 
-  --muted: oklch(0.20 0.018 240);
-  --muted-foreground: oklch(0.65 0.015 220);
+  --muted: oklch(0.25 0.025 165);
+  --muted-foreground: oklch(0.72 0.02 110);
 
-  --accent: oklch(0.25 0.04 240);
-  --accent-foreground: oklch(0.97 0.008 95);
+  --accent: oklch(0.30 0.05 160);
+  --accent-foreground: oklch(0.97 0.01 95);
 
-  --destructive: oklch(0.58 0.22 22);
-  --destructive-foreground: oklch(0.98 0.008 95);
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.98 0.01 95);
 
-  --border: oklch(0.28 0.02 240 / 50%);
-  --input: oklch(0.24 0.02 240 / 80%);
+  --border: oklch(0.30 0.03 160 / 60%);
+  --input: oklch(0.28 0.03 160 / 70%);
   --ring: oklch(0.80 0.14 88);
 
-  /* Brand */
-  --pitch: oklch(0.52 0.18 148);
-  --pitch-deep: oklch(0.28 0.10 155);
-  --gold: oklch(0.82 0.16 88);
+  /* Brand custom */
+  --pitch: oklch(0.55 0.16 150);
+  --pitch-deep: oklch(0.30 0.10 155);
+  --gold: oklch(0.82 0.15 88);
   --gold-soft: oklch(0.90 0.10 90);
-  --red: oklch(0.52 0.22 18);   /* Vermelho Portugal */
 
-  /* Gradientes cinematográficos */
-  --gradient-hero:
-    radial-gradient(ellipse 70% 50% at 15% 0%, oklch(0.52 0.22 18 / 0.18), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 85% 100%, oklch(0.82 0.16 88 / 0.12), transparent 55%),
-    radial-gradient(ellipse 80% 60% at 50% 50%, oklch(0.28 0.10 155 / 0.30), transparent 70%),
-    linear-gradient(160deg, oklch(0.10 0.02 240) 0%, oklch(0.13 0.025 230) 100%);
+  --gradient-hero: radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      oklch(0.30 0.10 155 / 0.55),
+      transparent 70%
+    ),
+    linear-gradient(180deg, oklch(0.13 0.03 165) 0%, oklch(0.18 0.04 160) 100%);
+  --gradient-gold: linear-gradient(135deg, oklch(0.86 0.14 92), oklch(0.72 0.16 75));
+  --gradient-pitch: linear-gradient(180deg, oklch(0.55 0.16 150) 0%, oklch(0.32 0.10 155) 100%);
 
-  --gradient-gold: linear-gradient(135deg, oklch(0.88 0.15 92), oklch(0.70 0.18 75));
-  --gradient-pitch: linear-gradient(180deg, oklch(0.52 0.18 148) 0%, oklch(0.28 0.10 155) 100%);
-  --gradient-card:
-    linear-gradient(135deg, oklch(0.18 0.025 240 / 0.9), oklch(0.14 0.02 240 / 0.95));
-
-  --shadow-elegant: 0 40px 100px -20px oklch(0 0 0 / 0.7);
-  --shadow-gold: 0 8px 32px -6px oklch(0.82 0.16 88 / 0.45);
-  --shadow-red: 0 8px 32px -6px oklch(0.52 0.22 18 / 0.35);
-  --shadow-card: 0 4px 24px -4px oklch(0 0 0 / 0.4);
+  --shadow-elegant: 0 30px 80px -30px oklch(0 0 0 / 0.55);
+  --shadow-gold: 0 10px 40px -10px oklch(0.82 0.15 88 / 0.35);
 
   --transition-smooth: all 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer base {
   * { border-color: var(--color-border); }
-  html, body {
-    background: var(--color-background);
-    color: var(--color-foreground);
-  }
+  html, body { background: var(--color-background); color: var(--color-foreground); }
   body {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -119,57 +109,24 @@
 }
 
 @layer utilities {
-  .bg-hero       { background: var(--gradient-hero); }
-  .bg-gold       { background: var(--gradient-gold); }
-  .bg-pitch      { background: var(--gradient-pitch); }
-  .bg-card-grad  { background: var(--gradient-card); }
-  .text-gold     { color: var(--gold); }
-  .text-red      { color: var(--red); }
-  .shadow-elegant{ box-shadow: var(--shadow-elegant); }
-  .shadow-gold   { box-shadow: var(--shadow-gold); }
-  .shadow-red    { box-shadow: var(--shadow-red); }
-  .shadow-card   { box-shadow: var(--shadow-card); }
+  .bg-hero { background: var(--gradient-hero); }
+  .bg-gold { background: var(--gradient-gold); }
+  .bg-pitch { background: var(--gradient-pitch); }
+  .text-gold { color: var(--gold); }
+  .shadow-elegant { box-shadow: var(--shadow-elegant); }
+  .shadow-gold { box-shadow: var(--shadow-gold); }
   .transition-smooth { transition: var(--transition-smooth); }
-
-  /* Linhas de relvado subtis */
   .pitch-lines {
-    background-image: repeating-linear-gradient(
-      90deg,
-      oklch(1 0 0 / 0.02) 0px, oklch(1 0 0 / 0.02) 1px,
-      transparent 1px, transparent 48px
-    );
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        oklch(1 0 0 / 0.025) 0px,
+        oklch(1 0 0 / 0.025) 2px,
+        transparent 2px,
+        transparent 40px
+      );
   }
-
-  /* Grain cinematográfico */
-  .grain::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    border-radius: inherit;
-  }
-
   .text-balance { text-wrap: balance; }
-
-  /* Glow utilities */
-  .glow-gold { filter: drop-shadow(0 0 20px oklch(0.82 0.16 88 / 0.5)); }
-  .glow-red  { filter: drop-shadow(0 0 20px oklch(0.52 0.22 18 / 0.4)); }
-
-  /* Border gradient */
-  .border-gold-gradient {
-    border: 1px solid transparent;
-    background-clip: padding-box;
-    position: relative;
-  }
-  .border-gold-gradient::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    background: linear-gradient(135deg, oklch(0.82 0.16 88 / 0.6), transparent 60%, oklch(0.52 0.22 18 / 0.3));
-    z-index: -1;
-  }
 }
 
 @font-face {

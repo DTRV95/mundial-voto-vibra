@@ -26,7 +26,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
     <Link
       to="/jogo/$id"
       params={{ id: match.id }}
-      className="group block rounded-2xl border border-border bg-card-grad shadow-card transition-smooth hover:border-gold/40 hover:shadow-gold overflow-hidden"
+      className="group block rounded-2xl border border-border bg-card/70 pitch-lines backdrop-blur-sm transition-smooth hover:border-gold/50 hover:shadow-gold overflow-hidden"
     >
       {/* Top bar: fase + status */}
       <div className="flex items-center justify-between px-4 pt-3.5 pb-0">

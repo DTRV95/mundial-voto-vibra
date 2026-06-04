@@ -15,11 +15,27 @@ import { Toaster } from "sonner";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 text-center">
-      <div>
-        <h1 className="font-display text-7xl text-gold">404</h1>
-        <p className="mt-2 text-muted-foreground">Esta página perdeu-se no campo.</p>
-        <a href="/" className="mt-6 inline-block rounded-full bg-gold px-5 py-2 text-sm font-semibold text-background">Voltar à Home</a>
+    <div className="flex min-h-[80vh] items-center justify-center px-4 text-center">
+      <div className="space-y-4">
+        <div className="relative inline-block">
+          <span className="font-display text-[8rem] leading-none text-gold opacity-20 select-none">404</span>
+          <span className="absolute inset-0 flex items-center justify-center font-display text-[8rem] leading-none text-gold"
+            style={{ WebkitTextStroke: "2px oklch(0.82 0.15 88 / 0.6)", WebkitTextFillColor: "transparent" }}>
+            404
+          </span>
+        </div>
+        <p className="font-display text-2xl">Página não encontrada</p>
+        <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+          Esta página saiu do campo. Volta para a homepage ou explora os jogos do Mundial.
+        </p>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <a href="/" className="rounded-full bg-gold px-5 py-2.5 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02]">
+            Ir para a Home
+          </a>
+          <a href="/jogos" className="rounded-full border border-border bg-card/60 px-5 py-2.5 text-sm font-semibold transition-smooth hover:border-gold/40">
+            Ver Jogos
+          </a>
+        </div>
       </div>
     </div>
   );

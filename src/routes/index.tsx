@@ -125,15 +125,6 @@ function Home() {
             </div>
           </div>
 
-          {/* ── Stats strip ───────────────────────────────────── */}
-          <div className="relative grid grid-cols-3 gap-px border-t border-white/20 bg-white/20">
-            {[{ label: "Jogos", value: "48" }, { label: "Mercados", value: "8" }, { label: "Fases", value: "4" }].map((s) => (
-              <div key={s.label} className="bg-white/10 py-3 text-center text-white">
-                <div className="font-display text-2xl md:text-3xl leading-none">{s.value}</div>
-                <div className="text-[10px] uppercase tracking-wider opacity-70 mt-0.5">{s.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* CTAs mobile — abaixo do card */}

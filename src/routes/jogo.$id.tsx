@@ -112,8 +112,20 @@ function JogoPage() {
           <div className="mt-5 flex items-center justify-around text-center">
             <TeamBlock flag={home.flag} name={home.name} />
             <div className="flex flex-col items-center gap-1">
-              <div className="font-display text-3xl text-gold">{formatTime(match.kickoff_at)}</div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{formatDate(match.kickoff_at)}</div>
+              {match.home_score != null && match.away_score != null ? (
+                <>
+                  <div className="font-display text-5xl leading-none text-foreground">
+                    {match.home_score} <span className="text-muted-foreground">:</span> {match.away_score}
+                  </div>
+                  <div className="mt-1 text-[10px] uppercase tracking-widest text-gold font-semibold">Resultado Final</div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{formatDate(match.kickoff_at)}</div>
+                </>
+              ) : (
+                <>
+                  <div className="font-display text-3xl text-gold">{formatTime(match.kickoff_at)}</div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{formatDate(match.kickoff_at)}</div>
+                </>
+              )}
             </div>
             <TeamBlock flag={away.flag} name={away.name} />
           </div>

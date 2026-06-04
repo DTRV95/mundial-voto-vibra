@@ -1,22 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <!-- Hexágono — referência ao painel de bola de futebol -->
-  <polygon points="24,2 43,13 43,35 24,46 5,35 5,13" fill="#E61D25"/>
-  <polygon points="24,2 43,13 43,35 24,46 5,35 5,13"
-    fill="url(#tricolor)" clip-path="url(#hex)"/>
-  <defs>
-    <clipPath id="hex">
-      <polygon points="24,2 43,13 43,35 24,46 5,35 5,13"/>
-    </clipPath>
-    <linearGradient id="tricolor" x1="0" y1="0" x2="48" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0%"    stop-color="#E61D25"/>
-      <stop offset="33.3%" stop-color="#E61D25"/>
-      <stop offset="33.3%" stop-color="#3CAC3B"/>
-      <stop offset="66.6%" stop-color="#3CAC3B"/>
-      <stop offset="66.6%" stop-color="#2A398D"/>
-      <stop offset="100%"  stop-color="#2A398D"/>
-    </linearGradient>
-  </defs>
-  <!-- Letras UG -->
-  <text x="24" y="30" text-anchor="middle" font-family="Arial Black, sans-serif"
-    font-weight="900" font-size="16" fill="white" letter-spacing="-1">UG</text>
+  <!-- Fundo rounded square vermelho -->
+  <rect width="48" height="48" rx="13" fill="#E61D25"/>
+
+  <!-- G geométrico em branco -->
+  <!-- Arco do G: círculo aberto no canto superior direito -->
+  <path
+    d="M33 16.5
+       A12 12 0 1 0 33 31.5
+       L33 25
+       L26 25"
+    stroke="white"
+    stroke-width="3.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
 </svg>

@@ -127,6 +127,31 @@
       );
   }
   .text-balance { text-wrap: balance; }
+
+  /* Shimmer loader premium */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background: oklch(0.21 0.03 165);
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      oklch(1 0 0 / 0.05) 40%,
+      oklch(1 0 0 / 0.10) 50%,
+      oklch(1 0 0 / 0.05) 60%,
+      transparent 100%
+    );
+    animation: shimmer 1.6s ease-in-out infinite;
+    transform: translateX(-100%);
+  }
+  @keyframes shimmer {
+    to { transform: translateX(100%); }
+  }
 }
 
 @font-face {

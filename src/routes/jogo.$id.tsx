@@ -88,7 +88,7 @@ function JogoPage() {
     qc.invalidateQueries({ queryKey: ["community", id] });
   }
 
-  if (isLoading) return <div className="px-5 pt-6"><div className="h-40 animate-pulse rounded-2xl bg-card/50" /></div>;
+  if (isLoading) return <div className="px-5 pt-6"><div className="h-40 shimmer rounded-2xl" /></div>;
   if (!match) return <div className="px-5 pt-10 text-center text-muted-foreground">Jogo não encontrado.</div>;
 
   const home = match.home as any;

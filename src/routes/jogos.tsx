@@ -77,7 +77,7 @@ function Jogos() {
 function Skeleton() {
   return (
     <div className="grid gap-3">
-      {[0,1,2].map((i) => <div key={i} className="h-32 animate-pulse rounded-2xl bg-card/50" />)}
+      {[0,1,2].map((i) => <div key={i} className="h-32 shimmer rounded-2xl" />)}
     </div>
   );
 }

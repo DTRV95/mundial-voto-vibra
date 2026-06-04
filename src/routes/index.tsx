@@ -74,7 +74,13 @@ function Home() {
           <div className="relative bg-gradient-to-b from-background/0 via-background to-background px-5 pb-6 -mt-8 pt-2 space-y-4">
             <div>
               <h1 className="font-display text-5xl leading-none">
-                UMA <span className="text-gold">GERAÇÃO</span>
+                UMA{" "}
+                <span style={{
+                  background: "linear-gradient(90deg, oklch(0.86 0.14 92), oklch(0.97 0.05 95) 50%, oklch(0.72 0.16 75))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}>GERAÇÃO</span>
               </h1>
               <p className="mt-2 text-sm font-medium text-foreground/70">
                 Vota, compara e vibra com a comunidade.
@@ -121,7 +127,13 @@ function Home() {
               <Sparkles className="h-3.5 w-3.5" /> Comunidade do Mundial 2026
             </span>
             <h1 className="font-display text-7xl leading-none text-balance">
-              UMA <br /><span className="text-gold">GERAÇÃO</span>
+              UMA <br />
+              <span style={{
+                background: "linear-gradient(90deg, oklch(0.86 0.14 92), oklch(0.97 0.05 95) 50%, oklch(0.72 0.16 75))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>GERAÇÃO</span>
             </h1>
             <p className="text-xl font-medium text-foreground/90 max-w-md">
               Vota, compara e vibra com a comunidade.

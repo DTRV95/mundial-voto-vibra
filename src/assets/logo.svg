@@ -1,31 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <rect width="48" height="48" rx="13" fill="#1a1a1a"/>
+  <!-- Fundo: vermelho -->
+  <rect width="48" height="48" rx="12" fill="#E61D25"/>
 
-  <!-- Segmento vermelho -->
-  <polyline
-    points="4,24 10,24 14,14 18,34"
-    stroke="#E61D25"
-    stroke-width="1.8"
-    stroke-linecap="round"
-    stroke-linejoin="round"
+  <!-- Contorno branco subtil (efeito camisola vintage) -->
+  <text
+    x="24" y="38"
+    text-anchor="middle"
+    font-family="Arial Black, Impact, sans-serif"
+    font-weight="900"
+    font-size="34"
     fill="none"
-  />
-  <!-- Segmento verde -->
-  <polyline
-    points="18,34 22,20 26,28 30,10"
-    stroke="#3CAC3B"
-    stroke-width="1.8"
-    stroke-linecap="round"
+    stroke="white"
+    stroke-width="5"
     stroke-linejoin="round"
-    fill="none"
-  />
-  <!-- Segmento azul -->
-  <polyline
-    points="30,10 34,38 38,24 44,24"
-    stroke="#2A398D"
-    stroke-width="1.8"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    fill="none"
-  />
+  >7</text>
+
+  <!-- 7 branco por cima -->
+  <text
+    x="24" y="38"
+    text-anchor="middle"
+    font-family="Arial Black, Impact, sans-serif"
+    font-weight="900"
+    font-size="34"
+    fill="white"
+  >7</text>
 </svg>

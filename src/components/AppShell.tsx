@@ -14,6 +14,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="relative min-h-screen">
 
+      {/* Barra tricolor oficial FIFA WC2026: Canadá · México · EUA */}
+      <div className="wc-tricolor fixed top-0 left-0 z-50 h-[3px] w-full" />
+
       {/* ── DESKTOP ──────────────────────────────────────────── */}
 
       {/* Não logado → top nav (full width, sem offset) */}
@@ -27,7 +30,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {loggedIn && <SideNav />}
 
       {/* ── MOBILE header (sempre visível em mobile) ─────────── */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl md:hidden">
+      <header className="sticky top-[3px] z-40 border-b border-border bg-background/80 backdrop-blur-xl md:hidden">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-gold font-display text-lg text-background">V</span>

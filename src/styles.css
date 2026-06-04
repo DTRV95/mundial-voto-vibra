@@ -3,8 +3,9 @@
 @import "tw-animate-css";
 
 /*
- * UMA GERAÇÃO — premium World Cup design system
- * Dark stadium atmosphere, grass green, gold accents.
+ * FIFA World Cup 2026 — official brand color system
+ * USA Blue #2A398D · Canada Red #E61D25 · Mexico Green #3CAC3B
+ * Dark stadium atmosphere + official WC26 palette.
  */
 
 @theme inline {
@@ -38,6 +39,9 @@
   --color-pitch-deep: var(--pitch-deep);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
+  --color-wc-blue: var(--wc-blue);
+  --color-wc-red: var(--wc-red);
+  --color-wc-green: var(--wc-green);
 
   --font-display: "Bebas Neue", "Oswald", "Inter", system-ui, sans-serif;
   --font-sans: "Inter", system-ui, sans-serif;
@@ -46,53 +50,64 @@
 :root {
   --radius: 0.875rem;
 
-  /* Deep stadium night */
-  --background: oklch(0.16 0.025 165);
+  /* ── Cores oficiais FIFA World Cup 2026 ─────────────── */
+  /* USA Blue  #2A398D — Pantone 7687 C */
+  --wc-blue:  oklch(0.38 0.18 265);
+  /* Canada Red  #E61D25 — Pantone 485 C */
+  --wc-red:   oklch(0.52 0.22 25);
+  /* Mexico Green  #3CAC3B — Pantone 7738 C */
+  --wc-green: oklch(0.65 0.19 142);
+
+  /* Deep stadium night — azul escuro oficial WC26 */
+  --background: oklch(0.14 0.030 265);
   --foreground: oklch(0.97 0.01 95);
 
-  --card: oklch(0.21 0.03 165);
+  --card: oklch(0.19 0.035 265);
   --card-foreground: oklch(0.97 0.01 95);
 
-  --popover: oklch(0.20 0.03 165);
+  --popover: oklch(0.18 0.035 265);
   --popover-foreground: oklch(0.97 0.01 95);
 
-  /* Grass green */
-  --primary: oklch(0.62 0.16 150);
-  --primary-foreground: oklch(0.12 0.02 165);
+  /* Verde oficial México — Pantone 7738 C */
+  --primary: oklch(0.65 0.19 142);
+  --primary-foreground: oklch(0.12 0.02 142);
 
-  --secondary: oklch(0.27 0.04 165);
+  --secondary: oklch(0.24 0.04 265);
   --secondary-foreground: oklch(0.97 0.01 95);
 
-  --muted: oklch(0.25 0.025 165);
-  --muted-foreground: oklch(0.72 0.02 110);
+  --muted: oklch(0.22 0.03 265);
+  --muted-foreground: oklch(0.72 0.02 220);
 
-  --accent: oklch(0.30 0.05 160);
+  --accent: oklch(0.28 0.06 265);
   --accent-foreground: oklch(0.97 0.01 95);
 
-  --destructive: oklch(0.62 0.22 25);
+  /* Vermelho oficial Canadá — Pantone 485 C */
+  --destructive: oklch(0.52 0.22 25);
   --destructive-foreground: oklch(0.98 0.01 95);
 
-  --border: oklch(0.30 0.03 160 / 60%);
-  --input: oklch(0.28 0.03 160 / 70%);
-  --ring: oklch(0.80 0.14 88);
+  --border: oklch(0.32 0.05 265 / 55%);
+  --input: oklch(0.26 0.04 265 / 70%);
+  --ring: oklch(0.62 0.20 262);
 
-  /* Brand custom */
-  --pitch: oklch(0.55 0.16 150);
-  --pitch-deep: oklch(0.30 0.10 155);
-  --gold: oklch(0.82 0.15 88);
-  --gold-soft: oklch(0.90 0.10 90);
+  /* ── Acento principal: azul vibrante WC26 ─────────── */
+  /* Versão brightened do #2A398D para legibilidade em fundo escuro */
+  --pitch: oklch(0.65 0.19 142);
+  --pitch-deep: oklch(0.32 0.12 265);
+  --gold: oklch(0.62 0.20 262);
+  --gold-soft: oklch(0.72 0.14 262);
 
+  /* Gradiente tricolor oficial: Vermelho → Verde → Azul */
   --gradient-hero: radial-gradient(
       ellipse 80% 60% at 50% 0%,
-      oklch(0.30 0.10 155 / 0.55),
+      oklch(0.38 0.18 265 / 0.50),
       transparent 70%
     ),
-    linear-gradient(180deg, oklch(0.13 0.03 165) 0%, oklch(0.18 0.04 160) 100%);
-  --gradient-gold: linear-gradient(135deg, oklch(0.86 0.14 92), oklch(0.72 0.16 75));
-  --gradient-pitch: linear-gradient(180deg, oklch(0.55 0.16 150) 0%, oklch(0.32 0.10 155) 100%);
+    linear-gradient(180deg, oklch(0.12 0.04 265) 0%, oklch(0.16 0.04 265) 100%);
+  --gradient-gold: linear-gradient(135deg, oklch(0.52 0.22 25), oklch(0.65 0.19 142), oklch(0.62 0.20 262));
+  --gradient-pitch: linear-gradient(180deg, oklch(0.65 0.19 142) 0%, oklch(0.35 0.12 265) 100%);
 
-  --shadow-elegant: 0 30px 80px -30px oklch(0 0 0 / 0.55);
-  --shadow-gold: 0 10px 40px -10px oklch(0.82 0.15 88 / 0.35);
+  --shadow-elegant: 0 30px 80px -30px oklch(0 0 0 / 0.60);
+  --shadow-gold: 0 10px 40px -10px oklch(0.62 0.20 262 / 0.40);
 
   --transition-smooth: all 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -113,18 +128,33 @@
   .bg-gold { background: var(--gradient-gold); }
   .bg-pitch { background: var(--gradient-pitch); }
   .text-gold { color: var(--gold); }
+  .text-wc-blue  { color: var(--wc-blue); }
+  .text-wc-red   { color: var(--wc-red); }
+  .text-wc-green { color: var(--wc-green); }
   .shadow-elegant { box-shadow: var(--shadow-elegant); }
   .shadow-gold { box-shadow: var(--shadow-gold); }
   .transition-smooth { transition: var(--transition-smooth); }
+
+  /* Linhas subtis de campo — agora com tint azul WC26 */
   .pitch-lines {
     background-image:
       repeating-linear-gradient(
         90deg,
-        oklch(1 0 0 / 0.025) 0px,
-        oklch(1 0 0 / 0.025) 2px,
+        oklch(0.62 0.20 262 / 0.04) 0px,
+        oklch(0.62 0.20 262 / 0.04) 2px,
         transparent 2px,
         transparent 40px
       );
+  }
+
+  /* Barra tricolor oficial WC2026 */
+  .wc-tricolor {
+    background: linear-gradient(
+      90deg,
+      var(--wc-red)   0%   33.3%,
+      var(--wc-green) 33.3% 66.6%,
+      var(--wc-blue)  66.6% 100%
+    );
   }
   .text-balance { text-wrap: balance; }
 

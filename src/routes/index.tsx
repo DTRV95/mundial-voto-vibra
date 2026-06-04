@@ -93,7 +93,6 @@ function Home() {
               src={trophyImg}
               alt="Troféu do Mundial"
               className="relative h-full w-full object-cover object-center trophy-shine"
-              style={{ mixBlendMode: "luminosity", opacity: 0.85 }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-wc-blue/50 to-transparent" />
           </div>

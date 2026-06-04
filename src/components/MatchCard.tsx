@@ -27,17 +27,19 @@ export function MatchCard({ match }: { match: MatchCardData }) {
     <Link
       to="/jogo/$id"
       params={{ id: match.id }}
-      className="group block rounded-2xl border border-border bg-card/70 pitch-lines backdrop-blur-sm overflow-hidden"
-      style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms cubic-bezier(0.16,1,0.3,1), border-color 260ms ease" }}
+      className="group block rounded-2xl bg-card pitch-lines overflow-hidden"
+      style={{
+        background: "linear-gradient(oklch(0.13 0.004 0), oklch(0.13 0.004 0)) padding-box, linear-gradient(135deg, oklch(0.54 0.24 27 / 0.5), oklch(0.66 0.20 142 / 0.4), oklch(0.42 0.18 265 / 0.5)) border-box",
+        border: "1px solid transparent",
+        transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms cubic-bezier(0.16,1,0.3,1)",
+      }}
       onMouseEnter={e => {
         (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 40px -8px oklch(0.82 0.15 88 / 0.25)";
-        (e.currentTarget as HTMLElement).style.borderColor = "oklch(0.82 0.15 88 / 0.5)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 48px -8px oklch(0.54 0.24 27 / 0.30), 0 0 0 1px oklch(0.54 0.24 27 / 0.20)";
       }}
       onMouseLeave={e => {
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
         (e.currentTarget as HTMLElement).style.boxShadow = "none";
-        (e.currentTarget as HTMLElement).style.borderColor = "";
       }}
     >
       {/* Top bar: fase + status */}

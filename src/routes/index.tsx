@@ -79,34 +79,27 @@ function Home() {
 
       {/* ===================== HERO ===================== */}
 
-      {/* MOBILE hero — card flutuante com margem da top bar */}
+      {/* MOBILE hero */}
       <section className="relative md:hidden px-4 pt-4">
-        <div className="relative overflow-hidden rounded-3xl trophy-shine" style={{ boxShadow: "0 20px 60px -10px oklch(0 0 0 / 0.5)" }}>
-          {/* Trophy image — menor, mais centrada */}
+        <div className="relative overflow-hidden rounded-3xl trophy-shine" style={{ boxShadow: "0 20px 60px -10px oklch(0.54 0.24 27 / 0.30)" }}>
           <div className="relative h-[50vw] min-h-[200px] max-h-[300px] w-full overflow-hidden">
-            <img
-              src={trophyImg}
-              alt="Troféu do Mundial"
-              className="h-full w-full object-cover object-center scale-105"
-            />
-            {/* Gradiente cinematográfico multicamada */}
+            <img src={trophyImg} alt="Troféu do Mundial" className="h-full w-full object-cover object-center scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-br from-[oklch(0.30_0.10_155/0.3)] via-transparent to-[oklch(0.82_0.15_88/0.08)]" />
-
-            {/* Badge */}
+            {/* Glow tricolor WC2026 */}
+            <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 50% at 10% 80%, oklch(0.54 0.24 27 / 0.25), transparent 60%)" }} />
+            <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 40% 40% at 90% 20%, oklch(0.42 0.18 265 / 0.20), transparent 55%)" }} />
             <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-gold backdrop-blur">
               <Sparkles className="h-3 w-3" /> Mundial 2026
             </span>
           </div>
 
-          {/* Texto sobre gradiente — funde com a imagem */}
           <div className="relative bg-gradient-to-b from-background/0 via-background to-background px-5 pb-6 -mt-8 pt-2 space-y-4">
             <div>
               <h1 className="font-display text-5xl leading-none">
                 UMA{" "}
                 <span style={{
-                  background: "linear-gradient(90deg, oklch(0.86 0.14 92), oklch(0.97 0.05 95) 50%, oklch(0.72 0.16 75))",
+                  background: "linear-gradient(90deg, oklch(0.62 0.24 27), oklch(0.97 0.005 0) 50%, oklch(0.66 0.20 142))",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -143,13 +136,14 @@ function Home() {
         </div>
       </section>
 
-      {/* DESKTOP hero — card flutuante com margem da topbar */}
+      {/* DESKTOP hero */}
       <section className="relative hidden md:block px-6 pt-5">
-        <div className="relative overflow-hidden rounded-3xl bg-hero" style={{ boxShadow: "0 24px 80px -12px oklch(0 0 0 / 0.5)" }}>
-          <div className="pointer-events-none absolute inset-0 pitch-lines opacity-30" />
-          {/* Gradiente lateral colorido */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[oklch(0.30_0.10_155/0.4)] via-transparent to-transparent" />
-          <div className="pointer-events-none absolute top-0 right-0 h-full w-1/2 bg-gradient-to-l from-[oklch(0.82_0.15_88/0.05)] to-transparent" />
+        <div className="relative overflow-hidden rounded-3xl bg-hero" style={{ boxShadow: "0 24px 80px -12px oklch(0.54 0.24 27 / 0.25)" }}>
+          <div className="pointer-events-none absolute inset-0 pitch-lines opacity-40" />
+          {/* Color mesh WC2026 */}
+          <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 50% 70% at 0% 50%, oklch(0.54 0.24 27 / 0.28), transparent 60%)" }} />
+          <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 40% 60% at 100% 50%, oklch(0.42 0.18 265 / 0.20), transparent 60%)" }} />
+          <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 35% 40% at 50% 0%, oklch(0.66 0.20 142 / 0.15), transparent 55%)" }} />
         <div className="relative grid grid-cols-2 items-center gap-8 px-10 py-14">
           {/* Left: text */}
           <div className="space-y-6">
@@ -159,7 +153,7 @@ function Home() {
             <h1 className="font-display text-7xl leading-none text-balance">
               UMA <br />
               <span style={{
-                background: "linear-gradient(90deg, oklch(0.86 0.14 92), oklch(0.97 0.05 95) 50%, oklch(0.72 0.16 75))",
+                background: "linear-gradient(90deg, oklch(0.62 0.24 27), oklch(0.97 0.005 0) 50%, oklch(0.66 0.20 142))",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -197,7 +191,7 @@ function Home() {
 
           {/* Right: trophy */}
           <div className="relative flex justify-center">
-            <div className="absolute inset-0 rounded-3xl bg-gold/20 blur-3xl" />
+            <div className="absolute inset-0 rounded-3xl blur-3xl" style={{ background: "radial-gradient(ellipse at center, oklch(0.54 0.24 27 / 0.30), oklch(0.42 0.18 265 / 0.15), transparent 70%)" }} />
             <div className="relative h-[420px] w-full max-w-md trophy-shine rounded-3xl overflow-hidden shadow-elegant">
               <img
                 src={trophyImg}
@@ -270,7 +264,7 @@ function Home() {
       <section className="relative grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
         <div className="pointer-events-none absolute -top-6 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[oklch(0.30_0.10_155/0.04)]" />
         {/* Ranking — destaque maior */}
-        <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/10 via-card/80 to-card/60 p-5 backdrop-blur-sm" style={{ boxShadow: "0 4px 24px -4px oklch(0.82_0.15_88/0.08)" }}>
+        <div className="rounded-2xl p-5 backdrop-blur-sm" style={{ background: "linear-gradient(oklch(0.16 0.004 0), oklch(0.16 0.004 0)) padding-box, linear-gradient(135deg, oklch(0.54 0.24 27 / 0.6), oklch(0.66 0.20 142 / 0.4), oklch(0.42 0.18 265 / 0.6)) border-box", border: "1px solid transparent", boxShadow: "0 4px 32px -8px oklch(0.54 0.24 27 / 0.20)" }}>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="grid h-9 w-9 place-items-center rounded-full bg-gold/20">

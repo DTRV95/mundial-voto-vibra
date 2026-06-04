@@ -27,7 +27,18 @@ export function MatchCard({ match }: { match: MatchCardData }) {
     <Link
       to="/jogo/$id"
       params={{ id: match.id }}
-      className="group block rounded-2xl border border-border bg-card/70 pitch-lines backdrop-blur-sm transition-smooth hover:border-gold/50 hover:shadow-gold overflow-hidden"
+      className="group block rounded-2xl border border-border bg-card/70 pitch-lines backdrop-blur-sm overflow-hidden"
+      style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms cubic-bezier(0.16,1,0.3,1), border-color 260ms ease" }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 40px -8px oklch(0.82 0.15 88 / 0.25)";
+        (e.currentTarget as HTMLElement).style.borderColor = "oklch(0.82 0.15 88 / 0.5)";
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+        (e.currentTarget as HTMLElement).style.borderColor = "";
+      }}
     >
       {/* Top bar: fase + status */}
       <div className="flex items-center justify-between px-4 pt-3.5 pb-0">

@@ -17,11 +17,12 @@ export function isToday(iso: string): boolean {
 }
 
 export const PHASE_LABEL: Record<string, string> = {
-  grupos: "Fase de Grupos",
-  oitavos: "Oitavos de Final",
-  quartos: "Quartos de Final",
-  meias: "Meias-Finais",
-  final: "Final",
+  grupos:   "Fase de Grupos",
+  ronda32:  "Ronda de 32",
+  oitavos:  "Oitavos de Final",
+  quartos:  "Quartos de Final",
+  meias:    "Meias-Finais",
+  final:    "Final",
 };
 
 export function votingStatus(match: { kickoff_at: string; voting_open: boolean }) {

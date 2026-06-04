@@ -68,7 +68,7 @@ function Grupos() {
     <div className="px-4 pt-6 pb-10 md:px-8">
       <header className="mb-5">
         <h1 className="font-display text-3xl md:text-4xl">Grupos</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Fase de grupos do Mundial 2026.</p>
+        <p className="text-sm text-muted-foreground mt-0.5">12 grupos · 48 equipas · Mundial 2026.</p>
       </header>
 
       {/* Tabs de grupo */}

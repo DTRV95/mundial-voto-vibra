@@ -67,7 +67,7 @@ function Home() {
 
       {/* MOBILE hero — card flutuante com margem da top bar */}
       <section className="relative md:hidden px-4 pt-4">
-        <div className="relative overflow-hidden rounded-3xl" style={{ boxShadow: "0 20px 60px -10px oklch(0 0 0 / 0.5)" }}>
+        <div className="relative overflow-hidden rounded-3xl trophy-shine" style={{ boxShadow: "0 20px 60px -10px oklch(0 0 0 / 0.5)" }}>
           {/* Trophy image — menor, mais centrada */}
           <div className="relative h-[50vw] min-h-[200px] max-h-[300px] w-full overflow-hidden">
             <img
@@ -184,11 +184,13 @@ function Home() {
           {/* Right: trophy */}
           <div className="relative flex justify-center">
             <div className="absolute inset-0 rounded-3xl bg-gold/20 blur-3xl" />
-            <img
-              src={trophyImg}
-              alt="Troféu do Mundial"
-              className="relative h-[420px] w-full max-w-md rounded-3xl object-cover shadow-elegant"
-            />
+            <div className="relative h-[420px] w-full max-w-md trophy-shine rounded-3xl overflow-hidden shadow-elegant">
+              <img
+                src={trophyImg}
+                alt="Troféu do Mundial"
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
         </div>
         </div>

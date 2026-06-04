@@ -205,8 +205,8 @@ function Home() {
 
       {/* ===================== RANKING + PRÉMIOS ===================== */}
       <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
-        {/* Ranking — fundo vermelho Panini */}
-        <div className="rounded-2xl overflow-hidden bg-wc-red panini-stripes shadow-gold">
+        {/* Ranking — fundo verde Panini */}
+        <div className="rounded-2xl overflow-hidden bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.45)" }}>
           <div className="p-5 text-white">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -225,7 +225,7 @@ function Home() {
                   <li key={i} className="flex items-center justify-between">
                     <span className="flex items-center gap-3">
                       <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                        i === 0 ? "bg-white text-wc-red" : "bg-white/20 text-white"
+                        i === 0 ? "bg-white text-wc-green" : "bg-white/20 text-white"
                       }`}>{i + 1}</span>
                       <span className="font-semibold text-sm">{u.display_name ?? "Adepto"}</span>
                     </span>

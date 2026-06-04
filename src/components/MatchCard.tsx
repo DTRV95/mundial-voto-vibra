@@ -66,10 +66,10 @@ export function MatchCard({ match }: { match: MatchCardData }) {
       <div className="flex items-center justify-between gap-2 px-4 py-4">
         {/* Home team */}
         <div className="flex flex-1 flex-col items-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/80 text-3xl shadow-sm lg:h-16 lg:w-16 lg:text-4xl">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/80 text-3xl shadow-sm md:h-16 md:w-16 md:text-4xl">
             {match.home.flag ?? "⚽"}
           </div>
-          <span className="text-center text-xs font-bold leading-tight lg:text-sm">
+          <span className="text-center text-xs font-bold leading-tight md:text-sm">
             {match.home.name}
           </span>
         </div>
@@ -89,10 +89,10 @@ export function MatchCard({ match }: { match: MatchCardData }) {
 
         {/* Away team */}
         <div className="flex flex-1 flex-col items-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/80 text-3xl shadow-sm lg:h-16 lg:w-16 lg:text-4xl">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/80 text-3xl shadow-sm md:h-16 md:w-16 md:text-4xl">
             {match.away.flag ?? "⚽"}
           </div>
-          <span className="text-center text-xs font-bold leading-tight lg:text-sm">
+          <span className="text-center text-xs font-bold leading-tight md:text-sm">
             {match.away.name}
           </span>
         </div>

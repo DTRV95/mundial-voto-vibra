@@ -43,10 +43,10 @@ function Rankings() {
         }));
       }
 
-      // Ranking por fase: somar pontos de predictions cujo jogo pertence à fase
+      // Ranking por fase: usar !inner para filtrar por fase do jogo
       const { data: preds } = await supabase
         .from("predictions")
-        .select("user_id,points,match:match_id(phase)")
+        .select("user_id,points,match:match_id!inner(phase)")
         .eq("match.phase", phase);
 
       if (!preds || preds.length === 0) return [];

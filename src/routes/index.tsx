@@ -49,67 +49,72 @@ function Home() {
 
       {/* ===================== HERO ===================== */}
 
-      {/* MOBILE hero — taça em destaque no topo */}
-      <section className="relative md:hidden">
-        {/* Trophy image — full width, top of page */}
-        <div className="relative h-[58vw] min-h-[220px] max-h-[340px] w-full overflow-hidden">
-          <img
-            src={trophyImg}
-            alt="Troféu do Mundial"
-            className="h-full w-full object-cover object-center"
-          />
-          {/* Bottom gradient over image */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-          {/* Badge top-left */}
-          <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-gold backdrop-blur">
-            <Sparkles className="h-3 w-3" /> Mundial 2026
-          </span>
-        </div>
+      {/* MOBILE hero — card flutuante com margem da top bar */}
+      <section className="relative md:hidden px-4 pt-4">
+        <div className="relative overflow-hidden rounded-3xl" style={{ boxShadow: "0 20px 60px -10px oklch(0 0 0 / 0.5)" }}>
+          {/* Trophy image — menor, mais centrada */}
+          <div className="relative h-[50vw] min-h-[200px] max-h-[300px] w-full overflow-hidden">
+            <img
+              src={trophyImg}
+              alt="Troféu do Mundial"
+              className="h-full w-full object-cover object-center scale-105"
+            />
+            {/* Gradiente cinematográfico multicamada */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[oklch(0.30_0.10_155/0.3)] via-transparent to-[oklch(0.82_0.15_88/0.08)]" />
 
-        {/* Text content below image */}
-        <div className="px-5 pt-4 pb-8 space-y-4">
-          <div>
-            <h1 className="font-display text-5xl leading-none">
-              UMA <span className="text-gold">GERAÇÃO</span>
-            </h1>
-            <p className="mt-2 text-base font-medium text-foreground/90">
-              Vota, compara e vibra com a comunidade.
-            </p>
+            {/* Badge */}
+            <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-gold backdrop-blur">
+              <Sparkles className="h-3 w-3" /> Mundial 2026
+            </span>
           </div>
-          <div className="flex gap-3">
-            <Link
-              to="/jogos"
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth active:scale-95"
-            >
-              Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
-            </Link>
-            <a
-              href="#como-funciona"
-              className="inline-flex items-center justify-center rounded-2xl border border-border bg-card/60 px-4 py-3 text-sm font-semibold backdrop-blur transition-smooth"
-            >
-              Como?
-            </a>
-          </div>
-          {/* Quick stats strip */}
-          <div className="grid grid-cols-3 gap-2 pt-1">
-            {[
-              { label: "Jogos", value: "48" },
-              { label: "Mercados", value: "8" },
-              { label: "Fases", value: "4" },
-            ].map((s) => (
-              <div key={s.label} className="rounded-xl border border-border bg-card/50 py-2.5 text-center">
-                <div className="font-display text-xl text-gold">{s.value}</div>
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.label}</div>
-              </div>
-            ))}
+
+          {/* Texto sobre gradiente — funde com a imagem */}
+          <div className="relative bg-gradient-to-b from-background/0 via-background to-background px-5 pb-6 -mt-8 pt-2 space-y-4">
+            <div>
+              <h1 className="font-display text-5xl leading-none">
+                UMA <span className="text-gold">GERAÇÃO</span>
+              </h1>
+              <p className="mt-2 text-sm font-medium text-foreground/70">
+                Vota, compara e vibra com a comunidade.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Link
+                to="/jogos"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth active:scale-95"
+              >
+                Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a
+                href="#como-funciona"
+                className="inline-flex items-center justify-center rounded-2xl border border-border bg-card/60 px-4 py-3 text-sm font-semibold backdrop-blur transition-smooth"
+              >
+                Como?
+              </a>
+            </div>
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-2">
+              {[{ label: "Jogos", value: "48" }, { label: "Mercados", value: "8" }, { label: "Fases", value: "4" }].map((s) => (
+                <div key={s.label} className="rounded-xl border border-border/60 bg-card/40 py-2.5 text-center">
+                  <div className="font-display text-xl text-gold">{s.value}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* DESKTOP hero — two columns, full width quando não logado */}
-      <section className="relative hidden md:block overflow-hidden bg-hero">
-        <div className="pointer-events-none absolute inset-0 pitch-lines opacity-40" />
-        <div className="relative grid grid-cols-2 items-center gap-8 px-10 py-16">
+      {/* DESKTOP hero — card flutuante com margem da topbar */}
+      <section className="relative hidden md:block px-6 pt-5">
+        <div className="relative overflow-hidden rounded-3xl bg-hero" style={{ boxShadow: "0 24px 80px -12px oklch(0 0 0 / 0.5)" }}>
+          <div className="pointer-events-none absolute inset-0 pitch-lines opacity-30" />
+          {/* Gradiente lateral colorido */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[oklch(0.30_0.10_155/0.4)] via-transparent to-transparent" />
+          <div className="pointer-events-none absolute top-0 right-0 h-full w-1/2 bg-gradient-to-l from-[oklch(0.82_0.15_88/0.05)] to-transparent" />
+        <div className="relative grid grid-cols-2 items-center gap-8 px-10 py-14">
           {/* Left: text */}
           <div className="space-y-6">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-gold">
@@ -150,18 +155,21 @@ function Home() {
 
           {/* Right: trophy */}
           <div className="relative flex justify-center">
-            <div className="absolute inset-0 rounded-3xl bg-gold/15 blur-3xl" />
+            <div className="absolute inset-0 rounded-3xl bg-gold/20 blur-3xl" />
             <img
               src={trophyImg}
               alt="Troféu do Mundial"
-              className="relative h-[480px] w-full max-w-md rounded-3xl object-cover shadow-elegant"
+              className="relative h-[420px] w-full max-w-md rounded-3xl object-cover shadow-elegant"
             />
           </div>
+        </div>
         </div>
       </section>
 
       {/* ===================== JOGOS DE HOJE ===================== */}
-      <section className="px-5 pt-8 md:px-8">
+      <section className="px-5 pt-8 md:px-8 relative">
+        {/* Gradiente de fundo subtil */}
+        <div className="pointer-events-none absolute -top-12 left-0 right-0 h-32 bg-gradient-to-b from-transparent via-[oklch(0.30_0.10_155/0.06)] to-transparent" />
         <div className="mb-4 flex items-end justify-between">
           <div>
             <h2 className="font-display text-2xl md:text-3xl">Jogos de Hoje</h2>
@@ -182,9 +190,10 @@ function Home() {
       </section>
 
       {/* ===================== RANKING + PRÉMIOS ===================== */}
-      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
+      <section className="relative grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
+        <div className="pointer-events-none absolute -top-6 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[oklch(0.30_0.10_155/0.04)]" />
         {/* Ranking — destaque maior */}
-        <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/10 to-card/70 p-5 backdrop-blur-sm">
+        <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/10 via-card/80 to-card/60 p-5 backdrop-blur-sm" style={{ boxShadow: "0 4px 24px -4px oklch(0.82_0.15_88/0.08)" }}>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="grid h-9 w-9 place-items-center rounded-full bg-gold/20">

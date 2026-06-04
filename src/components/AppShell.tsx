@@ -32,7 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/" className="flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-gold font-display text-lg text-background">V</span>
             <div className="leading-tight">
-              <div className="font-display text-base tracking-wide">VOZ DO MUNDIAL</div>
+              <div className="font-display text-base tracking-wide">UMA GERAÇÃO</div>
               <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Mundial 2026</div>
             </div>
           </Link>

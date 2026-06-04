@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/grupos")({
   head: () => ({
     meta: [
-      { title: "Grupos do Mundial — Voz do Mundial" },
+      { title: "Grupos do Mundial — Uma Geração" },
       { name: "description", content: "Vê todos os grupos do Mundial e as equipas em cada grupo." },
     ],
   }),

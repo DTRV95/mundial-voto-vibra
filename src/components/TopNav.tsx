@@ -25,7 +25,7 @@ export function TopNav() {
             V
           </span>
           <div className="leading-tight">
-            <div className="font-display text-base tracking-wide">VOZ DO MUNDIAL</div>
+            <div className="font-display text-base tracking-wide">UMA GERAÇÃO</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Mundial 2026</div>
           </div>
         </Link>

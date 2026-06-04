@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Lock, Users2, Info, TrendingUp, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/jogo/$id")({
-  head: () => ({ meta: [{ title: "Análise & Previsão — Voz do Mundial" }] }),
+  head: () => ({ meta: [{ title: "Análise & Previsão — Uma Geração" }] }),
   component: JogoPage,
 });
 

@@ -8,7 +8,7 @@ import { Mail, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }),
-  head: () => ({ meta: [{ title: "Entrar — Voz do Mundial" }] }),
+  head: () => ({ meta: [{ title: "Entrar — Uma Geração" }] }),
   component: AuthPage,
 });
 

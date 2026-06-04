@@ -8,7 +8,7 @@ import { PHASE_LABEL } from "@/lib/format";
 import { Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Voz do Mundial" }] }),
+  head: () => ({ meta: [{ title: "Admin — Uma Geração" }] }),
   component: Admin,
 });
 

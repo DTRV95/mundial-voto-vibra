@@ -8,7 +8,7 @@ import trophyImg from "@/assets/trophy-hero.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Voz do Mundial — Vota, compara e vibra com a comunidade" },
+      { title: "Uma Geração — Vota, compara e vibra com a comunidade" },
       { name: "description", content: "Faz a tua previsão para cada jogo do Mundial, compara com a comunidade e compete nos rankings por fase." },
     ],
   }),
@@ -70,7 +70,7 @@ function Home() {
         <div className="px-5 pt-4 pb-8 space-y-4">
           <div>
             <h1 className="font-display text-5xl leading-none">
-              VOZ DO <span className="text-gold">MUNDIAL</span>
+              UMA <span className="text-gold">GERAÇÃO</span>
             </h1>
             <p className="mt-2 text-base font-medium text-foreground/90">
               Vota, compara e vibra com a comunidade.
@@ -116,7 +116,7 @@ function Home() {
               <Sparkles className="h-3.5 w-3.5" /> Comunidade do Mundial 2026
             </span>
             <h1 className="font-display text-7xl leading-none text-balance">
-              VOZ DO <br /><span className="text-gold">MUNDIAL</span>
+              UMA <br /><span className="text-gold">GERAÇÃO</span>
             </h1>
             <p className="text-xl font-medium text-foreground/90 max-w-md">
               Vota, compara e vibra com a comunidade.

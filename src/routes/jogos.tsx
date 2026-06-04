@@ -7,7 +7,7 @@ import { formatDate } from "@/lib/format";
 export const Route = createFileRoute("/jogos")({
   head: () => ({
     meta: [
-      { title: "Jogos de Hoje — Voz do Mundial" },
+      { title: "Jogos de Hoje — Uma Geração" },
       { name: "description", content: "Vê os jogos do Mundial de hoje e deixa as tuas previsões." },
     ],
   }),

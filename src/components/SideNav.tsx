@@ -39,7 +39,7 @@ export function SideNav() {
             V
           </span>
           <div className="leading-tight">
-            <div className="font-display text-sm tracking-wide">VOZ DO MUNDIAL</div>
+            <div className="font-display text-sm tracking-wide">UMA GERAÇÃO</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Comunidade</div>
           </div>
         </Link>

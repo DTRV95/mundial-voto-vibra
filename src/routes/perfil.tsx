@@ -7,7 +7,7 @@ import { LogOut, Trophy, Target, Percent } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/perfil")({
-  head: () => ({ meta: [{ title: "Perfil — Voz do Mundial" }] }),
+  head: () => ({ meta: [{ title: "Perfil — Uma Geração" }] }),
   component: Perfil,
 });
 

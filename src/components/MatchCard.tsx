@@ -6,6 +6,7 @@ export interface MatchCardData {
   id: string;
   kickoff_at: string;
   phase: string;
+  status?: string;
   voting_open: boolean;
   home: { name: string; flag: string | null; code: string | null };
   away: { name: string; flag: string | null; code: string | null };
@@ -33,9 +34,21 @@ export function MatchCard({ match }: { match: MatchCardData }) {
         <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           {PHASE_LABEL[match.phase] ?? match.phase}
         </span>
-        <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${toneClass}`}>
-          {status.label}
-        </span>
+        <div className="flex items-center gap-2">
+          {match.status === "live" && (
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+            </span>
+          )}
+          <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
+            match.status === "live"
+              ? "border-red-500/40 bg-red-500/15 text-red-400"
+              : toneClass
+          }`}>
+            {match.status === "live" ? "Ao Vivo" : status.label}
+          </span>
+        </div>
       </div>
 
       {/* Teams row */}

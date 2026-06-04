@@ -207,8 +207,9 @@ function Home() {
       <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
         {/* Ranking — fundo verde Panini */}
         <div className="rounded-2xl overflow-hidden bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.45)" }}>
-          <div className="p-5 text-white">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="text-white">
+            {/* Cabeçalho */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/20">
               <div className="flex items-center gap-2">
                 <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20">
                   <BarChart3 className="h-5 w-5 text-white" />
@@ -217,12 +218,13 @@ function Home() {
               </div>
               <Link to="/rankings" className="text-xs font-bold text-white/80 hover:text-white">Ver rankings →</Link>
             </div>
+            {/* Linhas da tabela */}
             {topLeaders.length === 0 ? (
-              <p className="text-sm text-white/70">Ainda sem dados — sê o primeiro a marcar pontos.</p>
+              <p className="px-5 py-4 text-sm text-white/70">Ainda sem dados — sê o primeiro a marcar pontos.</p>
             ) : (
-              <ol className="space-y-3">
+              <ol>
                 {topLeaders.map((u, i) => (
-                  <li key={i} className="flex items-center justify-between">
+                  <li key={i} className={`flex items-center justify-between px-5 py-3 ${i < topLeaders.length - 1 ? "border-b border-white/20" : ""}`}>
                     <span className="flex items-center gap-3">
                       <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
                         i === 0 ? "bg-white text-wc-green" : "bg-white/20 text-white"

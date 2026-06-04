@@ -16,35 +16,40 @@ export interface MatchCardData {
 
 export function MatchCard({ match }: { match: MatchCardData }) {
   const status = votingStatus(match);
-  const toneClass =
-    status.tone === "primary"
-      ? "bg-primary/15 text-primary border-primary/30"
-      : status.tone === "gold"
-        ? "bg-gold/15 text-gold border-gold/30"
-        : "bg-destructive/15 text-destructive border-destructive/30";
+
+  const statusCls =
+    match.status === "live"
+      ? "bg-red-100 text-red-600 border-red-200"
+      : status.tone === "primary"
+        ? "bg-green-50 text-green-700 border-green-200"
+        : status.tone === "gold"
+          ? "bg-red-50 text-wc-red border-red-200"
+          : "bg-gray-100 text-gray-500 border-gray-200";
 
   return (
     <Link
       to="/jogo/$id"
       params={{ id: match.id }}
-      className="group block rounded-2xl bg-card pitch-lines overflow-hidden"
+      className="group block overflow-hidden rounded-2xl bg-white transition-smooth"
       style={{
-        background: "linear-gradient(oklch(0.13 0.004 0), oklch(0.13 0.004 0)) padding-box, linear-gradient(135deg, oklch(0.54 0.24 27 / 0.5), oklch(0.66 0.20 142 / 0.4), oklch(0.42 0.18 265 / 0.5)) border-box",
-        border: "1px solid transparent",
-        transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms cubic-bezier(0.16,1,0.3,1)",
+        boxShadow: "0 2px 8px oklch(0 0 0 / 0.08), 0 0 0 1px oklch(0 0 0 / 0.06)",
+        transition: "transform 240ms cubic-bezier(0.16,1,0.3,1), box-shadow 240ms ease",
       }}
       onMouseEnter={e => {
         (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 48px -8px oklch(0.54 0.24 27 / 0.30), 0 0 0 1px oklch(0.54 0.24 27 / 0.20)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 32px oklch(0.54 0.24 27 / 0.18), 0 0 0 1.5px oklch(0.54 0.24 27 / 0.30)";
       }}
       onMouseLeave={e => {
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "none";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px oklch(0 0 0 / 0.08), 0 0 0 1px oklch(0 0 0 / 0.06)";
       }}
     >
+      {/* Stripe tricolor Panini no topo */}
+      <div className="card-stripe" />
+
       {/* Top bar: fase + status */}
-      <div className="flex items-center justify-between px-4 pt-3.5 pb-0">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="flex items-center justify-between px-4 pt-3 pb-0">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
           {PHASE_LABEL[match.phase] ?? match.phase}
         </span>
         <div className="flex items-center gap-2">
@@ -54,59 +59,54 @@ export function MatchCard({ match }: { match: MatchCardData }) {
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
             </span>
           )}
-          <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
-            match.status === "live"
-              ? "border-red-500/40 bg-red-500/15 text-red-400"
-              : toneClass
+          <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+            match.status === "live" ? "bg-red-100 text-red-600 border-red-200" : statusCls
           }`}>
             {match.status === "live" ? "Ao Vivo" : status.label}
           </span>
         </div>
       </div>
 
-      {/* Teams row */}
+      {/* Teams */}
       <div className="flex items-center justify-between gap-2 px-4 py-4">
-        {/* Home team */}
         <div className="flex flex-1 flex-col items-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/80 text-3xl shadow-sm md:h-16 md:w-16 md:text-4xl">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-3xl shadow-sm md:h-16 md:w-16 md:text-4xl border border-gray-100">
             {match.home.flag ?? "⚽"}
           </div>
-          <span className="text-center text-xs font-bold leading-tight md:text-sm">
+          <span className="text-center text-xs font-bold leading-tight text-gray-800 md:text-sm">
             {match.home.name}
           </span>
         </div>
 
-        {/* Centre: time + vs */}
         <div className="flex flex-col items-center gap-1 px-2">
-          <div className="flex items-center gap-1 text-gold">
+          <div className="flex items-center gap-1 text-wc-red">
             <Clock className="h-3.5 w-3.5" />
-            <span className="font-display text-2xl tabular-nums lg:text-3xl">
+            <span className="font-display text-2xl tabular-nums md:text-3xl">
               {formatTime(match.kickoff_at)}
             </span>
           </div>
-          <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
             vs
           </span>
         </div>
 
-        {/* Away team */}
         <div className="flex flex-1 flex-col items-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/80 text-3xl shadow-sm md:h-16 md:w-16 md:text-4xl">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-3xl shadow-sm md:h-16 md:w-16 md:text-4xl border border-gray-100">
             {match.away.flag ?? "⚽"}
           </div>
-          <span className="text-center text-xs font-bold leading-tight md:text-sm">
+          <span className="text-center text-xs font-bold leading-tight text-gray-800 md:text-sm">
             {match.away.name}
           </span>
         </div>
       </div>
 
-      {/* Bottom bar: votes + CTA */}
-      <div className="flex items-center justify-between border-t border-border/60 bg-background/20 px-4 py-2.5">
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      {/* Bottom bar */}
+      <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-4 py-2.5">
+        <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <Users2 className="h-3.5 w-3.5" />
           <span>{match.votes_count ?? 0} previsões</span>
         </div>
-        <span className="text-xs font-bold text-gold transition-smooth group-hover:underline">
+        <span className="text-xs font-bold text-wc-red transition-smooth group-hover:underline">
           {match.already_voted ? "Ver Comunidade →" : "Dar Previsão →"}
         </span>
       </div>

@@ -79,128 +79,106 @@ function Home() {
 
       {/* ===================== HERO ===================== */}
 
-      {/* MOBILE hero */}
-      <section className="relative md:hidden px-4 pt-4">
-        <div className="relative overflow-hidden rounded-3xl trophy-shine" style={{ boxShadow: "0 20px 60px -10px oklch(0.54 0.24 27 / 0.30)" }}>
-          <div className="relative h-[50vw] min-h-[200px] max-h-[300px] w-full overflow-hidden">
-            <img src={trophyImg} alt="Troféu do Mundial" className="h-full w-full object-cover object-center scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-transparent" />
-            {/* Glow tricolor WC2026 */}
-            <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 50% at 10% 80%, oklch(0.54 0.24 27 / 0.25), transparent 60%)" }} />
-            <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 40% 40% at 90% 20%, oklch(0.42 0.18 265 / 0.20), transparent 55%)" }} />
-            <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-gold backdrop-blur">
-              <Sparkles className="h-3 w-3" /> Mundial 2026
-            </span>
-          </div>
+      {/* MOBILE hero — estilo Panini: vermelho bold com padrão diagonal */}
+      <section className="relative md:hidden">
+        <div className="relative overflow-hidden bg-wc-red panini-stripes" style={{ boxShadow: "0 8px 32px oklch(0.54 0.24 27 / 0.30)" }}>
+          {/* Bloco azul decorativo canto superior direito */}
+          <div className="absolute top-0 right-0 h-24 w-24 rounded-bl-[48px] bg-wc-blue opacity-80" />
+          {/* Bloco verde decorativo canto inferior esquerdo */}
+          <div className="absolute bottom-0 left-0 h-20 w-20 rounded-tr-[40px] bg-wc-green opacity-80" />
 
-          <div className="relative bg-gradient-to-b from-background/0 via-background to-background px-5 pb-6 -mt-8 pt-2 space-y-4">
-            <div>
+          <div className="relative flex items-center gap-4 px-5 py-6">
+            {/* Troféu */}
+            <div className="relative h-32 w-28 shrink-0 overflow-hidden rounded-2xl shadow-elegant trophy-shine">
+              <img src={trophyImg} alt="Troféu" className="h-full w-full object-cover scale-110" />
+            </div>
+            {/* Texto */}
+            <div className="flex-1 text-white">
+              <p className="text-[11px] font-bold uppercase tracking-widest opacity-80 mb-1">⚽ Mundial 2026</p>
               <h1 className="font-display text-5xl leading-none">
-                UMA{" "}
-                <span style={{
-                  background: "linear-gradient(90deg, oklch(0.62 0.24 27), oklch(0.97 0.005 0) 50%, oklch(0.66 0.20 142))",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}>GERAÇÃO</span>
+                UMA<br />GERAÇÃO
               </h1>
-              <p className="mt-2 text-sm font-medium text-foreground/70">
+              <p className="mt-2 text-sm font-semibold opacity-90">
                 Vota, compara e vibra com a comunidade.
               </p>
             </div>
-            <div className="flex gap-3">
-              <Link
-                to="/jogos"
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth active:scale-95"
-              >
-                Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a
-                href="#como-funciona"
-                className="inline-flex items-center justify-center rounded-2xl border border-border bg-card/60 px-4 py-3 text-sm font-semibold backdrop-blur transition-smooth"
-              >
-                Como?
-              </a>
-            </div>
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-2">
-              {[{ label: "Jogos", value: "48" }, { label: "Mercados", value: "8" }, { label: "Fases", value: "4" }].map((s) => (
-                <div key={s.label} className="rounded-xl border border-border/60 bg-card/40 py-2.5 text-center">
-                  <div className="font-display text-xl text-gold">{s.value}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.label}</div>
-                </div>
-              ))}
-            </div>
           </div>
+
+          {/* Stats strip — branco sobre vermelho */}
+          <div className="relative grid grid-cols-3 gap-px bg-white/20 border-t border-white/20">
+            {[{ label: "Jogos", value: "48" }, { label: "Mercados", value: "8" }, { label: "Fases", value: "4" }].map((s) => (
+              <div key={s.label} className="bg-white/10 py-3 text-center text-white">
+                <div className="font-display text-2xl leading-none">{s.value}</div>
+                <div className="text-[10px] uppercase tracking-wider opacity-70 mt-0.5">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTAs abaixo do hero vermelho */}
+        <div className="flex gap-3 px-4 pt-4">
+          <Link to="/jogos"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
+            Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
+          </Link>
+          <a href="#como-funciona"
+            className="inline-flex items-center justify-center rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 transition-smooth">
+            Como?
+          </a>
         </div>
       </section>
 
-      {/* DESKTOP hero */}
+      {/* DESKTOP hero — Panini: vermelho à esquerda, troféu à direita */}
       <section className="relative hidden md:block px-6 pt-5">
-        <div className="relative overflow-hidden rounded-3xl bg-hero" style={{ boxShadow: "0 24px 80px -12px oklch(0.54 0.24 27 / 0.25)" }}>
-          <div className="pointer-events-none absolute inset-0 pitch-lines opacity-40" />
-          {/* Color mesh WC2026 */}
-          <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 50% 70% at 0% 50%, oklch(0.54 0.24 27 / 0.28), transparent 60%)" }} />
-          <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 40% 60% at 100% 50%, oklch(0.42 0.18 265 / 0.20), transparent 60%)" }} />
-          <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 35% 40% at 50% 0%, oklch(0.66 0.20 142 / 0.15), transparent 55%)" }} />
-        <div className="relative grid grid-cols-2 items-center gap-8 px-10 py-14">
-          {/* Left: text */}
-          <div className="space-y-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-gold">
-              <Sparkles className="h-3.5 w-3.5" /> Comunidade do Mundial 2026
-            </span>
-            <h1 className="font-display text-7xl leading-none text-balance">
-              UMA <br />
-              <span style={{
-                background: "linear-gradient(90deg, oklch(0.62 0.24 27), oklch(0.97 0.005 0) 50%, oklch(0.66 0.20 142))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}>GERAÇÃO</span>
-            </h1>
-            <p className="text-xl font-medium text-foreground/90 max-w-md">
-              Vota, compara e vibra com a comunidade.
-            </p>
-            <p className="text-sm text-muted-foreground max-w-sm">
-              A plataforma de previsões do Mundial onde os adeptos competem por fase e ganham prémios.
-            </p>
-            <div className="flex items-center gap-4 pt-2">
-              <Link
-                to="/jogos"
-                className="inline-flex items-center gap-2 rounded-2xl bg-gold px-7 py-3.5 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02]"
-              >
-                Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a
-                href="#como-funciona"
-                className="rounded-2xl border border-border bg-card/60 px-6 py-3.5 text-sm font-semibold backdrop-blur transition-smooth hover:border-gold/40"
-              >
-                Como funciona
-              </a>
-            </div>
-            <div className="flex gap-6 pt-2">
-              {[{ label: "Jogos na fase de grupos", value: "48" }, { label: "Mercados por jogo", value: "8" }, { label: "Fases com prémios", value: "4" }].map((s) => (
-                <div key={s.label}>
-                  <div className="font-display text-3xl text-gold">{s.value}</div>
-                  <div className="text-xs text-muted-foreground">{s.label}</div>
+        <div className="relative overflow-hidden rounded-3xl" style={{ boxShadow: "0 24px 60px oklch(0.54 0.24 27 / 0.20)" }}>
+          <div className="grid grid-cols-2 min-h-[420px]">
+            {/* Esquerda: vermelho bold com padrão Panini */}
+            <div className="relative bg-wc-red panini-stripes flex flex-col justify-center px-10 py-12">
+              {/* Bloco decorativo */}
+              <div className="absolute top-0 left-0 h-full w-6 bg-wc-blue opacity-60" />
+              <div className="relative pl-4 space-y-5 text-white">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-widest">
+                  <Sparkles className="h-3.5 w-3.5" /> Comunidade do Mundial 2026
+                </span>
+                <h1 className="font-display text-8xl leading-none">
+                  UMA<br />GERAÇÃO
+                </h1>
+                <p className="text-xl font-semibold opacity-90 max-w-sm">
+                  Vota, compara e vibra com a comunidade.
+                </p>
+                <div className="flex items-center gap-4 pt-2">
+                  <Link to="/jogos"
+                    className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-3.5 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
+                    Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <a href="#como-funciona"
+                    className="rounded-2xl border-2 border-white/40 px-6 py-3.5 text-sm font-bold text-white transition-smooth hover:bg-white/10">
+                    Como funciona
+                  </a>
                 </div>
-              ))}
+                <div className="flex gap-8 pt-2 border-t border-white/20">
+                  {[{ label: "Jogos grupos", value: "48" }, { label: "Mercados/jogo", value: "8" }, { label: "Fases/prémios", value: "4" }].map((s) => (
+                    <div key={s.label}>
+                      <div className="font-display text-4xl leading-none">{s.value}</div>
+                      <div className="text-xs opacity-70 mt-1">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Right: trophy */}
-          <div className="relative flex justify-center">
-            <div className="absolute inset-0 rounded-3xl blur-3xl" style={{ background: "radial-gradient(ellipse at center, oklch(0.54 0.24 27 / 0.30), oklch(0.42 0.18 265 / 0.15), transparent 70%)" }} />
-            <div className="relative h-[420px] w-full max-w-md trophy-shine rounded-3xl overflow-hidden shadow-elegant">
-              <img
-                src={trophyImg}
-                alt="Troféu do Mundial"
-                className="h-full w-full object-cover"
-              />
+            {/* Direita: troféu sobre azul escuro */}
+            <div className="relative bg-wc-blue overflow-hidden">
+              <div className="absolute inset-0 panini-stripes opacity-30" />
+              {/* Bloco verde decorativo */}
+              <div className="absolute bottom-0 right-0 h-32 w-32 rounded-tl-[64px] bg-wc-green opacity-70" />
+              <div className="relative h-full trophy-shine">
+                <img src={trophyImg} alt="Troféu do Mundial"
+                  className="h-full w-full object-cover object-center mix-blend-luminosity opacity-90" />
+                <div className="absolute inset-0 bg-gradient-to-t from-wc-blue/60 via-transparent to-transparent" />
+              </div>
             </div>
           </div>
-        </div>
         </div>
       </section>
 
@@ -215,14 +193,12 @@ function Home() {
 
       {/* ===================== JOGOS DE HOJE ===================== */}
       <section className="px-5 pt-8 md:px-8 relative">
-        {/* Gradiente de fundo subtil */}
-        <div className="pointer-events-none absolute -top-12 left-0 right-0 h-32 bg-gradient-to-b from-transparent via-[oklch(0.30_0.10_155/0.06)] to-transparent" />
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <h2 className="font-display text-2xl md:text-3xl">Jogos de Hoje</h2>
-            <p className="text-xs text-muted-foreground">Dá a tua previsão antes do apito inicial.</p>
+            <h2 className="font-display text-2xl md:text-3xl text-gray-900">Jogos de Hoje</h2>
+            <p className="text-xs text-gray-400">Dá a tua previsão antes do apito inicial.</p>
           </div>
-          <Link to="/jogos" className="text-xs font-semibold text-gold">Ver todos →</Link>
+          <Link to="/jogos" className="text-xs font-bold text-wc-red">Ver todos →</Link>
         </div>
         {todays.length === 0 ? (
           <EmptyState
@@ -261,58 +237,61 @@ function Home() {
       </section>
 
       {/* ===================== RANKING + PRÉMIOS ===================== */}
-      <section className="relative grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
-        <div className="pointer-events-none absolute -top-6 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-[oklch(0.30_0.10_155/0.04)]" />
-        {/* Ranking — destaque maior */}
-        <div className="rounded-2xl p-5 backdrop-blur-sm" style={{ background: "linear-gradient(oklch(0.16 0.004 0), oklch(0.16 0.004 0)) padding-box, linear-gradient(135deg, oklch(0.54 0.24 27 / 0.6), oklch(0.66 0.20 142 / 0.4), oklch(0.42 0.18 265 / 0.6)) border-box", border: "1px solid transparent", boxShadow: "0 4px 32px -8px oklch(0.54 0.24 27 / 0.20)" }}>
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-gold/20">
-                <BarChart3 className="h-5 w-5 text-gold" />
+      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
+        {/* Ranking — fundo vermelho Panini */}
+        <div className="rounded-2xl overflow-hidden bg-wc-red panini-stripes shadow-gold">
+          <div className="p-5 text-white">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20">
+                  <BarChart3 className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="font-display text-xl">Líderes</h3>
               </div>
-              <h3 className="font-display text-xl">Líderes</h3>
+              <Link to="/rankings" className="text-xs font-bold text-white/80 hover:text-white">Ver rankings →</Link>
             </div>
-            <Link to="/rankings" className="text-xs font-semibold text-gold">Ver rankings →</Link>
+            {topLeaders.length === 0 ? (
+              <p className="text-sm text-white/70">Ainda sem dados — sê o primeiro a marcar pontos.</p>
+            ) : (
+              <ol className="space-y-3">
+                {topLeaders.map((u, i) => (
+                  <li key={i} className="flex items-center justify-between">
+                    <span className="flex items-center gap-3">
+                      <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
+                        i === 0 ? "bg-white text-wc-red" : "bg-white/20 text-white"
+                      }`}>{i + 1}</span>
+                      <span className="font-semibold text-sm">{u.display_name ?? "Adepto"}</span>
+                    </span>
+                    <span className="font-display text-lg">{u.total_points} <span className="text-xs font-sans opacity-70">pts</span></span>
+                  </li>
+                ))}
+              </ol>
+            )}
           </div>
-          {topLeaders.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Ainda sem dados — sê o primeiro a marcar pontos.</p>
-          ) : (
-            <ol className="space-y-3">
-              {topLeaders.map((u, i) => (
-                <li key={i} className="flex items-center justify-between">
-                  <span className="flex items-center gap-3">
-                    <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                      i === 0 ? "bg-gold text-background" : i === 1 ? "bg-gold/40 text-foreground" : "bg-secondary"
-                    }`}>{i + 1}</span>
-                    <span className="font-medium text-sm">{u.display_name ?? "Adepto"}</span>
-                  </span>
-                  <span className="font-display text-lg text-gold">{u.total_points} <span className="text-xs font-sans text-muted-foreground">pts</span></span>
-                </li>
-              ))}
-            </ol>
-          )}
         </div>
 
-        {/* Prémios */}
-        <div className="rounded-2xl border border-border bg-card/70 p-5 backdrop-blur-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-secondary">
-                <Trophy className="h-5 w-5 text-gold" />
+        {/* Prémios — fundo azul Panini */}
+        <div className="rounded-2xl overflow-hidden bg-wc-blue panini-stripes shadow-elegant">
+          <div className="p-5 text-white">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20">
+                  <Trophy className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="font-display text-xl">Prémios</h3>
               </div>
-              <h3 className="font-display text-xl">Prémios</h3>
+              <Link to="/premios" className="text-xs font-bold text-white/80 hover:text-white">Ver prémios →</Link>
             </div>
-            <Link to="/premios" className="text-xs font-semibold text-gold">Ver prémios →</Link>
-          </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Um prémio exclusivo para o vencedor de cada fase — Grupos, Oitavos, Quartos e Meias-Finais.
-          </p>
-          <div className="mt-4 grid grid-cols-4 gap-1.5">
-            {["Grupos", "Oitavos", "Quartos", "Meias"].map((f) => (
-              <div key={f} className="rounded-lg border border-border bg-secondary/50 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                {f}
-              </div>
-            ))}
+            <p className="text-sm text-white/80 leading-relaxed">
+              Um prémio exclusivo para o vencedor de cada fase — Grupos, Oitavos, Quartos e Meias-Finais.
+            </p>
+            <div className="mt-4 grid grid-cols-4 gap-1.5">
+              {["Grupos", "Oitavos", "Quartos", "Meias"].map((f) => (
+                <div key={f} className="rounded-lg bg-white/15 border border-white/20 py-2 text-center text-[10px] font-bold uppercase tracking-wide text-white">
+                  {f}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

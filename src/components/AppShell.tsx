@@ -12,46 +12,42 @@ export function AppShell({ children }: { children: ReactNode }) {
   const loggedIn = !loading && !!user;
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-background">
 
-      {/* Barra tricolor oficial FIFA WC2026: Canadá · México · EUA */}
+      {/* Barra tricolor FIFA WC2026 — fixa no topo */}
       <div className="wc-tricolor fixed top-0 left-0 z-50 h-[3px] w-full" />
 
       {/* ── DESKTOP ──────────────────────────────────────────── */}
-
-      {/* Não logado → top nav (full width, sem offset) */}
       {!loggedIn && (
         <div className="hidden md:block">
           <TopNav />
         </div>
       )}
-
-      {/* Logado → sidebar */}
       {loggedIn && <SideNav />}
 
-      {/* ── MOBILE header (sempre visível em mobile) ─────────── */}
-      <header className="sticky top-[3px] z-40 border-b border-border bg-background/80 backdrop-blur-xl md:hidden">
+      {/* ── MOBILE header ─────────────────────────────────── */}
+      <header className="sticky top-[3px] z-40 border-b border-gray-200 bg-white/90 backdrop-blur-xl shadow-sm md:hidden">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-gold font-display text-lg text-background">V</span>
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-wc-red font-display text-lg text-white">V</span>
             <div className="leading-tight">
-              <div className="font-display text-base tracking-wide">UMA GERAÇÃO</div>
-              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Mundial 2026</div>
+              <div className="font-display text-base tracking-wide text-gray-900">UMA GERAÇÃO</div>
+              <div className="text-[11px] uppercase tracking-widest text-gray-400">Mundial 2026</div>
             </div>
           </Link>
           <div className="flex items-center gap-2">
             {user && isAdmin && (
-              <Link to="/admin" className="flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-gold">
+              <Link to="/admin" className="flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-wc-red">
                 <Shield className="h-3 w-3" /> Admin
               </Link>
             )}
             {user && !isAdmin && (
-              <Link to="/perfil" className="grid h-8 w-8 place-items-center rounded-full bg-secondary font-display text-sm text-foreground">
+              <Link to="/perfil" className="grid h-8 w-8 place-items-center rounded-full bg-gray-100 font-display text-sm text-gray-700">
                 {(user.user_metadata?.display_name ?? user.email ?? "U").charAt(0).toUpperCase()}
               </Link>
             )}
             {!user && (
-              <Link to="/auth" className="rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-background">
+              <Link to="/auth" className="rounded-full bg-wc-red px-3 py-1.5 text-xs font-bold text-white shadow-gold">
                 Entrar
               </Link>
             )}
@@ -66,7 +62,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </main>
 
-      {/* Mobile bottom nav */}
       <BottomNav />
     </div>
   );

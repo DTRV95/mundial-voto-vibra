@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Clock, Users2 } from "lucide-react";
 import { formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
+import { TeamBadge } from "@/lib/teamColors.tsx";
 
 export interface MatchCardData {
   id: string;
@@ -70,9 +71,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
       {/* Teams */}
       <div className="flex items-center justify-between gap-2 px-4 py-4">
         <div className="flex flex-1 flex-col items-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-3xl md:h-16 md:w-16 md:text-4xl border border-border">
-            {match.home.flag ?? "⚽"}
-          </div>
+          <TeamBadge code={match.home.code} name={match.home.name} size="md" />
           <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
             {match.home.name}
           </span>
@@ -91,9 +90,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
         </div>
 
         <div className="flex flex-1 flex-col items-center gap-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-3xl md:h-16 md:w-16 md:text-4xl border border-border">
-            {match.away.flag ?? "⚽"}
-          </div>
+          <TeamBadge code={match.away.code} name={match.away.name} size="md" />
           <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
             {match.away.name}
           </span>

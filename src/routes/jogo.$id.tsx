@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
 import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check } from "lucide-react";
+import { TeamBadge } from "@/lib/teamColors.tsx";
 
 export const Route = createFileRoute("/jogo/$id")({
   head: () => ({
@@ -146,7 +147,7 @@ function JogoPage() {
             }`}>{status?.label}</span>
           </div>
           <div className="mt-5 flex items-center justify-around text-center">
-            <TeamBlock flag={home.flag} name={home.name} />
+            <TeamBlock flag={home.flag} name={home.name} code={home.code} />
             <div className="flex flex-col items-center gap-1">
               {match.home_score != null && match.away_score != null ? (
                 <>
@@ -163,7 +164,7 @@ function JogoPage() {
                 </>
               )}
             </div>
-            <TeamBlock flag={away.flag} name={away.name} />
+            <TeamBlock flag={away.flag} name={away.name} code={away.code} />
           </div>
         </div>
         <div className="flex items-center gap-2 border-t border-border bg-background/30 px-4 py-2 text-[11px] text-muted-foreground">
@@ -364,10 +365,10 @@ function JogoPage() {
 
 /* ── Components ─────────────────────────────────────────── */
 
-function TeamBlock({ flag, name }: { flag: string | null; name: string }) {
+function TeamBlock({ flag: _flag, name, code }: { flag: string | null; name: string; code?: string | null }) {
   return (
     <div className="flex flex-1 flex-col items-center gap-2">
-      <div className="grid h-16 w-16 place-items-center rounded-2xl bg-secondary text-4xl">{flag ?? "⚽"}</div>
+      <TeamBadge code={code ?? null} name={name} size="lg" />
       <span className="text-sm font-bold text-center leading-tight">{name}</span>
     </div>
   );

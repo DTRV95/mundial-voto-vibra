@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { toast } from "sonner";
 import { PHASE_LABEL } from "@/lib/format";
-import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock } from "lucide-react";
+import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Uma Geração" }] }),
@@ -161,6 +161,9 @@ function GroupsAdmin() {
 function TeamsAdmin() {
   const qc = useQueryClient();
   const [name, setName] = useState(""); const [code, setCode] = useState(""); const [flag, setFlag] = useState(""); const [groupId, setGroupId] = useState<string>("");
+  const [teamEditId, setTeamEditId] = useState<string | null>(null);
+  const [teamEditForm, setTeamEditForm] = useState<{ name: string; code: string; flag: string; group_id: string }>({ name: "", code: "", flag: "", group_id: "" });
+  const [teamPending, setTeamPending] = useState(false);
   const { data: teams = [] } = useQuery({
     queryKey: ["admin", "teams"],
     queryFn: async () => (await supabase.from("teams").select("*,group:group_id(name)").order("name")).data ?? [],
@@ -178,6 +181,22 @@ function TeamsAdmin() {
     const { error } = await supabase.from("teams").delete().eq("id", id);
     if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["admin", "teams"] });
   }
+  function startTeamEdit(t: any) {
+    setTeamEditId(t.id);
+    setTeamEditForm({ name: t.name, code: t.code ?? "", flag: t.flag ?? "", group_id: t.group_id ?? "" });
+  }
+  async function saveTeamEdit(id: string) {
+    setTeamPending(true);
+    const { error } = await supabase.from("teams").update({
+      name: teamEditForm.name.trim(),
+      code: teamEditForm.code || null,
+      flag: teamEditForm.flag || null,
+      group_id: teamEditForm.group_id || null,
+    }).eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Equipa actualizada!"); setTeamEditId(null); qc.invalidateQueries({ queryKey: ["admin", "teams"] }); }
+    setTeamPending(false);
+  }
   return (
     <Section>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -192,9 +211,35 @@ function TeamsAdmin() {
       <button onClick={add} className={`${btnCls} mt-2 w-full justify-center`}><Plus className="h-4 w-4" /> Adicionar equipa</button>
       <ul className="mt-3 space-y-2">
         {teams.map((t: any) => (
-          <li key={t.id} className={rowItemCls}>
-            <span className="flex items-center gap-2"><span className="text-xl">{t.flag ?? "⚽"}</span>{t.name} <span className="text-xs text-muted-foreground">{t.group?.name ?? "—"}</span></span>
-            <button onClick={() => del(t.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+          <li key={t.id} className="rounded-xl border border-border bg-card/60 p-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-2"><span className="text-xl">{t.flag ?? "⚽"}</span>{t.name} <span className="text-xs text-muted-foreground">{t.group?.name ?? "—"}</span></span>
+              <div className="flex items-center gap-2">
+                <button onClick={() => teamEditId === t.id ? setTeamEditId(null) : startTeamEdit(t)} className="text-muted-foreground hover:text-foreground">
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                <button onClick={() => del(t.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+              </div>
+            </div>
+            {teamEditId === t.id && (
+              <div className="mt-3 space-y-2 border-t border-border pt-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <input placeholder="Nome" value={teamEditForm.name} onChange={e => setTeamEditForm(f => ({ ...f, name: e.target.value }))} className={inputCls} />
+                  <input placeholder="POR" maxLength={3} value={teamEditForm.code} onChange={e => setTeamEditForm(f => ({ ...f, code: e.target.value.toUpperCase() }))} className={inputCls} />
+                  <input placeholder="🇵🇹" value={teamEditForm.flag} onChange={e => setTeamEditForm(f => ({ ...f, flag: e.target.value }))} className={inputCls} />
+                  <select value={teamEditForm.group_id} onChange={e => setTeamEditForm(f => ({ ...f, group_id: e.target.value }))} className={inputCls}>
+                    <option value="">Sem grupo</option>
+                    {groups.map((g: any) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => saveTeamEdit(t.id)} disabled={teamPending} className={`${btnCls} flex-1 justify-center`}>
+                    {teamPending ? "…" : "Guardar"}
+                  </button>
+                  <button onClick={() => setTeamEditId(null)} className="rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground">Cancelar</button>
+                </div>
+              </div>
+            )}
           </li>
         ))}
       </ul>
@@ -229,6 +274,41 @@ function MatchesAdmin() {
     if (error) toast.error(error.message); else { toast.success("Jogo criado"); qc.invalidateQueries({ queryKey: ["admin", "matches"] }); }
   }
   const [pending, setPending] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{ kickoff_at: string; phase: string; home_score: string; away_score: string }>({ kickoff_at: "", phase: "grupos", home_score: "", away_score: "" });
+  const [calcAllState, setCalcAllState] = useState<{ loading: boolean; result: string | null }>({ loading: false, result: null });
+
+  function startEdit(m: any) {
+    const dt = new Date(m.kickoff_at);
+    const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    setEditId(m.id);
+    setEditForm({ kickoff_at: local, phase: m.phase, home_score: m.home_score ?? "", away_score: m.away_score ?? "" });
+  }
+
+  async function saveEdit(id: string) {
+    setPending(`edit-${id}`);
+    const { error } = await supabase.from("matches").update({
+      kickoff_at: new Date(editForm.kickoff_at).toISOString(),
+      phase: editForm.phase as any,
+      home_score: editForm.home_score !== "" ? Number(editForm.home_score) : null,
+      away_score: editForm.away_score !== "" ? Number(editForm.away_score) : null,
+    }).eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Jogo actualizado!"); setEditId(null); qc.invalidateQueries({ queryKey: ["admin", "matches"] }); }
+    setPending(null);
+  }
+
+  async function calcAllPoints() {
+    setCalcAllState({ loading: true, result: null });
+    const finished = (matches as any[]).filter((m: any) => m.home_score != null);
+    let count = 0;
+    for (const m of finished) {
+      const { error } = await supabase.rpc("calculate_match_points", { p_match_id: m.id });
+      if (!error) count++;
+    }
+    setCalcAllState({ loading: false, result: `${count} jogos calculados` });
+    toast.success(`Pontos calculados para ${count} jogos`);
+  }
 
   async function toggleVoting(id: string, current: boolean) {
     setPending(`vote-${id}`);
@@ -274,13 +354,57 @@ function MatchesAdmin() {
         </select>
       </div>
       <button onClick={add} className={`${btnCls} mt-2 w-full justify-center`}><Plus className="h-4 w-4" /> Adicionar jogo</button>
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          onClick={calcAllPoints}
+          disabled={calcAllState.loading}
+          className="inline-flex items-center gap-1 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary disabled:opacity-50">
+          {calcAllState.loading ? "A calcular…" : "Calcular todos os pontos"}
+        </button>
+        {calcAllState.result && <span className="text-xs text-muted-foreground">{calcAllState.result}</span>}
+      </div>
       <ul className="mt-3 space-y-2">
         {matches.map((m: any) => (
           <li key={m.id} className="rounded-xl border border-border bg-card/60 p-3">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">{m.home?.name ?? "?"} vs {m.away?.name ?? "?"}</span>
-              <span className="text-xs text-muted-foreground">{new Date(m.kickoff_at).toLocaleString("pt-PT")}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">{new Date(m.kickoff_at).toLocaleString("pt-PT")}</span>
+                <button onClick={() => editId === m.id ? setEditId(null) : startEdit(m)} className="text-muted-foreground hover:text-foreground">
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
+            {editId === m.id && (
+              <div className="mt-3 space-y-2 border-t border-border pt-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Kickoff</label>
+                    <input type="datetime-local" value={editForm.kickoff_at} onChange={e => setEditForm(f => ({ ...f, kickoff_at: e.target.value }))} className={inputCls} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Fase</label>
+                    <select value={editForm.phase} onChange={e => setEditForm(f => ({ ...f, phase: e.target.value }))} className={inputCls}>
+                      {Object.entries(PHASE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Golos Casa</label>
+                    <input type="number" min={0} value={editForm.home_score} onChange={e => setEditForm(f => ({ ...f, home_score: e.target.value }))} className={inputCls} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Golos Fora</label>
+                    <input type="number" min={0} value={editForm.away_score} onChange={e => setEditForm(f => ({ ...f, away_score: e.target.value }))} className={inputCls} />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => saveEdit(m.id)} disabled={pending === `edit-${m.id}`} className={`${btnCls} flex-1 justify-center`}>
+                    {pending === `edit-${m.id}` ? "…" : "Guardar"}
+                  </button>
+                  <button onClick={() => setEditId(null)} className="rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground">Cancelar</button>
+                </div>
+              </div>
+            )}
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
               <span className="rounded-full bg-secondary px-2 py-0.5">{PHASE_LABEL[m.phase]}</span>
               <button

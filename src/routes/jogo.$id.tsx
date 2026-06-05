@@ -69,6 +69,7 @@ function JogoPage() {
   const [pred, setPred] = useState<Record<string, any>>({});
   const [scorelabOpen, setScorelabOpen] = useState(false);
   const [shared, setShared] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   async function share() {
     const home = (match?.home as any)?.name ?? "Casa";
@@ -98,6 +99,51 @@ function JogoPage() {
     setPred((p) => ({ ...p, [key]: p[key] === value ? null : value }));
   }
 
+  function fireConfetti() {
+    if (typeof document === "undefined") return;
+    const styleId = "__confetti_style__";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        @keyframes confettiFall {
+          0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+          80%  { opacity: 1; }
+          100% { transform: translateY(120px) rotate(720deg) scale(0.5); opacity: 0; }
+        }
+        @keyframes confettiRise {
+          0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+          80%  { opacity: 1; }
+          100% { transform: translateY(-140px) rotate(-540deg) scale(0.4); opacity: 0; }
+        }
+        .__confetti { position: fixed; pointer-events: none; z-index: 9999; border-radius: 2px; }
+      `;
+      document.head.appendChild(style);
+    }
+    const colors = ["#E61D25", "#3CAC3B", "#2A398D", "#D4A843"];
+    const btn = document.querySelector("[data-save-btn]");
+    const rect = btn?.getBoundingClientRect() ?? { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 0, height: 0 };
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    for (let i = 0; i < 30; i++) {
+      const el = document.createElement("div");
+      el.className = "__confetti";
+      const color = colors[i % colors.length];
+      const size = 6 + Math.random() * 7;
+      const xOff = (Math.random() - 0.5) * 200;
+      const rise = Math.random() > 0.4;
+      el.style.cssText = `
+        left: ${cx + xOff}px; top: ${cy}px;
+        width: ${size}px; height: ${size * (0.4 + Math.random() * 0.8)}px;
+        background: ${color};
+        animation: ${rise ? "confettiRise" : "confettiFall"} ${0.9 + Math.random() * 0.6}s ease-out forwards;
+        animation-delay: ${Math.random() * 0.2}s;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1800);
+    }
+  }
+
   async function save() {
     if (!user) { navigate({ to: "/auth", search: { redirect: `/jogo/${id}` } }); return; }
     if (closed) return;
@@ -112,6 +158,9 @@ function JogoPage() {
     const { error } = await supabase.from("predictions").upsert(payload, { onConflict: "user_id,match_id" });
     if (error) { toast.error(error.message); return; }
     toast.success("Previsão guardada!");
+    fireConfetti();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
     qc.invalidateQueries({ queryKey: ["prediction", id] });
     qc.invalidateQueries({ queryKey: ["community", id] });
   }
@@ -347,9 +396,11 @@ function JogoPage() {
 
       {/* Save */}
       <div className="sticky bottom-20 md:bottom-6 mt-6">
-        <button onClick={save} disabled={closed}
-          className="w-full rounded-2xl bg-gold py-4 font-bold text-background shadow-gold transition-smooth hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50">
-          {closed ? "Votação fechada" : hasVoted ? "Atualizar Previsão" : "Guardar Previsão"}
+        <button data-save-btn onClick={save} disabled={closed || saved}
+          className={`w-full rounded-2xl py-4 font-bold shadow-gold transition-smooth hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50 ${
+            saved ? "bg-green-500 text-white" : "bg-gold text-background"
+          }`}>
+          {saved ? "✓ Guardado!" : closed ? "Votação fechada" : hasVoted ? "Atualizar Previsão" : "Guardar Previsão"}
         </button>
       </div>
 
@@ -417,7 +468,7 @@ function VoteOptions({ value, options, onChange, disabled, grid = 0 }: {
         const active = value === o.v;
         return (
           <button key={o.v} type="button" disabled={disabled} onClick={() => onChange(o.v)}
-            className={`rounded-xl border px-3 py-2.5 text-xs font-bold transition-smooth disabled:opacity-50 ${
+            className={`rounded-xl border px-3 py-2.5 text-xs font-bold transition-smooth active:scale-95 disabled:opacity-50 ${
               active ? "border-gold bg-gold text-background shadow-gold" : "border-border bg-secondary/50 hover:border-gold/40"
             }`}>
             {o.label}

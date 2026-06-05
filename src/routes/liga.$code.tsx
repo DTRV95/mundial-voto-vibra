@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, Volleyball } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -440,6 +440,24 @@ function LigaPage() {
           </div>
         )}
       </div>
+
+      {/* ── VOTAR NOS JOGOS ──────────────────────────────────── */}
+      {user && isMember && (
+        <div className="mx-5 mt-4 md:mx-8">
+          <Link
+            to="/jogos"
+            className="flex items-center justify-between gap-4 rounded-2xl bg-wc-red px-5 py-4 text-white shadow-gold transition-smooth hover:scale-[1.01] active:scale-95 panini-stripes"
+          >
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 mb-0.5">Os teus pontos contam aqui</p>
+              <p className="font-display text-xl leading-tight">Votar nos jogos de hoje</p>
+            </div>
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/20">
+              <Volleyball className="h-6 w-6 text-white" />
+            </div>
+          </Link>
+        </div>
+      )}
 
       {/* ── CONVIDAR ─────────────────────────────────────────── */}
       {user && isMember && (

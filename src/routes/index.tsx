@@ -197,7 +197,7 @@ function Home() {
       </section>
 
       {/* ===================== COUNTDOWN + CTA ===================== */}
-      <div className={`mx-5 mt-4 md:mx-8 ${nextMatch ? "grid gap-4 md:grid-cols-2" : ""}`}>
+      <div className={`mx-5 mt-4 md:mx-8 ${nextMatch && !user ? "grid gap-3 sm:grid-cols-2" : ""}`}>
         {nextMatch && (
           <Countdown
             kickoff_at={nextMatch.kickoff_at}
@@ -206,28 +206,24 @@ function Home() {
           />
         )}
         {!user && (
-          <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-wc-blue to-[#1a2560] panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.40 0.18 265 / 0.45)" }}>
-            <div className="flex h-full flex-col justify-between p-4 text-white">
+          <div
+            className="relative overflow-hidden rounded-2xl panini-stripes"
+            style={{ background: "linear-gradient(135deg, oklch(0.54 0.24 27) 0%, oklch(0.36 0.18 350) 50%, oklch(0.28 0.14 270) 100%)", boxShadow: "0 6px 24px -4px oklch(0.54 0.24 27 / 0.35)" }}
+          >
+            {/* Troféu decorativo */}
+            <Trophy className="absolute right-3 top-1/2 -translate-y-1/2 h-20 w-20 text-white/5 pointer-events-none" />
+            <div className="relative flex h-full flex-col justify-between p-4 text-white">
               <div>
-                <div className="mb-2 flex items-center gap-1.5">
-                  <Star className="h-3.5 w-3.5 text-gold fill-gold" />
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-white/70">Gratuito</span>
-                </div>
-                <h3 className="font-display text-xl leading-tight">Junta-te à comunidade</h3>
-                <p className="mt-1.5 text-sm text-white/80">Vota nos jogos, soma pontos e compete com amigos no Mundial 2026.</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50 mb-1">Mundial 2026 · Grátis</p>
+                <h3 className="font-display text-2xl leading-none">A tua geração.<br/>O teu torneio.</h3>
+                <p className="mt-2 text-xs text-white/70 leading-relaxed max-w-[200px]">Vota, sobe no ranking e prova que sabes mais de futebol.</p>
               </div>
-              <div className="mt-4 flex flex-col gap-2">
+              <div className="mt-4 flex flex-col gap-1.5">
                 <Link
                   to="/auth"
-                  className="block w-full rounded-xl bg-white py-2.5 text-center text-sm font-bold text-wc-blue transition-smooth hover:scale-[1.02]"
+                  className="block w-full rounded-xl bg-white py-2.5 text-center text-sm font-bold text-wc-red transition-smooth hover:scale-[1.01] active:scale-95"
                 >
-                  Criar conta grátis
-                </Link>
-                <Link
-                  to="/auth"
-                  className="block w-full rounded-xl border border-white/30 py-2 text-center text-xs font-semibold text-white/80 hover:text-white"
-                >
-                  Já tenho conta — entrar
+                  Entrar agora — é grátis
                 </Link>
               </div>
             </div>
@@ -473,48 +469,48 @@ function Countdown({ kickoff_at, home, away }: { kickoff_at: string; home: any; 
 
   const pad = (n: number) => String(n).padStart(2, "0");
 
+  const goldGrad = {
+    background: "linear-gradient(180deg, oklch(0.90 0.12 92), oklch(0.72 0.16 75))",
+    WebkitBackgroundClip: "text" as const,
+    WebkitTextFillColor: "transparent" as const,
+    backgroundClip: "text" as const,
+  };
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-r from-card/80 via-gold/5 to-card/80 p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Timer className="h-4 w-4 text-gold" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Próximo jogo</span>
+    <div className="overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-r from-card/80 via-gold/5 to-card/80 px-4 py-3">
+      {/* Linha superior — label + equipas */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <Timer className="h-3.5 w-3.5 text-gold" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Próximo jogo</span>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <span>{home?.flag ?? "⚽"}</span>
-          <span className="font-semibold text-foreground">{home?.name}</span>
-          <span className="text-muted-foreground mx-1">vs</span>
-          <span className="font-semibold text-foreground">{away?.name}</span>
+          <span className="font-semibold text-foreground truncate max-w-[60px]">{home?.name}</span>
+          <span className="text-muted-foreground/50">vs</span>
+          <span className="font-semibold text-foreground truncate max-w-[60px]">{away?.name}</span>
           <span>{away?.flag ?? "⚽"}</span>
         </div>
       </div>
-      <div className="mt-3 flex items-end gap-1">
+      {/* Cronómetro compacto */}
+      <div className="mt-2 flex items-end gap-0.5">
         {h > 0 && (
           <>
             <div className="text-center">
-              <div className="font-display text-4xl leading-none text-gold" style={{
-                background: "linear-gradient(180deg, oklch(0.90 0.12 92), oklch(0.72 0.16 75))",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-              }}>{pad(h)}</div>
-              <div className="text-[9px] uppercase tracking-widest text-muted-foreground mt-0.5">horas</div>
+              <div className="font-display text-3xl leading-none" style={goldGrad}>{pad(h)}</div>
+              <div className="text-[8px] uppercase tracking-widest text-muted-foreground">h</div>
             </div>
-            <span className="font-display text-2xl text-gold/40 mb-4">:</span>
+            <span className="font-display text-xl text-gold/30 mb-3">:</span>
           </>
         )}
         <div className="text-center">
-          <div className="font-display text-4xl leading-none" style={{
-            background: "linear-gradient(180deg, oklch(0.90 0.12 92), oklch(0.72 0.16 75))",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-          }}>{pad(m)}</div>
-          <div className="text-[9px] uppercase tracking-widest text-muted-foreground mt-0.5">min</div>
+          <div className="font-display text-3xl leading-none" style={goldGrad}>{pad(m)}</div>
+          <div className="text-[8px] uppercase tracking-widest text-muted-foreground">min</div>
         </div>
-        <span className="font-display text-2xl text-gold/40 mb-4">:</span>
+        <span className="font-display text-xl text-gold/30 mb-3">:</span>
         <div className="text-center">
-          <div className="font-display text-4xl leading-none" style={{
-            background: "linear-gradient(180deg, oklch(0.90 0.12 92), oklch(0.72 0.16 75))",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-          }}>{pad(s)}</div>
-          <div className="text-[9px] uppercase tracking-widest text-muted-foreground mt-0.5">seg</div>
+          <div className="font-display text-3xl leading-none" style={goldGrad}>{pad(s)}</div>
+          <div className="text-[8px] uppercase tracking-widest text-muted-foreground">seg</div>
         </div>
       </div>
     </div>

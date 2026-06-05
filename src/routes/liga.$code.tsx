@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, Volleyball } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -193,11 +193,13 @@ function LigaPage() {
     <div className="pb-16">
 
       {/* ── HERO ─────────────────────────────────────────────── */}
+      <div className="px-5 pt-5 md:px-8">
       <div
-        className="relative overflow-hidden panini-stripes"
+        className="relative overflow-hidden rounded-3xl panini-stripes"
         style={{
           background: "linear-gradient(145deg, oklch(0.54 0.24 27) 0%, oklch(0.40 0.20 15) 55%, oklch(0.28 0.14 270) 100%)",
           minHeight: "220px",
+          boxShadow: "0 12px 40px oklch(0.54 0.24 27 / 0.35)",
         }}
       >
         {/* Tricolor strip no fundo */}
@@ -251,6 +253,7 @@ function LigaPage() {
             </button>
           </div>
         </div>
+      </div>
       </div>
 
       {/* ── CONVITE (não autenticado) ─────────────────────────── */}
@@ -453,7 +456,7 @@ function LigaPage() {
               <p className="font-display text-xl leading-tight">Votar nos jogos de hoje</p>
             </div>
             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/20">
-              <Volleyball className="h-6 w-6 text-white" />
+              <ArrowRight className="h-6 w-6 text-white" />
             </div>
           </Link>
         </div>
@@ -466,19 +469,38 @@ function LigaPage() {
             className="overflow-hidden rounded-2xl panini-stripes text-white"
             style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)", boxShadow: "0 4px 20px oklch(0 0 0 / 0.25)" }}
           >
-            <div className="flex items-center justify-between gap-4 p-5">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-1">Convida</p>
-                <p className="font-display text-lg leading-tight">Chama mais amigos</p>
-                <p className="mt-0.5 text-xs text-white/60">Quanto mais, mais emocionante fica.</p>
-              </div>
+            <div className="p-5">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-1">Convida</p>
+              <p className="font-display text-lg leading-tight">Chama mais amigos</p>
+              <p className="mt-0.5 text-xs text-white/60 mb-4">Partilha o link ou o código — quanto mais, mais emocionante fica.</p>
+
+              {/* Código copiável */}
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(pool.code);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                  toast.success("Código copiado!");
+                }}
+                className="mb-3 flex w-full items-center justify-between rounded-xl bg-white/10 px-4 py-3 hover:bg-white/20 transition-smooth active:scale-95"
+              >
+                <div className="text-left">
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest mb-0.5">Código do torneio</p>
+                  <p className="font-mono text-xl font-bold text-white tracking-widest">{pool.code}</p>
+                </div>
+                <div className="flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white">
+                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? "Copiado!" : "Copiar"}
+                </div>
+              </button>
+
+              {/* Botões de partilha */}
               <div className="flex gap-2">
-                <button onClick={shareWhatsApp} className="rounded-xl bg-[#25D366] px-3 py-2 text-xs font-bold text-white transition-smooth hover:scale-[1.02]">
-                  WhatsApp
+                <button onClick={shareWhatsApp} className="flex-1 rounded-xl bg-[#25D366] py-2.5 text-xs font-bold text-white transition-smooth hover:scale-[1.02] active:scale-95">
+                  Partilhar no WhatsApp
                 </button>
-                <button onClick={copyLink} className="flex items-center gap-1 rounded-xl bg-white/15 px-3 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth">
-                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                  {copied ? "Copiado" : "Link"}
+                <button onClick={copyLink} className="flex items-center justify-center gap-1.5 rounded-xl bg-white/15 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/25 transition-smooth active:scale-95">
+                  <Copy className="h-3 w-3" /> Link
                 </button>
               </div>
             </div>

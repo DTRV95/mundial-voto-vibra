@@ -54,16 +54,44 @@ function LigaPage() {
       if (!members || members.length === 0) return [];
 
       const userIds = members.map((m) => m.user_id);
+
+      // Buscar nome de cada membro
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, display_name, total_points, predictions_made, predictions_correct")
-        .in("id", userIds)
-        .order("total_points", { ascending: false });
+        .select("id, display_name")
+        .in("id", userIds);
 
-      return (profiles ?? []).map((p) => ({
-        ...p,
-        joined_at: members.find((m) => m.user_id === p.id)?.joined_at,
-      }));
+      // Para cada membro, somar só os pontos de previsões feitas APÓS entrar na liga
+      const results = await Promise.all(
+        members.map(async (member) => {
+          const { data: preds } = await supabase
+            .from("predictions")
+            .select("points, created_at")
+            .eq("user_id", member.user_id)
+            .gte("created_at", member.joined_at);
+
+          const points = (preds ?? []).reduce((sum, p) => sum + (p.points ?? 0), 0);
+          const made = (preds ?? []).length;
+          const correct = (preds ?? []).filter((p) => (p.points ?? 0) > 0).length;
+          const profile = profiles?.find((pr) => pr.id === member.user_id);
+
+          return {
+            id: member.user_id,
+            display_name: profile?.display_name ?? "Adepto",
+            total_points: points,
+            predictions_made: made,
+            predictions_correct: correct,
+            joined_at: member.joined_at,
+          };
+        })
+      );
+
+      return results.sort((a, b) => {
+        if (b.total_points !== a.total_points) return b.total_points - a.total_points;
+        const accA = a.predictions_made > 0 ? a.predictions_correct / a.predictions_made : 0;
+        const accB = b.predictions_made > 0 ? b.predictions_correct / b.predictions_made : 0;
+        return accB - accA;
+      });
     },
   });
 

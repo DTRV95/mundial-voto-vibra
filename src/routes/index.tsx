@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper, Star, Gift } from "lucide-react";
+import { TeamBadge } from "@/lib/teamColors.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { useAuth } from "@/lib/useAuth";
@@ -143,7 +144,7 @@ function Home() {
     queryFn: async () => {
       const { data } = await supabase
         .from("matches")
-        .select("id,kickoff_at,home:home_team_id(name,flag),away:away_team_id(name,flag)")
+        .select("id,kickoff_at,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
         .gt("kickoff_at", new Date().toISOString())
         .eq("status", "scheduled")
         .order("kickoff_at")
@@ -531,12 +532,10 @@ function Countdown({ kickoff_at, home, away }: { kickoff_at: string; home: any; 
           <Timer className="h-3.5 w-3.5 text-gold" />
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Próximo jogo</span>
         </div>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <span>{home?.flag ?? "⚽"}</span>
-          <span className="font-semibold text-foreground truncate max-w-[60px]">{home?.name}</span>
-          <span className="text-muted-foreground/50">vs</span>
-          <span className="font-semibold text-foreground truncate max-w-[60px]">{away?.name}</span>
-          <span>{away?.flag ?? "⚽"}</span>
+        <div className="flex items-center gap-1.5">
+          <TeamBadge code={home?.code ?? null} flag={home?.flag ?? null} name={home?.name ?? ""} size="sm" />
+          <span className="text-[10px] font-bold text-muted-foreground/50">vs</span>
+          <TeamBadge code={away?.code ?? null} flag={away?.flag ?? null} name={away?.name ?? ""} size="sm" />
         </div>
       </div>
       {/* Cronómetro compacto */}

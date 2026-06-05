@@ -40,12 +40,12 @@ function Home() {
         .from("profiles")
         .select("display_name,total_points,predictions_made")
         .order("total_points", { ascending: false })
-        .limit(3);
+        .limit(10);
       return data ?? [];
     },
   });
 
-  const { data: featuredNews } = useQuery({
+  const { data: featuredNewsList = [] } = useQuery({
     queryKey: ["news", "featured"],
     queryFn: async () => {
       const { data } = await supabase
@@ -53,9 +53,8 @@ function Home() {
         .select("id,title,excerpt,image_url,category,created_at")
         .eq("published", true)
         .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return data;
+        .limit(3);
+      return data ?? [];
     },
   });
 
@@ -306,47 +305,49 @@ function Home() {
         </div>
       </section>
 
-      {/* ===================== NOTÍCIA EM DESTAQUE ===================== */}
-      {featuredNews && (
+      {/* ===================== NOTÍCIAS EM DESTAQUE ===================== */}
+      {featuredNewsList.length > 0 && (
         <section className="px-5 pt-8 pb-2 md:px-8">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Newspaper className="h-4 w-4 text-muted-foreground" />
-              <h2 className="font-display text-xl">Última Notícia</h2>
+              <h2 className="font-display text-xl">Últimas Notícias</h2>
             </div>
             <Link to="/noticias" className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">
               Ver todas →
             </Link>
           </div>
-          <Link
-            to="/noticias/$id"
-            params={{ id: (featuredNews as any).id }}
-            className="group flex gap-4 overflow-hidden rounded-2xl border border-border bg-card/70 p-4 hover:border-gold/40"
-            style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 32px -6px oklch(0.82 0.15 88 / 0.15)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
-          >
-            {(featuredNews as any).image_url && (
-              <img src={(featuredNews as any).image_url} alt={(featuredNews as any).title}
-                className="h-20 w-28 shrink-0 rounded-xl object-cover" />
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                {(featuredNews as any).category === "analise" && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold">
-                    <TrendingUp className="h-2.5 w-2.5" /> ScoreLab
-                  </span>
+          <div className="space-y-2">
+            {featuredNewsList.map((news: any) => (
+              <Link
+                key={news.id}
+                to="/noticias/$id"
+                params={{ id: news.id }}
+                className="group flex gap-4 overflow-hidden rounded-2xl border border-border bg-card/70 p-4 hover:border-gold/40 transition-smooth"
+              >
+                {news.image_url && (
+                  <img src={news.image_url} alt={news.title}
+                    className="h-16 w-20 shrink-0 rounded-xl object-cover" />
                 )}
-                <span className="text-[11px] text-muted-foreground">
-                  {new Date((featuredNews as any).created_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" })}
-                </span>
-              </div>
-              <h3 className="font-display text-base leading-tight line-clamp-2">{(featuredNews as any).title}</h3>
-              {(featuredNews as any).excerpt && (
-                <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{(featuredNews as any).excerpt}</p>
-              )}
-              <span className="mt-2 inline-block text-xs font-semibold text-gold group-hover:underline">Ler artigo →</span>
-            </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    {news.category === "analise" && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold">
+                        <TrendingUp className="h-2.5 w-2.5" /> ScoreLab
+                      </span>
+                    )}
+                    <span className="text-[11px] text-muted-foreground">
+                      {new Date(news.created_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" })}
+                    </span>
+                  </div>
+                  <h3 className="font-display text-sm leading-tight line-clamp-2">{news.title}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <Link to="/noticias"
+            className="mt-3 block w-full rounded-2xl border border-border py-2.5 text-center text-xs font-bold text-muted-foreground transition-smooth hover:border-gold/40 hover:text-gold">
+            Ver todas as notícias →
           </Link>
         </section>
       )}

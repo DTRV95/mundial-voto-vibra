@@ -33,7 +33,7 @@ function JogoPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("matches")
-        .select("id,kickoff_at,phase,voting_open,home_score,away_score,home:home_team_id(name,flag),away:away_team_id(name,flag)")
+        .select("id,kickoff_at,phase,voting_open,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
         .eq("id", id).maybeSingle();
       return data;
     },

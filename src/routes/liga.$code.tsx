@@ -115,7 +115,7 @@ function LigaPage() {
   function copyLink() {
     const url = window.location.href;
     if (navigator.share) {
-      navigator.share({ title: `Liga "${pool?.name}"`, text: "Junta-te à minha liga no Uma Geração 🏆", url });
+      navigator.share({ title: `Liga "${pool?.name}"`, text: "Junta-te ao meu torneio no Uma Geração 🏆", url });
     } else {
       navigator.clipboard.writeText(url);
       setCopied(true);
@@ -126,7 +126,7 @@ function LigaPage() {
 
   function shareWhatsApp() {
     const url = window.location.href;
-    const text = encodeURIComponent(`🏆 Junta-te à minha liga "${pool?.name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
+    const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${pool?.name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }
 
@@ -152,14 +152,14 @@ function LigaPage() {
     <div className="px-5 pt-6 pb-10 max-w-2xl">
       {/* Header */}
       <Link to="/ligas" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Ligas
+        <ArrowLeft className="h-4 w-4" /> Torneios
       </Link>
 
       <div className="mb-6 overflow-hidden rounded-2xl bg-wc-red panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.54 0.24 27 / 0.40)" }}>
         <div className="p-5 text-white">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-white/70">Liga Privada</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-white/70">Torneio Privado</p>
               <h1 className="font-display text-3xl leading-tight">{pool.name}</h1>
               <p className="mt-1 flex items-center gap-1.5 text-xs text-white/70">
                 <Users className="h-3.5 w-3.5" />

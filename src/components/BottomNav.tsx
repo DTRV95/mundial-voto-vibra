@@ -4,7 +4,7 @@ import { Home, CalendarClock, Trophy, Users, User } from "lucide-react";
 const items = [
   { to: "/",         label: "Home",     icon: Home },
   { to: "/jogos",    label: "Jogos",    icon: CalendarClock },
-  { to: "/ligas",    label: "Ligas",    icon: Users },
+  { to: "/ligas",    label: "Torneios",    icon: Users },
   { to: "/rankings", label: "Rankings", icon: Trophy },
   { to: "/perfil",   label: "Perfil",   icon: User },
 ];

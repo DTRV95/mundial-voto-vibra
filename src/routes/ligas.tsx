@@ -9,8 +9,8 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/ligas")({
   head: () => ({
     meta: [
-      { title: "Ligas — Uma Geração" },
-      { name: "description", content: "Cria ou junta-te a uma liga privada com os teus amigos." },
+      { title: "Torneios Privados — Uma Geração" },
+      { name: "description", content: "Cria ou junta-te a um torneio privado com os teus amigos." },
     ],
   }),
   component: Ligas,
@@ -96,7 +96,7 @@ function Ligas() {
       const { error: joinError } = await supabase
         .from("pool_members")
         .insert({ pool_id: pool.id, user_id: user!.id });
-      if (joinError?.code === "23505") throw new Error("Já és membro desta liga.");
+      if (joinError?.code === "23505") throw new Error("Já és membro deste torneio.");
       if (joinError) throw joinError;
       return pool;
     },
@@ -105,7 +105,7 @@ function Ligas() {
       qc.invalidateQueries({ queryKey: ["my-pools"] });
       toast.success(`Entraste na liga "${pool.name}"!`);
     },
-    onError: (e: any) => toast.error(e.message ?? "Erro ao entrar na liga."),
+    onError: (e: any) => toast.error(e.message ?? "Erro ao entrar no torneio."),
   });
 
   const leavePool = useMutation({
@@ -114,14 +114,14 @@ function Ligas() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-pools"] });
-      toast.success("Saíste da liga.");
+      toast.success("Saíste do torneio.");
     },
   });
 
   function copyLink(code: string, poolId: string) {
     const url = `${window.location.origin}/liga/${code}`;
     if (navigator.share) {
-      navigator.share({ title: "Junta-te à minha liga!", text: "Vota comigo no Mundial 2026 🏆", url });
+      navigator.share({ title: "Junta-te ao meu torneio!", text: "Vota comigo no Mundial 2026 🏆", url });
     } else {
       navigator.clipboard.writeText(url);
       setCopiedId(poolId);
@@ -132,7 +132,7 @@ function Ligas() {
 
   function shareWhatsApp(code: string, name: string) {
     const url = `${window.location.origin}/liga/${code}`;
-    const text = encodeURIComponent(`🏆 Junta-te à minha liga "${name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
+    const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }
 
@@ -140,8 +140,8 @@ function Ligas() {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center px-5 text-center">
         <Users className="mb-3 h-12 w-12 text-muted-foreground" />
-        <h2 className="font-display text-2xl">Ligas Privadas</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Entra na tua conta para criar ou juntar-te a uma liga.</p>
+        <h2 className="font-display text-2xl">Torneios Privados</h2>
+        <p className="mt-2 text-sm text-muted-foreground">Entra na tua conta para criar ou juntar-te a um torneio.</p>
         <Link to="/auth" className="mt-4 rounded-full bg-wc-red px-6 py-2.5 text-sm font-bold text-white shadow-gold">
           Entrar / Registar
         </Link>
@@ -152,19 +152,19 @@ function Ligas() {
   return (
     <div className="px-5 pt-6 pb-10 max-w-2xl">
       <header className="mb-6">
-        <h1 className="font-display text-3xl">Ligas Privadas</h1>
-        <p className="text-sm text-muted-foreground">Cria um grupo, convida os amigos e compete em privado.</p>
+        <h1 className="font-display text-3xl">Torneios Privados</h1>
+        <p className="text-sm text-muted-foreground">Cria um torneio privado, convida os amigos e compete entre si.</p>
       </header>
 
       {/* Criar nova liga */}
       <div className="mb-6 rounded-2xl border border-border bg-card p-5">
         <h2 className="mb-3 font-display text-lg flex items-center gap-2">
-          <Plus className="h-5 w-5 text-wc-red" /> Criar Liga
+          <Plus className="h-5 w-5 text-wc-red" /> Criar Torneio
         </h2>
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Nome da liga (ex: Família Silva)"
+            placeholder="Nome do torneio (ex: Família Silva)"
             value={newName}
             onChange={e => setNewName(e.target.value)}
             onKeyDown={e => e.key === "Enter" && newName.trim() && createPool.mutate(newName.trim())}
@@ -181,7 +181,7 @@ function Ligas() {
         </div>
       </div>
 
-      {/* Entrar numa liga */}
+      {/* Entrar num torneio */}
       <div className="mb-8 rounded-2xl border border-border bg-card p-5">
         <h2 className="mb-3 font-display text-lg flex items-center gap-2">
           <LogIn className="h-5 w-5 text-wc-green" /> Entrar com Código
@@ -189,7 +189,7 @@ function Ligas() {
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Código da liga (ex: XK92PL)"
+            placeholder="Código do torneio (ex: XK92PL)"
             value={joinCode}
             onChange={e => setJoinCode(e.target.value.toUpperCase())}
             onKeyDown={e => e.key === "Enter" && joinCode.trim() && joinPool.mutate(joinCode)}
@@ -207,12 +207,12 @@ function Ligas() {
       </div>
 
       {/* Minhas ligas */}
-      <h2 className="mb-3 font-display text-xl">As minhas ligas</h2>
+      <h2 className="mb-3 font-display text-xl">Os meus torneios</h2>
       {myPools.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-card/40 p-8 text-center">
           <Users className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="font-display text-lg">Ainda sem ligas</p>
-          <p className="text-sm text-muted-foreground">Cria uma liga ou entra com um código.</p>
+          <p className="font-display text-lg">Ainda sem torneios</p>
+          <p className="text-sm text-muted-foreground">Cria um torneio ou entra com um código.</p>
         </div>
       ) : (
         <div className="space-y-3">

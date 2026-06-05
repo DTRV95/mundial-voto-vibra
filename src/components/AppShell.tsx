@@ -21,10 +21,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Barras laterais decorativas — só desktop, só quando não há sidebar */}
       {!loggedIn && (
         <>
-          <div className="hidden xl:block fixed left-0 top-0 h-full w-2 z-30"
-            style={{ background: "linear-gradient(180deg, #E61D25 0%, #3CAC3B 50%, #2A398D 100%)", opacity: 0.18 }} />
-          <div className="hidden xl:block fixed right-0 top-0 h-full w-2 z-30"
-            style={{ background: "linear-gradient(180deg, #2A398D 0%, #3CAC3B 50%, #E61D25 100%)", opacity: 0.18 }} />
+          <div className="hidden md:block fixed left-0 top-0 h-full w-3 z-30"
+            style={{ background: "linear-gradient(180deg, #E61D25 0%, #3CAC3B 50%, #2A398D 100%)", opacity: 0.55 }} />
+          <div className="hidden md:block fixed right-0 top-0 h-full w-3 z-30"
+            style={{ background: "linear-gradient(180deg, #2A398D 0%, #3CAC3B 50%, #E61D25 100%)", opacity: 0.55 }} />
         </>
       )}
 

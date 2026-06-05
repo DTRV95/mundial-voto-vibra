@@ -93,25 +93,37 @@ function LigaPage() {
 
       const results = await Promise.all(
         members.map(async (member) => {
-          const { data: preds } = await supabase
-            .from("predictions")
-            .select("points, created_at")
-            .eq("user_id", member.user_id)
-            .gte("created_at", member.joined_at);
+          try {
+            const { data: preds } = await supabase
+              .from("predictions")
+              .select("points, created_at")
+              .eq("user_id", member.user_id)
+              .gte("created_at", member.joined_at);
 
-          const points = (preds ?? []).reduce((sum, p) => sum + (p.points ?? 0), 0);
-          const made = (preds ?? []).length;
-          const correct = (preds ?? []).filter((p) => (p.points ?? 0) > 0).length;
-          const profile = profiles?.find((pr) => pr.id === member.user_id);
+            const points = (preds ?? []).reduce((sum, p) => sum + (p.points ?? 0), 0);
+            const made = (preds ?? []).length;
+            const correct = (preds ?? []).filter((p) => (p.points ?? 0) > 0).length;
+            const profile = profiles?.find((pr) => pr.id === member.user_id);
 
-          return {
-            id: member.user_id,
-            display_name: profile?.display_name ?? "Adepto",
-            total_points: points,
-            predictions_made: made,
-            predictions_correct: correct,
-            joined_at: member.joined_at,
-          };
+            return {
+              id: member.user_id,
+              display_name: profile?.display_name ?? "Adepto",
+              total_points: points,
+              predictions_made: made,
+              predictions_correct: correct,
+              joined_at: member.joined_at,
+            };
+          } catch {
+            const profile = profiles?.find((pr) => pr.id === member.user_id);
+            return {
+              id: member.user_id,
+              display_name: profile?.display_name ?? "Adepto",
+              total_points: 0,
+              predictions_made: 0,
+              predictions_correct: 0,
+              joined_at: member.joined_at,
+            };
+          }
         })
       );
 

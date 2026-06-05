@@ -118,8 +118,8 @@ function JogoPage() {
   if (isLoading) return <div className="px-5 pt-6"><div className="h-40 shimmer rounded-2xl" /></div>;
   if (!match) return <div className="px-5 pt-10 text-center text-muted-foreground">Jogo não encontrado.</div>;
 
-  const home = match.home as any;
-  const away = match.away as any;
+  const home = (match.home as any) ?? { name: "?", flag: "⚽", code: "" };
+  const away = (match.away as any) ?? { name: "?", flag: "⚽", code: "" };
 
   return (
     <div className="px-4 pt-4 pb-10 md:px-8">

@@ -228,23 +228,34 @@ function MatchesAdmin() {
     });
     if (error) toast.error(error.message); else { toast.success("Jogo criado"); qc.invalidateQueries({ queryKey: ["admin", "matches"] }); }
   }
+  const [pending, setPending] = useState<string | null>(null);
+
   async function toggleVoting(id: string, current: boolean) {
+    setPending(`vote-${id}`);
     await supabase.from("matches").update({ voting_open: !current }).eq("id", id);
     qc.invalidateQueries({ queryKey: ["admin", "matches"] });
+    setPending(null);
   }
   async function setScore(id: string, h: number, a: number) {
+    setPending(`score-${id}`);
     await supabase.from("matches").update({ home_score: h, away_score: a, status: "finished" }).eq("id", id);
-    toast.success("Resultado registado"); qc.invalidateQueries({ queryKey: ["admin", "matches"] });
+    toast.success("Resultado registado");
+    qc.invalidateQueries({ queryKey: ["admin", "matches"] });
+    setPending(null);
   }
   async function calcPoints(id: string) {
+    setPending(`pts-${id}`);
     const { error } = await supabase.rpc("calculate_match_points", { p_match_id: id });
     if (error) toast.error(error.message);
     else { toast.success("Pontos calculados!"); qc.invalidateQueries({ queryKey: ["admin", "matches"] }); }
+    setPending(null);
   }
   async function del(id: string) {
     if (!confirm("Eliminar jogo?")) return;
+    setPending(`del-${id}`);
     await supabase.from("matches").delete().eq("id", id);
     qc.invalidateQueries({ queryKey: ["admin", "matches"] });
+    setPending(null);
   }
   return (
     <Section>
@@ -267,23 +278,27 @@ function MatchesAdmin() {
         {matches.map((m: any) => (
           <li key={m.id} className="rounded-xl border border-border bg-card/60 p-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">{m.home.name} vs {m.away.name}</span>
+              <span className="font-medium">{m.home?.name ?? "?"} vs {m.away?.name ?? "?"}</span>
               <span className="text-xs text-muted-foreground">{new Date(m.kickoff_at).toLocaleString("pt-PT")}</span>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
               <span className="rounded-full bg-secondary px-2 py-0.5">{PHASE_LABEL[m.phase]}</span>
-              <button onClick={() => toggleVoting(m.id, m.voting_open)}
-                className={`rounded-full px-2 py-0.5 font-semibold ${m.voting_open ? "bg-primary/20 text-primary" : "bg-destructive/20 text-destructive"}`}>
-                {m.voting_open ? "Votação aberta" : "Votação fechada"}
+              <button
+                onClick={() => toggleVoting(m.id, m.voting_open)}
+                disabled={!!pending}
+                className={`rounded-full px-2 py-0.5 font-semibold disabled:opacity-50 ${m.voting_open ? "bg-primary/20 text-primary" : "bg-destructive/20 text-destructive"}`}>
+                {pending === `vote-${m.id}` ? "…" : m.voting_open ? "Votação aberta" : "Votação fechada"}
               </button>
-              <ScoreSet match={m} onSubmit={(h, a) => setScore(m.id, h, a)} />
+              <ScoreSet match={m} onSubmit={(h, a) => setScore(m.id, h, a)} disabled={!!pending} />
               {m.home_score != null && m.away_score != null && (
-                <button onClick={() => calcPoints(m.id)}
-                  className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-semibold text-primary">
-                  Calcular pts
+                <button
+                  onClick={() => calcPoints(m.id)}
+                  disabled={!!pending}
+                  className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-semibold text-primary disabled:opacity-50">
+                  {pending === `pts-${m.id}` ? "…" : "Calcular pts"}
                 </button>
               )}
-              <button onClick={() => del(m.id)} className="ml-auto text-destructive"><Trash2 className="h-4 w-4" /></button>
+              <button onClick={() => del(m.id)} disabled={!!pending} className="ml-auto text-destructive disabled:opacity-50"><Trash2 className="h-4 w-4" /></button>
             </div>
           </li>
         ))}
@@ -292,15 +307,15 @@ function MatchesAdmin() {
   );
 }
 
-function ScoreSet({ match, onSubmit }: { match: any; onSubmit: (h: number, a: number) => void }) {
+function ScoreSet({ match, onSubmit, disabled }: { match: any; onSubmit: (h: number, a: number) => void; disabled?: boolean }) {
   const [h, setH] = useState<number>(match.home_score ?? 0);
   const [a, setA] = useState<number>(match.away_score ?? 0);
   return (
     <span className="flex items-center gap-1">
-      <input type="number" min={0} value={h} onChange={(e) => setH(Number(e.target.value))} className="w-12 rounded-md border border-border bg-input px-2 py-0.5 text-center" />
+      <input type="number" min={0} value={h} onChange={(e) => setH(Number(e.target.value))} disabled={disabled} className="w-12 rounded-md border border-border bg-input px-2 py-0.5 text-center disabled:opacity-50" />
       <span>:</span>
-      <input type="number" min={0} value={a} onChange={(e) => setA(Number(e.target.value))} className="w-12 rounded-md border border-border bg-input px-2 py-0.5 text-center" />
-      <button onClick={() => onSubmit(h, a)} className="rounded-full bg-gold px-2 py-0.5 font-semibold text-background">OK</button>
+      <input type="number" min={0} value={a} onChange={(e) => setA(Number(e.target.value))} disabled={disabled} className="w-12 rounded-md border border-border bg-input px-2 py-0.5 text-center disabled:opacity-50" />
+      <button onClick={() => onSubmit(h, a)} disabled={disabled} className="rounded-full bg-gold px-2 py-0.5 font-semibold text-background disabled:opacity-50">OK</button>
     </span>
   );
 }

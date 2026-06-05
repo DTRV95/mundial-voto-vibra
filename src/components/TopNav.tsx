@@ -6,8 +6,8 @@ import logoSvg from "@/assets/logo.svg";
 const items = [
   { to: "/",         label: "Home",     icon: Home },
   { to: "/jogos",    label: "Jogos",    icon: CalendarClock },
+  { to: "/ligas",    label: "Ligas",    icon: Users },
   { to: "/noticias", label: "Notícias", icon: Newspaper },
-  { to: "/grupos",   label: "Grupos",   icon: Users },
   { to: "/rankings", label: "Rankings", icon: Trophy },
   { to: "/premios",  label: "Prémios",  icon: Gift },
 ];

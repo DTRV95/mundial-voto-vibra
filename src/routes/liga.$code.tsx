@@ -469,38 +469,34 @@ function LigaPage() {
             className="overflow-hidden rounded-2xl panini-stripes text-white"
             style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)", boxShadow: "0 4px 20px oklch(0 0 0 / 0.25)" }}
           >
-            <div className="p-5">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-1">Convida</p>
-              <p className="font-display text-lg leading-tight">Chama mais amigos</p>
-              <p className="mt-0.5 text-xs text-white/60 mb-4">Partilha o link ou o código — quanto mais, mais emocionante fica.</p>
-
-              {/* Código copiável */}
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(pool.code);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                  toast.success("Código copiado!");
-                }}
-                className="mb-3 flex w-full items-center justify-between rounded-xl bg-white/10 px-4 py-3 hover:bg-white/20 transition-smooth active:scale-95"
-              >
-                <div className="text-left">
-                  <p className="text-[10px] text-white/50 uppercase tracking-widest mb-0.5">Código do torneio</p>
-                  <p className="font-mono text-xl font-bold text-white tracking-widest">{pool.code}</p>
-                </div>
-                <div className="flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white">
-                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied ? "Copiado!" : "Copiar"}
-                </div>
-              </button>
-
-              {/* Botões de partilha */}
-              <div className="flex gap-2">
-                <button onClick={shareWhatsApp} className="flex-1 rounded-xl bg-[#25D366] py-2.5 text-xs font-bold text-white transition-smooth hover:scale-[1.02] active:scale-95">
-                  Partilhar no WhatsApp
+            <div className="flex items-center justify-between gap-4 p-5">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-1">Convida</p>
+                <p className="font-display text-lg leading-tight">Chama mais amigos</p>
+                <p className="mt-0.5 text-xs text-white/60">Quanto mais, mais emocionante fica.</p>
+                {/* Código pequeno e copiável */}
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(pool.code);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                    toast.success("Código copiado!");
+                  }}
+                  className="mt-2 flex items-center gap-2 rounded-lg bg-white/10 px-2.5 py-1 hover:bg-white/20 transition-smooth active:scale-95"
+                >
+                  <span className="text-[11px] text-white/50">Código:</span>
+                  <span className="font-mono text-xs font-bold text-white tracking-widest">{pool.code}</span>
+                  {copied ? <Check className="h-3 w-3 text-white/70" /> : <Copy className="h-3 w-3 text-white/50" />}
                 </button>
-                <button onClick={copyLink} className="flex items-center justify-center gap-1.5 rounded-xl bg-white/15 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/25 transition-smooth active:scale-95">
-                  <Copy className="h-3 w-3" /> Link
+              </div>
+              <div className="flex gap-2">
+                <button onClick={shareWhatsApp} className="flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3 py-2 text-xs font-bold text-white transition-smooth hover:scale-[1.02]">
+                  <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.524 5.851L0 24l6.336-1.498A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.36-.214-3.727.881.933-3.625-.235-.372A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+                  WhatsApp
+                </button>
+                <button onClick={copyLink} className="flex items-center gap-1 rounded-xl bg-white/15 px-3 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth">
+                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  Link
                 </button>
               </div>
             </div>

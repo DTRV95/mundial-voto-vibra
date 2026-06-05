@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { BottomNav } from "./BottomNav";
 import { SideNav } from "./SideNav";
 import { TopNav } from "./TopNav";
+import { Footer } from "./Footer";
+import { CookieBanner } from "./CookieBanner";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { Shield } from "lucide-react";
 import logoSvg from "@/assets/logo.svg";
@@ -78,7 +80,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </main>
 
+      <Footer />
       <BottomNav />
+      <CookieBanner />
     </div>
   );
 }

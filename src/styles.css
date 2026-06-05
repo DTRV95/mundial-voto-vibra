@@ -168,6 +168,14 @@
 
   .text-balance { text-wrap: balance; }
 
+  .text-gold-metallic {
+    background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 45%, #FBF5B7 65%, #AA771C 80%, #FCF6BA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: #DAA520; /* fallback */
+  }
+
   .shimmer {
     position: relative;
     overflow: hidden;

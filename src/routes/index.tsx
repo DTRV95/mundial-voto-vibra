@@ -147,12 +147,7 @@ function Home() {
             <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-2 flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" /> Mundial 2026
             </p>
-            <h1 className="font-display text-[clamp(3rem,10vw,6rem)] leading-none" style={{
-              background: "linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 45%, #FBF5B7 65%, #AA771C 80%, #FCF6BA 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}>
+            <h1 className="font-display text-[clamp(3rem,10vw,6rem)] leading-none text-gold-metallic">
               UMA<br />GERAÇÃO
             </h1>
             <p className="mt-3 text-sm md:text-base font-semibold text-white/90 max-w-xs">

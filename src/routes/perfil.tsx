@@ -136,7 +136,7 @@ function Perfil() {
         {/* Trophy watermark */}
         <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[96px] opacity-[0.06] select-none">🏆</div>
 
-        <div className="relative px-5 py-6">
+        <div className="relative px-5 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* Avatar */}
@@ -191,7 +191,7 @@ function Perfil() {
           </div>
 
           {/* Stats row */}
-          <div className="mt-5 grid grid-cols-3 gap-3">
+          <div className="mt-8 grid grid-cols-3 gap-3">
             <StatCard icon={<Trophy className="h-4 w-4 text-gold" />} label="Pontos" value={profile?.total_points ?? 0} />
             <StatCard icon={<Target className="h-4 w-4 text-wc-green" />} label="Previsões" value={profile?.predictions_made ?? 0} />
             <StatCard icon={<Percent className="h-4 w-4 text-wc-blue" />} label="Acerto" value={`${acc}%`} />
@@ -262,7 +262,12 @@ function Perfil() {
                 <li key={h.id}>
                   <Link to="/jogo/$id" params={{ id: h.match.id }}
                     className="flex items-center gap-3 rounded-2xl border border-border bg-card/60 p-3 transition-smooth hover:border-gold/30 group">
-                    <TeamBadge code={h.match.home?.code} flag={h.match.home?.flag} name={h.match.home?.name ?? ""} size="sm" />
+                    {/* Badges lado a lado */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <TeamBadge code={h.match.home?.code} flag={h.match.home?.flag} name={h.match.home?.name ?? ""} size="sm" />
+                      <span className="text-[10px] font-bold text-muted-foreground">vs</span>
+                      <TeamBadge code={h.match.away?.code} flag={h.match.away?.flag} name={h.match.away?.name ?? ""} size="sm" />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold leading-tight truncate">
                         {h.match.home?.name} vs {h.match.away?.name}
@@ -281,7 +286,6 @@ function Perfil() {
                         )}
                       </div>
                     </div>
-                    <TeamBadge code={h.match.away?.code} flag={h.match.away?.flag} name={h.match.away?.name ?? ""} size="sm" />
                     <div className="text-right shrink-0 w-12">
                       {hasResult ? (
                         <>

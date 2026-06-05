@@ -80,7 +80,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </main>
 
-      <Footer />
+      <div className={`${loggedIn ? "md:ml-56" : ""}`}>
+        <Footer />
+      </div>
       <BottomNav />
       <CookieBanner />
     </div>

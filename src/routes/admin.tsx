@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { toast } from "sonner";
 import { PHASE_LABEL } from "@/lib/format";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Uma Geração" }] }),
@@ -73,7 +73,20 @@ function Stat({ label, value }: { label: string; value: number }) {
 }
 
 function Tabs() {
-  const [tab, setTab] = useState<"matches" | "analysis" | "news" | "teams" | "groups" | "prizes">("matches");
+  const [tab, setTab] = useState<"matches" | "analysis" | "news" | "teams" | "groups" | "prizes" | "suporte">("matches");
+
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ["admin", "support-unread"],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("support_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("read", false);
+      return count ?? 0;
+    },
+    refetchInterval: 60000,
+  });
+
   const tabs = [
     { k: "matches",  label: "Jogos" },
     { k: "analysis", label: "ScoreLab" },
@@ -81,15 +94,23 @@ function Tabs() {
     { k: "teams",    label: "Equipas" },
     { k: "groups",   label: "Grupos" },
     { k: "prizes",   label: "Prémios" },
+    { k: "suporte",  label: "Suporte", badge: unreadCount },
   ] as const;
   return (
     <>
       <div className="mb-4 flex gap-2 overflow-x-auto">
         {tabs.map((t) => (
           <button key={t.k} onClick={() => setTab(t.k)}
-            className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold ${
+            className={`relative whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold ${
               tab === t.k ? "border-gold bg-gold text-background" : "border-border bg-card/60 text-muted-foreground"
-            }`}>{t.label}</button>
+            }`}>
+            {t.label}
+            {"badge" in t && t.badge > 0 && (
+              <span className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-wc-red text-[9px] font-bold text-white">
+                {t.badge}
+              </span>
+            )}
+          </button>
         ))}
       </div>
       {tab === "matches"  && <MatchesAdmin />}
@@ -98,6 +119,7 @@ function Tabs() {
       {tab === "groups"   && <GroupsAdmin />}
       {tab === "teams"    && <TeamsAdmin />}
       {tab === "prizes"   && <PrizesAdmin />}
+      {tab === "suporte"  && <SuporteAdmin />}
     </>
   );
 }
@@ -519,6 +541,89 @@ function NewsAdmin() {
         </ul>
       )}
     </Section>
+  );
+}
+
+function SuporteAdmin() {
+  const qc = useQueryClient();
+  const { data: messages = [] } = useQuery({
+    queryKey: ["admin", "support-messages"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("support_messages")
+        .select("*")
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  async function markRead(id: string, read: boolean) {
+    await supabase.from("support_messages").update({ read }).eq("id", id);
+    qc.invalidateQueries({ queryKey: ["admin", "support-messages"] });
+    qc.invalidateQueries({ queryKey: ["admin", "support-unread"] });
+  }
+
+  async function del(id: string) {
+    await supabase.from("support_messages").delete().eq("id", id);
+    qc.invalidateQueries({ queryKey: ["admin", "support-messages"] });
+    qc.invalidateQueries({ queryKey: ["admin", "support-unread"] });
+  }
+
+  if (messages.length === 0) {
+    return (
+      <Section>
+        <div className="py-8 text-center">
+          <MessageCircle className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">Sem mensagens de suporte.</p>
+        </div>
+      </Section>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {messages.map((m: any) => (
+        <div key={m.id} className={`rounded-2xl border p-4 ${m.read ? "border-border bg-card/40" : "border-wc-red/30 bg-wc-red/5"}`}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                {!m.read && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-wc-red px-2 py-0.5 text-[9px] font-bold uppercase text-white">
+                    <Clock className="h-2.5 w-2.5" /> Novo
+                  </span>
+                )}
+                {m.subject && <p className="font-semibold text-sm">{m.subject}</p>}
+                {m.email && (
+                  <a href={`mailto:${m.email}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-wc-red transition-smooth">
+                    <Mail className="h-3 w-3" /> {m.email}
+                  </a>
+                )}
+              </div>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{m.message}</p>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                {new Date(m.created_at).toLocaleString("pt-PT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                {m.user_id && <span className="ml-2">· utilizador registado</span>}
+              </p>
+            </div>
+            <div className="flex shrink-0 gap-1.5">
+              <button
+                onClick={() => markRead(m.id, !m.read)}
+                title={m.read ? "Marcar como não lida" : "Marcar como lida"}
+                className="grid h-7 w-7 place-items-center rounded-full border border-border text-muted-foreground hover:text-foreground transition-smooth"
+              >
+                <CheckCheck className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => del(m.id)}
+                className="grid h-7 w-7 place-items-center rounded-full border border-border text-muted-foreground hover:text-destructive transition-smooth"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 

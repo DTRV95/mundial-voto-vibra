@@ -11,6 +11,7 @@ export function Footer() {
           </div>
           <nav className="flex flex-wrap gap-x-5 gap-y-2">
             {[
+              { to: "/suporte", label: "Suporte" },
               { to: "/privacidade", label: "Privacidade" },
               { to: "/cookies", label: "Cookies" },
               { to: "/termos", label: "Termos" },
@@ -26,15 +27,9 @@ export function Footer() {
             ))}
           </nav>
         </div>
-        <div className="mt-5 border-t border-border pt-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 border-t border-border pt-4">
           <p className="text-[11px] text-muted-foreground">
-            © {new Date().getFullYear()} David Tomas da Rocha Vilaverde ·{" "}
-            <a href="mailto:davidvilaverde@hotmail.com" className="hover:text-foreground transition-smooth">
-              davidvilaverde@hotmail.com
-            </a>
-          </p>
-          <p className="text-[11px] text-muted-foreground">
-            Não afiliado com a FIFA. Apenas para fins de entretenimento.
+            © {new Date().getFullYear()} Uma Geração · Não afiliado com a FIFA. Apenas para fins de entretenimento.
           </p>
         </div>
       </div>

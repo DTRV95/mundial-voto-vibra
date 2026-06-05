@@ -106,7 +106,12 @@ function Home() {
             <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-2 flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" /> Mundial 2026
             </p>
-            <h1 className="font-display text-[clamp(3rem,10vw,6rem)] leading-none text-white">
+            <h1 className="font-display text-[clamp(3rem,10vw,6rem)] leading-none" style={{
+              background: "linear-gradient(180deg, #FFE066 0%, #FFB800 45%, #CC8800 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}>
               UMA<br />GERAÇÃO
             </h1>
             <p className="mt-3 text-sm md:text-base font-semibold text-white/90 max-w-xs">
@@ -267,8 +272,8 @@ function Home() {
 
       {/* ===================== TORNEIO PRIVADO CTA ===================== */}
       <section className="px-5 pt-8 md:px-8">
-        <div className="overflow-hidden rounded-2xl panini-stripes" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)", boxShadow: "0 6px 24px -4px oklch(0 0 0 / 0.40)" }}>
-          <div className="flex items-center justify-between gap-4 p-5 text-white">
+        <div className="overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)", boxShadow: "0 6px 24px -4px oklch(0 0 0 / 0.40)" }}>
+          <div className="flex items-center justify-between gap-4 p-5 text-white panini-stripes">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-1">Novo</p>
               <h3 className="font-display text-xl leading-tight">Torneio Privado</h3>

@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper } from "lucide-react";
+import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
+import { useAuth } from "@/lib/useAuth";
 import trophyImg from "@/assets/trophy-hero.jpg";
 
 export const Route = createFileRoute("/")({
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const { user } = useAuth();
   const { data: todays = [] } = useQuery({
     queryKey: ["matches", "today"],
     queryFn: async (): Promise<MatchCardData[]> => {
@@ -190,14 +192,44 @@ function Home() {
         </div>
       </section>
 
-      {/* ===================== COUNTDOWN ===================== */}
-      {nextMatch && (
-        <Countdown
-          kickoff_at={nextMatch.kickoff_at}
-          home={(nextMatch as any).home}
-          away={(nextMatch as any).away}
-        />
-      )}
+      {/* ===================== COUNTDOWN + CTA ===================== */}
+      <div className={`mx-5 mt-4 md:mx-8 ${nextMatch ? "grid gap-4 md:grid-cols-2" : ""}`}>
+        {nextMatch && (
+          <Countdown
+            kickoff_at={nextMatch.kickoff_at}
+            home={(nextMatch as any).home}
+            away={(nextMatch as any).away}
+          />
+        )}
+        {!user && (
+          <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-wc-blue to-[#1a2560] panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.40 0.18 265 / 0.45)" }}>
+            <div className="flex h-full flex-col justify-between p-4 text-white">
+              <div>
+                <div className="mb-2 flex items-center gap-1.5">
+                  <Star className="h-3.5 w-3.5 text-gold fill-gold" />
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-white/70">Gratuito</span>
+                </div>
+                <h3 className="font-display text-xl leading-tight">Junta-te à comunidade</h3>
+                <p className="mt-1.5 text-sm text-white/80">Vota nos jogos, soma pontos e compete com amigos no Mundial 2026.</p>
+              </div>
+              <div className="mt-4 flex flex-col gap-2">
+                <Link
+                  to="/auth"
+                  className="block w-full rounded-xl bg-white py-2.5 text-center text-sm font-bold text-wc-blue transition-smooth hover:scale-[1.02]"
+                >
+                  Criar conta grátis
+                </Link>
+                <Link
+                  to="/auth"
+                  className="block w-full rounded-xl border border-white/30 py-2 text-center text-xs font-semibold text-white/80 hover:text-white"
+                >
+                  Já tenho conta — entrar
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* ===================== JOGOS DE HOJE ===================== */}
       <section className="px-5 pt-8 md:px-8 relative">
@@ -438,7 +470,7 @@ function Countdown({ kickoff_at, home, away }: { kickoff_at: string; home: any; 
   const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
-    <div className="mx-5 mt-4 overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-r from-card/80 via-gold/5 to-card/80 p-4 md:mx-8">
+    <div className="overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-r from-card/80 via-gold/5 to-card/80 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Timer className="h-4 w-4 text-gold" />

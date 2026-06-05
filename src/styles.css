@@ -108,6 +108,12 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Padrão diagonal Panini subtil no fundo da página */
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent 0px, transparent 28px,
+      oklch(0 0 0 / 0.028) 28px, oklch(0 0 0 / 0.028) 29px
+    );
   }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: 0.01em; }
 }

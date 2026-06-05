@@ -267,15 +267,15 @@ function Home() {
 
       {/* ===================== TORNEIO PRIVADO CTA ===================== */}
       <section className="px-5 pt-8 md:px-8">
-        <div className="overflow-hidden rounded-2xl bg-wc-blue panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.40 0.18 265 / 0.35)" }}>
+        <div className="overflow-hidden rounded-2xl panini-stripes" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)", boxShadow: "0 6px 24px -4px oklch(0 0 0 / 0.40)" }}>
           <div className="flex items-center justify-between gap-4 p-5 text-white">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-white/70 mb-1">Novo</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-1">Novo</p>
               <h3 className="font-display text-xl leading-tight">Torneio Privado</h3>
-              <p className="mt-1 text-sm text-white/80">Compete com os teus amigos num grupo fechado. Os pontos começam do zero quando entras.</p>
+              <p className="mt-1 text-sm text-white/70">Compete com os teus amigos num grupo fechado.</p>
             </div>
             <Link to="/ligas"
-              className="shrink-0 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-wc-blue transition-smooth hover:scale-[1.02]">
+              className="shrink-0 rounded-xl bg-wc-red px-4 py-2.5 text-sm font-bold text-white shadow-gold transition-smooth hover:scale-[1.02]">
               Criar →
             </Link>
           </div>

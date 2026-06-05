@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -21,7 +21,7 @@ function LigaPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("pools")
-        .select("id, name, code, created_by")
+        .select("id, name, code, created_by, prize")
         .eq("code", code.toUpperCase())
         .maybeSingle();
       return data;
@@ -165,6 +165,11 @@ function LigaPage() {
                 <Users className="h-3.5 w-3.5" />
                 {ranking.length} membro{ranking.length !== 1 ? "s" : ""} · código: <span className="font-mono font-bold text-white">{pool.code}</span>
               </p>
+              {pool.prize && (
+                <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white">
+                  <Gift className="h-3.5 w-3.5" /> {pool.prize}
+                </p>
+              )}
             </div>
             <Trophy className="h-10 w-10 shrink-0 text-white/30" />
           </div>

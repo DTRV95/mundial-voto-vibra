@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Users, Plus, LogIn, Copy, Check, Trash2 } from "lucide-react";
+import { Users, Plus, LogIn, Copy, Check, Trash2, Gift } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/ligas")({
@@ -24,6 +24,7 @@ function Ligas() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [newName, setNewName] = useState("");
+  const [newPrize, setNewPrize] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -34,7 +35,7 @@ function Ligas() {
     queryFn: async () => {
       const { data } = await supabase
         .from("pool_members")
-        .select("pool:pool_id(id, name, code, created_by)")
+        .select("pool:pool_id(id, name, code, created_by, prize)")
         .eq("user_id", user!.id);
       return (data ?? []).map((r: any) => r.pool).filter(Boolean);
     },
@@ -59,7 +60,7 @@ function Ligas() {
   });
 
   const createPool = useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async ({ name, prize }: { name: string; prize: string }) => {
       let code = genCode();
       // garantir código único (retry simples)
       const { data: existing } = await supabase.from("pools").select("id").eq("code", code).maybeSingle();
@@ -67,7 +68,7 @@ function Ligas() {
 
       const { data: pool, error } = await supabase
         .from("pools")
-        .insert({ name, code, created_by: user!.id })
+        .insert({ name, code, created_by: user!.id, prize: prize || null })
         .select()
         .single();
       if (error) throw error;
@@ -78,8 +79,9 @@ function Ligas() {
     },
     onSuccess: () => {
       setNewName("");
+      setNewPrize("");
       qc.invalidateQueries({ queryKey: ["my-pools"] });
-      toast.success("Liga criada!");
+      toast.success("Torneio criado!");
     },
     onError: () => toast.error("Erro ao criar liga."),
   });
@@ -156,27 +158,37 @@ function Ligas() {
         <p className="text-sm text-muted-foreground">Cria um torneio privado, convida os amigos e compete entre si.</p>
       </header>
 
-      {/* Criar nova liga */}
+      {/* Criar novo torneio */}
       <div className="mb-6 rounded-2xl border border-border bg-card p-5">
         <h2 className="mb-3 font-display text-lg flex items-center gap-2">
           <Plus className="h-5 w-5 text-wc-red" /> Criar Torneio
         </h2>
-        <div className="flex gap-2">
+        <div className="space-y-2">
           <input
             type="text"
             placeholder="Nome do torneio (ex: Família Silva)"
             value={newName}
             onChange={e => setNewName(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && newName.trim() && createPool.mutate(newName.trim())}
             maxLength={40}
-            className="flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-wc-red/40"
+            className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-wc-red/40"
           />
+          <div className="relative">
+            <Gift className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Prémio do vencedor (ex: Jantar pago, Camisola...)"
+              value={newPrize}
+              onChange={e => setNewPrize(e.target.value)}
+              maxLength={80}
+              className="w-full rounded-xl border border-border bg-background pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-wc-red/40"
+            />
+          </div>
           <button
-            onClick={() => newName.trim() && createPool.mutate(newName.trim())}
+            onClick={() => newName.trim() && createPool.mutate({ name: newName.trim(), prize: newPrize.trim() })}
             disabled={!newName.trim() || createPool.isPending}
-            className="rounded-xl bg-wc-red px-4 py-2.5 text-sm font-bold text-white shadow-gold disabled:opacity-50"
+            className="w-full rounded-xl bg-wc-red py-2.5 text-sm font-bold text-white shadow-gold disabled:opacity-50"
           >
-            Criar
+            Criar Torneio
           </button>
         </div>
       </div>
@@ -229,6 +241,11 @@ function Ligas() {
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {memberCounts[pool.id] ?? 1} membro{(memberCounts[pool.id] ?? 1) !== 1 ? "s" : ""} · código: <span className="font-mono font-bold">{pool.code}</span>
                     </p>
+                    {pool.prize && (
+                      <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-wc-red">
+                        <Gift className="h-3 w-3" /> {pool.prize}
+                      </p>
+                    )}
                   </div>
                   <button
                     onClick={() => leavePool.mutate(pool.id)}

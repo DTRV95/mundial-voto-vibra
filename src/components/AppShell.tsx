@@ -18,7 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Barra tricolor FIFA WC2026 — fixa no topo */}
       <div className="wc-tricolor fixed top-0 left-0 z-50 h-[3px] w-full" />
 
-      {/* Barras laterais decorativas — só desktop, só quando não há sidebar */}
+      {/* Barras laterais decorativas */}
       {!loggedIn && (
         <>
           <div className="hidden md:block fixed left-0 top-0 h-full w-3 z-30"
@@ -26,6 +26,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="hidden md:block fixed right-0 top-0 h-full w-3 z-30"
             style={{ background: "linear-gradient(180deg, #2A398D 0%, #3CAC3B 50%, #E61D25 100%)", opacity: 0.55 }} />
         </>
+      )}
+      {/* Barra lateral direita quando logged in (esquerda tem a sidebar) */}
+      {loggedIn && (
+        <div className="hidden md:block fixed right-0 top-0 h-full w-3 z-30"
+          style={{ background: "linear-gradient(180deg, #E61D25 0%, #3CAC3B 50%, #2A398D 100%)", opacity: 0.55 }} />
       )}
 
       {/* ── DESKTOP ──────────────────────────────────────────── */}

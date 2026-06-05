@@ -45,3 +45,4 @@ CREATE POLICY "pool_members_delete" ON pool_members FOR DELETE TO authenticated
 CREATE INDEX IF NOT EXISTS idx_pool_members_pool ON pool_members(pool_id);
 CREATE INDEX IF NOT EXISTS idx_pool_members_user ON pool_members(user_id);
 CREATE INDEX IF NOT EXISTS idx_pools_code ON pools(code);
+ALTER TABLE pools ADD COLUMN IF NOT EXISTS prize TEXT;

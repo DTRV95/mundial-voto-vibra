@@ -4,7 +4,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
-import { Mail, Lock, User, CheckCircle2, XCircle, Loader2, ArrowLeft, KeyRound } from "lucide-react";
+import { Mail, Lock, User, CheckCircle2, XCircle, Loader2, ArrowLeft, KeyRound, Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }),
@@ -23,6 +23,8 @@ function AuthPage() {
   const [newPassword, setNewPassword] = useState("");
   const [name, setName] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [nameStatus, setNameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   let nameTimer: ReturnType<typeof setTimeout>;
@@ -166,9 +168,13 @@ function AuthPage() {
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input type="password" required minLength={6} placeholder="Nova palavra-passe (mín. 6 caracteres)"
+              <input type={showNewPassword ? "text" : "password"} required minLength={6} placeholder="Nova palavra-passe (mín. 6 caracteres)"
                 value={newPassword} onChange={e => setNewPassword(e.target.value)}
-                className={`${inputCls} pl-10`} />
+                className={`${inputCls} pl-10 pr-10`} />
+              <button type="button" onClick={() => setShowNewPassword(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-smooth">
+                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
             <button type="submit" disabled={loading}
               className="w-full rounded-xl bg-gold py-3.5 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.01] disabled:opacity-50">
@@ -218,9 +224,13 @@ function AuthPage() {
 
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input type="password" required minLength={6} maxLength={72} placeholder="Palavra-passe"
+                <input type={showPassword ? "text" : "password"} required minLength={6} maxLength={72} placeholder="Palavra-passe"
                   value={password} onChange={e => setPassword(e.target.value)}
-                  className={`${inputCls} pl-10`} />
+                  className={`${inputCls} pl-10 pr-10`} />
+                <button type="button" onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-smooth">
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
 
               {mode === "signin" && (

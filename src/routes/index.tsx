@@ -263,66 +263,6 @@ function Home() {
         )}
       </div>
 
-      {/* ===================== OS MEUS TORNEIOS ===================== */}
-      {user && (
-        <section className="px-5 pt-6 md:px-8">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-xl">Os meus torneios</h2>
-            <Link to="/ligas" className="text-xs font-bold text-wc-red">Ver todos →</Link>
-          </div>
-          {myPools.length === 0 ? (
-            <Link
-              to="/ligas"
-              className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-border bg-card/50 px-5 py-4 transition-smooth hover:border-wc-red/40"
-            >
-              <div>
-                <p className="text-sm font-semibold text-foreground">Ainda não estás em nenhum torneio</p>
-                <p className="text-xs text-muted-foreground">Cria um ou pede o código a um amigo.</p>
-              </div>
-              <Trophy className="h-6 w-6 shrink-0 text-muted-foreground/40" />
-            </Link>
-          ) : (
-            <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-              {myPools.map((p: any) => (
-                <Link
-                  key={p.id}
-                  to="/liga/$code"
-                  params={{ code: p.code }}
-                  className="shrink-0 w-52 overflow-hidden rounded-2xl bg-gradient-to-br from-wc-red to-[#8b1018] panini-stripes text-white transition-smooth hover:scale-[1.02] active:scale-95"
-                  style={{ boxShadow: "0 4px 16px oklch(0.54 0.24 27 / 0.30)" }}
-                >
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <Trophy className="h-6 w-6 text-white/40 shrink-0 mt-0.5" />
-                      <span className="font-mono text-[10px] font-bold text-white/50 tracking-widest">{p.code}</span>
-                    </div>
-                    <p className="font-display text-lg leading-tight line-clamp-2">{p.name}</p>
-                    <div className="mt-2 flex items-center gap-1.5 text-[11px] text-white/60">
-                      <Users className="h-3 w-3" />
-                      <span>{p.members} membro{p.members !== 1 ? "s" : ""}</span>
-                    </div>
-                    {p.prize && (
-                      <p className="mt-1.5 flex items-center gap-1 text-[11px] text-white/60">
-                        <Gift className="h-3 w-3" /> {p.prize}
-                      </p>
-                    )}
-                  </div>
-                </Link>
-              ))}
-              <Link
-                to="/ligas"
-                className="shrink-0 w-40 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border text-muted-foreground transition-smooth hover:border-wc-red/40 hover:text-wc-red"
-              >
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-secondary">
-                  <span className="text-xl font-light">+</span>
-                </div>
-                <span className="text-xs font-semibold text-center px-3">Criar ou entrar num torneio</span>
-              </Link>
-            </div>
-          )}
-        </section>
-      )}
-
       {/* ===================== JOGOS DE HOJE ===================== */}
       <section className="px-5 pt-8 md:px-8 relative">
         <div className="mb-4 flex items-end justify-between">

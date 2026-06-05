@@ -214,7 +214,7 @@ function Home() {
             <Trophy className="absolute right-3 top-1/2 -translate-y-1/2 h-20 w-20 text-white/5 pointer-events-none" />
             <div className="relative flex h-full flex-col justify-between p-4 text-white">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50 mb-1">Mundial 2026 · Grátis</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50 mb-1">Mundial 2026</p>
                 <h3 className="font-display text-2xl leading-none">A tua geração.<br/>O teu torneio.</h3>
                 <p className="mt-2 text-xs text-white/70 leading-relaxed max-w-[200px]">Vota, sobe no ranking e prova que sabes mais de futebol.</p>
               </div>
@@ -223,7 +223,7 @@ function Home() {
                   to="/auth"
                   className="block w-full rounded-xl bg-white py-2.5 text-center text-sm font-bold text-wc-red transition-smooth hover:scale-[1.01] active:scale-95"
                 >
-                  Entrar agora — é grátis
+                  Entrar agora
                 </Link>
               </div>
             </div>
@@ -325,38 +325,53 @@ function Home() {
               <Link to="/ligas" className="text-xs font-bold text-white/80 hover:text-white">Ver todos →</Link>
             </div>
             {topPools.length === 0 ? (
-              <p className="px-5 py-4 text-sm text-white/70">Ainda sem torneios — cria o primeiro!</p>
+              <div className="px-5 py-5 text-center">
+                <p className="text-sm text-white/70 mb-3">Ainda sem torneios — cria o primeiro!</p>
+                <Link to="/ligas" className="inline-block rounded-xl bg-white/15 px-4 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth">
+                  Convida os teus amigos →
+                </Link>
+              </div>
             ) : (
-              <ol>
-                {topPools.map((pool, i) => (
-                  <li key={pool.id} className={`flex items-center justify-between px-5 py-3 ${i < topPools.length - 1 ? "border-b border-white/20" : ""}`}>
-                    <span className="flex items-center gap-3 min-w-0">
-                      <span className={`shrink-0 grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                        i === 0 ? "bg-white text-wc-blue" : "bg-white/20 text-white"
-                      }`}>{i + 1}</span>
-                      <span className="font-semibold text-sm truncate">{pool.name}</span>
-                    </span>
-                    <span className="shrink-0 font-display text-lg ml-2">{pool.points} <span className="text-xs font-sans opacity-70">pts</span></span>
-                  </li>
-                ))}
-              </ol>
+              <>
+                <ol>
+                  {topPools.map((pool, i) => (
+                    <li key={pool.id} className={`flex items-center justify-between px-5 py-3 ${i < topPools.length - 1 ? "border-b border-white/20" : ""}`}>
+                      <span className="flex items-center gap-3 min-w-0">
+                        <span className={`shrink-0 grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
+                          i === 0 ? "bg-white text-wc-blue" : "bg-white/20 text-white"
+                        }`}>{i + 1}</span>
+                        <span className="font-semibold text-sm truncate">{pool.name}</span>
+                      </span>
+                      <span className="shrink-0 font-display text-lg ml-2">{pool.points} <span className="text-xs font-sans opacity-70">pts</span></span>
+                    </li>
+                  ))}
+                </ol>
+                <div className="border-t border-white/20 px-5 py-3 text-center">
+                  <Link to="/ligas" className="text-xs font-bold text-white/60 hover:text-white transition-smooth">
+                    + Convida os teus amigos e cria um torneio
+                  </Link>
+                </div>
+              </>
             )}
           </div>
         </div>
 
       </section>
 
-      {/* ===================== TORNEIO PRIVADO CTA ===================== */}
+      {/* ===================== CONVIDA OS TEUS AMIGOS ===================== */}
       <section className="px-5 pt-8 md:px-8">
-        <div className="overflow-hidden rounded-2xl" style={{ background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)", boxShadow: "0 6px 24px -4px oklch(0 0 0 / 0.40)" }}>
-          <div className="flex items-center justify-between gap-4 p-5 text-white panini-stripes">
+        <div
+          className="overflow-hidden rounded-2xl panini-stripes"
+          style={{ background: "linear-gradient(135deg, oklch(0.54 0.24 27) 0%, oklch(0.38 0.16 350) 60%, oklch(0.28 0.14 270) 100%)", boxShadow: "0 8px 32px oklch(0.54 0.24 27 / 0.30)" }}
+        >
+          <div className="flex items-center justify-between gap-4 p-5 text-white">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-1">Novo</p>
-              <h3 className="font-display text-xl leading-tight">Torneio Privado</h3>
-              <p className="mt-1 text-sm text-white/70">Compete com os teus amigos num grupo fechado.</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50 mb-1">Torneio Privado</p>
+              <h3 className="font-display text-2xl leading-tight">Convida os teus amigos</h3>
+              <p className="mt-1 text-xs text-white/70">Cria um grupo fechado e vê quem sabe mais de futebol.</p>
             </div>
             <Link to="/ligas"
-              className="shrink-0 rounded-xl bg-wc-red px-4 py-2.5 text-sm font-bold text-white shadow-gold transition-smooth hover:scale-[1.02]">
+              className="shrink-0 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-wc-red shadow-gold transition-smooth hover:scale-[1.02] active:scale-95">
               Criar →
             </Link>
           </div>

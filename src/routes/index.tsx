@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ArrowRight, Trophy, BarChart3, Users2, Sparkles, Timer, TrendingUp, Newspaper } from "lucide-react";
+import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import trophyImg from "@/assets/trophy-hero.jpg";
@@ -42,6 +42,48 @@ function Home() {
         .order("total_points", { ascending: false })
         .limit(10);
       return data ?? [];
+    },
+  });
+
+  const { data: topPools = [] } = useQuery({
+    queryKey: ["pools", "ranking"],
+    queryFn: async () => {
+      // Buscar todos os membros com a data de entrada
+      const { data: members } = await supabase
+        .from("pool_members")
+        .select("pool_id, user_id, joined_at");
+
+      if (!members || members.length === 0) return [];
+
+      // Buscar nomes das ligas
+      const poolIds = [...new Set(members.map((m) => m.pool_id))];
+      const { data: pools } = await supabase
+        .from("pools")
+        .select("id, name")
+        .in("id", poolIds);
+
+      // Buscar todas as previsões relevantes
+      const userIds = [...new Set(members.map((m) => m.user_id))];
+      const { data: preds } = await supabase
+        .from("predictions")
+        .select("user_id, points, created_at")
+        .in("user_id", userIds);
+
+      // Calcular pontos por liga (só previsões após joined_at)
+      const poolPoints: Record<string, number> = {};
+      const poolMembers: Record<string, number> = {};
+      for (const member of members) {
+        const pts = (preds ?? [])
+          .filter((p) => p.user_id === member.user_id && p.created_at >= member.joined_at)
+          .reduce((sum, p) => sum + (p.points ?? 0), 0);
+        poolPoints[member.pool_id] = (poolPoints[member.pool_id] ?? 0) + pts;
+        poolMembers[member.pool_id] = (poolMembers[member.pool_id] ?? 0) + 1;
+      }
+
+      return (pools ?? [])
+        .map((p) => ({ id: p.id, name: p.name, points: poolPoints[p.id] ?? 0, members: poolMembers[p.id] ?? 0 }))
+        .sort((a, b) => b.points - a.points)
+        .slice(0, 10);
     },
   });
 
@@ -207,8 +249,8 @@ function Home() {
         )}
       </section>
 
-      {/* ===================== RANKING + PRÉMIOS ===================== */}
-      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
+      {/* ===================== RANKING + LIGAS + PRÉMIOS ===================== */}
+      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 lg:grid-cols-3 md:px-8">
         {/* Ranking — fundo verde Panini */}
         <div className="rounded-2xl overflow-hidden bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.45)" }}>
           <div className="text-white">
@@ -236,6 +278,38 @@ function Home() {
                       <span className="font-semibold text-sm">{u.display_name ?? "Adepto"}</span>
                     </span>
                     <span className="font-display text-lg">{u.total_points} <span className="text-xs font-sans opacity-70">pts</span></span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </div>
+
+        {/* Ranking de Torneios — fundo azul Panini */}
+        <div className="rounded-2xl overflow-hidden bg-wc-blue panini-stripes shadow-elegant">
+          <div className="text-white">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/20">
+              <div className="flex items-center gap-2">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="font-display text-xl">Torneios</h3>
+              </div>
+              <Link to="/ligas" className="text-xs font-bold text-white/80 hover:text-white">Ver todos →</Link>
+            </div>
+            {topPools.length === 0 ? (
+              <p className="px-5 py-4 text-sm text-white/70">Ainda sem torneios — cria o primeiro!</p>
+            ) : (
+              <ol>
+                {topPools.map((pool, i) => (
+                  <li key={pool.id} className={`flex items-center justify-between px-5 py-3 ${i < topPools.length - 1 ? "border-b border-white/20" : ""}`}>
+                    <span className="flex items-center gap-3 min-w-0">
+                      <span className={`shrink-0 grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
+                        i === 0 ? "bg-white text-wc-blue" : "bg-white/20 text-white"
+                      }`}>{i + 1}</span>
+                      <span className="font-semibold text-sm truncate">{pool.name}</span>
+                    </span>
+                    <span className="shrink-0 font-display text-lg ml-2">{pool.points} <span className="text-xs font-sans opacity-70">pts</span></span>
                   </li>
                 ))}
               </ol>

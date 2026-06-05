@@ -2,13 +2,44 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/liga/$code")({
   component: LigaPage,
 });
+
+const MEDAL = ["🥇", "🥈", "🥉"];
+const PODIUM_H = ["h-28", "h-20", "h-16"];
+const PODIUM_BG = [
+  "bg-gradient-to-b from-[#FFD700] to-[#B8860B]",
+  "bg-gradient-to-b from-[#C0C0C0] to-[#808080]",
+  "bg-gradient-to-b from-[#CD7F32] to-[#8B4513]",
+];
+
+function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) {
+  const initials = name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const colors = [
+    "from-wc-red to-[#b01020]",
+    "from-wc-green to-[#2a7a2a]",
+    "from-wc-blue to-[#1a2560]",
+    "from-[#7C3AED] to-[#4C1D95]",
+    "from-[#D97706] to-[#92400E]",
+  ];
+  const color = colors[initials.charCodeAt(0) % colors.length];
+  const sz = size === "lg" ? "h-14 w-14 text-xl" : size === "sm" ? "h-7 w-7 text-[10px]" : "h-9 w-9 text-sm";
+  return (
+    <div className={`${sz} shrink-0 grid place-items-center rounded-full bg-gradient-to-br ${color} font-display text-white shadow-md`}>
+      {initials}
+    </div>
+  );
+}
 
 function LigaPage() {
   const { code } = Route.useParams();
@@ -55,13 +86,11 @@ function LigaPage() {
 
       const userIds = members.map((m) => m.user_id);
 
-      // Buscar nome de cada membro
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, display_name")
         .in("id", userIds);
 
-      // Para cada membro, somar só os pontos de previsões feitas APÓS entrar na liga
       const results = await Promise.all(
         members.map(async (member) => {
           const { data: preds } = await supabase
@@ -100,7 +129,7 @@ function LigaPage() {
       const { error } = await supabase
         .from("pool_members")
         .insert({ pool_id: pool!.id, user_id: user!.id });
-      if (error?.code === "23505") return; // já membro, ignorar silenciosamente
+      if (error?.code === "23505") return;
       if (error) throw error;
     },
     onSuccess: () => {
@@ -112,7 +141,6 @@ function LigaPage() {
     onError: (e: any) => toast.error(e.message ?? "Erro ao entrar."),
   });
 
-  // Auto-join quando o utilizador acaba de fazer login via link de convite
   useEffect(() => {
     if (user && pool && isMember === false && !joinPool.isPending) {
       joinPool.mutate();
@@ -155,44 +183,68 @@ function LigaPage() {
     );
   }
 
-  return (
-    <div className="px-5 pt-6 pb-10 max-w-2xl">
-      {/* Header */}
-      <Link to="/ligas" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Torneios
-      </Link>
+  const topPoints = ranking[0]?.total_points ?? 1;
+  const totalPoints = ranking.reduce((s, r: any) => s + (r.total_points ?? 0), 0);
+  const podium = ranking.slice(0, 3);
+  const rest = ranking.slice(3);
+  const myRank = ranking.findIndex((r: any) => r.id === user?.id);
 
-      <div className="mb-6 overflow-hidden rounded-2xl bg-wc-red panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.54 0.24 27 / 0.40)" }}>
-        <div className="p-5 text-white">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-white/70">Torneio Privado</p>
-              <h1 className="font-display text-3xl leading-tight">{pool.name}</h1>
-              <p className="mt-1 flex items-center gap-1.5 text-xs text-white/70">
-                <Users className="h-3.5 w-3.5" />
-                {ranking.length} membro{ranking.length !== 1 ? "s" : ""} · código: <span className="font-mono font-bold text-white">{pool.code}</span>
-              </p>
-              {pool.prize && (
-                <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white">
-                  <Gift className="h-3.5 w-3.5" /> {pool.prize}
-                </p>
-              )}
+  return (
+    <div className="pb-16">
+
+      {/* ── HERO ─────────────────────────────────────────────── */}
+      <div
+        className="relative overflow-hidden panini-stripes"
+        style={{
+          background: "linear-gradient(145deg, oklch(0.54 0.24 27) 0%, oklch(0.40 0.20 15) 55%, oklch(0.28 0.14 270) 100%)",
+          minHeight: "220px",
+        }}
+      >
+        {/* Tricolor strip no fundo */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 wc-tricolor" />
+
+        {/* Troféu decorativo */}
+        <div className="absolute right-0 top-0 bottom-0 flex items-center justify-end pr-6 opacity-10 pointer-events-none select-none">
+          <Trophy className="h-48 w-48 text-white" />
+        </div>
+
+        <div className="relative px-5 pt-5 pb-6 md:px-8">
+          <Link to="/ligas" className="mb-5 inline-flex items-center gap-1.5 text-xs font-semibold text-white/60 hover:text-white/90 transition-smooth">
+            <ArrowLeft className="h-3.5 w-3.5" /> Torneios
+          </Link>
+
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Torneio Privado · {pool.code}</p>
+          <h1 className="font-display text-[clamp(2rem,8vw,3.5rem)] leading-none text-white">{pool.name}</h1>
+
+          {/* Stats strip */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+            <div className="flex items-center gap-1.5 text-xs text-white/70">
+              <Users className="h-3.5 w-3.5" />
+              <span><strong className="text-white">{ranking.length}</strong> membro{ranking.length !== 1 ? "s" : ""}</span>
             </div>
-            <Trophy className="h-10 w-10 shrink-0 text-white/30" />
+            <div className="flex items-center gap-1.5 text-xs text-white/70">
+              <Zap className="h-3.5 w-3.5" />
+              <span><strong className="text-white">{totalPoints}</strong> pontos totais</span>
+            </div>
+            {pool.prize && (
+              <div className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white">
+                <Gift className="h-3 w-3" /> {pool.prize}
+              </div>
+            )}
           </div>
 
           {/* Botões de partilha */}
-          <div className="mt-4 flex gap-2">
+          <div className="mt-5 flex flex-wrap gap-2">
             <button
               onClick={shareWhatsApp}
-              className="flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3 py-2 text-xs font-bold text-white"
+              className="flex items-center gap-1.5 rounded-xl bg-[#25D366] px-4 py-2 text-xs font-bold text-white shadow-md transition-smooth hover:scale-[1.02] active:scale-95"
             >
               <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.524 5.851L0 24l6.336-1.498A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.36-.214-3.727.881.933-3.625-.235-.372A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
-              Partilhar no WhatsApp
+              WhatsApp
             </button>
             <button
               onClick={copyLink}
-              className="flex items-center gap-1.5 rounded-xl bg-white/20 px-3 py-2 text-xs font-bold text-white hover:bg-white/30 transition-smooth"
+              className="flex items-center gap-1.5 rounded-xl bg-white/15 px-4 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth active:scale-95"
             >
               {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? "Copiado!" : "Copiar link"}
@@ -201,9 +253,9 @@ function LigaPage() {
         </div>
       </div>
 
-      {/* Não autenticado — experiência de convite */}
+      {/* ── CONVITE (não autenticado) ─────────────────────────── */}
       {!user && (
-        <div className="mb-6 overflow-hidden rounded-2xl bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.35)" }}>
+        <div className="mx-5 mt-5 md:mx-8 overflow-hidden rounded-2xl bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.35)" }}>
           <div className="p-5 text-white">
             <p className="font-display text-xl mb-1">Foste convidado!</p>
             <p className="text-sm text-white/80 mb-4">
@@ -213,14 +265,14 @@ function LigaPage() {
               <Link
                 to="/auth"
                 search={{ redirect: `/liga/${code}` } as any}
-                className="block w-full rounded-xl bg-white py-3 text-center text-sm font-bold text-wc-green shadow-elegant"
+                className="block w-full rounded-xl bg-white py-3 text-center text-sm font-bold text-wc-green shadow-elegant transition-smooth hover:scale-[1.01]"
               >
                 Criar conta grátis e entrar no torneio
               </Link>
               <Link
                 to="/auth"
                 search={{ redirect: `/liga/${code}` } as any}
-                className="block w-full rounded-xl border border-white/30 py-2.5 text-center text-sm font-semibold text-white"
+                className="block w-full rounded-xl border border-white/30 py-2.5 text-center text-sm font-semibold text-white hover:bg-white/10 transition-smooth"
               >
                 Já tenho conta — entrar
               </Link>
@@ -230,9 +282,9 @@ function LigaPage() {
         </div>
       )}
 
-      {/* Autenticado mas ainda não membro */}
-      {user && !isMember && (
-        <div className="mb-6 overflow-hidden rounded-2xl bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.35)" }}>
+      {/* ── JOIN (autenticado, não membro) ───────────────────── */}
+      {user && isMember === false && (
+        <div className="mx-5 mt-5 md:mx-8 overflow-hidden rounded-2xl bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.35)" }}>
           <div className="flex items-center justify-between gap-3 p-5 text-white">
             <div>
               <p className="font-semibold">Aceitas o desafio?</p>
@@ -241,7 +293,7 @@ function LigaPage() {
             <button
               onClick={() => joinPool.mutate()}
               disabled={joinPool.isPending}
-              className="shrink-0 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-wc-green disabled:opacity-50"
+              className="shrink-0 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-wc-green disabled:opacity-50 transition-smooth hover:scale-[1.02]"
             >
               Entrar no Torneio
             </button>
@@ -249,53 +301,172 @@ function LigaPage() {
         </div>
       )}
 
-      {/* Ranking da liga */}
-      <h2 className="mb-3 font-display text-xl">Ranking da Liga</h2>
-      <div className="overflow-hidden rounded-2xl border border-border bg-card/70">
+      {/* ── O MEU RANKING (membro, fora do top 3) ────────────── */}
+      {user && isMember && myRank >= 3 && ranking[myRank] && (
+        <div className="mx-5 mt-5 md:mx-8">
+          <div className="flex items-center gap-3 rounded-2xl border-2 border-wc-red/40 bg-wc-red/5 px-4 py-3">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-wc-red font-display text-sm text-white">
+              {myRank + 1}
+            </span>
+            <Avatar name={(ranking[myRank] as any).display_name} size="sm" />
+            <span className="flex-1 text-sm font-semibold">{(ranking[myRank] as any).display_name} <span className="text-[10px] font-bold text-wc-red">Tu</span></span>
+            <span className="font-display text-lg text-gold">{(ranking[myRank] as any).total_points} <span className="text-xs font-sans text-muted-foreground">pts</span></span>
+          </div>
+        </div>
+      )}
+
+      {/* ── PÓDIO ────────────────────────────────────────────── */}
+      {ranking.length >= 2 && (
+        <div className="mx-5 mt-8 md:mx-8">
+          <div className="mb-4 flex items-center gap-2">
+            <Crown className="h-4 w-4 text-gold" />
+            <h2 className="font-display text-xl">Pódio</h2>
+          </div>
+
+          <div className="flex items-end justify-center gap-3 px-4 pb-2">
+            {/* 2º lugar */}
+            {podium[1] && (
+              <div className="flex flex-1 flex-col items-center gap-2">
+                <Avatar name={(podium[1] as any).display_name} size="md" />
+                <p className="text-center text-xs font-semibold leading-tight line-clamp-1 max-w-[80px]">{(podium[1] as any).display_name}</p>
+                <p className="font-display text-sm text-muted-foreground">{(podium[1] as any).total_points} pts</p>
+                <div className={`w-full ${PODIUM_H[1]} ${PODIUM_BG[1]} rounded-t-xl flex items-start justify-center pt-2`}>
+                  <span className="text-xl">🥈</span>
+                </div>
+              </div>
+            )}
+            {/* 1º lugar */}
+            {podium[0] && (
+              <div className="flex flex-1 flex-col items-center gap-2">
+                <div className="relative">
+                  <Avatar name={(podium[0] as any).display_name} size="lg" />
+                  <span className="absolute -top-2 -right-1 text-lg">👑</span>
+                </div>
+                <p className="text-center text-xs font-bold leading-tight line-clamp-1 max-w-[80px]">{(podium[0] as any).display_name}</p>
+                <p className="font-display text-base text-gold font-bold">{(podium[0] as any).total_points} pts</p>
+                <div className={`w-full ${PODIUM_H[0]} ${PODIUM_BG[0]} rounded-t-xl flex items-start justify-center pt-2 trophy-shine`}>
+                  <span className="text-2xl">🥇</span>
+                </div>
+              </div>
+            )}
+            {/* 3º lugar */}
+            {podium[2] && (
+              <div className="flex flex-1 flex-col items-center gap-2">
+                <Avatar name={(podium[2] as any).display_name} size="md" />
+                <p className="text-center text-xs font-semibold leading-tight line-clamp-1 max-w-[80px]">{(podium[2] as any).display_name}</p>
+                <p className="font-display text-sm text-muted-foreground">{(podium[2] as any).total_points} pts</p>
+                <div className={`w-full ${PODIUM_H[2]} ${PODIUM_BG[2]} rounded-t-xl flex items-start justify-center pt-2`}>
+                  <span className="text-xl">🥉</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── RANKING COMPLETO ─────────────────────────────────── */}
+      <div className="mx-5 mt-8 md:mx-8">
+        <div className="mb-4 flex items-center gap-2">
+          <Target className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-display text-xl">Classificação Completa</h2>
+        </div>
+
         {ranking.length === 0 ? (
-          <div className="p-10 text-center">
-            <Users className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center">
+            <Trophy className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
             <p className="font-display text-lg">Ainda sem membros</p>
-            <p className="text-sm text-muted-foreground">Convida os teus amigos para começar.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Convida os teus amigos para começar a competir.</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-secondary/50 text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 text-left">#</th>
-                <th className="px-3 py-2 text-left">Adepto</th>
-                <th className="px-2 py-2 text-right">Pts</th>
-                <th className="px-2 py-2 text-right">Acertos</th>
-                <th className="px-2 py-2 text-right hidden sm:table-cell">%</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ranking.map((r: any, i: number) => {
-                const acc = r.predictions_made > 0
-                  ? Math.round((r.predictions_correct / r.predictions_made) * 100)
-                  : 0;
-                const isMe = r.id === user?.id;
-                return (
-                  <tr key={r.id} className={`border-t border-border ${isMe ? "bg-wc-red/5" : ""}`}>
-                    <td className="px-3 py-2.5">
-                      <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                        i === 0 ? "bg-gold text-background" : i < 3 ? "bg-gold/30 text-gold" : "bg-secondary"
-                      }`}>{i + 1}</span>
-                    </td>
-                    <td className="px-3 py-2.5 font-medium">
-                      {r.display_name ?? "Adepto"}
-                      {isMe && <span className="ml-1.5 text-[10px] font-bold text-wc-red">Tu</span>}
-                    </td>
-                    <td className="px-2 py-2.5 text-right font-display text-gold">{r.total_points ?? 0}</td>
-                    <td className="px-2 py-2.5 text-right text-muted-foreground">{r.predictions_correct ?? 0}/{r.predictions_made ?? 0}</td>
-                    <td className="px-2 py-2.5 text-right text-muted-foreground hidden sm:table-cell">{acc}%</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="space-y-2">
+            {ranking.map((r: any, i: number) => {
+              const isMe = r.id === user?.id;
+              const pct = topPoints > 0 ? Math.round((r.total_points / topPoints) * 100) : 0;
+              const acc = r.predictions_made > 0
+                ? Math.round((r.predictions_correct / r.predictions_made) * 100)
+                : 0;
+
+              return (
+                <div
+                  key={r.id}
+                  className={`overflow-hidden rounded-2xl border transition-smooth ${
+                    isMe
+                      ? "border-wc-red/40 bg-wc-red/5 shadow-gold"
+                      : "border-border bg-card/70"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    {/* Posição */}
+                    <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold ${
+                      i === 0
+                        ? "bg-gradient-to-b from-[#FFD700] to-[#B8860B] text-white"
+                        : i === 1
+                        ? "bg-gradient-to-b from-[#C0C0C0] to-[#808080] text-white"
+                        : i === 2
+                        ? "bg-gradient-to-b from-[#CD7F32] to-[#8B4513] text-white"
+                        : "bg-secondary text-muted-foreground"
+                    }`}>
+                      {i < 3 ? MEDAL[i] : i + 1}
+                    </span>
+
+                    <Avatar name={r.display_name} size="sm" />
+
+                    {/* Nome + barra de progresso */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate text-sm font-semibold">{r.display_name}</span>
+                        {isMe && <span className="shrink-0 text-[9px] font-bold text-wc-red uppercase tracking-wider">Tu</span>}
+                      </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <div className="h-1.5 flex-1 rounded-full bg-secondary overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-wc-red to-[#ff6b35] transition-all duration-700"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">{acc}%</span>
+                      </div>
+                    </div>
+
+                    {/* Pontos */}
+                    <div className="shrink-0 text-right">
+                      <div className="font-display text-lg leading-none text-gold">{r.total_points}</div>
+                      <div className="text-[10px] text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
+
+      {/* ── CONVIDAR ─────────────────────────────────────────── */}
+      {user && isMember && (
+        <div className="mx-5 mt-6 md:mx-8">
+          <div
+            className="overflow-hidden rounded-2xl panini-stripes text-white"
+            style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)", boxShadow: "0 4px 20px oklch(0 0 0 / 0.25)" }}
+          >
+            <div className="flex items-center justify-between gap-4 p-5">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-white/50 mb-1">Convida</p>
+                <p className="font-display text-lg leading-tight">Chama mais amigos</p>
+                <p className="mt-0.5 text-xs text-white/60">Quanto mais, mais emocionante fica.</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={shareWhatsApp} className="rounded-xl bg-[#25D366] px-3 py-2 text-xs font-bold text-white transition-smooth hover:scale-[1.02]">
+                  WhatsApp
+                </button>
+                <button onClick={copyLink} className="flex items-center gap-1 rounded-xl bg-white/15 px-3 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth">
+                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  {copied ? "Copiado" : "Link"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

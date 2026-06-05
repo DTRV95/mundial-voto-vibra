@@ -142,10 +142,10 @@ function LigaPage() {
   });
 
   useEffect(() => {
-    if (user && pool && isMember === false && !joinPool.isPending) {
+    if (user && pool && isMember === false && !joinPool.isPending && !joinPool.isSuccess) {
       joinPool.mutate();
     }
-  }, [user?.id, pool?.id, isMember]);
+  }, [user?.id, pool?.id, isMember, joinPool.isPending]);
 
   function copyLink() {
     const url = window.location.href;

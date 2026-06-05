@@ -147,7 +147,7 @@ function Home() {
             <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-2 flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" /> Mundial 2026
             </p>
-            <h1 className="font-cinzel text-[clamp(2.4rem,8vw,5.5rem)] leading-[1.05] text-gold-metallic">
+            <h1 className="font-display text-[clamp(3rem,10vw,6rem)] leading-none text-gold-metallic">
               UMA<br />GERAÇÃO
             </h1>
             <p className="mt-3 text-sm md:text-base font-semibold text-white/90 max-w-xs">

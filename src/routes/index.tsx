@@ -50,42 +50,46 @@ function Home() {
   const { data: topPools = [] } = useQuery({
     queryKey: ["pools", "ranking"],
     queryFn: async () => {
-      // Buscar todos os membros com a data de entrada
-      const { data: members } = await supabase
-        .from("pool_members")
-        .select("pool_id, user_id, joined_at");
-
-      if (!members || members.length === 0) return [];
-
-      // Buscar nomes das ligas
-      const poolIds = [...new Set(members.map((m) => m.pool_id))];
+      // Buscar ligas (visível também para utilizadores não autenticados se RLS permitir)
       const { data: pools } = await supabase
         .from("pools")
         .select("id, name")
-        .in("id", poolIds);
+        .order("created_at", { ascending: false })
+        .limit(10);
 
-      // Buscar todas as previsões relevantes
+      if (!pools || pools.length === 0) return [];
+
+      // Tentar buscar membros (pode falhar para utilizadores anónimos)
+      const poolIds = pools.map((p) => p.id);
+      const { data: members } = await supabase
+        .from("pool_members")
+        .select("pool_id, user_id, joined_at")
+        .in("pool_id", poolIds);
+
+      if (!members || members.length === 0) {
+        return pools.map((p) => ({ id: p.id, name: p.name, points: 0, members: 0 }));
+      }
+
+      // Buscar previsões para calcular pontos por liga
       const userIds = [...new Set(members.map((m) => m.user_id))];
       const { data: preds } = await supabase
         .from("predictions")
         .select("user_id, points, created_at")
         .in("user_id", userIds);
 
-      // Calcular pontos por liga (só previsões após joined_at)
       const poolPoints: Record<string, number> = {};
-      const poolMembers: Record<string, number> = {};
+      const poolMemberCount: Record<string, number> = {};
       for (const member of members) {
         const pts = (preds ?? [])
           .filter((p) => p.user_id === member.user_id && p.created_at >= member.joined_at)
           .reduce((sum, p) => sum + (p.points ?? 0), 0);
         poolPoints[member.pool_id] = (poolPoints[member.pool_id] ?? 0) + pts;
-        poolMembers[member.pool_id] = (poolMembers[member.pool_id] ?? 0) + 1;
+        poolMemberCount[member.pool_id] = (poolMemberCount[member.pool_id] ?? 0) + 1;
       }
 
-      return (pools ?? [])
-        .map((p) => ({ id: p.id, name: p.name, points: poolPoints[p.id] ?? 0, members: poolMembers[p.id] ?? 0 }))
-        .sort((a, b) => b.points - a.points)
-        .slice(0, 10);
+      return pools
+        .map((p) => ({ id: p.id, name: p.name, points: poolPoints[p.id] ?? 0, members: poolMemberCount[p.id] ?? 0 }))
+        .sort((a, b) => b.points - a.points);
     },
   });
 

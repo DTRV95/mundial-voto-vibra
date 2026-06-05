@@ -365,10 +365,10 @@ function JogoPage() {
 
 /* ── Components ─────────────────────────────────────────── */
 
-function TeamBlock({ flag: _flag, name, code }: { flag: string | null; name: string; code?: string | null }) {
+function TeamBlock({ flag, name, code }: { flag: string | null; name: string; code?: string | null }) {
   return (
     <div className="flex flex-1 flex-col items-center gap-2">
-      <TeamBadge code={code ?? null} name={name} size="lg" />
+      <TeamBadge code={code ?? null} flag={flag} name={name} size="lg" />
       <span className="text-sm font-bold text-center leading-tight">{name}</span>
     </div>
   );

@@ -71,7 +71,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
       {/* Teams */}
       <div className="flex items-center justify-between gap-2 px-4 py-4">
         <div className="flex flex-1 flex-col items-center gap-2">
-          <TeamBadge code={match.home.code} name={match.home.name} size="md" />
+          <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} size="md" />
           <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
             {match.home.name}
           </span>
@@ -90,7 +90,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
         </div>
 
         <div className="flex flex-1 flex-col items-center gap-2">
-          <TeamBadge code={match.away.code} name={match.away.name} size="md" />
+          <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} size="md" />
           <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
             {match.away.name}
           </span>

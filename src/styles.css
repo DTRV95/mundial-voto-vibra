@@ -169,11 +169,23 @@
   .text-balance { text-wrap: balance; }
 
   .text-gold-metallic {
-    background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 45%, #FBF5B7 65%, #AA771C 80%, #FCF6BA 100%);
+    background: linear-gradient(
+      135deg,
+      #5C3D00 0%,
+      #C8860A 12%,
+      #FFE566 28%,
+      #FFFFFF 38%,
+      #FFD700 48%,
+      #C8860A 60%,
+      #FFE566 72%,
+      #FFFFFF 80%,
+      #C8860A 90%,
+      #7A5000 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    color: #DAA520; /* fallback */
+    color: #DAA520;
   }
 
   .shimmer {
@@ -224,4 +236,17 @@
   font-family: 'Bebas Neue';
   src: url('https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXoo9WlhyyTh89Y.woff2') format('woff2');
   font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cinzel';
+  src: url('https://fonts.gstatic.com/s/cinzel/v23/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnTYrvDE5ZdqU.woff2') format('woff2');
+  font-weight: 900;
+  font-display: swap;
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-weight: 900;
+  letter-spacing: 0.05em;
 }

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { Trophy, Users, Copy, Check, ArrowLeft, Gift } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/liga/$code")({
@@ -100,17 +100,24 @@ function LigaPage() {
       const { error } = await supabase
         .from("pool_members")
         .insert({ pool_id: pool!.id, user_id: user!.id });
-      if (error?.code === "23505") throw new Error("Já és membro.");
+      if (error?.code === "23505") return; // já membro, ignorar silenciosamente
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pool-member"] });
       qc.invalidateQueries({ queryKey: ["pool-ranking"] });
       qc.invalidateQueries({ queryKey: ["my-pools"] });
-      toast.success("Entraste na liga!");
+      toast.success(`Bem-vindo ao torneio "${pool?.name}"! 🏆`);
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao entrar."),
   });
+
+  // Auto-join quando o utilizador acaba de fazer login via link de convite
+  useEffect(() => {
+    if (user && pool && isMember === false && !joinPool.isPending) {
+      joinPool.mutate();
+    }
+  }, [user?.id, pool?.id, isMember]);
 
   function copyLink() {
     const url = window.location.href;
@@ -194,26 +201,51 @@ function LigaPage() {
         </div>
       </div>
 
-      {/* Entrar na liga (se não for membro) */}
-      {user && !isMember && (
-        <div className="mb-6 rounded-2xl border border-wc-green/30 bg-wc-green/10 p-4 flex items-center justify-between gap-3">
-          <p className="text-sm font-semibold">Queres entrar nesta liga?</p>
-          <button
-            onClick={() => joinPool.mutate()}
-            disabled={joinPool.isPending}
-            className="rounded-xl bg-wc-green px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-          >
-            Entrar
-          </button>
+      {/* Não autenticado — experiência de convite */}
+      {!user && (
+        <div className="mb-6 overflow-hidden rounded-2xl bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.35)" }}>
+          <div className="p-5 text-white">
+            <p className="font-display text-xl mb-1">Foste convidado!</p>
+            <p className="text-sm text-white/80 mb-4">
+              Cria uma conta gratuita em menos de 1 minuto, entra no torneio e começa a votar nos jogos do Mundial 2026.
+            </p>
+            <div className="flex flex-col gap-2">
+              <Link
+                to="/auth"
+                search={{ redirect: `/liga/${code}` } as any}
+                className="block w-full rounded-xl bg-white py-3 text-center text-sm font-bold text-wc-green shadow-elegant"
+              >
+                Criar conta grátis e entrar no torneio
+              </Link>
+              <Link
+                to="/auth"
+                search={{ redirect: `/liga/${code}` } as any}
+                className="block w-full rounded-xl border border-white/30 py-2.5 text-center text-sm font-semibold text-white"
+              >
+                Já tenho conta — entrar
+              </Link>
+            </div>
+            <p className="mt-3 text-center text-[11px] text-white/60">Grátis. Sem apostas. Só diversão.</p>
+          </div>
         </div>
       )}
 
-      {!user && (
-        <div className="mb-6 rounded-2xl border border-wc-red/30 bg-wc-red/10 p-4 flex items-center justify-between gap-3">
-          <p className="text-sm font-semibold">Entra na tua conta para participar.</p>
-          <Link to="/auth" className="rounded-xl bg-wc-red px-4 py-2 text-sm font-bold text-white">
-            Entrar
-          </Link>
+      {/* Autenticado mas ainda não membro */}
+      {user && !isMember && (
+        <div className="mb-6 overflow-hidden rounded-2xl bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.35)" }}>
+          <div className="flex items-center justify-between gap-3 p-5 text-white">
+            <div>
+              <p className="font-semibold">Aceitas o desafio?</p>
+              <p className="text-sm text-white/80">Junta-te ao torneio e compete a partir de agora.</p>
+            </div>
+            <button
+              onClick={() => joinPool.mutate()}
+              disabled={joinPool.isPending}
+              className="shrink-0 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-wc-green disabled:opacity-50"
+            >
+              Entrar no Torneio
+            </button>
+          </div>
         </div>
       )}
 

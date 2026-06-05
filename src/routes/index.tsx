@@ -124,7 +124,7 @@ function Home() {
       <section className="relative px-4 pt-4 md:px-6 md:pt-5">
         <div
           className="relative overflow-hidden rounded-3xl bg-wc-red panini-stripes"
-          style={{ boxShadow: "0 12px 48px oklch(0.54 0.24 27 / 0.35)", minHeight: "260px" }}
+          style={{ boxShadow: "0 12px 48px oklch(0.54 0.24 27 / 0.35)", minHeight: "200px" }}
         >
           {/* ── Canto superior direito: troféu cores originais ─── */}
           <div className="absolute top-0 right-0 h-[75%] w-[38%] md:h-full md:w-[36%] overflow-hidden"
@@ -143,7 +143,7 @@ function Home() {
           />
 
           {/* ── Conteúdo principal ────────────────────────────── */}
-          <div className="relative px-5 py-6 md:px-10 md:py-10 pr-[42%] md:pr-[40%]">
+          <div className="relative px-5 py-4 md:px-10 md:py-6 pr-[42%] md:pr-[40%]">
             <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-2 flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" /> Mundial 2026
             </p>

@@ -148,7 +148,7 @@ function Home() {
               <Sparkles className="h-3 w-3" /> Mundial 2026
             </p>
             <h1 className="font-display text-[clamp(3rem,10vw,6rem)] leading-none" style={{
-              background: "linear-gradient(180deg, #FFE066 0%, #FFB800 45%, #CC8800 100%)",
+              background: "linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 45%, #FBF5B7 65%, #AA771C 80%, #FCF6BA 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -250,7 +250,7 @@ function Home() {
       </section>
 
       {/* ===================== RANKING + LIGAS + PRÉMIOS ===================== */}
-      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 lg:grid-cols-3 md:px-8">
+      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
         {/* Ranking — fundo verde Panini */}
         <div className="rounded-2xl overflow-hidden bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.45)" }}>
           <div className="text-white">
@@ -293,7 +293,7 @@ function Home() {
                 <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20">
                   <Users className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="font-display text-xl">Torneios</h3>
+                <h3 className="font-display text-xl">Leader Board Torneios</h3>
               </div>
               <Link to="/ligas" className="text-xs font-bold text-white/80 hover:text-white">Ver todos →</Link>
             </div>
@@ -317,30 +317,6 @@ function Home() {
           </div>
         </div>
 
-        {/* Prémios — fundo azul Panini */}
-        <div className="rounded-2xl overflow-hidden bg-wc-blue panini-stripes shadow-elegant">
-          <div className="p-5 text-white">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20">
-                  <Trophy className="h-5 w-5 text-white" />
-                </div>
-                <h3 className="font-display text-xl">Prémios</h3>
-              </div>
-              <Link to="/premios" className="text-xs font-bold text-white/80 hover:text-white">Ver prémios →</Link>
-            </div>
-            <p className="text-sm text-white/80 leading-relaxed">
-              Um prémio exclusivo para o vencedor de cada fase — Grupos, Oitavos, Quartos e Meias-Finais.
-            </p>
-            <div className="mt-4 grid grid-cols-4 gap-1.5">
-              {["Grupos", "Oitavos", "Quartos", "Meias"].map((f) => (
-                <div key={f} className="rounded-lg bg-white/15 border border-white/20 py-2 text-center text-[10px] font-bold uppercase tracking-wide text-white">
-                  {f}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* ===================== TORNEIO PRIVADO CTA ===================== */}

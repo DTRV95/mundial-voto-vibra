@@ -3,6 +3,7 @@ import { Composition } from "remotion";
 import { VozDoMundialReel, type VozDoMundialReelProps } from "./compositions/VozDoMundialReel";
 import { UmaGeracaoReel } from "./compositions/UmaGeracaoReel";
 import { UmaGeracaoReelPremium } from "./compositions/UmaGeracaoReelPremium";
+import { UmaGeracaoKinetic } from "./compositions/UmaGeracaoKinetic";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -43,6 +44,15 @@ export const RemotionRoot: React.FC = () => {
         id="UmaGeracaoReelPremium"
         component={UmaGeracaoReelPremium}
         durationInFrames={450}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      {/* ── Uma Geração Kinetic (tipografia pura) ── */}
+      <Composition
+        id="UmaGeracaoKinetic"
+        component={UmaGeracaoKinetic}
+        durationInFrames={600}
         fps={30}
         width={1080}
         height={1920}

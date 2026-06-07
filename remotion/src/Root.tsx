@@ -4,6 +4,7 @@ import { VozDoMundialReel, type VozDoMundialReelProps } from "./compositions/Voz
 import { UmaGeracaoReel } from "./compositions/UmaGeracaoReel";
 import { UmaGeracaoReelPremium } from "./compositions/UmaGeracaoReelPremium";
 import { UmaGeracaoKinetic } from "./compositions/UmaGeracaoKinetic";
+import { PequenosNoMapaReel } from "./compositions/PequenosNoMapaReel";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -53,6 +54,16 @@ export const RemotionRoot: React.FC = () => {
         id="UmaGeracaoKinetic"
         component={UmaGeracaoKinetic}
         durationInFrames={600}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+
+      {/* ── Pequenos no Mapa ───────────────────── */}
+      <Composition
+        id="PequenosNoMapaReel"
+        component={PequenosNoMapaReel}
+        durationInFrames={300}
         fps={30}
         width={1080}
         height={1920}

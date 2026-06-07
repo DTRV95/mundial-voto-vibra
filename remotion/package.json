@@ -6,6 +6,7 @@
   "scripts": {
     "studio": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts VozDoMundialReel out/VozDoMundialReel.mp4",
+    "render:pequenos": "remotion render src/index.ts PequenosNoMapaReel out/PequenosNoMapaReel.mp4",
     "render:still": "remotion still src/index.ts VozDoMundialReel out/still.png",
     "upgrade": "remotion upgrade"
   },

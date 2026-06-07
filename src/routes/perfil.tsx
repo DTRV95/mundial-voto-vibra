@@ -305,6 +305,17 @@ function Perfil() {
           </ul>
         )}
       </section>
+
+      {/* Terminar sessão — visível em mobile */}
+      <div className="mt-8 md:hidden">
+        <button
+          onClick={signOut}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card/60 px-4 py-3.5 text-sm font-semibold text-muted-foreground transition-smooth hover:border-wc-red/40 hover:text-wc-red"
+        >
+          <LogOut className="h-4 w-4" />
+          Terminar sessão
+        </button>
+      </div>
     </div>
   );
 }

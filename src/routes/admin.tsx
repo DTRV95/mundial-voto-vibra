@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { toast } from "sonner";
 import { PHASE_LABEL } from "@/lib/format";
-import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil, Upload, X, ImageIcon } from "lucide-react";
+import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil, X, ImageIcon, Eye, Newspaper } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Uma Geração" }] }),
@@ -46,26 +46,29 @@ function Stats() {
   const { data: stats } = useQuery({
     queryKey: ["admin", "stats"],
     queryFn: async () => {
-      const [users, votes, matches] = await Promise.all([
+      const [users, votes, matches, news] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("predictions").select("id", { count: "exact", head: true }),
         supabase.from("matches").select("id", { count: "exact", head: true }),
+        supabase.from("news").select("id", { count: "exact", head: true }).eq("published", true),
       ]);
-      return { users: users.count ?? 0, votes: votes.count ?? 0, matches: matches.count ?? 0 };
+      return { users: users.count ?? 0, votes: votes.count ?? 0, matches: matches.count ?? 0, news: news.count ?? 0 };
     },
   });
   return (
-    <div className="mb-6 grid grid-cols-3 gap-3">
+    <div className="mb-6 grid grid-cols-4 gap-3">
       <Stat label="Utilizadores" value={stats?.users ?? 0} />
       <Stat label="Previsões" value={stats?.votes ?? 0} />
       <Stat label="Jogos" value={stats?.matches ?? 0} />
+      <Stat label="Notícias" value={stats?.news ?? 0} icon={<Newspaper className="h-3.5 w-3.5 text-gold" />} />
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value, icon }: { label: string; value: number; icon?: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-border bg-card/70 p-4 text-center">
+      {icon && <div className="mb-1 flex justify-center">{icon}</div>}
       <div className="font-display text-2xl text-gold">{value}</div>
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
     </div>
@@ -585,6 +588,55 @@ function AnalysisAdmin() {
 
 const EXCERPT_MAX = 160;
 
+// ── Preview Modal ─────────────────────────────────────────────────────────────
+function NewsPreview({ article, onClose }: { article: any; onClose: () => void }) {
+  if (!article) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-background/95 backdrop-blur-sm p-4 pt-8">
+      <div className="w-full max-w-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <span className="rounded-full bg-gold/15 px-3 py-1 text-xs font-bold text-gold uppercase tracking-wider">
+            Pré-visualização
+          </span>
+          <button onClick={onClose} className="rounded-full border border-border p-2 text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <article className="rounded-2xl border border-border bg-card/70 overflow-hidden">
+          {article.image_url && (
+            <figure className="overflow-hidden">
+              <img src={article.image_url} alt={article.title} className="w-full object-cover max-h-72" />
+              {article.image_caption && (
+                <figcaption className="px-5 pt-2 pb-0 text-[11px] text-muted-foreground italic">
+                  {article.image_caption}
+                </figcaption>
+              )}
+            </figure>
+          )}
+          <div className="p-5">
+            <span className="inline-block rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
+              {article.category}
+            </span>
+            <h1 className="font-display text-2xl md:text-3xl leading-tight mb-3">{article.title || "Sem título"}</h1>
+            {article.excerpt && (
+              <p className="text-sm text-muted-foreground leading-relaxed border-l-2 border-gold/40 pl-3 mb-4">{article.excerpt}</p>
+            )}
+            {article.content && (
+              <div className="text-sm leading-7 text-foreground/90 space-y-4 whitespace-pre-wrap">
+                {article.content}
+              </div>
+            )}
+            {!article.content && (
+              <p className="text-sm text-muted-foreground/50 italic">Sem conteúdo ainda...</p>
+            )}
+          </div>
+        </article>
+      </div>
+    </div>
+  );
+}
+
 function NewsAdmin() {
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
@@ -596,6 +648,7 @@ function NewsAdmin() {
   const [published, setPublished] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState(false);
 
   const { data: articles = [] } = useQuery({
     queryKey: ["admin", "news"],
@@ -755,6 +808,12 @@ function NewsAdmin() {
 
         {/* Ações */}
         <div className="flex gap-2">
+          <button
+            onClick={() => setPreview(true)}
+            className="rounded-xl border border-border bg-card/60 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-smooth flex items-center gap-1.5"
+          >
+            <Eye className="h-4 w-4" /> Preview
+          </button>
           <button onClick={save} disabled={uploading} className={`${btnCls} flex-1 justify-center`}>
             {editId ? "Actualizar artigo" : "Criar artigo"}
           </button>
@@ -765,6 +824,13 @@ function NewsAdmin() {
           )}
         </div>
       </div>
+
+      {preview && (
+        <NewsPreview
+          article={{ title, excerpt, content, image_url: imageUrl, image_caption: imageCaption, category }}
+          onClose={() => setPreview(false)}
+        />
+      )}
 
       {articles.length > 0 && (
         <ul className="mt-5 space-y-2">
@@ -780,6 +846,11 @@ function NewsAdmin() {
                   <span className={`text-[10px] font-bold uppercase ${a.published ? "text-primary" : "text-muted-foreground"}`}>
                     {a.published ? "• Publicado" : "Rascunho"}
                   </span>
+                  {a.views > 0 && (
+                    <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                      <Eye className="h-2.5 w-2.5" /> {a.views}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2 ml-2 shrink-0">

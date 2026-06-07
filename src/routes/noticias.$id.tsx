@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, ArrowLeft, Calendar } from "lucide-react";
+import { TrendingUp, ArrowLeft, Calendar, Eye } from "lucide-react";
 
 export const Route = createFileRoute("/noticias/$id")({
   head: ({ params }) => ({
@@ -55,6 +56,12 @@ function Article() {
     },
   });
 
+  useEffect(() => {
+    if (id) {
+      supabase.rpc("increment_news_views", { article_id: id }).then(() => {});
+    }
+  }, [id]);
+
   if (isLoading) return (
     <div className="px-4 pt-6 md:px-8 space-y-4">
       <div className="h-4 w-20 shimmer rounded" />
@@ -91,9 +98,17 @@ function Article() {
         {article.excerpt && (
           <p className="mt-3 text-base text-muted-foreground leading-relaxed">{article.excerpt}</p>
         )}
-        <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5" />
-          {new Date(article.created_at).toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+        <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Calendar className="h-3.5 w-3.5" />
+            {new Date(article.created_at).toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          </span>
+          {(article as any).views > 0 && (
+            <span className="flex items-center gap-1.5">
+              <Eye className="h-3.5 w-3.5" />
+              {(article as any).views.toLocaleString("pt-PT")} {(article as any).views === 1 ? "leitura" : "leituras"}
+            </span>
+          )}
         </div>
       </header>
 

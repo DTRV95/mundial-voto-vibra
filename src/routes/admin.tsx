@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { toast } from "sonner";
 import { PHASE_LABEL } from "@/lib/format";
-import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil } from "lucide-react";
+import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil, Upload, X, ImageIcon } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Uma Geração" }] }),
@@ -583,31 +583,56 @@ function AnalysisAdmin() {
   );
 }
 
+const EXCERPT_MAX = 160;
+
 function NewsAdmin() {
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [imageCaption, setImageCaption] = useState("");
   const [category, setCategory] = useState("noticia");
   const [published, setPublished] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const { data: articles = [] } = useQuery({
     queryKey: ["admin", "news"],
     queryFn: async () => (await supabase.from("news").select("*").order("created_at", { ascending: false })).data ?? [],
   });
 
-  function reset() { setTitle(""); setExcerpt(""); setContent(""); setImageUrl(""); setCategory("noticia"); setPublished(false); setEditId(null); }
+  function reset() {
+    setTitle(""); setExcerpt(""); setContent(""); setImageUrl("");
+    setImageCaption(""); setCategory("noticia"); setPublished(false); setEditId(null);
+  }
 
   function loadEdit(a: any) {
-    setEditId(a.id); setTitle(a.title); setExcerpt(a.excerpt ?? ""); setContent(a.content ?? "");
-    setImageUrl(a.image_url ?? ""); setCategory(a.category); setPublished(a.published);
+    setEditId(a.id); setTitle(a.title); setExcerpt(a.excerpt ?? "");
+    setContent(a.content ?? ""); setImageUrl(a.image_url ?? "");
+    setImageCaption(a.image_caption ?? ""); setCategory(a.category); setPublished(a.published);
+  }
+
+  async function uploadImage(file: File) {
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from("news-images").upload(path, file, { upsert: false });
+    if (error) { toast.error("Erro no upload: " + error.message); setUploading(false); return; }
+    const { data: { publicUrl } } = supabase.storage.from("news-images").getPublicUrl(path);
+    setImageUrl(publicUrl);
+    setUploading(false);
+    toast.success("Imagem carregada!");
   }
 
   async function save() {
     if (!title.trim()) { toast.error("Título obrigatório"); return; }
-    const payload = { title, excerpt: excerpt || null, content: content || null, image_url: imageUrl || null, category, published };
+    if (excerpt.length > EXCERPT_MAX) { toast.error(`Resumo demasiado longo (máx. ${EXCERPT_MAX} caracteres)`); return; }
+    const payload = {
+      title, excerpt: excerpt || null, content: content || null,
+      image_url: imageUrl || null, image_caption: imageCaption || null,
+      category, published,
+    };
     const { error } = editId
       ? await supabase.from("news").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", editId)
       : await supabase.from("news").insert(payload);
@@ -627,13 +652,86 @@ function NewsAdmin() {
     qc.invalidateQueries({ queryKey: ["admin", "news"] });
   }
 
+  const excerptLeft = EXCERPT_MAX - excerpt.length;
+  const excerptOver = excerptLeft < 0;
+
   return (
     <Section>
-      <p className="mb-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{editId ? "Editar artigo" : "Novo artigo"}</p>
-      <div className="space-y-2">
-        <input placeholder="Título" value={title} onChange={e => setTitle(e.target.value)} className={`${inputCls} w-full`} />
-        <input placeholder="Resumo (excerpt)" value={excerpt} onChange={e => setExcerpt(e.target.value)} className={`${inputCls} w-full`} />
-        <input placeholder="URL da imagem de capa" value={imageUrl} onChange={e => setImageUrl(e.target.value)} className={`${inputCls} w-full`} />
+      <p className="mb-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        {editId ? "Editar artigo" : "Novo artigo"}
+      </p>
+      <div className="space-y-3">
+
+        {/* Título */}
+        <input
+          placeholder="Título do artigo"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          className={`${inputCls} w-full`}
+        />
+
+        {/* Resumo com contador */}
+        <div>
+          <textarea
+            placeholder={`Resumo para a página principal (máx. ${EXCERPT_MAX} caracteres) — aparece nos resultados do Google`}
+            value={excerpt}
+            onChange={e => setExcerpt(e.target.value)}
+            rows={3}
+            className={`${inputCls} w-full resize-none ${excerptOver ? "border-destructive focus:border-destructive" : ""}`}
+          />
+          <div className={`mt-1 text-right text-[11px] ${excerptOver ? "text-destructive font-semibold" : "text-muted-foreground"}`}>
+            {excerptOver ? `${Math.abs(excerptLeft)} caracteres a mais` : `${excerptLeft} restantes`}
+          </div>
+        </div>
+
+        {/* Upload de imagem */}
+        <div>
+          <label className="mb-1 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Imagem de capa
+          </label>
+          {imageUrl ? (
+            <div className="relative overflow-hidden rounded-xl border border-border">
+              <img src={imageUrl} alt="capa" className="h-40 w-full object-cover" />
+              <button
+                onClick={() => { setImageUrl(""); setImageCaption(""); }}
+                className="absolute right-2 top-2 rounded-full bg-background/80 p-1 text-foreground hover:bg-destructive hover:text-white transition-smooth"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <label className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-input/50 py-8 transition-smooth hover:border-gold/40 ${uploading ? "opacity-60 pointer-events-none" : ""}`}>
+              {uploading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+                  A carregar...
+                </div>
+              ) : (
+                <>
+                  <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+                  <span className="text-sm text-muted-foreground">Clica para fazer upload</span>
+                  <span className="text-xs text-muted-foreground/60">JPG, PNG, WebP — máx. 5 MB</span>
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); }}
+              />
+            </label>
+          )}
+          {imageUrl && (
+            <input
+              placeholder="Crédito da fotografia (ex: © João Silva / Reuters)"
+              value={imageCaption}
+              onChange={e => setImageCaption(e.target.value)}
+              className={`${inputCls} w-full mt-2`}
+            />
+          )}
+        </div>
+
+        {/* Categoria + Publicar */}
         <div className="flex gap-2">
           <select value={category} onChange={e => setCategory(e.target.value)} className={`${inputCls} flex-1`}>
             <option value="noticia">Notícia</option>
@@ -646,18 +744,35 @@ function NewsAdmin() {
             Publicar
           </label>
         </div>
-        <textarea placeholder="Conteúdo do artigo..." value={content} onChange={e => setContent(e.target.value)}
-          className={`${inputCls} w-full min-h-[140px] resize-y`} />
+
+        {/* Conteúdo */}
+        <textarea
+          placeholder="Conteúdo completo do artigo..."
+          value={content}
+          onChange={e => setContent(e.target.value)}
+          className={`${inputCls} w-full min-h-[200px] resize-y`}
+        />
+
+        {/* Ações */}
         <div className="flex gap-2">
-          <button onClick={save} className={`${btnCls} flex-1 justify-center`}>{editId ? "Actualizar" : "Criar artigo"}</button>
-          {editId && <button onClick={reset} className="rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground">Cancelar</button>}
+          <button onClick={save} disabled={uploading} className={`${btnCls} flex-1 justify-center`}>
+            {editId ? "Actualizar artigo" : "Criar artigo"}
+          </button>
+          {editId && (
+            <button onClick={reset} className="rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground">
+              Cancelar
+            </button>
+          )}
         </div>
       </div>
 
       {articles.length > 0 && (
-        <ul className="mt-4 space-y-2">
+        <ul className="mt-5 space-y-2">
           {articles.map((a: any) => (
             <li key={a.id} className={rowItemCls}>
+              {a.image_url && (
+                <img src={a.image_url} alt={a.title} className="h-10 w-14 rounded-lg object-cover shrink-0" />
+              )}
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-sm">{a.title}</p>
                 <div className="flex items-center gap-2 mt-0.5">

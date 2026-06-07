@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && node -e \"const fs=require('fs');fs.copyFileSync('dist/server/server.js','dist/client/_worker.js');fs.readdirSync('dist/server/assets').forEach(f=>fs.copyFileSync('dist/server/assets/'+f,'dist/client/assets/'+f));\"",
+    "build": "vite build && node -e \"const fs=require('fs');fs.copyFileSync('dist/server/server.js','dist/client/_worker.js');fs.readdirSync('dist/server/assets').forEach(f=>fs.copyFileSync('dist/server/assets/'+f,'dist/client/assets/'+f));fs.writeFileSync('dist/client/.assetsignore','_worker.js\\n');\"",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",

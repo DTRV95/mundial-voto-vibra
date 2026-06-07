@@ -1,8 +1,4 @@
 {
   "name": "mundial-voto-vibra",
-  "compatibility_date": "2026-06-07",
-  "main": "dist/client/_worker.js",
-  "assets": {
-    "directory": "./dist/client"
-  }
+  "pages_build_output_dir": "./dist/client"
 }

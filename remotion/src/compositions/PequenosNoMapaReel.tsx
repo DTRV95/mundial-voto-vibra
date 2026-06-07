@@ -33,12 +33,11 @@ const Bubble: React.FC<BubbleProps> = ({ seed }) => {
   const tx = Math.sin((frame * 0.04) + seed) * drift;
 
   // opacity: fade in nos primeiros 200px, fade out nos últimos 150px
-  const opacity = interpolate(
-    rawY,
-    [1920, 1720, 200, 50],
-    [0, 0.55, 0.55, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-  );
+  // borbulhas sobem → rawY decresce; usar clamp manual
+  const opacity =
+    rawY > 1720 ? interpolate(rawY, [1720, 1920], [0.55, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) :
+    rawY < 50   ? interpolate(rawY, [0, 50], [0, 0.55], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) :
+    0.55;
 
   return (
     <div

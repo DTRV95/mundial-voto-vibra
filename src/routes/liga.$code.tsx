@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/useAuth";
 import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { UserAvatar } from "@/components/AvatarPicker";
 
 export const Route = createFileRoute("/liga/$code")({
   component: LigaPage,
@@ -88,7 +89,7 @@ function LigaPage() {
 
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, display_name")
+        .select("id, display_name, avatar_url")
         .in("id", userIds);
 
       const results = await Promise.all(
@@ -108,6 +109,7 @@ function LigaPage() {
             return {
               id: member.user_id,
               display_name: profile?.display_name ?? "Adepto",
+              avatar_url: (profile as any)?.avatar_url ?? null,
               total_points: points,
               predictions_made: made,
               predictions_correct: correct,
@@ -118,6 +120,7 @@ function LigaPage() {
             return {
               id: member.user_id,
               display_name: profile?.display_name ?? "Adepto",
+              avatar_url: (profile as any)?.avatar_url ?? null,
               total_points: 0,
               predictions_made: 0,
               predictions_correct: 0,
@@ -323,7 +326,7 @@ function LigaPage() {
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-wc-red font-display text-sm text-white">
               {myRank + 1}
             </span>
-            <Avatar name={(ranking[myRank] as any).display_name} size="sm" />
+            <UserAvatar avatarUrl={(ranking[myRank] as any).avatar_url} name={(ranking[myRank] as any).display_name} size={8} className="rounded-full" />
             <span className="flex-1 text-sm font-semibold">{(ranking[myRank] as any).display_name} <span className="text-[10px] font-bold text-wc-red">Tu</span></span>
             <span className="font-display text-lg text-gold">{(ranking[myRank] as any).total_points} <span className="text-xs font-sans text-muted-foreground">pts</span></span>
           </div>
@@ -342,7 +345,7 @@ function LigaPage() {
             {/* 2º lugar */}
             {podium[1] && (
               <div className="flex flex-1 flex-col items-center gap-2">
-                <Avatar name={(podium[1] as any).display_name} size="md" />
+                <UserAvatar avatarUrl={(podium[1] as any).avatar_url} name={(podium[1] as any).display_name} size={10} className="rounded-full" />
                 <p className="text-center text-xs font-semibold leading-tight line-clamp-1 max-w-[80px]">{(podium[1] as any).display_name}</p>
                 <p className="font-display text-sm text-muted-foreground">{(podium[1] as any).total_points} pts</p>
                 <div className={`w-full ${PODIUM_H[1]} ${PODIUM_BG[1]} rounded-t-xl flex items-start justify-center pt-2`}>
@@ -354,7 +357,7 @@ function LigaPage() {
             {podium[0] && (
               <div className="flex flex-1 flex-col items-center gap-2">
                 <div className="relative">
-                  <Avatar name={(podium[0] as any).display_name} size="lg" />
+                  <UserAvatar avatarUrl={(podium[0] as any).avatar_url} name={(podium[0] as any).display_name} size={14} className="rounded-full" />
                   <span className="absolute -top-2 -right-1 text-lg">👑</span>
                 </div>
                 <p className="text-center text-xs font-bold leading-tight line-clamp-1 max-w-[80px]">
@@ -370,7 +373,7 @@ function LigaPage() {
             {/* 3º lugar */}
             {podium[2] && (
               <div className="flex flex-1 flex-col items-center gap-2">
-                <Avatar name={(podium[2] as any).display_name} size="md" />
+                <UserAvatar avatarUrl={(podium[2] as any).avatar_url} name={(podium[2] as any).display_name} size={10} className="rounded-full" />
                 <p className="text-center text-xs font-semibold leading-tight line-clamp-1 max-w-[80px]">{(podium[2] as any).display_name}</p>
                 <p className="font-display text-sm text-muted-foreground">{(podium[2] as any).total_points} pts</p>
                 <div className={`w-full ${PODIUM_H[2]} ${PODIUM_BG[2]} rounded-t-xl flex items-start justify-center pt-2`}>
@@ -427,7 +430,7 @@ function LigaPage() {
                       {i < 3 ? MEDAL[i] : i + 1}
                     </span>
 
-                    <Avatar name={r.display_name} size="sm" />
+                    <UserAvatar avatarUrl={r.avatar_url} name={r.display_name} size={8} className="rounded-full" />
 
                     {/* Nome + barra de progresso */}
                     <div className="min-w-0 flex-1">

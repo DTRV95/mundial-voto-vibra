@@ -120,6 +120,19 @@ function Ligas() {
     },
   });
 
+  const deletePool = useMutation({
+    mutationFn: async (poolId: string) => {
+      await supabase.from("pool_members").delete().eq("pool_id", poolId);
+      const { error } = await supabase.from("pools").delete().eq("id", poolId).eq("created_by", user!.id);
+      if (error) throw new Error("Não foi possível eliminar o torneio.");
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-pools"] });
+      toast.success("Torneio eliminado.");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   function copyLink(code: string, poolId: string) {
     const url = `${window.location.origin}/liga/${code}`;
     if (navigator.share) {
@@ -247,13 +260,27 @@ function Ligas() {
                       </p>
                     )}
                   </div>
-                  <button
-                    onClick={() => leavePool.mutate(pool.id)}
-                    className="text-muted-foreground hover:text-destructive transition-smooth"
-                    title="Sair da liga"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  {pool.created_by === user.id ? (
+                    <button
+                      onClick={() => {
+                        if (confirm(`Eliminar "${pool.name}"? Esta ação não pode ser desfeita.`)) {
+                          deletePool.mutate(pool.id);
+                        }
+                      }}
+                      className="text-muted-foreground hover:text-destructive transition-smooth"
+                      title="Eliminar torneio"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => leavePool.mutate(pool.id)}
+                      className="text-xs text-muted-foreground hover:text-destructive transition-smooth border border-border rounded-lg px-2 py-1"
+                      title="Sair do torneio"
+                    >
+                      Sair
+                    </button>
+                  )}
                 </div>
                 <div className="mt-3 flex gap-2">
                   <Link to="/liga/$code" params={{ code: pool.code }}

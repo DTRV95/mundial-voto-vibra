@@ -30,35 +30,39 @@ function Article() {
   const { data: article, isLoading } = useQuery({
     queryKey: ["news", id],
     queryFn: async () => {
-      // Try slug first, then UUID fallback for old links
-      const bySlug = await supabase.from("news").select("*").eq("slug", id).eq("published", true).maybeSingle();
-      if (bySlug.data) return bySlug.data;
+      // UUID regex — if it looks like a UUID go straight to id lookup, otherwise try slug
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      if (!isUuid) {
+        const { data } = await supabase.from("news").select("*").eq("slug", id).eq("published", true).maybeSingle();
+        if (data) return data;
+      }
       const { data } = await supabase.from("news").select("*").eq("id", id).eq("published", true).maybeSingle();
       return data;
     },
   });
 
   const { data: related = [] } = useQuery({
-    queryKey: ["news", "related", article?.category],
+    queryKey: ["news", "related", article?.id],
     enabled: !!article,
     queryFn: async () => {
       const { data } = await supabase
         .from("news")
-        .select("id,slug,title,excerpt,image_url,category,created_at")
+        .select("id,title,excerpt,image_url,category,created_at")
         .eq("published", true)
         .eq("category", article!.category)
-        .neq("id", id)
+        .neq("id", article!.id)
         .order("created_at", { ascending: false })
         .limit(3);
       return data ?? [];
     },
   });
 
+  // Use the real UUID from the fetched article, not the URL param (which may be a slug)
   useEffect(() => {
-    if (id) {
-      supabase.rpc("increment_news_views", { article_id: id }).then(() => {});
+    if (article?.id) {
+      supabase.rpc("increment_news_views", { article_id: article.id }).catch(() => {});
     }
-  }, [id]);
+  }, [article?.id]);
 
   if (isLoading) return (
     <div className="px-4 pt-6 md:px-8 space-y-4">

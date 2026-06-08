@@ -26,7 +26,7 @@ function Noticias() {
     queryFn: async () => {
       const { data } = await supabase
         .from("news")
-        .select("id,slug,title,excerpt,image_url,category,created_at")
+        .select("id,title,excerpt,image_url,category,created_at,slug")
         .eq("published", true)
         .order("created_at", { ascending: false });
       return data ?? [];

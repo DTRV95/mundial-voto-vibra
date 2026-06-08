@@ -2,14 +2,22 @@ import { useState } from "react";
 import { Shuffle, Check, X } from "lucide-react";
 
 const STYLES = [
-  { id: "adventurer",     label: "Aventureiro" },
-  { id: "avataaars",      label: "Cartoon" },
-  { id: "big-smile",      label: "Sorriso" },
-  { id: "bottts",         label: "Robô" },
-  { id: "fun-emoji",      label: "Emoji" },
-  { id: "pixel-art",      label: "Pixel" },
-  { id: "lorelei",        label: "Lorelei" },
-  { id: "notionists",     label: "Notion" },
+  { id: "adventurer",       label: "Aventureiro" },
+  { id: "avataaars",        label: "Cartoon" },
+  { id: "big-smile",        label: "Sorriso" },
+  { id: "bottts",           label: "Robô" },
+  { id: "fun-emoji",        label: "Emoji" },
+  { id: "pixel-art",        label: "Pixel" },
+  { id: "lorelei",          label: "Lorelei" },
+  { id: "notionists",       label: "Notion" },
+  { id: "thumbs",           label: "Polegar" },
+  { id: "croodles",         label: "Doodle" },
+  { id: "micah",            label: "Micah" },
+  { id: "open-peeps",       label: "Peeps" },
+  { id: "personas",         label: "Persona" },
+  { id: "rings",            label: "Anéis" },
+  { id: "shapes",           label: "Formas" },
+  { id: "identicon",        label: "Identicon" },
 ];
 
 function dicebearUrl(style: string, seed: string) {
@@ -89,7 +97,7 @@ export function AvatarPicker({ current, onSave, onClose }: AvatarPickerProps) {
         {/* Style picker */}
         <div>
           <p className="mb-2 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Estilo</p>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto pr-1">
             {STYLES.map(s => (
               <button
                 key={s.id}

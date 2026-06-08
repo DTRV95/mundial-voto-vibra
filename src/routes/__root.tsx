@@ -49,6 +49,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
       <div>
         <h1 className="font-display text-3xl">Algo correu mal</h1>
         <p className="mt-2 text-sm text-muted-foreground">Tenta novamente daqui a uns segundos.</p>
+        <p className="mt-2 text-xs text-red-400 font-mono max-w-md break-all">{error.message}</p>
         <button onClick={reset} className="mt-6 rounded-full bg-gold px-5 py-2 text-sm font-semibold text-background">Tentar novamente</button>
       </div>
     </div>

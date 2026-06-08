@@ -685,15 +685,21 @@ function NewsAdmin() {
   }
 
   async function uploadImage(file: File) {
+    if (file.size > 5 * 1024 * 1024) { toast.error("Ficheiro demasiado grande (máx. 5 MB)"); return; }
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await supabase.storage.from("news-images").upload(path, file, { upsert: false });
-    if (error) { toast.error("Erro no upload: " + error.message); setUploading(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from("news-images").getPublicUrl(path);
-    setImageUrl(publicUrl);
-    setUploading(false);
-    toast.success("Imagem carregada!");
+    try {
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("news-images").upload(path, file, { upsert: false });
+      if (error) { toast.error("Erro no upload: " + error.message); return; }
+      const { data: { publicUrl } } = supabase.storage.from("news-images").getPublicUrl(path);
+      setImageUrl(publicUrl);
+      toast.success("Imagem carregada!");
+    } catch (e: any) {
+      toast.error("Erro inesperado: " + e.message);
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function save() {
@@ -773,13 +779,14 @@ function NewsAdmin() {
 
         {/* Upload de imagem */}
         <div>
-          <label className="mb-1 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <p className="mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             Imagem de capa
-          </label>
+          </p>
           {imageUrl ? (
             <div className="relative overflow-hidden rounded-xl border border-border">
               <img src={imageUrl} alt="capa" className="h-40 w-full object-cover" />
               <button
+                type="button"
                 onClick={() => { setImageUrl(""); setImageCaption(""); }}
                 className="absolute right-2 top-2 rounded-full bg-background/80 p-1 text-foreground hover:bg-destructive hover:text-white transition-smooth"
               >
@@ -787,7 +794,10 @@ function NewsAdmin() {
               </button>
             </div>
           ) : (
-            <label className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-input/50 py-8 transition-smooth hover:border-gold/40 ${uploading ? "opacity-60 pointer-events-none" : ""}`}>
+            <div
+              className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-input/50 py-8 transition-smooth hover:border-gold/40 ${uploading ? "opacity-60 pointer-events-none" : ""}`}
+              onClick={() => !uploading && document.getElementById("news-img-input")?.click()}
+            >
               {uploading ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-gold border-t-transparent" />
@@ -801,12 +811,14 @@ function NewsAdmin() {
                 </>
               )}
               <input
+                id="news-img-input"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 className="hidden"
+                onClick={e => { (e.target as HTMLInputElement).value = ""; }}
                 onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); }}
               />
-            </label>
+            </div>
           )}
           {imageUrl && (
             <input

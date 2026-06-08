@@ -783,15 +783,18 @@ function NewsAdmin() {
             Imagem de capa
           </p>
           {imageUrl ? (
-            <div className="relative overflow-hidden rounded-xl border border-border">
-              <img src={imageUrl} alt="capa" className="h-40 w-full object-cover" />
-              <button
-                type="button"
-                onClick={() => { setImageUrl(""); setImageCaption(""); }}
-                className="absolute right-2 top-2 rounded-full bg-background/80 p-1 text-foreground hover:bg-destructive hover:text-white transition-smooth"
-              >
-                <X className="h-4 w-4" />
-              </button>
+            <div className="rounded-xl border border-border overflow-hidden">
+              <div className="relative" style={{ resize: "vertical", overflow: "auto", minHeight: "200px", maxHeight: "600px", height: "320px" }}>
+                <img src={imageUrl} alt="capa" className="absolute inset-0 h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => { setImageUrl(""); setImageCaption(""); }}
+                  className="absolute right-2 top-2 rounded-full bg-background/80 p-1 text-foreground hover:bg-destructive hover:text-white transition-smooth z-10"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                <div className="absolute bottom-1 right-1 text-[10px] text-white/40 select-none pointer-events-none">↕ arrasta para redimensionar</div>
+              </div>
             </div>
           ) : (
             <div

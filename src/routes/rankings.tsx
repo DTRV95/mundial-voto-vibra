@@ -1,10 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy } from "lucide-react";
+import { Trophy, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
+
+function RankTrend({ userId, currentRank }: { userId: string; currentRank: number }) {
+  const key = `rank_prev_${userId}`;
+  const [prev, setPrev] = useState<number | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(key);
+    if (stored) setPrev(Number(stored));
+    localStorage.setItem(key, String(currentRank));
+  }, [key, currentRank]);
+
+  if (!prev || prev === currentRank) return <Minus className="h-3 w-3 text-muted-foreground" />;
+  if (currentRank < prev) return <TrendingUp className="h-3 w-3 text-green-400" />;
+  return <TrendingDown className="h-3 w-3 text-red-400" />;
+}
 
 const PHASES = [
   { key: "geral", label: "Ranking Geral" },
@@ -164,6 +179,7 @@ function Rankings() {
                 <th className="px-2 py-2 text-right">Pts</th>
                 <th className="px-2 py-2 text-right">Acertos</th>
                 <th className="px-2 py-2 text-right">%</th>
+                <th className="px-2 py-2 text-right"></th>
               </tr>
             </thead>
             <tbody>
@@ -188,6 +204,9 @@ function Rankings() {
                     <td className="px-2 py-2.5 text-right font-display text-gold">{r.points}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{acc}%</td>
+                    <td className="px-2 py-2.5 text-right">
+                      {isMe && user && <RankTrend userId={user.id} currentRank={i + 1} />}
+                    </td>
                   </tr>
                 );
               })}
@@ -216,6 +235,9 @@ function Rankings() {
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{myPosition.predictions_correct}/{myPosition.predictions_made}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">
                       {myPosition.predictions_made > 0 ? Math.round((myPosition.predictions_correct / myPosition.predictions_made) * 100) : 0}%
+                    </td>
+                    <td className="px-2 py-2.5 text-right">
+                      {user && <RankTrend userId={user.id} currentRank={myPosition.rank} />}
                     </td>
                   </tr>
                 </>

@@ -274,7 +274,11 @@ function Ligas() {
                     </button>
                   ) : (
                     <button
-                      onClick={() => leavePool.mutate(pool.id)}
+                      onClick={() => {
+                        if (confirm(`Sair de "${pool.name}"? Perdes o teu lugar no ranking deste torneio.`)) {
+                          leavePool.mutate(pool.id);
+                        }
+                      }}
                       className="text-xs text-muted-foreground hover:text-destructive transition-smooth border border-border rounded-lg px-2 py-1"
                       title="Sair do torneio"
                     >

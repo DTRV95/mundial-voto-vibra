@@ -1,7 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, TrendingUp } from "lucide-react";
+import { ArrowLeft, TrendingUp, Clock } from "lucide-react";
+
+function readingTime(content: string): number {
+  const words = content.trim().split(/\s+/).length;
+  return Math.max(1, Math.round(words / 200));
+}
 
 export const Route = createFileRoute("/noticias/$id")({
   component: Article,
@@ -27,6 +32,7 @@ function CategoryBadge({ category }: { category: string }) {
 function Article() {
   const { id } = Route.useParams();
   const [article, setArticle] = useState<any>(null);
+  const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,6 +46,17 @@ function Article() {
       .then(({ data }) => {
         setArticle(data ?? null);
         setLoading(false);
+        if (data?.category) {
+          supabase
+            .from("news")
+            .select("id,title,excerpt,image_url,category,created_at")
+            .eq("published", true)
+            .eq("category", data.category)
+            .neq("id", data.id)
+            .order("created_at", { ascending: false })
+            .limit(3)
+            .then(({ data: rel }) => setRelated(rel ?? []));
+        }
       })
       .catch(() => setLoading(false));
   }, [id]);
@@ -87,11 +104,16 @@ function Article() {
       </Link>
 
       <header className="mt-2 mb-8">
-        <div className="mb-4 flex items-center gap-3">
+        <div className="mb-4 flex items-center flex-wrap gap-3">
           <CategoryBadge category={article.category} />
           <span className="text-xs text-muted-foreground">
             {new Date(article.created_at).toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </span>
+          {article.content && (
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" /> {readingTime(article.content)} min de leitura
+            </span>
+          )}
         </div>
 
         <h1 className="font-display text-3xl md:text-[2.6rem] leading-[1.15] tracking-tight">{article.title}</h1>
@@ -115,6 +137,34 @@ function Article() {
             <p key={i}>{para.replace(/\n/g, " ")}</p>
           ))}
         </div>
+      )}
+
+      {related.length > 0 && (
+        <aside className="mt-12 pt-8 border-t border-border">
+          <h2 className="font-display text-xl mb-4">Artigos relacionados</h2>
+          <div className="space-y-3">
+            {related.map((a: any) => (
+              <Link
+                key={a.id}
+                to="/noticias/$id"
+                params={{ id: a.id }}
+                className="group flex items-center gap-4 rounded-xl border border-border bg-card/60 p-3 hover:border-gold/40 transition-smooth"
+              >
+                {a.image_url && (
+                  <img src={a.image_url} alt={a.title} className="h-16 w-24 shrink-0 rounded-lg object-cover" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-gold transition-smooth">{a.title}</p>
+                  {a.excerpt && <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{a.excerpt}</p>}
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {new Date(a.created_at).toLocaleDateString("pt-PT", { day: "numeric", month: "long" })}
+                  </p>
+                </div>
+                <span className="text-xs text-gold shrink-0">Ler →</span>
+              </Link>
+            ))}
+          </div>
+        </aside>
       )}
     </div>
   );

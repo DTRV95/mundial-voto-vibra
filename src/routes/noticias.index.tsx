@@ -1,7 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Newspaper } from "lucide-react";
+import { TrendingUp, Newspaper, Clock } from "lucide-react";
+
+function readingTime(content?: string | null): number {
+  if (!content) return 1;
+  return Math.max(1, Math.round(content.trim().split(/\s+/).length / 200));
+}
 
 export const Route = createFileRoute("/noticias/")({
   head: () => ({
@@ -26,7 +31,7 @@ function Noticias() {
     queryFn: async () => {
       const { data } = await supabase
         .from("news")
-        .select("id,title,excerpt,image_url,image_position,category,created_at")
+        .select("id,title,excerpt,content,image_url,image_position,category,created_at")
         .eq("published", true)
         .order("created_at", { ascending: false });
       return data ?? [];
@@ -88,7 +93,10 @@ function Noticias() {
             <p className="px-5 py-4 text-sm text-muted-foreground line-clamp-2">{featured.excerpt}</p>
           )}
           <div className="flex items-center justify-between border-t border-border/50 px-5 py-3">
-            <span className="text-xs text-muted-foreground">{formatArticleDate(featured.created_at)}</span>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span>{formatArticleDate(featured.created_at)}</span>
+              <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{readingTime(featured.content)} min</span>
+            </div>
             <span className="text-xs font-semibold text-gold group-hover:underline">Ler artigo →</span>
           </div>
         </Link>
@@ -121,7 +129,10 @@ function Noticias() {
                 <h3 className="font-display text-base leading-tight line-clamp-2">{a.title}</h3>
                 {a.excerpt && <p className="mt-1 text-xs text-muted-foreground line-clamp-2 flex-1">{a.excerpt}</p>}
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground">{formatArticleDate(a.created_at)}</span>
+                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                    <span>{formatArticleDate(a.created_at)}</span>
+                    <span className="inline-flex items-center gap-0.5"><Clock className="h-2.5 w-2.5" />{readingTime(a.content)} min</span>
+                  </div>
                   <span className="text-[11px] font-semibold text-gold group-hover:underline">Ler →</span>
                 </div>
               </div>

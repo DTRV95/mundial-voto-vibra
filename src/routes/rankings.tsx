@@ -15,7 +15,7 @@ const PHASES = [
 export const Route = createFileRoute("/rankings")({
   head: () => ({
     meta: [
-      { title: "Rankings — Ultima Geração" },
+      { title: "Rankings — Uma Geração" },
       { name: "description", content: "Vê o ranking dos adeptos por fase do Mundial." },
     ],
   }),

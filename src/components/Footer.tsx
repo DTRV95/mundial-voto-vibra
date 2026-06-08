@@ -6,7 +6,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="font-display text-sm text-foreground">Ultima Geração</p>
+            <p className="font-display text-sm text-foreground">Uma Geração</p>
             <p className="text-xs text-muted-foreground mt-0.5">Plataforma de previsões · Mundial 2026 · Sem apostas</p>
           </div>
           <nav className="flex flex-wrap gap-x-5 gap-y-2">
@@ -29,7 +29,7 @@ export function Footer() {
         </div>
         <div className="mt-5 border-t border-border pt-4">
           <p className="text-[11px] text-muted-foreground">
-            © {new Date().getFullYear()} Ultima Geração · Não afiliado com a FIFA. Apenas para fins de entretenimento.
+            © {new Date().getFullYear()} Uma Geração · Não afiliado com a FIFA. Apenas para fins de entretenimento.
           </p>
         </div>
       </div>

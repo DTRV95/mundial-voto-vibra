@@ -8,7 +8,7 @@ import { PHASE_LABEL } from "@/lib/format";
 import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil, X, ImageIcon, Eye, Newspaper } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Ultima Geração" }] }),
+  head: () => ({ meta: [{ title: "Admin — Uma Geração" }] }),
   component: Admin,
 });
 

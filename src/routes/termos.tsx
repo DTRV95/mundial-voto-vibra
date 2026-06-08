@@ -8,7 +8,7 @@ function TermosPage() {
   return (
     <LegalPage title="Termos e Condições" updated="5 de junho de 2025">
       <Section title="1. Identificação do Serviço">
-        <p><strong>Ultima Geração</strong> é uma plataforma de previsões desportivas comunitária, inteiramente gratuita, dedicada ao Campeonato do Mundo de Futebol FIFA 2026. Não envolve apostas, dinheiro real, nem qualquer forma de jogo a dinheiro.</p>
+        <p><strong>Uma Geração</strong> é uma plataforma de previsões desportivas comunitária, inteiramente gratuita, dedicada ao Campeonato do Mundo de Futebol FIFA 2026. Não envolve apostas, dinheiro real, nem qualquer forma de jogo a dinheiro.</p>
         <p>Responsável: David Tomas da Rocha Vilaverde — <a href="mailto:davidvilaverde@hotmail.com" className="text-wc-red hover:underline">davidvilaverde@hotmail.com</a></p>
       </Section>
 

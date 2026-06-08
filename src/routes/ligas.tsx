@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/ligas")({
   head: () => ({
     meta: [
-      { title: "Torneios Privados — Ultima Geração" },
+      { title: "Torneios Privados — Uma Geração" },
       { name: "description", content: "Cria ou junta-te a um torneio privado com os teus amigos." },
     ],
   }),
@@ -134,7 +134,7 @@ function Ligas() {
 
   function shareWhatsApp(code: string, name: string) {
     const url = `${window.location.origin}/liga/${code}`;
-    const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${name}" no Ultima Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
+    const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }
 

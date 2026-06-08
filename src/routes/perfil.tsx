@@ -9,7 +9,7 @@ import { TeamBadge } from "@/lib/teamColors.tsx";
 import { formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/perfil")({
-  head: () => ({ meta: [{ title: "Perfil — Ultima Geração" }] }),
+  head: () => ({ meta: [{ title: "Perfil — Uma Geração" }] }),
   component: Perfil,
 });
 

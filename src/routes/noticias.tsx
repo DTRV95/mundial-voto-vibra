@@ -6,7 +6,7 @@ import { TrendingUp, Newspaper } from "lucide-react";
 export const Route = createFileRoute("/noticias")({
   head: () => ({
     meta: [
-      { title: "Notícias — Ultima Geração" },
+      { title: "Notícias — Uma Geração" },
       { name: "description", content: "As últimas notícias, antevisões e análises ScoreLab sobre o Mundial 2026." },
     ],
   }),

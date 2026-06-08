@@ -32,11 +32,11 @@ function Article() {
     queryFn: async () => {
       const { data } = await supabase
         .from("news")
-        .select("id,title,excerpt,content,image_url,image_position,image_caption,category,created_at,views")
+        .select("*")
         .eq("id", id)
         .eq("published", true)
         .maybeSingle();
-      return data;
+      return data ?? null;
     },
   });
 
@@ -46,7 +46,7 @@ function Article() {
     queryFn: async () => {
       const { data } = await supabase
         .from("news")
-        .select("id,title,excerpt,image_url,category,created_at")
+        .select("id,title,image_url,category,created_at")
         .eq("published", true)
         .eq("category", article!.category)
         .neq("id", article!.id)

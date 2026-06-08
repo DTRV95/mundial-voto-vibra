@@ -30,12 +30,10 @@ function Article() {
   const { data: article, isLoading } = useQuery({
     queryKey: ["news", id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("news")
-        .select("*")
-        .eq("id", id)
-        .eq("published", true)
-        .maybeSingle();
+      // Try slug first, then UUID fallback for old links
+      const bySlug = await supabase.from("news").select("*").eq("slug", id).eq("published", true).maybeSingle();
+      if (bySlug.data) return bySlug.data;
+      const { data } = await supabase.from("news").select("*").eq("id", id).eq("published", true).maybeSingle();
       return data;
     },
   });
@@ -46,7 +44,7 @@ function Article() {
     queryFn: async () => {
       const { data } = await supabase
         .from("news")
-        .select("id,title,excerpt,image_url,category,created_at")
+        .select("id,slug,title,excerpt,image_url,category,created_at")
         .eq("published", true)
         .eq("category", article!.category)
         .neq("id", id)
@@ -148,7 +146,7 @@ function Article() {
           <h2 className="font-display text-xl mb-4">Mais artigos</h2>
           <div className="space-y-3">
             {related.map((r: any) => (
-              <Link key={r.id} to="/noticias/$id" params={{ id: r.id }}
+              <Link key={r.id} to="/noticias/$id" params={{ id: (r as any).slug ?? r.id }}
                 className="flex items-center gap-3 rounded-2xl border border-border bg-card/60 p-3 transition-smooth hover:border-gold/40">
                 {r.image_url && (
                   <img src={r.image_url} alt={r.title} className="h-14 w-20 rounded-xl object-cover shrink-0" />

@@ -26,7 +26,7 @@ function Noticias() {
     queryFn: async () => {
       const { data } = await supabase
         .from("news")
-        .select("id,title,excerpt,image_url,category,created_at")
+        .select("id,slug,title,excerpt,image_url,category,created_at")
         .eq("published", true)
         .order("created_at", { ascending: false });
       return data ?? [];
@@ -62,7 +62,7 @@ function Noticias() {
 
       {/* Artigo em destaque */}
       {featured && (
-        <Link to="/noticias/$id" params={{ id: featured.id }}
+        <Link to="/noticias/$id" params={{ id: (featured as any).slug ?? featured.id }}
           className="group mb-6 block overflow-hidden rounded-2xl border border-border bg-card/70 transition-smooth hover:border-gold/40"
           style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 40px -8px oklch(0.82 0.15 88 / 0.2)"; }}
@@ -97,7 +97,7 @@ function Noticias() {
       {rest.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {rest.map((a: any) => (
-            <Link key={a.id} to="/noticias/$id" params={{ id: a.id }}
+            <Link key={a.id} to="/noticias/$id" params={{ id: a.slug ?? a.id }}
               className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-smooth hover:border-gold/40"
               style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 32px -6px oklch(0.82 0.15 88 / 0.15)"; }}

@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Trophy, TrendingUp, TrendingDown, Minus, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 
@@ -162,6 +163,29 @@ function Rankings() {
           ))}
         </div>
       </div>
+
+      {/* Partilhar posição */}
+      {user && (myRank || myPosition) && (
+        <div className="mb-4">
+          <button
+            onClick={() => {
+              const rank = myRank ?? myPosition?.rank;
+              const pts  = myRank ? rows[myRank - 1]?.points : myPosition?.points;
+              const text = `Estou em ${rank}º lugar com ${pts} pontos no ranking do Uma Geração 🏆\nVota no Mundial 2026: ${window.location.origin}/rankings`;
+              if (navigator.share) {
+                navigator.share({ title: "O meu ranking — Uma Geração", text, url: `${window.location.origin}/rankings` });
+              } else {
+                navigator.clipboard.writeText(text);
+                toast.success("Texto copiado para partilhar!");
+              }
+            }}
+            className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-2 text-xs font-semibold text-gold hover:bg-gold/20 transition-smooth"
+          >
+            <Share2 className="h-3.5 w-3.5" />
+            Partilhar a minha posição
+          </button>
+        </div>
+      )}
 
       <div className="overflow-hidden rounded-2xl border border-border bg-card/70">
         {rows.length === 0 ? (

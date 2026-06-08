@@ -357,7 +357,10 @@ function LigaPage() {
                   <Avatar name={(podium[0] as any).display_name} size="lg" />
                   <span className="absolute -top-2 -right-1 text-lg">👑</span>
                 </div>
-                <p className="text-center text-xs font-bold leading-tight line-clamp-1 max-w-[80px]">{(podium[0] as any).display_name}</p>
+                <p className="text-center text-xs font-bold leading-tight line-clamp-1 max-w-[80px]">
+                  {(podium[0] as any).display_name}
+                  {(podium[0] as any).id === pool?.created_by && " 👑"}
+                </p>
                 <p className="font-display text-base text-gold font-bold">{(podium[0] as any).total_points} pts</p>
                 <div className={`w-full ${PODIUM_H[0]} ${PODIUM_BG[0]} rounded-t-xl flex items-start justify-center pt-2 trophy-shine`}>
                   <span className="text-2xl">🥇</span>
@@ -431,6 +434,9 @@ function LigaPage() {
                       <div className="flex items-center gap-1.5">
                         <span className="truncate text-sm font-semibold">{r.display_name}</span>
                         {isMe && <span className="shrink-0 text-[9px] font-bold text-wc-red uppercase tracking-wider">Tu</span>}
+                        {r.id === pool?.created_by && (
+                          <span className="shrink-0 text-[10px]" title="Criador do torneio">👑</span>
+                        )}
                       </div>
                       <div className="mt-1 flex items-center gap-2">
                         <div className="h-1.5 flex-1 rounded-full bg-secondary overflow-hidden">

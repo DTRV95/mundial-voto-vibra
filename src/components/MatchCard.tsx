@@ -99,9 +99,18 @@ export function MatchCard({ match }: { match: MatchCardData }) {
 
       {/* Bottom bar */}
       <div className="flex items-center justify-between border-t border-border bg-muted/50 px-4 py-2.5">
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Users2 className="h-3.5 w-3.5" />
-          <span>{match.votes_count ?? 0} previsões</span>
+        <div className="flex items-center gap-1.5">
+          <Users2 className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">
+            <span className="font-bold tabular-nums text-foreground">{(match.votes_count ?? 0).toLocaleString("pt-PT")}</span>
+            {" "}previsões
+          </span>
+          {(match.votes_count ?? 0) > 0 && (
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-green opacity-60" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-wc-green" />
+            </span>
+          )}
         </div>
         <span className="text-xs font-bold text-wc-red transition-smooth group-hover:underline">
           {match.already_voted ? "Ver Comunidade →" : "Dar Previsão →"}

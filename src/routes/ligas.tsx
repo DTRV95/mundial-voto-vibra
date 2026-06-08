@@ -247,10 +247,17 @@ function Ligas() {
               <div className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <Link to="/liga/$code" params={{ code: pool.code }}
-                      className="font-display text-lg hover:text-wc-red transition-smooth">
-                      {pool.name}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link to="/liga/$code" params={{ code: pool.code }}
+                        className="font-display text-lg hover:text-wc-red transition-smooth">
+                        {pool.name}
+                      </Link>
+                      {pool.created_by === user.id && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 border border-gold/30 px-2 py-0.5 text-[10px] font-bold text-gold">
+                          👑 Criador
+                        </span>
+                      )}
+                    </div>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {memberCounts[pool.id] ?? 1} membro{(memberCounts[pool.id] ?? 1) !== 1 ? "s" : ""} · código: <span className="font-mono font-bold">{pool.code}</span>
                     </p>

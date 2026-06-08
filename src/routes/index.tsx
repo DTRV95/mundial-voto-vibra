@@ -99,10 +99,10 @@ function Home() {
     queryFn: async () => {
       const { data } = await supabase
         .from("news")
-        .select("id,title,excerpt,image_url,category,created_at")
+        .select("id,slug,title,excerpt,image_url,category,created_at")
         .eq("published", true)
         .order("created_at", { ascending: false })
-        .limit(3);
+        .limit(4);
       return data ?? [];
     },
   });
@@ -432,44 +432,83 @@ function Home() {
 
       {/* ===================== NOTÍCIAS EM DESTAQUE ===================== */}
       {featuredNewsList.length > 0 && (
-        <section className="px-5 pt-8 pb-2 md:px-8">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Newspaper className="h-4 w-4 text-muted-foreground" />
-              <h2 className="font-display text-xl">Últimas Notícias</h2>
-            </div>
+        <section className="px-5 pt-10 pb-2 md:px-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-2xl md:text-3xl">Últimas Notícias</h2>
             <Link to="/noticias" className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">
               Ver todas →
             </Link>
           </div>
-          <div className="space-y-2">
-            {featuredNewsList.map((news: any) => (
-              <Link
-                key={news.id}
-                to="/noticias/$id"
-                params={{ id: news.id }}
-                className="group flex gap-4 overflow-hidden rounded-2xl border border-border bg-card/70 p-4 hover:border-gold/40 transition-smooth"
-              >
-                {news.image_url && (
-                  <img src={news.image_url} alt={news.title}
-                    className="h-16 w-20 shrink-0 rounded-xl object-cover" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    {news.category === "analise" && (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold">
-                        <TrendingUp className="h-2.5 w-2.5" /> ScoreLab
-                      </span>
-                    )}
-                    <span className="text-[11px] text-muted-foreground">
-                      {new Date(news.created_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" })}
+
+          {/* Artigo principal */}
+          {(() => {
+            const main = featuredNewsList[0] as any;
+            const rest = featuredNewsList.slice(1) as any[];
+            return (
+              <>
+                <Link
+                  to="/noticias/$id"
+                  params={{ id: main.slug ?? main.id }}
+                  className="group mb-3 block overflow-hidden rounded-2xl border border-border bg-card transition-smooth hover:border-gold/40"
+                >
+                  {main.image_url ? (
+                    <div className="relative overflow-hidden h-52 md:h-64">
+                      <img src={main.image_url} alt={main.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        style={{ objectPosition: main.image_position ?? "50% 50%" }} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <NewsCategory category={main.category} />
+                        <h3 className="mt-1.5 font-display text-xl md:text-2xl leading-snug text-white line-clamp-2">{main.title}</h3>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-5">
+                      <NewsCategory category={main.category} />
+                      <h3 className="mt-2 font-display text-xl leading-snug line-clamp-2">{main.title}</h3>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between border-t border-border/50 px-4 py-2.5">
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(main.created_at).toLocaleDateString("pt-PT", { day: "numeric", month: "long" })}
                     </span>
+                    <span className="text-xs font-semibold text-gold group-hover:underline">Ler →</span>
                   </div>
-                  <h3 className="font-display text-sm leading-tight line-clamp-2">{news.title}</h3>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+
+                {/* Grid dos restantes */}
+                {rest.length > 0 && (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {rest.map((news: any) => (
+                      <Link
+                        key={news.id}
+                        to="/noticias/$id"
+                        params={{ id: news.slug ?? news.id }}
+                        className="group flex flex-row sm:flex-col overflow-hidden rounded-2xl border border-border bg-card transition-smooth hover:border-gold/40"
+                      >
+                        {news.image_url && (
+                          <div className="relative h-20 w-28 shrink-0 overflow-hidden sm:h-36 sm:w-full">
+                            <img src={news.image_url} alt={news.title}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                              style={{ objectPosition: news.image_position ?? "50% 50%" }} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent sm:hidden" />
+                          </div>
+                        )}
+                        <div className="flex flex-1 flex-col justify-center p-3">
+                          <NewsCategory category={news.category} small />
+                          <h3 className="mt-1 font-display text-sm leading-snug line-clamp-2">{news.title}</h3>
+                          <p className="mt-1.5 text-[11px] text-muted-foreground">
+                            {new Date(news.created_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" })}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
+
           <Link to="/noticias"
             className="mt-3 block w-full rounded-2xl border border-border py-2.5 text-center text-xs font-bold text-muted-foreground transition-smooth hover:border-gold/40 hover:text-gold">
             Ver todas as notícias →
@@ -477,6 +516,23 @@ function Home() {
         </section>
       )}
     </div>
+  );
+}
+
+const NEWS_CATEGORY: Record<string, { label: string; cls: string }> = {
+  analise:   { label: "Análise ScoreLab", cls: "text-gold" },
+  antevisao: { label: "Antevisão",        cls: "text-primary" },
+  noticia:   { label: "Notícia",          cls: "text-muted-foreground" },
+  opiniao:   { label: "Opinião",          cls: "text-muted-foreground" },
+};
+
+function NewsCategory({ category, small = false }: { category: string; small?: boolean }) {
+  const c = NEWS_CATEGORY[category] ?? NEWS_CATEGORY.noticia;
+  return (
+    <p className={`font-bold uppercase tracking-widest ${small ? "text-[9px]" : "text-[10px]"} ${c.cls}`}>
+      {category === "analise" && <TrendingUp className="inline h-2.5 w-2.5 mr-0.5 -mt-0.5" />}
+      {c.label}
+    </p>
   );
 }
 

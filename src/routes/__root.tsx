@@ -94,7 +94,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-PT">
-      <head><HeadContent /></head>
+      <head>
+        <HeadContent />
+        {/* Force reload when opened inside Instagram/Facebook in-app browser */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function(){
+            var ua = navigator.userAgent || '';
+            var isInApp = /Instagram|FBAN|FBAV|FB_IAB|FB4A|FBIOS|LinkedInApp/.test(ua);
+            if (isInApp && !window.__igReloaded) {
+              window.__igReloaded = true;
+              var url = location.href;
+              if (url.indexOf('?') === -1) url += '?_r=1';
+              location.replace(url);
+            }
+          })();
+        ` }} />
+      </head>
       <body>
         {children}
         <Scripts />

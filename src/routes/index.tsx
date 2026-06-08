@@ -456,10 +456,10 @@ function Home() {
                       <img src={main.image_url} alt={main.title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         style={{ objectPosition: main.image_position ?? "50% 50%" }} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-4">
                         <NewsCategory category={main.category} />
-                        <h3 className="mt-1.5 font-display text-xl md:text-2xl leading-snug text-white line-clamp-2">{main.title}</h3>
+                        <h3 className="mt-1.5 font-display text-xl md:text-2xl leading-snug text-white drop-shadow line-clamp-2">{main.title}</h3>
                       </div>
                     </div>
                   ) : (

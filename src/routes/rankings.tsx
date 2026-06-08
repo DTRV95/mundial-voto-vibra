@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Trophy } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
+import { useAuth } from "@/lib/useAuth";
 
 const PHASES = [
   { key: "geral", label: "Ranking Geral" },
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/rankings")({
 
 function Rankings() {
   const [phase, setPhase] = useState<typeof PHASES[number]["key"]>("geral");
+  const { user } = useAuth();
 
   const { data: rows = [] } = useQuery({
     queryKey: ["ranking", phase],
@@ -88,6 +90,39 @@ function Rankings() {
     },
   });
 
+  // Posição do utilizador autenticado (se não estiver no top 50)
+  const myEntry = rows.find(r => r.id === user?.id);
+  const myRank  = myEntry ? rows.indexOf(myEntry) + 1 : null;
+
+  const { data: myPosition } = useQuery({
+    queryKey: ["my-rank", phase, user?.id],
+    enabled: !!user?.id && !myEntry && rows.length > 0,
+    queryFn: async () => {
+      if (phase === "geral") {
+        const { data: me } = await supabase
+          .from("profiles")
+          .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct")
+          .eq("id", user!.id)
+          .maybeSingle();
+        if (!me) return null;
+        const { count } = await supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .gt("total_points", me.total_points);
+        return {
+          id: me.id,
+          display_name: me.display_name,
+          avatar_url: (me as any).avatar_url,
+          points: me.total_points,
+          predictions_made: me.predictions_made,
+          predictions_correct: me.predictions_correct,
+          rank: (count ?? 0) + 1,
+        };
+      }
+      return null;
+    },
+  });
+
   return (
     <div className="px-5 pt-6">
       <header className="mb-5">
@@ -136,17 +171,18 @@ function Rankings() {
                 const acc = r.predictions_made > 0
                   ? Math.round((r.predictions_correct / r.predictions_made) * 100)
                   : 0;
+                const isMe = r.id === user?.id;
                 return (
-                  <tr key={r.id} className="border-t border-border">
+                  <tr key={r.id} className={`border-t border-border ${isMe ? "bg-gold/5" : ""}`}>
                     <td className="px-3 py-2.5">
                       <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                        i === 0 ? "bg-gold text-background" : i < 3 ? "bg-gold/30 text-gold" : "bg-secondary"
+                        i === 0 ? "bg-gold text-background" : i < 3 ? "bg-gold/30 text-gold" : isMe ? "bg-wc-red/20 text-wc-red" : "bg-secondary"
                       }`}>{i + 1}</span>
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
                         <UserAvatar avatarUrl={(r as any).avatar_url} name={r.display_name} size={7} className="rounded-full" />
-                        <span className="font-medium">{r.display_name ?? "Adepto"}</span>
+                        <span className={`font-medium ${isMe ? "text-wc-red" : ""}`}>{r.display_name ?? "Adepto"}{isMe && " (tu)"}</span>
                       </div>
                     </td>
                     <td className="px-2 py-2.5 text-right font-display text-gold">{r.points}</td>
@@ -155,6 +191,35 @@ function Rankings() {
                   </tr>
                 );
               })}
+
+              {/* Posição do utilizador fora do top 50 */}
+              {myPosition && (
+                <>
+                  <tr className="border-t border-border">
+                    <td colSpan={5} className="px-3 py-1 text-center text-[10px] text-muted-foreground tracking-widest">
+                      · · ·
+                    </td>
+                  </tr>
+                  <tr className="border-t border-wc-red/20 bg-wc-red/5">
+                    <td className="px-3 py-2.5">
+                      <span className="grid h-7 w-7 place-items-center rounded-full bg-wc-red/20 text-xs font-bold text-wc-red">
+                        {myPosition.rank}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-2">
+                        <UserAvatar avatarUrl={myPosition.avatar_url} name={myPosition.display_name} size={7} className="rounded-full" />
+                        <span className="font-medium text-wc-red">{myPosition.display_name ?? "Tu"} (tu)</span>
+                      </div>
+                    </td>
+                    <td className="px-2 py-2.5 text-right font-display text-gold">{myPosition.points}</td>
+                    <td className="px-2 py-2.5 text-right text-muted-foreground">{myPosition.predictions_correct}/{myPosition.predictions_made}</td>
+                    <td className="px-2 py-2.5 text-right text-muted-foreground">
+                      {myPosition.predictions_made > 0 ? Math.round((myPosition.predictions_correct / myPosition.predictions_made) * 100) : 0}%
+                    </td>
+                  </tr>
+                </>
+              )}
             </tbody>
           </table>
         )}

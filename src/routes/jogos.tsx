@@ -26,8 +26,19 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "todos",   label: "Todos" },
 ];
 
+type PhaseFilter = "todas" | "grupos" | "oitavos" | "quartos" | "meias" | "final";
+const PHASE_FILTERS: { key: PhaseFilter; label: string }[] = [
+  { key: "todas",    label: "Todas as fases" },
+  { key: "grupos",   label: "Grupos" },
+  { key: "oitavos",  label: "Oitavos" },
+  { key: "quartos",  label: "Quartos" },
+  { key: "meias",    label: "Meias-Finais" },
+  { key: "final",    label: "Final" },
+];
+
 function Jogos() {
   const [filter, setFilter] = useState<Filter>("hoje");
+  const [phase, setPhase] = useState<PhaseFilter>("todas");
   const { user } = useAuth();
 
   const { data: all = [], isLoading } = useQuery({
@@ -74,8 +85,9 @@ function Jogos() {
         if (filter === "semana")  return t >= today && t <= weekEnd;
         if (filter === "votados") return m.already_voted;
         return true;
-      });
-  }, [all, filter, votedIds]);
+      })
+      .filter(m => phase === "todas" || m.phase === phase);
+  }, [all, filter, phase, votedIds]);
 
   const grouped = useMemo(() => {
     const map: Record<string, MatchCardData[]> = {};
@@ -112,7 +124,7 @@ function Jogos() {
       </header>
 
       {/* Filtros */}
-      <div className="mb-6 -mx-4 md:mx-0 overflow-x-auto px-4 md:px-0">
+      <div className="mb-3 -mx-4 md:mx-0 overflow-x-auto px-4 md:px-0">
         <div className="flex gap-2 w-max">
           {FILTERS.map(f => {
             // Só mostra "Já votados" se o user estiver autenticado
@@ -137,6 +149,22 @@ function Jogos() {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Filtros de fase */}
+      <div className="mb-6 -mx-4 md:mx-0 overflow-x-auto px-4 md:px-0">
+        <div className="flex gap-1.5 w-max">
+          {PHASE_FILTERS.map(f => (
+            <button key={f.key} onClick={() => setPhase(f.key)}
+              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition-smooth ${
+                phase === f.key
+                  ? "border-wc-red bg-wc-red/20 text-wc-red"
+                  : "border-border bg-card/40 text-muted-foreground hover:border-wc-red/30 hover:text-foreground"
+              }`}>
+              {f.label}
+            </button>
+          ))}
         </div>
       </div>
 

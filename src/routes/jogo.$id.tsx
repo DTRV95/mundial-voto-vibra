@@ -487,24 +487,36 @@ function CommunityLine({ votes, labels, total }: { votes: (string | null)[]; lab
 
   const parts = Object.entries(labels).map(([k, label]) => {
     const pct = Math.round(((counts[k] ?? 0) / n) * 100);
-    return { label, pct };
+    return { key: k, label, pct };
   });
 
+  const maxPct = Math.max(...parts.map(p => p.pct));
+
   return (
-    <div className="rounded-xl border border-border/50 bg-secondary/20 px-3 py-2">
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <Users2 className="h-3 w-3 text-muted-foreground shrink-0" />
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Opinião da Comunidade · {total} {total === 1 ? "voto" : "votos"}
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-x-4 gap-y-1">
-        {parts.map(({ label, pct }) => (
-          <span key={label} className="text-xs">
-            <span className="text-muted-foreground">{label}</span>
-            {" "}
-            <span className="font-bold text-foreground">{pct}%</span>
+    <div className="rounded-xl border border-border/50 bg-secondary/20 px-3 py-2.5">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <Users2 className="h-3 w-3 text-muted-foreground shrink-0" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Opinião da Comunidade
           </span>
+        </div>
+        <span className="text-[11px] font-bold text-gold">{total} {total === 1 ? "voto" : "votos"}</span>
+      </div>
+      <div className="space-y-1.5">
+        {parts.map(({ label, pct }) => (
+          <div key={label} className="flex items-center gap-2">
+            <span className="text-[11px] text-muted-foreground w-16 shrink-0 truncate">{label}</span>
+            <div className="flex-1 h-1.5 rounded-full bg-border/50 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${pct === maxPct && pct > 0 ? "bg-gold" : "bg-muted-foreground/40"}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className={`text-xs font-bold w-8 text-right ${pct === maxPct && pct > 0 ? "text-gold" : "text-muted-foreground"}`}>
+              {pct}%
+            </span>
+          </div>
         ))}
       </div>
     </div>

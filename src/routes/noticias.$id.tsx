@@ -30,13 +30,12 @@ function Article() {
   const { data: article, isLoading } = useQuery({
     queryKey: ["news", id],
     queryFn: async () => {
-      // UUID regex — if it looks like a UUID go straight to id lookup, otherwise try slug
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-      if (!isUuid) {
-        const { data } = await supabase.from("news").select("*").eq("slug", id).eq("published", true).maybeSingle();
-        if (data) return data;
-      }
-      const { data } = await supabase.from("news").select("*").eq("id", id).eq("published", true).maybeSingle();
+      const { data } = await supabase
+        .from("news")
+        .select("id,title,excerpt,content,image_url,image_position,image_caption,category,created_at,views")
+        .eq("id", id)
+        .eq("published", true)
+        .maybeSingle();
       return data;
     },
   });

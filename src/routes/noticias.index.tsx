@@ -20,20 +20,15 @@ const CATEGORY_STYLE: Record<string, { label: string; cls: string }> = {
   opiniao:    { label: "Opinião",           cls: "border-border bg-secondary text-muted-foreground" },
 };
 
-function articleLink(a: any): string {
-  return a.slug || a.id;
-}
-
 function Noticias() {
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ["news", "all"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("news")
-        .select("*")
+        .select("id,title,excerpt,image_url,image_position,category,created_at")
         .eq("published", true)
         .order("created_at", { ascending: false });
-      if (error) console.error("news fetch error", error);
       return data ?? [];
     },
   });
@@ -68,7 +63,7 @@ function Noticias() {
       {featured && (
         <Link
           to="/noticias/$id"
-          params={{ id: articleLink(featured) }}
+          params={{ id: featured.id }}
           className="group mb-6 block overflow-hidden rounded-2xl border border-border bg-card/70 transition-smooth hover:border-gold/40"
           style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 40px -8px oklch(0.82 0.15 88 / 0.2)"; }}
@@ -105,7 +100,7 @@ function Noticias() {
             <Link
               key={a.id}
               to="/noticias/$id"
-              params={{ id: articleLink(a) }}
+              params={{ id: a.id }}
               className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-smooth hover:border-gold/40"
               style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 32px -6px oklch(0.82 0.15 88 / 0.15)"; }}

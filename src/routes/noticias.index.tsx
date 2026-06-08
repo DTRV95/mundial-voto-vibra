@@ -20,15 +20,20 @@ const CATEGORY_STYLE: Record<string, { label: string; cls: string }> = {
   opiniao:    { label: "Opinião",           cls: "border-border bg-secondary text-muted-foreground" },
 };
 
+function articleLink(a: any): string {
+  return a.slug || a.id;
+}
+
 function Noticias() {
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ["news", "all"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("news")
-        .select("id,title,excerpt,image_url,category,created_at")
+        .select("*")
         .eq("published", true)
         .order("created_at", { ascending: false });
+      if (error) console.error("news fetch error", error);
       return data ?? [];
     },
   });
@@ -61,7 +66,9 @@ function Noticias() {
       )}
 
       {featured && (
-        <Link to="/noticias/$id" params={{ id: featured.id }}
+        <Link
+          to="/noticias/$id"
+          params={{ id: articleLink(featured) }}
           className="group mb-6 block overflow-hidden rounded-2xl border border-border bg-card/70 transition-smooth hover:border-gold/40"
           style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 40px -8px oklch(0.82 0.15 88 / 0.2)"; }}
@@ -69,7 +76,7 @@ function Noticias() {
         >
           {featured.image_url ? (
             <div className="relative h-52 md:h-64 w-full overflow-hidden">
-              <img src={featured.image_url} alt={featured.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src={featured.image_url} alt={featured.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: featured.image_position ?? "50% 50%" }} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <CategoryBadge category={featured.category} className="absolute left-4 top-4" />
               <div className="absolute bottom-4 left-4 right-4">
@@ -95,7 +102,10 @@ function Noticias() {
       {rest.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {rest.map((a: any) => (
-            <Link key={a.id} to="/noticias/$id" params={{ id: a.id }}
+            <Link
+              key={a.id}
+              to="/noticias/$id"
+              params={{ id: articleLink(a) }}
               className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-smooth hover:border-gold/40"
               style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 32px -6px oklch(0.82 0.15 88 / 0.15)"; }}
@@ -103,7 +113,7 @@ function Noticias() {
             >
               {a.image_url ? (
                 <div className="relative h-36 overflow-hidden">
-                  <img src={a.image_url} alt={a.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <img src={a.image_url} alt={a.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: a.image_position ?? "50% 50%" }} />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
                   <CategoryBadge category={a.category} className="absolute left-3 top-3" small />
                 </div>

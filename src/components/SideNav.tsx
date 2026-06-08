@@ -4,6 +4,8 @@ import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logoSvg from "@/assets/logo.svg";
+import { useQuery } from "@tanstack/react-query";
+import { UserAvatar } from "@/components/AvatarPicker";
 
 const items = [
   { to: "/",        label: "Home",     icon: Home },
@@ -30,7 +32,14 @@ export function SideNav() {
     ?? user?.email?.split("@")[0]
     ?? "Utilizador";
 
-  const initial = displayName.charAt(0).toUpperCase();
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("avatar_url,display_name").eq("id", user!.id).maybeSingle();
+      return data;
+    },
+  });
 
   return (
     <aside className="hidden md:flex fixed left-0 top-0 h-full w-56 flex-col border-r border-border bg-card z-40 shadow-elegant">
@@ -89,9 +98,7 @@ export function SideNav() {
       {user ? (
         <div className="border-t border-border p-4 space-y-3">
           <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-muted font-display text-base text-foreground">
-              {initial}
-            </span>
+            <UserAvatar avatarUrl={profile?.avatar_url} name={profile?.display_name ?? displayName} size={9} className="rounded-full" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold text-foreground">{displayName}</p>
               {isAdmin ? (

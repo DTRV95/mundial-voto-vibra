@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Trophy } from "lucide-react";
+import { UserAvatar } from "@/components/AvatarPicker";
 
 const PHASES = [
   { key: "geral", label: "Ranking Geral" },
@@ -31,12 +32,13 @@ function Rankings() {
       if (phase === "geral") {
         const { data } = await supabase
           .from("profiles")
-          .select("id,display_name,total_points,predictions_made,predictions_correct")
+          .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct")
           .order("total_points", { ascending: false })
           .limit(50);
         return (data ?? []).map((r) => ({
           id: r.id,
           display_name: r.display_name,
+          avatar_url: (r as any).avatar_url,
           points: r.total_points,
           predictions_made: r.predictions_made,
           predictions_correct: r.predictions_correct,
@@ -63,13 +65,14 @@ function Rankings() {
       const userIds = Object.keys(map);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id,display_name")
+        .select("id,display_name,avatar_url")
         .in("id", userIds);
 
       return (profiles ?? [])
         .map((pr) => ({
           id: pr.id,
           display_name: pr.display_name,
+          avatar_url: (pr as any).avatar_url,
           points: map[pr.id]?.points ?? 0,
           predictions_made: map[pr.id]?.made ?? 0,
           predictions_correct: map[pr.id]?.correct ?? 0,
@@ -140,7 +143,12 @@ function Rankings() {
                         i === 0 ? "bg-gold text-background" : i < 3 ? "bg-gold/30 text-gold" : "bg-secondary"
                       }`}>{i + 1}</span>
                     </td>
-                    <td className="px-3 py-2.5 font-medium">{r.display_name ?? "Adepto"}</td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-2">
+                        <UserAvatar avatarUrl={(r as any).avatar_url} name={r.display_name} size={7} className="rounded-full" />
+                        <span className="font-medium">{r.display_name ?? "Adepto"}</span>
+                      </div>
+                    </td>
                     <td className="px-2 py-2.5 text-right font-display text-gold">{r.points}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{acc}%</td>

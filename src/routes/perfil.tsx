@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Star, Flame, Calendar } from "lucide-react";
+import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Star, Flame, Calendar, ImageIcon } from "lucide-react";
+import { AvatarPicker, UserAvatar } from "@/components/AvatarPicker";
 import { toast } from "sonner";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { formatDate } from "@/lib/format";
@@ -55,6 +56,14 @@ function Perfil() {
   });
 
   // Edição de nome
+  const [avatarOpen, setAvatarOpen] = useState(false);
+
+  async function saveAvatar(url: string) {
+    await supabase.from("profiles").update({ avatar_url: url }).eq("id", user!.id);
+    qc.invalidateQueries({ queryKey: ["profile", user?.id] });
+    toast.success("Avatar actualizado!");
+  }
+
   const [editing, setEditing] = useState(false);
   const [newName, setNewName] = useState("");
   const [nameStatus, setNameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
@@ -122,12 +131,16 @@ function Perfil() {
     navigate({ to: "/" });
   }
 
-  const initial = (profile?.display_name ?? user.email ?? "?").charAt(0).toUpperCase();
-  const colors = ["#E61D25", "#3CAC3B", "#2A398D", "#D4A843", "#9333ea", "#06b6d4"];
-  const avatarColor = colors[(initial.charCodeAt(0) ?? 0) % colors.length];
-
   return (
     <div className="px-5 pt-6 pb-24 md:pb-10 md:px-8 max-w-2xl mx-auto">
+
+      {avatarOpen && (
+        <AvatarPicker
+          current={profile?.avatar_url}
+          onSave={saveAvatar}
+          onClose={() => setAvatarOpen(false)}
+        />
+      )}
 
       {/* Hero card */}
       <div className="relative overflow-hidden rounded-3xl mb-6"
@@ -140,10 +153,16 @@ function Perfil() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* Avatar */}
-              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl font-display text-3xl text-white shadow-lg"
-                style={{ background: avatarColor }}>
-                {initial}
-              </div>
+              <button
+                onClick={() => setAvatarOpen(true)}
+                className="relative shrink-0 group"
+                title="Alterar avatar"
+              >
+                <UserAvatar avatarUrl={profile?.avatar_url} name={profile?.display_name ?? user.email} size={16} />
+                <div className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-smooth flex items-center justify-center">
+                  <ImageIcon className="h-5 w-5 text-white" />
+                </div>
+              </button>
               <div>
                 {editing ? (
                   <div className="space-y-1">

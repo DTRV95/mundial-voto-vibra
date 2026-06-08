@@ -637,22 +637,9 @@ function NewsPreview({ article, onClose }: { article: any; onClose: () => void }
   );
 }
 
-function toSlug(text: string) {
-  return text
-    .toLowerCase()
-    .normalize("NFD").replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 80);
-}
-
 function NewsAdmin() {
   const qc = useQueryClient();
   const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [slugTouched, setSlugTouched] = useState(false);
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -670,20 +657,15 @@ function NewsAdmin() {
   });
 
   function reset() {
-    setTitle(""); setSlug(""); setSlugTouched(false); setExcerpt(""); setContent(""); setImageUrl("");
+    setTitle(""); setExcerpt(""); setContent(""); setImageUrl("");
     setImageCaption(""); setImagePosition("50% 50%"); setCategory("noticia"); setPublished(false); setEditId(null);
   }
 
   function loadEdit(a: any) {
-    setEditId(a.id); setTitle(a.title); setSlug(a.slug ?? ""); setSlugTouched(!!a.slug);
+    setEditId(a.id); setTitle(a.title);
     setExcerpt(a.excerpt ?? ""); setContent(a.content ?? ""); setImageUrl(a.image_url ?? "");
     setImageCaption(a.image_caption ?? ""); setImagePosition(a.image_position ?? "50% 50%");
     setCategory(a.category); setPublished(a.published);
-  }
-
-  function handleTitleChange(val: string) {
-    setTitle(val);
-    if (!slugTouched) setSlug(toSlug(val));
   }
 
   async function uploadImage(file: File) {
@@ -708,7 +690,7 @@ function NewsAdmin() {
     if (!title.trim()) { toast.error("Título obrigatório"); return; }
     if (excerpt.length > EXCERPT_MAX) { toast.error(`Resumo demasiado longo (máx. ${EXCERPT_MAX} caracteres)`); return; }
     const payload = {
-      title, slug: slug.trim() || null, excerpt: excerpt || null, content: content || null,
+      title, excerpt: excerpt || null, content: content || null,
       image_url: imageUrl || null, image_caption: imageCaption || null,
       image_position: imageUrl ? imagePosition : null,
       category, published,
@@ -746,25 +728,9 @@ function NewsAdmin() {
         <input
           placeholder="Título do artigo"
           value={title}
-          onChange={e => handleTitleChange(e.target.value)}
+          onChange={e => setTitle(e.target.value)}
           className={`${inputCls} w-full`}
         />
-
-        {/* Slug SEO */}
-        <div>
-          <label className="mb-1 block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Slug (URL do artigo)
-          </label>
-          <div className="flex items-center rounded-xl border border-border bg-input overflow-hidden focus-within:border-gold/60 transition-smooth">
-            <span className="px-3 text-xs text-muted-foreground/60 whitespace-nowrap select-none">/noticias/</span>
-            <input
-              placeholder="meu-artigo-sobre-portugal"
-              value={slug}
-              onChange={e => { setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")); setSlugTouched(true); }}
-              className="flex-1 bg-transparent py-2 pr-3 text-sm outline-none"
-            />
-          </div>
-        </div>
 
         {/* Resumo com contador */}
         <div>

@@ -7,7 +7,7 @@ import { PHASE_LABEL } from "@/lib/format";
 export const Route = createFileRoute("/premios")({
   head: () => ({
     meta: [
-      { title: "Prémios — Uma Geração" },
+      { title: "Prémios — Ultima Geração" },
       { name: "description", content: "Prémios para os vencedores de cada fase do Mundial." },
     ],
   }),

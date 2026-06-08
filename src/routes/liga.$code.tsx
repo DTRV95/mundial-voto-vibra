@@ -162,7 +162,7 @@ function LigaPage() {
   function copyLink() {
     const url = window.location.href;
     if (navigator.share) {
-      navigator.share({ title: `Liga "${pool?.name}"`, text: "Junta-te ao meu torneio no Uma Geração 🏆", url });
+      navigator.share({ title: `Liga "${pool?.name}"`, text: "Junta-te ao meu torneio no Ultima Geração 🏆", url });
     } else {
       navigator.clipboard.writeText(url);
       setCopied(true);
@@ -173,7 +173,7 @@ function LigaPage() {
 
   function shareWhatsApp() {
     const url = window.location.href;
-    const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${pool?.name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
+    const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${pool?.name}" no Ultima Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }
 

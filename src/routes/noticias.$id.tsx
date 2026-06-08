@@ -7,9 +7,9 @@ import { TrendingUp, ArrowLeft, Calendar, Eye } from "lucide-react";
 export const Route = createFileRoute("/noticias/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: `Artigo — Uma Geração 2026` },
+      { title: `Artigo — Ultima Geração 2026` },
       { name: "robots", content: "index, follow" },
-      { property: "og:site_name", content: "Uma Geração 2026" },
+      { property: "og:site_name", content: "Ultima Geração 2026" },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

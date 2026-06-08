@@ -8,7 +8,7 @@ import { Mail, Lock, User, CheckCircle2, XCircle, Loader2, ArrowLeft, KeyRound, 
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }),
-  head: () => ({ meta: [{ title: "Entrar — Uma Geração" }] }),
+  head: () => ({ meta: [{ title: "Entrar — Ultima Geração" }] }),
   component: AuthPage,
 });
 

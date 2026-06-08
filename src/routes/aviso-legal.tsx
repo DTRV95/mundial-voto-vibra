@@ -25,7 +25,7 @@ function AvisoLegalPage() {
       </Section>
 
       <Section title="Sobre a Plataforma">
-        <p><strong>Uma Geração</strong> é uma plataforma digital de previsões desportivas comunitária, dedicada ao Campeonato do Mundo de Futebol FIFA 2026. O serviço é inteiramente gratuito e não envolve apostas ou jogo a dinheiro.</p>
+        <p><strong>Ultima Geração</strong> é uma plataforma digital de previsões desportivas comunitária, dedicada ao Campeonato do Mundo de Futebol FIFA 2026. O serviço é inteiramente gratuito e não envolve apostas ou jogo a dinheiro.</p>
         <p>Esta plataforma não tem qualquer afiliação, patrocínio ou aprovação oficial por parte da FIFA ou de qualquer federação de futebol.</p>
       </Section>
 

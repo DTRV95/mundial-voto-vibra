@@ -11,7 +11,7 @@ import trophyImg from "@/assets/trophy-hero.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Uma Geração — Vota, compara e vibra com a comunidade" },
+      { title: "Ultima Geração — Vota, compara e vibra com a comunidade" },
       { name: "description", content: "Faz a tua previsão para cada jogo do Mundial, compara com a comunidade e compete nos rankings por fase." },
     ],
   }),

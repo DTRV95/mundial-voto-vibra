@@ -113,7 +113,7 @@ function Article() {
       {/* Imagem de capa */}
       {article.image_url && (
         <figure className="mb-6 overflow-hidden rounded-2xl">
-          <img src={article.image_url} alt={article.title} className="w-full object-cover max-h-80" />
+          <img src={article.image_url} alt={article.title} className="w-full object-cover h-64 md:h-80" style={{ objectPosition: (article as any).image_position ?? "50% 50%" }} />
           {(article as any).image_caption && (
             <figcaption className="mt-2 px-1 text-[11px] text-muted-foreground italic">
               {(article as any).image_caption}

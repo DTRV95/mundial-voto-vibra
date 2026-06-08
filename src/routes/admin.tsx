@@ -606,7 +606,7 @@ function NewsPreview({ article, onClose }: { article: any; onClose: () => void }
         <article className="rounded-2xl border border-border bg-card/70 overflow-hidden">
           {article.image_url && (
             <figure className="overflow-hidden">
-              <img src={article.image_url} alt={article.title} className="w-full object-cover max-h-72" />
+              <img src={article.image_url} alt={article.title} className="w-full object-cover h-64" style={{ objectPosition: article.image_position ?? "50% 50%" }} />
               {article.image_caption && (
                 <figcaption className="px-5 pt-2 pb-0 text-[11px] text-muted-foreground italic">
                   {article.image_caption}
@@ -657,6 +657,7 @@ function NewsAdmin() {
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imageCaption, setImageCaption] = useState("");
+  const [imagePosition, setImagePosition] = useState("50% 50%");
   const [category, setCategory] = useState("noticia");
   const [published, setPublished] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -670,13 +671,14 @@ function NewsAdmin() {
 
   function reset() {
     setTitle(""); setSlug(""); setSlugTouched(false); setExcerpt(""); setContent(""); setImageUrl("");
-    setImageCaption(""); setCategory("noticia"); setPublished(false); setEditId(null);
+    setImageCaption(""); setImagePosition("50% 50%"); setCategory("noticia"); setPublished(false); setEditId(null);
   }
 
   function loadEdit(a: any) {
     setEditId(a.id); setTitle(a.title); setSlug(a.slug ?? ""); setSlugTouched(!!a.slug);
     setExcerpt(a.excerpt ?? ""); setContent(a.content ?? ""); setImageUrl(a.image_url ?? "");
-    setImageCaption(a.image_caption ?? ""); setCategory(a.category); setPublished(a.published);
+    setImageCaption(a.image_caption ?? ""); setImagePosition(a.image_position ?? "50% 50%");
+    setCategory(a.category); setPublished(a.published);
   }
 
   function handleTitleChange(val: string) {
@@ -708,6 +710,7 @@ function NewsAdmin() {
     const payload = {
       title, slug: slug.trim() || null, excerpt: excerpt || null, content: content || null,
       image_url: imageUrl || null, image_caption: imageCaption || null,
+      image_position: imageUrl ? imagePosition : null,
       category, published,
     };
     const { error } = editId
@@ -784,16 +787,39 @@ function NewsAdmin() {
           </p>
           {imageUrl ? (
             <div className="rounded-xl border border-border overflow-hidden">
-              <div className="relative" style={{ resize: "vertical", overflow: "auto", minHeight: "200px", maxHeight: "600px", height: "320px" }}>
-                <img src={imageUrl} alt="capa" className="absolute inset-0 h-full w-full object-cover" />
+              <div
+                className="relative h-64 cursor-grab active:cursor-grabbing select-none"
+                onMouseDown={e => {
+                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                  const startX = e.clientX; const startY = e.clientY;
+                  const [px, py] = imagePosition.split(" ").map(v => parseFloat(v));
+                  const onMove = (ev: MouseEvent) => {
+                    const dx = ((ev.clientX - startX) / rect.width) * -100;
+                    const dy = ((ev.clientY - startY) / rect.height) * -100;
+                    const nx = Math.max(0, Math.min(100, px + dx));
+                    const ny = Math.max(0, Math.min(100, py + dy));
+                    setImagePosition(`${nx.toFixed(1)}% ${ny.toFixed(1)}%`);
+                  };
+                  const onUp = () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
+                  window.addEventListener("mousemove", onMove);
+                  window.addEventListener("mouseup", onUp);
+                }}
+              >
+                <img
+                  src={imageUrl} alt="capa" draggable={false}
+                  className="h-full w-full object-cover pointer-events-none"
+                  style={{ objectPosition: imagePosition }}
+                />
                 <button
                   type="button"
-                  onClick={() => { setImageUrl(""); setImageCaption(""); }}
+                  onClick={() => { setImageUrl(""); setImageCaption(""); setImagePosition("50% 50%"); }}
                   className="absolute right-2 top-2 rounded-full bg-background/80 p-1 text-foreground hover:bg-destructive hover:text-white transition-smooth z-10"
                 >
                   <X className="h-4 w-4" />
                 </button>
-                <div className="absolute bottom-1 right-1 text-[10px] text-white/40 select-none pointer-events-none">↕ arrasta para redimensionar</div>
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-background/70 px-2.5 py-1 text-[10px] text-muted-foreground backdrop-blur-sm pointer-events-none">
+                  ✥ arrasta para ajustar o enquadramento
+                </div>
               </div>
             </div>
           ) : (
@@ -876,7 +902,7 @@ function NewsAdmin() {
 
       {preview && (
         <NewsPreview
-          article={{ title, excerpt, content, image_url: imageUrl, image_caption: imageCaption, category }}
+          article={{ title, excerpt, content, image_url: imageUrl, image_caption: imageCaption, image_position: imagePosition, category }}
           onClose={() => setPreview(false)}
         />
       )}

@@ -15,7 +15,6 @@ import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PremiosRouteImport } from './routes/premios'
 import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as LigasRouteImport } from './routes/ligas'
 import { Route as JogosRouteImport } from './routes/jogos'
 import { Route as GruposRouteImport } from './routes/grupos'
@@ -59,11 +58,6 @@ const PerfilRoute = PerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NoticiasRoute = NoticiasRouteImport.update({
-  id: '/noticias',
-  path: '/noticias',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LigasRoute = LigasRouteImport.update({
   id: '/ligas',
   path: '/ligas',
@@ -105,14 +99,14 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => NoticiasRoute,
+  id: '/noticias/',
+  path: '/noticias/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const NoticiasIdRoute = NoticiasIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => NoticiasRoute,
+  id: '/noticias/$id',
+  path: '/noticias/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LigaCodeRoute = LigaCodeRouteImport.update({
   id: '/liga/$code',
@@ -134,7 +128,6 @@ export interface FileRoutesByFullPath {
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
-  '/noticias': typeof NoticiasRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -176,7 +169,6 @@ export interface FileRoutesById {
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
-  '/noticias': typeof NoticiasRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -199,7 +191,6 @@ export interface FileRouteTypes {
     | '/grupos'
     | '/jogos'
     | '/ligas'
-    | '/noticias'
     | '/perfil'
     | '/premios'
     | '/privacidade'
@@ -240,7 +231,6 @@ export interface FileRouteTypes {
     | '/grupos'
     | '/jogos'
     | '/ligas'
-    | '/noticias'
     | '/perfil'
     | '/premios'
     | '/privacidade'
@@ -262,7 +252,6 @@ export interface RootRouteChildren {
   GruposRoute: typeof GruposRoute
   JogosRoute: typeof JogosRoute
   LigasRoute: typeof LigasRoute
-  NoticiasRoute: typeof NoticiasRouteWithChildren
   PerfilRoute: typeof PerfilRoute
   PremiosRoute: typeof PremiosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -271,6 +260,8 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   JogoIdRoute: typeof JogoIdRoute
   LigaCodeRoute: typeof LigaCodeRoute
+  NoticiasIdRoute: typeof NoticiasIdRoute
+  NoticiasIndexRoute: typeof NoticiasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -315,13 +306,6 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/noticias': {
-      id: '/noticias'
-      path: '/noticias'
-      fullPath: '/noticias'
-      preLoaderRoute: typeof NoticiasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ligas': {
@@ -382,17 +366,17 @@ declare module '@tanstack/react-router' {
     }
     '/noticias/': {
       id: '/noticias/'
-      path: '/'
+      path: '/noticias'
       fullPath: '/noticias/'
       preLoaderRoute: typeof NoticiasIndexRouteImport
-      parentRoute: typeof NoticiasRoute
+      parentRoute: typeof rootRouteImport
     }
     '/noticias/$id': {
       id: '/noticias/$id'
-      path: '/$id'
+      path: '/noticias/$id'
       fullPath: '/noticias/$id'
       preLoaderRoute: typeof NoticiasIdRouteImport
-      parentRoute: typeof NoticiasRoute
+      parentRoute: typeof rootRouteImport
     }
     '/liga/$code': {
       id: '/liga/$code'
@@ -411,20 +395,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface NoticiasRouteChildren {
-  NoticiasIdRoute: typeof NoticiasIdRoute
-  NoticiasIndexRoute: typeof NoticiasIndexRoute
-}
-
-const NoticiasRouteChildren: NoticiasRouteChildren = {
-  NoticiasIdRoute: NoticiasIdRoute,
-  NoticiasIndexRoute: NoticiasIndexRoute,
-}
-
-const NoticiasRouteWithChildren = NoticiasRoute._addFileChildren(
-  NoticiasRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -434,7 +404,6 @@ const rootRouteChildren: RootRouteChildren = {
   GruposRoute: GruposRoute,
   JogosRoute: JogosRoute,
   LigasRoute: LigasRoute,
-  NoticiasRoute: NoticiasRouteWithChildren,
   PerfilRoute: PerfilRoute,
   PremiosRoute: PremiosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
@@ -443,6 +412,8 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   JogoIdRoute: JogoIdRoute,
   LigaCodeRoute: LigaCodeRoute,
+  NoticiasIdRoute: NoticiasIdRoute,
+  NoticiasIndexRoute: NoticiasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -220,6 +220,18 @@
   }
   @keyframes shimmer { to { transform: translateX(100%); } }
 
+  .prose-article {
+    font-size: 1.0625rem;
+    line-height: 1.85;
+    color: oklch(var(--foreground) / 0.88);
+  }
+  .prose-article p {
+    margin-bottom: 1.5em;
+  }
+  .prose-article p:last-child {
+    margin-bottom: 0;
+  }
+
   .trophy-shine { position: relative; overflow: hidden; }
   .trophy-shine::after {
     content: "";

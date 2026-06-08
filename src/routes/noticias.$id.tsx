@@ -7,6 +7,23 @@ export const Route = createFileRoute("/noticias/$id")({
   component: Article,
 });
 
+const CATEGORY_STYLE: Record<string, { label: string; cls: string }> = {
+  analise:   { label: "Análise ScoreLab", cls: "border-gold/40 bg-gold/10 text-gold" },
+  antevisao: { label: "Antevisão",        cls: "border-primary/40 bg-primary/10 text-primary" },
+  noticia:   { label: "Notícia",           cls: "border-border bg-secondary text-muted-foreground" },
+  opiniao:   { label: "Opinião",           cls: "border-border bg-secondary text-muted-foreground" },
+};
+
+function CategoryBadge({ category }: { category: string }) {
+  const s = CATEGORY_STYLE[category] ?? CATEGORY_STYLE.noticia;
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${s.cls}`}>
+      {category === "analise" && <TrendingUp className="h-2.5 w-2.5" />}
+      {s.label}
+    </span>
+  );
+}
+
 function Article() {
   const { id } = Route.useParams();
   const [article, setArticle] = useState<any>(null);
@@ -61,38 +78,42 @@ function Article() {
   }
 
   return (
-    <div className="px-4 pt-6 pb-12 md:px-8 max-w-3xl">
+    <div className="px-4 pt-6 pb-16 md:px-8 max-w-2xl mx-auto">
       <Link
         to="/noticias"
-        className="mb-6 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-smooth"
+        className="mb-8 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-smooth"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Notícias
       </Link>
 
-      <header className="mt-3 mb-6">
-        {article.category === "analise" && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-gold mb-3">
-            <TrendingUp className="h-3 w-3" /> Análise ScoreLab
+      <header className="mt-2 mb-8">
+        <div className="mb-4 flex items-center gap-3">
+          <CategoryBadge category={article.category} />
+          <span className="text-xs text-muted-foreground">
+            {new Date(article.created_at).toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </span>
-        )}
-        <h1 className="font-display text-3xl md:text-4xl leading-tight">{article.title}</h1>
+        </div>
+
+        <h1 className="font-display text-3xl md:text-[2.6rem] leading-[1.15] tracking-tight">{article.title}</h1>
+
         {article.excerpt && (
-          <p className="mt-3 text-base text-muted-foreground leading-relaxed">{article.excerpt}</p>
+          <p className="mt-4 text-[1.05rem] leading-relaxed text-muted-foreground font-light border-l-2 border-gold/50 pl-4">
+            {article.excerpt}
+          </p>
         )}
-        <p className="mt-3 text-xs text-muted-foreground">
-          {new Date(article.created_at).toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-        </p>
       </header>
 
       {article.image_url && (
-        <figure className="mb-6 overflow-hidden rounded-2xl">
-          <img src={article.image_url} alt={article.title} className="w-full object-cover h-64 md:h-80" />
+        <figure className="mb-8 overflow-hidden rounded-xl">
+          <img src={article.image_url} alt={article.title} className="w-full object-cover h-64 md:h-[22rem]" />
         </figure>
       )}
 
       {article.content && (
-        <div className="text-sm leading-7 text-foreground/90 space-y-4 whitespace-pre-wrap">
-          {article.content}
+        <div className="prose-article">
+          {article.content.split("\n\n").filter(Boolean).map((para, i) => (
+            <p key={i}>{para.replace(/\n/g, " ")}</p>
+          ))}
         </div>
       )}
     </div>

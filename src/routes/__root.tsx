@@ -96,16 +96,38 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="pt-PT">
       <head>
         <HeadContent />
-        {/* Force reload when opened inside Instagram/Facebook in-app browser */}
+        {/* Detect Instagram/Facebook in-app browser and show open-in-browser screen */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function(){
             var ua = navigator.userAgent || '';
-            var isInApp = /Instagram|FBAN|FBAV|FB_IAB|FB4A|FBIOS|LinkedInApp/.test(ua);
-            if (isInApp && !window.__igReloaded) {
-              window.__igReloaded = true;
-              var url = location.href;
-              if (url.indexOf('?') === -1) url += '?_r=1';
-              location.replace(url);
+            var isInApp = /Instagram|FBAN|FBAV|FB_IAB|FB4A|FBIOS/.test(ua);
+            if (!isInApp) return;
+
+            var url = location.href;
+            var isAndroid = /Android/.test(ua);
+
+            // Try to open in Chrome on Android via intent://
+            if (isAndroid) {
+              var intentUrl = url.replace(/^https?:\\/\\//, 'intent://').replace(/(\\/?)$/, '$1#Intent;scheme=https;package=com.android.chrome;end');
+              location.href = intentUrl;
+              // Fallback: show overlay after a short delay if intent didn't work
+              setTimeout(showOverlay, 1500);
+            } else {
+              showOverlay();
+            }
+
+            function showOverlay() {
+              document.addEventListener('DOMContentLoaded', function() {
+                var div = document.createElement('div');
+                div.id = 'ig-overlay';
+                div.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#0f1a14;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;font-family:system-ui,sans-serif;';
+                div.innerHTML = '<div style="font-size:64px;margin-bottom:24px">🏆</div>'
+                  + '<h1 style="color:#fff;font-size:24px;font-weight:700;margin:0 0 12px">Uma Geração</h1>'
+                  + '<p style="color:rgba(255,255,255,0.6);font-size:15px;line-height:1.6;margin:0 0 32px">Para uma experiência completa,<br>abre este link no teu browser.</p>'
+                  + '<a href="' + url + '" target="_blank" rel="noopener" style="display:block;background:#c9a84c;color:#0f1a14;font-weight:700;font-size:15px;padding:14px 32px;border-radius:999px;text-decoration:none;margin-bottom:16px">Abrir no Browser →</a>'
+                  + '<p style="color:rgba(255,255,255,0.35);font-size:12px;margin:0">No Instagram: toca nos <strong style="color:rgba(255,255,255,0.5)">três pontos ···</strong> e escolhe<br><strong style="color:rgba(255,255,255,0.5)">"Abrir no browser externo"</strong></p>';
+                document.body.appendChild(div);
+              });
             }
           })();
         ` }} />

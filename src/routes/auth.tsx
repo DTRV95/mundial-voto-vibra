@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { Mail, Lock, User, CheckCircle2, XCircle, Loader2, ArrowLeft, KeyRound, Eye, EyeOff } from "lucide-react";
 
@@ -109,10 +108,11 @@ function AuthPage() {
 
   async function handleGoogle() {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.error) { toast.error("Erro com Google"); setLoading(false); return; }
-    if (result.redirected) return;
-    go();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
+    });
+    if (error) { toast.error("Erro com Google: " + error.message); setLoading(false); }
   }
 
   const inputCls = "w-full rounded-xl border border-border bg-input px-4 py-3 text-sm outline-none focus:border-gold/60 transition-smooth";

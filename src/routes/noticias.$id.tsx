@@ -39,7 +39,7 @@ function Article() {
     setLoading(true);
     supabase
       .from("news")
-      .select("id,title,excerpt,content,image_url,category,created_at")
+      .select("id,title,excerpt,content,image_url,image_caption,category,created_at")
       .eq("id", id)
       .eq("published", true)
       .maybeSingle()
@@ -126,8 +126,15 @@ function Article() {
       </header>
 
       {article.image_url && (
-        <figure className="mb-8 overflow-hidden rounded-xl">
-          <img src={article.image_url} alt={article.title} className="w-full object-cover h-64 md:h-[22rem]" />
+        <figure className="mb-8">
+          <div className="overflow-hidden rounded-xl">
+            <img src={article.image_url} alt={article.title} className="w-full object-cover h-64 md:h-[22rem]" />
+          </div>
+          {article.image_caption && (
+            <figcaption className="mt-2 text-[11px] text-muted-foreground italic px-1">
+              {article.image_caption}
+            </figcaption>
+          )}
         </figure>
       )}
 

@@ -52,7 +52,7 @@ function Rankings() {
           .from("profiles")
           .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct")
           .order("total_points", { ascending: false })
-          .limit(50);
+          .limit(5);
         return (data ?? []).map((r) => ({
           id: r.id,
           display_name: r.display_name,
@@ -102,17 +102,17 @@ function Rankings() {
           if (accB !== accA) return accB - accA;
           return a.predictions_made - b.predictions_made;
         })
-        .slice(0, 50);
+        .slice(0, 5);
     },
   });
 
-  // Posição do utilizador autenticado (se não estiver no top 50)
+  // Posição do utilizador autenticado — sempre mostrada no fundo
   const myEntry = rows.find(r => r.id === user?.id);
   const myRank  = myEntry ? rows.indexOf(myEntry) + 1 : null;
 
   const { data: myPosition } = useQuery({
     queryKey: ["my-rank", phase, user?.id],
-    enabled: !!user?.id && !myEntry && rows.length > 0,
+    enabled: !!user?.id && rows.length > 0,
     queryFn: async () => {
       if (phase === "geral") {
         const { data: me } = await supabase

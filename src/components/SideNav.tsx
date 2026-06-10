@@ -119,7 +119,7 @@ export function SideNav() {
       ) : (
         <div className="border-t border-border p-4">
           <Link to="/auth"
-            className="block w-full rounded-xl bg-wc-red py-2.5 text-center text-sm font-bold text-white shadow-gold transition-smooth hover:scale-[1.02]">
+            className="block w-full rounded-xl bg-wc-red py-2.5 text-center text-sm font-bold text-white shadow-gold transition-all duration-200 hover:bg-wc-red/80 hover:shadow-[0_4px_14px_oklch(0.54_0.24_27_/_0.55)] hover:-translate-y-px active:translate-y-0 active:scale-[0.98]">
             Entrar
           </Link>
           <p className="mt-2 text-center text-[11px] text-muted-foreground">Vota, compara e vibra.</p>

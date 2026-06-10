@@ -4,6 +4,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Mail, Lock, User, CheckCircle2, XCircle, Loader2, ArrowLeft, KeyRound, Eye, EyeOff, Trophy, Star, Users } from "lucide-react";
+import logoSvg from "@/assets/logo.svg";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }),
@@ -123,9 +124,7 @@ function AuthPage() {
         {/* ── Cabeçalho ── */}
         <div className="mb-8 text-center">
           <div className="relative inline-flex">
-            <span className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-gold to-gold/70 text-background font-display text-3xl shadow-gold">
-              V
-            </span>
+            <img src={logoSvg} alt="Uma Geração" className="h-16 w-16 drop-shadow-lg" />
             <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-wc-red text-[9px] font-bold text-white shadow-md">
               26
             </span>

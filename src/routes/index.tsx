@@ -41,9 +41,9 @@ function Home() {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("display_name,total_points,predictions_made")
+        .select("id,display_name,total_points,predictions_made")
         .order("total_points", { ascending: false })
-        .limit(10);
+        .limit(5);
       return data ?? [];
     },
   });
@@ -56,7 +56,7 @@ function Home() {
         .from("pools")
         .select("id, name")
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(5);
 
       if (!pools || pools.length === 0) return [];
 
@@ -91,6 +91,25 @@ function Home() {
       return pools
         .map((p) => ({ id: p.id, name: p.name, points: poolPoints[p.id] ?? 0, members: poolMemberCount[p.id] ?? 0 }))
         .sort((a, b) => b.points - a.points);
+    },
+  });
+
+  const myLeaderEntry = topLeaders.find((u: any) => u.id === user?.id);
+  const { data: myLeaderRank } = useQuery({
+    queryKey: ["my-rank-home", user?.id],
+    enabled: !!user?.id && !myLeaderEntry && topLeaders.length > 0,
+    queryFn: async () => {
+      const { data: me } = await supabase
+        .from("profiles")
+        .select("id,display_name,total_points")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (!me) return null;
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gt("total_points", me.total_points);
+      return { display_name: me.display_name, total_points: me.total_points, rank: (count ?? 0) + 1 };
     },
   });
 
@@ -329,7 +348,7 @@ function Home() {
               <p className="px-5 py-4 text-sm text-white/70">Ainda sem dados — sê o primeiro a marcar pontos.</p>
             ) : (
               <ol>
-                {topLeaders.map((u, i) => (
+                {(topLeaders as any[]).map((u, i) => (
                   <li key={i} className={`flex items-center justify-between px-5 py-3 ${i < topLeaders.length - 1 ? "border-b border-white/20" : ""}`}>
                     <span className="flex items-center gap-3">
                       <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
@@ -340,6 +359,20 @@ function Home() {
                     <span className="font-display text-lg">{u.total_points} <span className="text-xs font-sans opacity-70">pts</span></span>
                   </li>
                 ))}
+                {(myLeaderRank || myLeaderEntry) && user && (
+                  <>
+                    <li className="px-5 py-1 text-center text-[10px] text-white/30 tracking-widest border-t border-white/10">· · ·</li>
+                    <li className="flex items-center justify-between px-5 py-3 bg-white/10 border-t border-white/20">
+                      <span className="flex items-center gap-3">
+                        <span className="grid h-7 w-7 place-items-center rounded-full bg-gold text-background text-xs font-bold">
+                          {myLeaderEntry ? (topLeaders as any[]).indexOf(myLeaderEntry) + 1 : myLeaderRank?.rank}
+                        </span>
+                        <span className="font-semibold text-sm">{myLeaderEntry?.display_name ?? myLeaderRank?.display_name ?? "Tu"} <span className="text-[10px] text-gold font-bold">Tu</span></span>
+                      </span>
+                      <span className="font-display text-lg">{myLeaderEntry?.total_points ?? myLeaderRank?.total_points ?? 0} <span className="text-xs font-sans opacity-70">pts</span></span>
+                    </li>
+                  </>
+                )}
               </ol>
             )}
           </div>

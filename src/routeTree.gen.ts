@@ -19,6 +19,7 @@ import { Route as LigasRouteImport } from './routes/ligas'
 import { Route as JogosRouteImport } from './routes/jogos'
 import { Route as GruposRouteImport } from './routes/grupos'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -78,6 +79,11 @@ const CookiesRoute = CookiesRouteImport.update({
   path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AvisoLegalRoute = AvisoLegalRouteImport.update({
   id: '/aviso-legal',
   path: '/aviso-legal',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/aviso-legal': typeof AvisoLegalRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/aviso-legal': typeof AvisoLegalRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/aviso-legal': typeof AvisoLegalRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/aviso-legal'
+    | '/como-funciona'
     | '/cookies'
     | '/grupos'
     | '/jogos'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/aviso-legal'
+    | '/como-funciona'
     | '/cookies'
     | '/grupos'
     | '/jogos'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/aviso-legal'
+    | '/como-funciona'
     | '/cookies'
     | '/grupos'
     | '/jogos'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   AvisoLegalRoute: typeof AvisoLegalRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
   CookiesRoute: typeof CookiesRoute
   GruposRoute: typeof GruposRoute
   JogosRoute: typeof JogosRoute
@@ -336,6 +349,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/aviso-legal': {
       id: '/aviso-legal'
       path: '/aviso-legal'
@@ -400,6 +420,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   AvisoLegalRoute: AvisoLegalRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
   CookiesRoute: CookiesRoute,
   GruposRoute: GruposRoute,
   JogosRoute: JogosRoute,

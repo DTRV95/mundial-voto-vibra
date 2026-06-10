@@ -292,8 +292,14 @@ function JogoPage() {
 
       {/* ── Markets ── */}
       <section className="mt-4 space-y-3">
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Os teus votos</p>
+          <Link to="/como-funciona" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-gold transition-smooth">
+            <Info className="h-3.5 w-3.5" /> Como funciona?
+          </Link>
+        </div>
 
-        <MarketCard title="Resultado em 90 minutos" closed={closed}>
+        <MarketCard title="Resultado em 90 minutos" closed={closed} pts="3–4 pts">
           <VoteOptions value={pred.result_90} disabled={closed}
             options={[
               { v: "home", label: home.name, pct: analysis?.prob_home },
@@ -305,7 +311,7 @@ function JogoPage() {
             labels={{ home: home.name, draw: "Empate", away: away.name }} total={community.length} />}
         </MarketCard>
 
-        <MarketCard title="Ambas as equipas marcam" closed={closed}>
+        <MarketCard title="Ambas as equipas marcam" closed={closed} pts="2 pts">
           <VoteOptions value={pred.btts} disabled={closed}
             options={[
               { v: "yes", label: "Sim", pct: analysis?.prob_btts_yes },
@@ -316,7 +322,7 @@ function JogoPage() {
             labels={{ yes: "Sim", no: "Não" }} total={community.length} />}
         </MarketCard>
 
-        <MarketCard title="Total de golos — 2.5" closed={closed}>
+        <MarketCard title="Total de golos — 2.5" closed={closed} pts="2 pts">
           <VoteOptions value={pred.total_25} disabled={closed}
             options={[
               { v: "over", label: "Mais de 2.5", pct: analysis?.prob_over25 },
@@ -327,7 +333,7 @@ function JogoPage() {
             labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
         </MarketCard>
 
-        <MarketCard title="Total de golos — 3.5" closed={closed}>
+        <MarketCard title="Total de golos — 3.5" closed={closed} pts="3 pts">
           <VoteOptions value={pred.total_35} disabled={closed}
             options={[
               { v: "over", label: "Mais de 3.5", pct: analysis?.prob_over35 },
@@ -338,7 +344,7 @@ function JogoPage() {
             labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
         </MarketCard>
 
-        <MarketCard title="Dupla hipótese" closed={closed}>
+        <MarketCard title="Dupla hipótese" closed={closed} pts="1 pt">
           <VoteOptions value={pred.double_chance} disabled={closed}
             options={[
               { v: "1x", label: "1X — Casa ou Empate", pct: analysis?.prob_1x },
@@ -349,7 +355,7 @@ function JogoPage() {
             labels={{ "1x": "1X", x2: "X2" }} total={community.length} />}
         </MarketCard>
 
-        <MarketCard title="Resultado exacto" closed={closed}>
+        <MarketCard title="Resultado exacto" closed={closed} pts="10 pts 🔥">
           {showCommunity && community.filter(c => c.exact_home != null).length > 0 && (
             <ExactScoreCommunity votes={community} />
           )}
@@ -366,7 +372,7 @@ function JogoPage() {
           </div>
         </MarketCard>
 
-        <MarketCard title="Combinação · 1X/X2 + 1.5 golos" closed={closed}>
+        <MarketCard title="Combinação · 1X/X2 + 1.5 golos" closed={closed} pts="4 pts">
           <VoteOptions value={pred.combo_15} disabled={closed} grid={2}
             options={[
               { v: "1x_over",  label: "1X · Mais 1.5",  pct: analysis?.prob_combo15_1x_over },
@@ -379,7 +385,7 @@ function JogoPage() {
             labels={{ "1x_over": "1X+Mais", "1x_under": "1X+Menos", x2_over: "X2+Mais", x2_under: "X2+Menos" }} total={community.length} />}
         </MarketCard>
 
-        <MarketCard title="Combinação · 1X/X2 + 3.5 golos" closed={closed}>
+        <MarketCard title="Combinação · 1X/X2 + 3.5 golos" closed={closed} pts="5 pts">
           <VoteOptions value={pred.combo_35} disabled={closed} grid={2}
             options={[
               { v: "1x_over",  label: "1X · Mais 3.5",  pct: analysis?.prob_combo35_1x_over },
@@ -425,12 +431,15 @@ function TeamBlock({ flag, name, code }: { flag: string | null; name: string; co
   );
 }
 
-function MarketCard({ title, closed, children }: { title: string; closed: boolean; children: React.ReactNode }) {
+function MarketCard({ title, closed, pts, children }: { title: string; closed: boolean; pts?: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-border bg-card/70 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
         <h3 className="font-display text-base">{title}</h3>
-        {closed && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+        <div className="flex items-center gap-2">
+          {pts && <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-bold text-gold">{pts}</span>}
+          {closed && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+        </div>
       </div>
       <div className="p-4 space-y-3">{children}</div>
     </div>

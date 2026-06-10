@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Users, Plus, LogIn, Copy, Check, Trash2, Gift } from "lucide-react";
+import { Users, Plus, LogIn, Copy, Check, Trash2, Gift, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/ligas")({
@@ -167,7 +167,12 @@ function Ligas() {
   return (
     <div className="px-5 pt-6 pb-10 max-w-2xl">
       <header className="mb-6">
-        <h1 className="font-display text-3xl">Torneios Privados</h1>
+        <div className="flex items-start justify-between gap-2">
+          <h1 className="font-display text-3xl">Torneios Privados</h1>
+          <Link to="/como-funciona" className="mt-1 inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] text-muted-foreground hover:border-gold/40 hover:text-gold transition-smooth shrink-0">
+            <HelpCircle className="h-3.5 w-3.5" /> Como funciona?
+          </Link>
+        </div>
         <p className="text-sm text-muted-foreground">Cria um torneio privado, convida os amigos e compete entre si.</p>
       </header>
 

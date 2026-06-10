@@ -6,7 +6,7 @@ import { TopNav } from "./TopNav";
 import { Footer } from "./Footer";
 import { CookieBanner } from "./CookieBanner";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
-import { Shield } from "lucide-react";
+import { Shield, HelpCircle } from "lucide-react";
 import logoSvg from "@/assets/logo.svg";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -54,6 +54,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </Link>
           <div className="flex items-center gap-2">
+            <Link to="/como-funciona" className="grid h-8 w-8 place-items-center rounded-full border border-border text-muted-foreground hover:border-gold/40 hover:text-gold transition-smooth">
+              <HelpCircle className="h-4.5 w-4.5" />
+            </Link>
             {user && isAdmin && (
               <Link to="/admin" className="flex items-center gap-1 rounded-full border border-wc-red/30 bg-wc-red/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-wc-red">
                 <Shield className="h-3 w-3" /> Admin

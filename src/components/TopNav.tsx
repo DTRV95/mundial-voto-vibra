@@ -65,7 +65,7 @@ export function TopNav() {
         {/* CTA */}
         <div className="shrink-0">
           <Link to="/auth"
-            className="rounded-full bg-wc-red px-5 py-2 text-sm font-bold text-white shadow-gold transition-smooth hover:scale-[1.02]"
+            className="rounded-full bg-wc-red px-5 py-2 text-sm font-bold text-white shadow-gold transition-all duration-200 hover:bg-wc-red/80 hover:shadow-[0_4px_14px_oklch(0.54_0.24_27_/_0.55)] hover:-translate-y-px active:translate-y-0 active:scale-95"
           >
             Entrar
           </Link>

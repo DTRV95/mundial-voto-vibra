@@ -184,6 +184,7 @@ function Ligas() {
         <div className="space-y-2">
           <input
             type="text"
+            id="nome-torneio"
             placeholder="Nome do torneio (ex: Família Silva)"
             value={newName}
             onChange={e => setNewName(e.target.value)}
@@ -239,10 +240,40 @@ function Ligas() {
       {/* Minhas ligas */}
       <h2 className="mb-3 font-display text-xl">Os meus torneios</h2>
       {myPools.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card/40 p-8 text-center">
-          <Users className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="font-display text-lg">Ainda sem torneios</p>
-          <p className="text-sm text-muted-foreground">Cria um torneio ou entra com um código.</p>
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card/60">
+          {/* Pódio decorativo */}
+          <div className="flex items-end justify-center gap-2 px-8 pt-8 pb-4 opacity-20 pointer-events-none select-none">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-2xl">👤</span>
+              <div className="w-16 rounded-t-lg bg-muted-foreground/60" style={{ height: "48px" }}>
+                <div className="text-center pt-1 font-display text-xs text-background/80">2º</div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-2xl">👑</span>
+              <div className="w-20 rounded-t-lg bg-gold/80" style={{ height: "72px" }}>
+                <div className="text-center pt-2 font-display text-sm text-background/80">1º</div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-2xl">👤</span>
+              <div className="w-16 rounded-t-lg bg-muted-foreground/60" style={{ height: "36px" }}>
+                <div className="text-center pt-1 font-display text-xs text-background/80">3º</div>
+              </div>
+            </div>
+          </div>
+          <div className="px-6 pb-8 text-center">
+            <p className="font-display text-xl">Imagina o teu nome aqui.</p>
+            <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto">Cria um torneio, partilha o código com os teus amigos — a batalha começa agora.</p>
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+              <button
+                onClick={() => document.getElementById("nome-torneio")?.focus()}
+                className="rounded-xl bg-wc-red px-5 py-2.5 text-sm font-bold text-white shadow-gold transition-smooth hover:scale-[1.01]">
+                Criar o meu torneio
+              </button>
+              <p className="self-center text-xs text-muted-foreground">ou entra com um código acima</p>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">

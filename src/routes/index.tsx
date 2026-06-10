@@ -259,29 +259,56 @@ function Home() {
         )}
         {!user && (
           <div
-            className="relative overflow-hidden rounded-2xl panini-stripes"
-            style={{ background: "linear-gradient(135deg, oklch(0.54 0.24 27) 0%, oklch(0.36 0.18 350) 50%, oklch(0.28 0.14 270) 100%)", boxShadow: "0 6px 24px -4px oklch(0.54 0.24 27 / 0.35)" }}
+            className="relative overflow-hidden rounded-2xl"
+            style={{ background: "linear-gradient(135deg, oklch(0.20 0.06 270) 0%, oklch(0.28 0.10 300) 50%, oklch(0.22 0.08 250) 100%)", boxShadow: "0 6px 24px -4px oklch(0.20 0.06 270 / 0.6)" }}
           >
-            {/* Troféu decorativo */}
-            <Trophy className="absolute right-3 top-1/2 -translate-y-1/2 h-20 w-20 text-white/5 pointer-events-none" />
-            <div className="relative flex h-full flex-col justify-between p-4 text-white">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50 mb-1">Mundial 2026</p>
-                <h3 className="font-display text-2xl leading-none">A tua geração.<br/>O teu torneio.</h3>
-                <p className="mt-2 text-xs text-white/70 leading-relaxed max-w-[200px]">Vota, sobe no ranking e prova que sabes mais de futebol.</p>
-              </div>
-              <div className="mt-4 flex flex-col gap-1.5">
-                <Link
-                  to="/auth"
-                  className="block w-full rounded-xl bg-white py-2.5 text-center text-sm font-bold text-wc-red transition-smooth hover:scale-[1.01] active:scale-95"
-                >
-                  Entrar agora
+            {/* Decoração fundo */}
+            <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 80% 50%, white 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+            <div className="absolute top-3 right-3 flex gap-1.5">
+              {["🇵🇹","🇧🇷","🇦🇷","🇫🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿"].map(f => (
+                <span key={f} className="text-base opacity-60">{f}</span>
+              ))}
+            </div>
+            <div className="relative p-5 text-white">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40 mb-2">Para toda a família</p>
+              <h3 className="font-display text-[1.6rem] leading-tight">Quem sabe mais<br/>de futebol em casa?</h3>
+              <p className="mt-2 text-[13px] text-white/65 leading-relaxed">Cria um torneio privado, convida os teus amigos e descubram quem é o maior entendido do Mundial.</p>
+              <div className="mt-4 flex gap-2">
+                <Link to="/auth" params={{ search: { redirect: "/ligas" } } as any}
+                  className="flex-1 rounded-xl bg-gold py-2.5 text-center text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.01] active:scale-95">
+                  Criar torneio grátis
+                </Link>
+                <Link to="/como-funciona"
+                  className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold text-white/70 transition-smooth hover:border-white/40 hover:text-white">
+                  Como?
                 </Link>
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* ===================== BANNER TORNEIO — logado sem liga ===================== */}
+      {user && myPools.length === 0 && (
+        <div className="mx-5 mt-4 md:mx-8">
+          <div className="relative overflow-hidden rounded-2xl border border-gold/30 bg-gradient-to-r from-gold/10 via-gold/5 to-transparent px-5 py-4">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex -space-x-2 opacity-30 pointer-events-none select-none text-2xl">
+              <span>👤</span><span>👤</span><span>👤</span>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-gold/70 mb-0.5">Novo — Torneios Privados</p>
+                <p className="font-display text-base leading-snug">Ainda não tens um grupo de amigos?</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Cria um torneio em 30 segundos e partilha o código.</p>
+              </div>
+              <Link to="/ligas"
+                className="shrink-0 rounded-xl bg-gold px-4 py-2 text-xs font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95 whitespace-nowrap">
+                Criar grupo →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ===================== JOGOS DE HOJE ===================== */}
       <section className="px-5 pt-8 md:px-8 relative">

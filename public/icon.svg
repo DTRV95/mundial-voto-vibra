@@ -1,6 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fundo -->
   <rect width="512" height="512" rx="120" fill="#1a2820"/>
-  <circle cx="256" cy="256" r="200" fill="none" stroke="#d4a853" stroke-width="12" opacity="0.3"/>
-  <text x="256" y="320" font-family="'Arial Black', sans-serif" font-size="240" font-weight="900"
-        text-anchor="middle" fill="#d4a853">V</text>
+
+  <!-- Troféu -->
+  <!-- Base / pedestal -->
+  <rect x="196" y="400" width="120" height="18" rx="9" fill="#d4a853"/>
+  <rect x="176" y="418" width="160" height="20" rx="10" fill="#c9973e"/>
+
+  <!-- Haste -->
+  <rect x="236" y="340" width="40" height="64" rx="8" fill="#d4a853"/>
+
+  <!-- Copa principal -->
+  <path d="M160 140 Q148 260 200 310 Q228 336 256 338 Q284 336 312 310 Q364 260 352 140 Z"
+        fill="url(#cupGold)"/>
+
+  <!-- Alças -->
+  <path d="M160 170 Q110 180 112 240 Q114 285 168 295"
+        fill="none" stroke="#d4a853" stroke-width="22" stroke-linecap="round"/>
+  <path d="M352 170 Q402 180 400 240 Q398 285 344 295"
+        fill="none" stroke="#d4a853" stroke-width="22" stroke-linecap="round"/>
+
+  <!-- Brilho interno da copa -->
+  <path d="M200 155 Q210 130 230 160 Q245 185 240 220 Q230 210 215 200 Q195 185 200 155 Z"
+        fill="white" opacity="0.18"/>
+
+  <!-- Gradiente -->
+  <defs>
+    <linearGradient id="cupGold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#b8852a"/>
+      <stop offset="35%"  stop-color="#f0cc6a"/>
+      <stop offset="60%"  stop-color="#d4a853"/>
+      <stop offset="100%" stop-color="#a07030"/>
+    </linearGradient>
+  </defs>
 </svg>

@@ -473,20 +473,47 @@ function Home() {
 
       {/* ===================== COMO FUNCIONA ===================== */}
       <section id="como-funciona" className="px-5 pt-12 md:px-8">
-        <h2 className="mb-5 font-display text-2xl md:text-3xl">Como funciona</h2>
+        <div className="mb-5 flex items-end justify-between">
+          <h2 className="font-display text-2xl md:text-3xl">Como funciona</h2>
+          <Link to="/como-funciona" className="text-xs font-semibold text-gold hover:text-gold/70 transition-smooth">
+            Guia completo →
+          </Link>
+        </div>
+
+        {/* 3 passos */}
         <div className="grid gap-3 sm:grid-cols-3">
           <Step n="1" title="Vê os jogos">Consulta os jogos do dia e escolhe os que te interessam.</Step>
-          <Step n="2" title="Deixa a tua previsão">Vota nos mercados que quiseres até 5 minutos antes do jogo.</Step>
-          <Step n="3" title="Compete">Soma pontos pelo teu palpite e sobe no ranking da fase.</Step>
+          <Step n="2" title="Deixa a tua previsão">Vota nos mercados que quiseres até ao apito inicial.</Step>
+          <Step n="3" title="Compete e sobe">Soma pontos e sobe no ranking — geral ou entre amigos.</Step>
         </div>
-        <div className="mt-4 rounded-2xl border border-gold/30 bg-gold/5 p-5 text-sm">
-          <div className="mb-1 flex items-center gap-2 font-semibold text-gold">
-            <Users2 className="h-4 w-4" /> Opinião da Comunidade
+
+        {/* Pontos rápidos */}
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {[
+            { label: "Resultado 1X2",    pts: "3–4 pts" },
+            { label: "Marcador exacto",  pts: "10 pts 🔥" },
+            { label: "BTTS / Golos",     pts: "2–3 pts" },
+            { label: "Combo especial",   pts: "4–5 pts" },
+          ].map(({ label, pts }) => (
+            <div key={label} className="rounded-xl border border-border bg-card/60 px-3 py-2.5 text-center">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+              <p className="mt-0.5 font-display text-sm text-gold">{pts}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Comunidade + CTA */}
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-gold/30 bg-gold/5 p-5">
+          <div className="flex items-start gap-3">
+            <Users2 className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
+            <p className="text-sm text-muted-foreground">
+              Depois de votares desbloqueias as percentagens da comunidade. Sem conta não vês nada — <span className="font-semibold text-foreground">o segredo é do clube.</span>
+            </p>
           </div>
-          <p className="text-muted-foreground">
-            Depois de votares, desbloqueias as percentagens e a tendência da comunidade para cada mercado.
-            Todas as previsões são consideradas no tempo regulamentar (90 minutos).
-          </p>
+          <Link to="/auth"
+            className="shrink-0 rounded-xl bg-wc-red px-5 py-2.5 text-sm font-bold text-white shadow-gold transition-all duration-200 hover:bg-wc-red/80 hover:shadow-[0_4px_14px_oklch(0.54_0.24_27_/_0.55)] hover:-translate-y-px active:scale-[0.98] text-center">
+            Entrar grátis
+          </Link>
         </div>
       </section>
 

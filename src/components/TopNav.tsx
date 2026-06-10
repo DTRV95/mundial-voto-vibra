@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarClock, Users, Trophy, Newspaper, Gift, Shield } from "lucide-react";
+import { Home, CalendarClock, Users, Trophy, Newspaper, Gift, Shield, HelpCircle } from "lucide-react";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import logoSvg from "@/assets/logo.svg";
 
@@ -63,7 +63,18 @@ export function TopNav() {
         </nav>
 
         {/* CTA */}
-        <div className="shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
+          {!user && (
+            <Link to="/como-funciona"
+              className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-semibold transition-smooth ${
+                location.pathname === "/como-funciona"
+                  ? "bg-gold/15 text-gold"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              }`}
+            >
+              <HelpCircle className="h-4 w-4" /> Como funciona
+            </Link>
+          )}
           <Link to="/auth"
             className="rounded-full bg-wc-red px-5 py-2 text-sm font-bold text-white shadow-gold transition-all duration-200 hover:bg-wc-red/80 hover:shadow-[0_4px_14px_oklch(0.54_0.24_27_/_0.55)] hover:-translate-y-px active:translate-y-0 active:scale-95"
           >

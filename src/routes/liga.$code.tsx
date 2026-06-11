@@ -516,12 +516,14 @@ function LigaPage() {
                       {i < 3 ? MEDAL[i] : i + 1}
                     </span>
 
-                    <UserAvatar avatarUrl={r.avatar_url} name={r.display_name} size={8} className="rounded-full" />
+                    <Link to="/perfil/$id" params={{ id: r.id }}>
+                      <UserAvatar avatarUrl={r.avatar_url} name={r.display_name} size={8} className="rounded-full hover:opacity-80 transition-smooth" />
+                    </Link>
 
                     {/* Nome + barra de progresso */}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="truncate text-sm font-semibold">{r.display_name}</span>
+                        <Link to="/perfil/$id" params={{ id: r.id }} className="truncate text-sm font-semibold hover:underline">{r.display_name}</Link>
                         {isMe && <span className="shrink-0 text-[9px] font-bold text-wc-red uppercase tracking-wider">Tu</span>}
                         {r.id === pool?.created_by && (
                           <span className="shrink-0 text-[10px]" title="Criador do torneio">👑</span>

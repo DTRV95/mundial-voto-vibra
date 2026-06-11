@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -220,10 +220,10 @@ function Rankings() {
                       }`}>{i + 1}</span>
                     </td>
                     <td className="px-3 py-2.5">
-                      <div className="flex items-center gap-2">
+                      <Link to="/perfil/$id" params={{ id: r.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
                         <UserAvatar avatarUrl={(r as any).avatar_url} name={r.display_name} size={7} className="rounded-full" />
                         <span className={`font-medium ${isMe ? "text-wc-red" : ""}`}>{r.display_name ?? "Adepto"}{isMe && " (tu)"}</span>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-2 py-2.5 text-right font-display text-gold">{r.points}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</td>
@@ -250,10 +250,10 @@ function Rankings() {
                       </span>
                     </td>
                     <td className="px-3 py-2.5">
-                      <div className="flex items-center gap-2">
+                      <Link to="/perfil/$id" params={{ id: myPosition.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
                         <UserAvatar avatarUrl={myPosition.avatar_url} name={myPosition.display_name} size={7} className="rounded-full" />
                         <span className="font-medium text-wc-red">{myPosition.display_name ?? "Tu"} (tu)</span>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-2 py-2.5 text-right font-display text-gold">{myPosition.points}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{myPosition.predictions_correct}/{myPosition.predictions_made}</td>

@@ -344,60 +344,6 @@ function JogoPage() {
             labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
         </MarketCard>
 
-        <MarketCard title="Dupla hipótese" closed={closed} pts="1 pt">
-          <VoteOptions value={pred.double_chance} disabled={closed}
-            options={[
-              { v: "1x", label: "1X — Casa ou Empate", pct: analysis?.prob_1x },
-              { v: "x2", label: "X2 — Empate ou Fora", pct: analysis?.prob_x2 },
-            ]}
-            onChange={(v) => set("double_chance", v)} />
-          {showCommunity && <CommunityLine votes={community.map(c => c.double_chance)}
-            labels={{ "1x": "1X", x2: "X2" }} total={community.length} />}
-        </MarketCard>
-
-        <MarketCard title="Resultado exacto" closed={closed} pts="10 pts 🔥">
-          {showCommunity && community.filter(c => c.exact_home != null).length > 0 && (
-            <ExactScoreCommunity votes={community} />
-          )}
-          <div className="flex items-center justify-center gap-4 py-2">
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-xs font-semibold text-muted-foreground">{home.name}</span>
-              <ScoreInput value={pred.exact_home} onChange={(v) => set("exact_home", v)} disabled={closed} />
-            </div>
-            <span className="font-display text-3xl text-muted-foreground mt-4">:</span>
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-xs font-semibold text-muted-foreground">{away.name}</span>
-              <ScoreInput value={pred.exact_away} onChange={(v) => set("exact_away", v)} disabled={closed} />
-            </div>
-          </div>
-        </MarketCard>
-
-        <MarketCard title="Combinação · 1X/X2 + 1.5 golos" closed={closed} pts="4 pts">
-          <VoteOptions value={pred.combo_15} disabled={closed} grid={2}
-            options={[
-              { v: "1x_over",  label: "1X · Mais 1.5",  pct: analysis?.prob_combo15_1x_over },
-              { v: "1x_under", label: "1X · Menos 1.5", pct: analysis?.prob_combo15_1x_under },
-              { v: "x2_over",  label: "X2 · Mais 1.5",  pct: analysis?.prob_combo15_x2_over },
-              { v: "x2_under", label: "X2 · Menos 1.5", pct: analysis?.prob_combo15_x2_under },
-            ]}
-            onChange={(v) => set("combo_15", v)} />
-          {showCommunity && <CommunityLine votes={community.map(c => c.combo_15)}
-            labels={{ "1x_over": "1X+Mais", "1x_under": "1X+Menos", x2_over: "X2+Mais", x2_under: "X2+Menos" }} total={community.length} />}
-        </MarketCard>
-
-        <MarketCard title="Combinação · 1X/X2 + 3.5 golos" closed={closed} pts="5 pts">
-          <VoteOptions value={pred.combo_35} disabled={closed} grid={2}
-            options={[
-              { v: "1x_over",  label: "1X · Mais 3.5",  pct: analysis?.prob_combo35_1x_over },
-              { v: "1x_under", label: "1X · Menos 3.5", pct: analysis?.prob_combo35_1x_under },
-              { v: "x2_over",  label: "X2 · Mais 3.5",  pct: analysis?.prob_combo35_x2_over },
-              { v: "x2_under", label: "X2 · Menos 3.5", pct: analysis?.prob_combo35_x2_under },
-            ]}
-            onChange={(v) => set("combo_35", v)} />
-          {showCommunity && <CommunityLine votes={community.map(c => c.combo_35)}
-            labels={{ "1x_over": "1X+Mais", "1x_under": "1X+Menos", x2_over: "X2+Mais", x2_under: "X2+Menos" }} total={community.length} />}
-        </MarketCard>
-
       </section>
 
       {/* Save */}

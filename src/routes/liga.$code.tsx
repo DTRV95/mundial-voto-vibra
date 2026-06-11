@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
 
@@ -582,6 +582,11 @@ function LigaPage() {
         </div>
       )}
 
+      {/* ── CHAT ─────────────────────────────────────────────── */}
+      {user && isMember && (
+        <LeagueChat poolCode={code} userId={user.id} ranking={ranking} />
+      )}
+
       {/* ── CONVIDAR ─────────────────────────────────────────── */}
       {user && isMember && (
         <div className="mx-5 mt-6 md:mx-8">
@@ -623,6 +628,142 @@ function LigaPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── CHAT ──────────────────────────────────────────────────────────────────────
+
+interface ChatMessage {
+  id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
+}
+
+function timeAgo(iso: string) {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60) return "agora";
+  if (diff < 3600) return `${Math.floor(diff / 60)}min`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+  return `${Math.floor(diff / 86400)}d`;
+}
+
+function LeagueChat({ poolCode, userId, ranking }: { poolCode: string; userId: string; ranking: any[] }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  const memberMap = Object.fromEntries(ranking.map(r => [r.id, r]));
+
+  useEffect(() => {
+    // Carrega as últimas 50 mensagens
+    supabase
+      .from("league_messages")
+      .select("id,user_id,body,created_at")
+      .eq("pool_code", poolCode)
+      .order("created_at", { ascending: true })
+      .limit(50)
+      .then(({ data }) => {
+        if (data) setMessages(data as ChatMessage[]);
+      });
+
+    // Subscreve a novas mensagens em tempo real
+    const channel = supabase
+      .channel(`chat:${poolCode}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "league_messages", filter: `pool_code=eq.${poolCode}` },
+        (payload) => {
+          setMessages(prev => {
+            if (prev.some(m => m.id === payload.new.id)) return prev;
+            return [...prev, payload.new as ChatMessage];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [poolCode]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  async function send() {
+    const body = input.trim();
+    if (!body || sending) return;
+    setSending(true);
+    setInput("");
+    await supabase.from("league_messages").insert({ pool_code: poolCode, user_id: userId, body });
+    setSending(false);
+  }
+
+  return (
+    <div className="mx-5 mt-8 md:mx-8">
+      <div className="mb-4 flex items-center gap-2">
+        <MessageCircle className="h-4 w-4 text-muted-foreground" />
+        <h2 className="font-display text-xl">Chat do Grupo</h2>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-border bg-card/70">
+        {/* Mensagens */}
+        <div className="flex flex-col gap-1 px-4 py-4 overflow-y-auto max-h-72 min-h-[120px]">
+          {messages.length === 0 && (
+            <p className="text-center text-xs text-muted-foreground py-6">
+              Ninguém falou ainda. Sê o primeiro! 👋
+            </p>
+          )}
+          {messages.map(msg => {
+            const isMe = msg.user_id === userId;
+            const member = memberMap[msg.user_id];
+            const name = member?.display_name ?? "Adepto";
+
+            return (
+              <div key={msg.id} className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : ""}`}>
+                {!isMe && (
+                  <UserAvatar avatarUrl={member?.avatar_url} name={name} size={6} className="rounded-full shrink-0 mb-0.5" />
+                )}
+                <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-0.5`}>
+                  {!isMe && (
+                    <span className="text-[10px] font-semibold text-muted-foreground px-1">{name}</span>
+                  )}
+                  <div className={`rounded-2xl px-3 py-2 text-sm leading-snug ${
+                    isMe
+                      ? "bg-wc-red text-white rounded-br-sm"
+                      : "bg-secondary text-foreground rounded-bl-sm"
+                  }`}>
+                    {msg.body}
+                  </div>
+                  <span className="text-[9px] text-muted-foreground/60 px-1">{timeAgo(msg.created_at)}</span>
+                </div>
+              </div>
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Input */}
+        <div className="flex items-center gap-2 border-t border-border px-3 py-2.5">
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value.slice(0, 300))}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+            placeholder="Escreve uma mensagem…"
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+          />
+          <span className="text-[10px] text-muted-foreground/40 shrink-0">{input.length}/300</span>
+          <button
+            onClick={send}
+            disabled={!input.trim() || sending}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-wc-red text-white disabled:opacity-40 transition-smooth hover:bg-wc-red/80 active:scale-95"
+          >
+            <Send className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

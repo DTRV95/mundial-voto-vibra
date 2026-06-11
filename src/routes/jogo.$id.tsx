@@ -329,6 +329,23 @@ function JogoPage() {
             labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
         </MarketCard>
 
+        <MarketCard title="Resultado correto" closed={closed} pts="10 pts 🔥">
+          {showCommunity && community.filter(c => c.exact_home != null).length > 0 && (
+            <ExactScoreCommunity votes={community} />
+          )}
+          <div className="flex items-center justify-center gap-4 py-2">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xs font-semibold text-muted-foreground">{home.name}</span>
+              <ScoreInput value={pred.exact_home} onChange={(v) => set("exact_home", v)} disabled={closed} />
+            </div>
+            <span className="font-display text-3xl text-muted-foreground mt-4">:</span>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xs font-semibold text-muted-foreground">{away.name}</span>
+              <ScoreInput value={pred.exact_away} onChange={(v) => set("exact_away", v)} disabled={closed} />
+            </div>
+          </div>
+        </MarketCard>
+
       </section>
 
       {/* Save */}

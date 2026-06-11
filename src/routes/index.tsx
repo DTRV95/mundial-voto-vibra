@@ -397,7 +397,9 @@ function Home() {
                       <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
                         i === 0 ? "bg-white text-wc-green" : "bg-white/20 text-white"
                       }`}>{i + 1}</span>
-                      <span className="font-semibold text-sm">{u.display_name ?? "Adepto"}</span>
+                      <Link to="/adepto/$id" params={{ id: u.id }} className="font-semibold text-sm hover:underline underline-offset-2">
+                        {u.display_name ?? "Adepto"}
+                      </Link>
                     </span>
                     <span className="font-display text-lg">{u.total_points} <span className="text-xs font-sans opacity-70">pts</span></span>
                   </li>

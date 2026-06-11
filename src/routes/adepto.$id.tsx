@@ -34,11 +34,11 @@ function PublicProfile() {
     queryFn: async () => {
       const { data } = await supabase
         .from("predictions")
-        .select("id,result_90,points,created_at,match:match_id(kickoff_at,phase,status,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
+        .select("id,result_90,btts,total_25,total_35,exact_home,exact_away,points,created_at,match:match_id(kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
         .eq("user_id", id)
         .order("created_at", { ascending: false })
-        .limit(8);
-      return (data ?? []).filter((p: any) => p.match?.status === "finished");
+        .limit(20);
+      return data ?? [];
     },
   });
 
@@ -91,6 +91,8 @@ function PublicProfile() {
     : 0;
 
   const RESULT_LABEL: Record<string, string> = { home: "Casa", draw: "Empate", away: "Fora" };
+  const BTTS_LABEL: Record<string, string> = { yes: "BTTS Sim", no: "BTTS Não" };
+  const GOALS_LABEL: Record<string, string> = { over: "Mais", under: "Menos" };
 
   return (
     <div className="pb-16">
@@ -176,36 +178,68 @@ function PublicProfile() {
         </div>
       )}
 
-      {/* Últimas previsões */}
+      {/* Previsões */}
       {recentPredictions.length > 0 && (
         <div className="mx-5 mt-8 md:mx-8">
           <div className="mb-4 flex items-center gap-2">
             <Target className="h-4 w-4 text-muted-foreground" />
-            <h2 className="font-display text-xl">Últimas Previsões</h2>
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">jogos terminados</span>
+            <h2 className="font-display text-xl">Previsões</h2>
           </div>
           <div className="space-y-2">
             {recentPredictions.map((p: any) => {
               const match = p.match;
-              const scored = p.points > 0;
+              const finished = match?.status === "finished";
+              const scored = finished && p.points > 0;
               return (
-                <div key={p.id} className={`flex items-center gap-3 rounded-2xl border px-4 py-3 ${scored ? "border-wc-green/30 bg-wc-green/5" : "border-border bg-card/70"}`}>
-                  <div className="flex flex-1 items-center gap-2 min-w-0">
-                    <TeamBadge code={match.home?.code} flag={match.home?.flag} name={match.home?.name} size="sm" />
-                    <span className="text-xs font-semibold truncate">{match.home?.name}</span>
-                    <span className="text-[10px] text-muted-foreground shrink-0">vs</span>
-                    <span className="text-xs font-semibold truncate">{match.away?.name}</span>
-                    <TeamBadge code={match.away?.code} flag={match.away?.flag} name={match.away?.name} size="sm" />
+                <div key={p.id} className={`overflow-hidden rounded-2xl border ${scored ? "border-wc-green/30 bg-wc-green/5" : "border-border bg-card/70"}`}>
+                  {/* Cabeçalho do jogo */}
+                  <div className="flex items-center justify-between gap-2 px-4 py-2.5 border-b border-border/50">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <TeamBadge code={match.home?.code} flag={match.home?.flag} name={match.home?.name} size="sm" />
+                      <span className="text-xs font-semibold truncate">{match.home?.name}</span>
+                      {finished && (
+                        <span className="text-xs font-bold text-foreground shrink-0">{match.home_score}–{match.away_score}</span>
+                      )}
+                      <span className="text-[10px] text-muted-foreground shrink-0">{finished ? "" : "vs"}</span>
+                      <span className="text-xs font-semibold truncate">{match.away?.name}</span>
+                      <TeamBadge code={match.away?.code} flag={match.away?.flag} name={match.away?.name} size="sm" />
+                    </div>
+                    {finished && (
+                      <span className={`shrink-0 text-sm font-bold ${scored ? "text-wc-green" : "text-muted-foreground/50"}`}>
+                        {scored ? `+${p.points}` : "0 pts"}
+                      </span>
+                    )}
+                    {!finished && (
+                      <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">pendente</span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  {/* Mercados apostados */}
+                  <div className="flex flex-wrap gap-1.5 px-4 py-2.5">
                     {p.result_90 && (
                       <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
                         {RESULT_LABEL[p.result_90] ?? p.result_90}
                       </span>
                     )}
-                    <span className={`text-xs font-bold w-8 text-right ${scored ? "text-wc-green" : "text-muted-foreground/50"}`}>
-                      {scored ? `+${p.points}` : "0"}
-                    </span>
+                    {p.btts && (
+                      <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
+                        {BTTS_LABEL[p.btts] ?? p.btts}
+                      </span>
+                    )}
+                    {p.total_25 && (
+                      <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
+                        2.5 {GOALS_LABEL[p.total_25] ?? p.total_25}
+                      </span>
+                    )}
+                    {p.total_35 && (
+                      <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
+                        3.5 {GOALS_LABEL[p.total_35] ?? p.total_35}
+                      </span>
+                    )}
+                    {p.exact_home != null && p.exact_away != null && (
+                      <span className="rounded-full bg-wc-blue/20 px-2 py-0.5 text-[10px] font-bold text-wc-blue">
+                        {p.exact_home}–{p.exact_away}
+                      </span>
+                    )}
                   </div>
                 </div>
               );

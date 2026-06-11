@@ -25,10 +25,10 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
-import { Route as PerfilIdRouteImport } from './routes/perfil.$id'
 import { Route as NoticiasIdRouteImport } from './routes/noticias.$id'
 import { Route as LigaCodeRouteImport } from './routes/liga.$code'
 import { Route as JogoIdRouteImport } from './routes/jogo.$id'
+import { Route as AdeptoIdRouteImport } from './routes/adepto.$id'
 
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
@@ -110,11 +110,6 @@ const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
   path: '/noticias/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PerfilIdRoute = PerfilIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => PerfilRoute,
-} as any)
 const NoticiasIdRoute = NoticiasIdRouteImport.update({
   id: '/noticias/$id',
   path: '/noticias/$id',
@@ -130,6 +125,11 @@ const JogoIdRoute = JogoIdRouteImport.update({
   path: '/jogo/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdeptoIdRoute = AdeptoIdRouteImport.update({
+  id: '/adepto/$id',
+  path: '/adepto/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -141,16 +141,16 @@ export interface FileRoutesByFullPath {
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
-  '/perfil': typeof PerfilRouteWithChildren
+  '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
+  '/adepto/$id': typeof AdeptoIdRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
   '/noticias/$id': typeof NoticiasIdRoute
-  '/perfil/$id': typeof PerfilIdRoute
   '/noticias/': typeof NoticiasIndexRoute
 }
 export interface FileRoutesByTo {
@@ -163,16 +163,16 @@ export interface FileRoutesByTo {
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
-  '/perfil': typeof PerfilRouteWithChildren
+  '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
+  '/adepto/$id': typeof AdeptoIdRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
   '/noticias/$id': typeof NoticiasIdRoute
-  '/perfil/$id': typeof PerfilIdRoute
   '/noticias': typeof NoticiasIndexRoute
 }
 export interface FileRoutesById {
@@ -186,16 +186,16 @@ export interface FileRoutesById {
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
-  '/perfil': typeof PerfilRouteWithChildren
+  '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
+  '/adepto/$id': typeof AdeptoIdRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
   '/noticias/$id': typeof NoticiasIdRoute
-  '/perfil/$id': typeof PerfilIdRoute
   '/noticias/': typeof NoticiasIndexRoute
 }
 export interface FileRouteTypes {
@@ -216,10 +216,10 @@ export interface FileRouteTypes {
     | '/rankings'
     | '/suporte'
     | '/termos'
+    | '/adepto/$id'
     | '/jogo/$id'
     | '/liga/$code'
     | '/noticias/$id'
-    | '/perfil/$id'
     | '/noticias/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -238,10 +238,10 @@ export interface FileRouteTypes {
     | '/rankings'
     | '/suporte'
     | '/termos'
+    | '/adepto/$id'
     | '/jogo/$id'
     | '/liga/$code'
     | '/noticias/$id'
-    | '/perfil/$id'
     | '/noticias'
   id:
     | '__root__'
@@ -260,10 +260,10 @@ export interface FileRouteTypes {
     | '/rankings'
     | '/suporte'
     | '/termos'
+    | '/adepto/$id'
     | '/jogo/$id'
     | '/liga/$code'
     | '/noticias/$id'
-    | '/perfil/$id'
     | '/noticias/'
   fileRoutesById: FileRoutesById
 }
@@ -277,12 +277,13 @@ export interface RootRouteChildren {
   GruposRoute: typeof GruposRoute
   JogosRoute: typeof JogosRoute
   LigasRoute: typeof LigasRoute
-  PerfilRoute: typeof PerfilRouteWithChildren
+  PerfilRoute: typeof PerfilRoute
   PremiosRoute: typeof PremiosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   RankingsRoute: typeof RankingsRoute
   SuporteRoute: typeof SuporteRoute
   TermosRoute: typeof TermosRoute
+  AdeptoIdRoute: typeof AdeptoIdRoute
   JogoIdRoute: typeof JogoIdRoute
   LigaCodeRoute: typeof LigaCodeRoute
   NoticiasIdRoute: typeof NoticiasIdRoute
@@ -403,13 +404,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NoticiasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/perfil/$id': {
-      id: '/perfil/$id'
-      path: '/$id'
-      fullPath: '/perfil/$id'
-      preLoaderRoute: typeof PerfilIdRouteImport
-      parentRoute: typeof PerfilRoute
-    }
     '/noticias/$id': {
       id: '/noticias/$id'
       path: '/noticias/$id'
@@ -431,19 +425,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JogoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/adepto/$id': {
+      id: '/adepto/$id'
+      path: '/adepto/$id'
+      fullPath: '/adepto/$id'
+      preLoaderRoute: typeof AdeptoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
-
-interface PerfilRouteChildren {
-  PerfilIdRoute: typeof PerfilIdRoute
-}
-
-const PerfilRouteChildren: PerfilRouteChildren = {
-  PerfilIdRoute: PerfilIdRoute,
-}
-
-const PerfilRouteWithChildren =
-  PerfilRoute._addFileChildren(PerfilRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -455,12 +445,13 @@ const rootRouteChildren: RootRouteChildren = {
   GruposRoute: GruposRoute,
   JogosRoute: JogosRoute,
   LigasRoute: LigasRoute,
-  PerfilRoute: PerfilRouteWithChildren,
+  PerfilRoute: PerfilRoute,
   PremiosRoute: PremiosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   RankingsRoute: RankingsRoute,
   SuporteRoute: SuporteRoute,
   TermosRoute: TermosRoute,
+  AdeptoIdRoute: AdeptoIdRoute,
   JogoIdRoute: JogoIdRoute,
   LigaCodeRoute: LigaCodeRoute,
   NoticiasIdRoute: NoticiasIdRoute,

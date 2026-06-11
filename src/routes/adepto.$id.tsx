@@ -7,7 +7,7 @@ import { UserAvatar } from "@/components/AvatarPicker";
 import { PHASE_LABEL, formatDate } from "@/lib/format";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 
-export const Route = createFileRoute("/perfil/$id")({
+export const Route = createFileRoute("/adepto/$id")({
   component: PublicProfile,
 });
 

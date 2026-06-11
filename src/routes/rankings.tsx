@@ -220,7 +220,7 @@ function Rankings() {
                       }`}>{i + 1}</span>
                     </td>
                     <td className="px-3 py-2.5">
-                      <Link to="/perfil/$id" params={{ id: r.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
+                      <Link to="/adepto/$id" params={{ id: r.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
                         <UserAvatar avatarUrl={(r as any).avatar_url} name={r.display_name} size={7} className="rounded-full" />
                         <span className={`font-medium ${isMe ? "text-wc-red" : ""}`}>{r.display_name ?? "Adepto"}{isMe && " (tu)"}</span>
                       </Link>
@@ -250,7 +250,7 @@ function Rankings() {
                       </span>
                     </td>
                     <td className="px-3 py-2.5">
-                      <Link to="/perfil/$id" params={{ id: myPosition.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
+                      <Link to="/adepto/$id" params={{ id: myPosition.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
                         <UserAvatar avatarUrl={myPosition.avatar_url} name={myPosition.display_name} size={7} className="rounded-full" />
                         <span className="font-medium text-wc-red">{myPosition.display_name ?? "Tu"} (tu)</span>
                       </Link>

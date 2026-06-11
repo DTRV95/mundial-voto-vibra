@@ -715,19 +715,27 @@ function LeagueChat({ poolCode, userId, ranking }: { poolCode: string; userId: s
               Ninguém falou ainda. Sê o primeiro! 👋
             </p>
           )}
-          {messages.map(msg => {
+          {messages.map((msg, i) => {
             const isMe = msg.user_id === userId;
             const member = memberMap[msg.user_id];
             const name = member?.display_name ?? "Adepto";
+            // Só mostra nome/avatar se for a primeira mensagem desta pessoa em sequência
+            const prev = messages[i - 1];
+            const showHeader = !prev || prev.user_id !== msg.user_id;
 
             return (
-              <div key={msg.id} className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : ""}`}>
-                {!isMe && (
-                  <UserAvatar avatarUrl={member?.avatar_url} name={name} size={6} className="rounded-full shrink-0 mb-0.5" />
-                )}
-                <div className={`max-w-[75%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-0.5`}>
-                  {!isMe && (
-                    <span className="text-[10px] font-semibold text-muted-foreground px-1">{name}</span>
+              <div key={msg.id} className={`flex items-end gap-2 ${isMe ? "flex-row-reverse" : ""} ${showHeader && i > 0 ? "mt-3" : ""}`}>
+                {/* Avatar — placeholder invisível quando não é cabeçalho, para manter alinhamento */}
+                <div className="shrink-0 w-6 h-6 mb-0.5">
+                  {showHeader && (
+                    <UserAvatar avatarUrl={member?.avatar_url} name={name} size={6} className="rounded-full" />
+                  )}
+                </div>
+                <div className={`max-w-[75%] flex flex-col gap-0.5 ${isMe ? "items-end" : "items-start"}`}>
+                  {showHeader && (
+                    <span className={`text-[10px] font-semibold px-1 ${isMe ? "text-wc-red/70" : "text-muted-foreground"}`}>
+                      {isMe ? "Tu" : name}
+                    </span>
                   )}
                   <div className={`rounded-2xl px-3 py-2 text-sm leading-snug ${
                     isMe

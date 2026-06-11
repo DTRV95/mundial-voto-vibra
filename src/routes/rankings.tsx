@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, TrendingUp, TrendingDown, Minus, Share2 } from "lucide-react";
+import { Trophy, TrendingUp, TrendingDown, Minus, Share2, Shield, Users2 } from "lucide-react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
@@ -41,6 +41,7 @@ export const Route = createFileRoute("/rankings")({
 });
 
 function Rankings() {
+  const [tab, setTab] = useState<"individual" | "ligas">("individual");
   const [phase, setPhase] = useState<typeof PHASES[number]["key"]>("geral");
   const { user } = useAuth();
 
@@ -106,6 +107,41 @@ function Rankings() {
     },
   });
 
+  // Ranking de ligas
+  const { data: leagueRanking = [] } = useQuery({
+    queryKey: ["league-ranking"],
+    enabled: tab === "ligas",
+    queryFn: async () => {
+      const { data: pools } = await supabase
+        .from("pools")
+        .select("id, name, code");
+      if (!pools || pools.length === 0) return [];
+
+      const results = await Promise.all(
+        pools.map(async (pool) => {
+          const { data: members } = await supabase
+            .from("pool_members")
+            .select("user_id")
+            .eq("pool_id", pool.id);
+          if (!members || members.length === 0) return { ...pool, total_points: 0, members: 0 };
+
+          const userIds = members.map(m => m.user_id);
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("total_points")
+            .in("id", userIds);
+
+          const total = (profiles ?? []).reduce((s, p) => s + (p.total_points ?? 0), 0);
+          return { ...pool, total_points: total, members: members.length };
+        })
+      );
+
+      return results
+        .filter(l => l.members > 0)
+        .sort((a, b) => b.total_points - a.total_points);
+    },
+  });
+
   // Posição do utilizador autenticado — sempre mostrada no fundo
   const myEntry = rows.find(r => r.id === user?.id);
   const myRank  = myEntry ? rows.indexOf(myEntry) + 1 : null;
@@ -146,26 +182,54 @@ function Rankings() {
         <p className="text-sm text-muted-foreground">Compete por fase do Mundial e ganha prémios.</p>
       </header>
 
-      <div className="mb-5 -mx-5 overflow-x-auto px-5">
-        <div className="flex gap-2">
-          {PHASES.map((p) => (
-            <button
-              key={p.key}
-              onClick={() => setPhase(p.key)}
-              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition-smooth ${
-                phase === p.key
-                  ? "border-gold bg-gold text-background"
-                  : "border-border bg-card/60 text-muted-foreground hover:border-gold/40"
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
+      {/* Tabs principais */}
+      <div className="mb-5 flex gap-2">
+        <button
+          onClick={() => setTab("individual")}
+          className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold transition-smooth ${
+            tab === "individual"
+              ? "border-wc-red bg-wc-red text-white"
+              : "border-border bg-card/60 text-muted-foreground hover:border-wc-red/40"
+          }`}
+        >
+          <Trophy className="h-3.5 w-3.5" /> Individual
+        </button>
+        <button
+          onClick={() => setTab("ligas")}
+          className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold transition-smooth ${
+            tab === "ligas"
+              ? "border-wc-red bg-wc-red text-white"
+              : "border-border bg-card/60 text-muted-foreground hover:border-wc-red/40"
+          }`}
+        >
+          <Shield className="h-3.5 w-3.5" /> Ligas
+        </button>
       </div>
 
+      {/* Sub-tabs de fase (só no individual) */}
+      {tab === "individual" && (
+        <div className="mb-5 -mx-5 overflow-x-auto px-5">
+          <div className="flex gap-2">
+            {PHASES.map((p) => (
+              <button
+                key={p.key}
+                onClick={() => setPhase(p.key)}
+                className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition-smooth ${
+                  phase === p.key
+                    ? "border-gold bg-gold text-background"
+                    : "border-border bg-card/60 text-muted-foreground hover:border-gold/40"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── RANKING INDIVIDUAL ─────────────────────────────── */}
       {/* Partilhar posição */}
-      {user && (myRank || myPosition) && (
+      {tab === "individual" && user && (myRank || myPosition) && (
         <div className="mb-4">
           <button
             onClick={() => {
@@ -187,7 +251,7 @@ function Rankings() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card/70">
+      {tab === "individual" && <div className="overflow-hidden rounded-2xl border border-border bg-card/70">
         {rows.length === 0 ? (
           <div className="p-10 text-center">
             <Trophy className="mx-auto mb-2 h-8 w-8 text-gold" />
@@ -269,7 +333,43 @@ function Rankings() {
             </tbody>
           </table>
         )}
-      </div>
+      </div>}
+
+      {/* ── RANKING DE LIGAS ───────────────────────────────── */}
+      {tab === "ligas" && (
+        <div className="overflow-hidden rounded-2xl border border-border bg-card/70">
+          {leagueRanking.length === 0 ? (
+            <div className="p-10 text-center">
+              <Shield className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
+              <p className="font-display text-lg">Ainda sem ligas</p>
+              <p className="text-sm text-muted-foreground">Cria um torneio para aparecer aqui.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {leagueRanking.map((league, i) => (
+                <div key={league.id} className="flex items-center gap-3 px-4 py-3">
+                  <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
+                    i === 0 ? "bg-gold text-background" : i < 3 ? "bg-gold/30 text-gold" : "bg-secondary text-muted-foreground"
+                  }`}>
+                    {i + 1}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate">{league.name}</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Users2 className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-[10px] text-muted-foreground">{league.members} membro{league.members !== 1 ? "s" : ""}</span>
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="font-display text-lg text-gold leading-none">{league.total_points}</p>
+                    <p className="text-[10px] text-muted-foreground">pts totais</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mt-6 rounded-2xl border border-border bg-card/50 p-5 text-xs text-muted-foreground">
         <h3 className="mb-2 font-display text-base text-foreground">Critérios de desempate</h3>

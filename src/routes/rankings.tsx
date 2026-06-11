@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, TrendingUp, TrendingDown, Minus, Share2 } from "lucide-react";
+import { Trophy, TrendingUp, TrendingDown, Minus, Share2, Users2 } from "lucide-react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
@@ -103,6 +103,25 @@ function Rankings() {
           return a.predictions_made - b.predictions_made;
         })
         .slice(0, 5);
+    },
+  });
+
+  const { data: totalParticipants = 0 } = useQuery({
+    queryKey: ["ranking-total", phase],
+    queryFn: async () => {
+      if (phase === "geral") {
+        const { count } = await supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .gt("total_points", 0);
+        return count ?? 0;
+      }
+      const { data: preds } = await supabase
+        .from("predictions")
+        .select("user_id,match:match_id!inner(phase)")
+        .eq("match.phase", phase);
+      const unique = new Set((preds ?? []).map(p => p.user_id));
+      return unique.size;
     },
   });
 
@@ -235,7 +254,22 @@ function Rankings() {
                 );
               })}
 
-              {/* Posição do utilizador fora do top 50 */}
+              {/* Barra total de participantes */}
+              {totalParticipants > 0 && (
+                <tr className="border-t border-border">
+                  <td colSpan={6} className="px-4 py-2.5">
+                    <div className="flex items-center justify-center gap-2 rounded-xl bg-secondary/60 px-3 py-2">
+                      <Users2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-xs text-muted-foreground">
+                        <span className="font-bold tabular-nums text-foreground">{totalParticipants.toLocaleString("pt-PT")}</span>
+                        {" "}participantes no torneio global
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              )}
+
+              {/* Posição do utilizador fora do top 5 */}
               {myPosition && (
                 <>
                   <tr className="border-t border-border">

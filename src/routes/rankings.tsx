@@ -43,17 +43,18 @@ export const Route = createFileRoute("/rankings")({
 function Rankings() {
   const [tab, setTab] = useState<"individual" | "ligas">("individual");
   const [phase, setPhase] = useState<typeof PHASES[number]["key"]>("geral");
+  const [showAll, setShowAll] = useState(false);
   const { user } = useAuth();
 
   const { data: rows = [] } = useQuery({
-    queryKey: ["ranking", phase],
+    queryKey: ["ranking", phase, showAll],
     queryFn: async () => {
       if (phase === "geral") {
-        const { data } = await supabase
+        const query = supabase
           .from("profiles")
           .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct")
-          .order("total_points", { ascending: false })
-          .limit(5);
+          .order("total_points", { ascending: false });
+        const { data } = showAll ? await query : await query.limit(5);
         return (data ?? []).map((r) => ({
           id: r.id,
           display_name: r.display_name,
@@ -299,8 +300,8 @@ function Rankings() {
                 );
               })}
 
-              {/* Posição do utilizador fora do top 5 */}
-              {myPosition && (
+              {/* Posição do utilizador fora do top 5 — só quando não está em modo expandido */}
+              {!showAll && myPosition && (
                 <>
                   <tr className="border-t border-border">
                     <td colSpan={5} className="px-3 py-1 text-center text-[10px] text-muted-foreground tracking-widest">
@@ -329,6 +330,20 @@ function Rankings() {
                     </td>
                   </tr>
                 </>
+              )}
+
+              {/* Botão ver todos / ver menos */}
+              {phase === "geral" && (
+                <tr className="border-t border-border">
+                  <td colSpan={6} className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => setShowAll(v => !v)}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-1.5 text-xs font-semibold text-muted-foreground hover:border-gold/40 hover:text-gold transition-smooth"
+                    >
+                      {showAll ? "Ver menos ↑" : `Ver classificação completa ↓`}
+                    </button>
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

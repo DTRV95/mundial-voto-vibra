@@ -420,6 +420,12 @@ function Home() {
                 )}
               </ol>
             )}
+            <Link
+              to="/rankings"
+              className="flex items-center justify-center gap-1.5 border-t border-white/20 px-5 py-3 text-xs font-semibold text-white/70 hover:text-white transition-smooth"
+            >
+              Ver classificação completa →
+            </Link>
           </div>
         </div>
 

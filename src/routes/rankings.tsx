@@ -113,7 +113,7 @@ function Rankings() {
         const { count } = await supabase
           .from("profiles")
           .select("id", { count: "exact", head: true })
-          .gt("total_points", 0);
+          .gt("predictions_made", 0);
         return count ?? 0;
       }
       const { data: preds } = await supabase
@@ -255,7 +255,7 @@ function Rankings() {
               })}
 
               {/* Barra total de participantes */}
-              {totalParticipants > 0 && (
+              {rows.length > 0 && (
                 <tr className="border-t border-border">
                   <td colSpan={6} className="px-4 py-2.5">
                     <div className="flex items-center justify-center gap-2 rounded-xl bg-secondary/60 px-3 py-2">

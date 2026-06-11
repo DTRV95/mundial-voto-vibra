@@ -48,15 +48,17 @@ function LigaPage() {
   const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
 
-  const { data: pool, isLoading } = useQuery({
+  const { data: pool, isLoading, isError } = useQuery({
     queryKey: ["pool", code],
+    retry: false,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("pools")
         .select("id, name, code, created_by, prize")
         .eq("code", code.toUpperCase())
         .maybeSingle();
-      return data;
+      if (error) throw error;
+      return data ?? null;
     },
   });
 
@@ -257,12 +259,18 @@ function LigaPage() {
     );
   }
 
-  if (!pool) {
+  if (!isLoading && (isError || !pool)) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center px-5 text-center">
+      <div className="flex min-h-[50vh] flex-col items-center justify-center px-5 text-center gap-2">
+        <span className="text-5xl mb-2">🔍</span>
         <h2 className="font-display text-2xl">Liga não encontrada</h2>
-        <p className="mt-2 text-sm text-muted-foreground">O código <span className="font-mono font-bold">{code}</span> não corresponde a nenhuma liga.</p>
-        <Link to="/ligas" className="mt-4 text-sm font-bold text-wc-red hover:underline">← Voltar às ligas</Link>
+        <p className="text-sm text-muted-foreground">
+          O código <span className="font-mono font-bold text-foreground">{code.toUpperCase()}</span> não corresponde a nenhuma liga.
+        </p>
+        <p className="text-xs text-muted-foreground">Verifica se o link está correto ou pede ao criador do torneio para te enviar novamente.</p>
+        <Link to="/ligas" className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-wc-red px-5 py-2.5 text-sm font-bold text-white hover:bg-wc-red/80 transition-smooth">
+          <ArrowLeft className="h-3.5 w-3.5" /> Ver os meus torneios
+        </Link>
       </div>
     );
   }

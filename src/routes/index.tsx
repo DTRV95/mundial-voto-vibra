@@ -69,9 +69,7 @@ function Home() {
     queryFn: async () => {
       const { data: pools } = await supabase
         .from("pools")
-        .select("id, name")
-        .order("created_at", { ascending: false })
-        .limit(5);
+        .select("id, name");
 
       if (!pools || pools.length === 0) return [];
 
@@ -102,7 +100,8 @@ function Home() {
 
       return pools
         .map((p) => ({ id: p.id, name: p.name, points: poolPoints[p.id] ?? 0, members: poolMemberCount[p.id] ?? 0 }))
-        .sort((a, b) => b.points - a.points);
+        .sort((a, b) => b.points - a.points)
+        .slice(0, 5);
     },
   });
 

@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
-import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check } from "lucide-react";
+import { Lock, Users2, Info, Share2, Check } from "lucide-react";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 
 export const Route = createFileRoute("/jogo/$id")({
@@ -67,7 +67,7 @@ function JogoPage() {
   });
 
   const [pred, setPred] = useState<Record<string, any>>({});
-  const [scorelabOpen, setScorelabOpen] = useState(false);
+
   const [shared, setShared] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -233,62 +233,6 @@ function JogoPage() {
         </div>
       )}
 
-      {/* ── Previsão ScoreLab colapsável ── */}
-      {analysis && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-gold/30 bg-gold/5">
-          <button
-            onClick={() => setScorelabOpen((o) => !o)}
-            className="flex w-full items-center justify-between px-4 py-3 transition-smooth hover:bg-gold/10"
-          >
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-gold" />
-              <span className="font-display text-base text-gold">Previsão ScoreLab</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-gold/50">Powered by ScoreLab</span>
-              <ChevronDown className={`h-4 w-4 text-gold transition-transform duration-200 ${scorelabOpen ? "rotate-180" : ""}`} />
-            </div>
-          </button>
-
-          {scorelabOpen && (
-            <div className="border-t border-gold/20 px-4 py-4 space-y-3">
-              <SLRow label="Resultado 90 min" entries={[
-                { label: home.name, pct: analysis.prob_home },
-                { label: "Empate", pct: analysis.prob_draw },
-                { label: away.name, pct: analysis.prob_away },
-              ]} />
-              <SLRow label="Ambas marcam" entries={[
-                { label: "Sim", pct: analysis.prob_btts_yes },
-                { label: "Não", pct: analysis.prob_btts_no },
-              ]} />
-              <SLRow label="Total 2.5" entries={[
-                { label: "Mais", pct: analysis.prob_over25 },
-                { label: "Menos", pct: analysis.prob_under25 },
-              ]} />
-              <SLRow label="Total 3.5" entries={[
-                { label: "Mais", pct: analysis.prob_over35 },
-                { label: "Menos", pct: analysis.prob_under35 },
-              ]} />
-              <SLRow label="Dupla hipótese" entries={[
-                { label: "1X", pct: analysis.prob_1x },
-                { label: "X2", pct: analysis.prob_x2 },
-              ]} />
-              <SLRow label="Combo 1.5" entries={[
-                { label: "1X+Mais", pct: analysis.prob_combo15_1x_over },
-                { label: "1X+Menos", pct: analysis.prob_combo15_1x_under },
-                { label: "X2+Mais", pct: analysis.prob_combo15_x2_over },
-                { label: "X2+Menos", pct: analysis.prob_combo15_x2_under },
-              ]} />
-              <SLRow label="Combo 3.5" entries={[
-                { label: "1X+Mais", pct: analysis.prob_combo35_1x_over },
-                { label: "1X+Menos", pct: analysis.prob_combo35_1x_under },
-                { label: "X2+Mais", pct: analysis.prob_combo35_x2_over },
-                { label: "X2+Menos", pct: analysis.prob_combo35_x2_under },
-              ]} />
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ── Markets ── */}
       <section className="mt-4 space-y-3">

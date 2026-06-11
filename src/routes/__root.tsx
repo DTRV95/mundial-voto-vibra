@@ -44,12 +44,20 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   useEffect(() => { reportLovableError(error, { boundary: "tanstack_root_error_component" }); }, [error]);
+
+  // Erro de chunk stale após novo deploy — recarrega silenciosamente
+  const isChunkError = /importing a module script failed|failed to fetch dynamically imported|unable to preload css/i.test(error.message);
+  useEffect(() => {
+    if (isChunkError) window.location.reload();
+  }, [isChunkError]);
+
+  if (isChunkError) return null;
+
   return (
     <div className="flex min-h-screen items-center justify-center px-4 text-center">
       <div>
         <h1 className="font-display text-3xl">Algo correu mal</h1>
         <p className="mt-2 text-sm text-muted-foreground">Tenta novamente daqui a uns segundos.</p>
-        <p className="mt-2 text-xs text-red-400 font-mono max-w-md break-all">{error.message}</p>
         <button onClick={reset} className="mt-6 rounded-full bg-gold px-5 py-2 text-sm font-semibold text-background">Tentar novamente</button>
       </div>
     </div>
@@ -189,6 +197,15 @@ function PageTransition() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    // Quando um novo deploy acontece, os chunks JS antigos deixam de existir.
+    // O Vite emite este evento — fazemos reload silencioso para carregar os novos assets.
+    const handler = () => window.location.reload();
+    window.addEventListener("vite:preloadError", handler);
+    return () => window.removeEventListener("vite:preloadError", handler);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <PageTransition />

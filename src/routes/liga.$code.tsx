@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
@@ -165,6 +165,46 @@ function LigaPage() {
         .in("match_id", matchIds);
 
       return new Set((preds ?? []).map(p => p.user_id));
+    },
+  });
+
+  // Previsões do grupo — jogos iniciados nos últimos 3 dias
+  const { data: groupPredictions = [] } = useQuery({
+    queryKey: ["pool-group-preds", pool?.id],
+    enabled: !!pool && !!isMember && ranking.length > 0,
+    queryFn: async () => {
+      const since = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+      const now = new Date().toISOString();
+
+      const { data: matches } = await supabase
+        .from("matches")
+        .select("id,kickoff_at,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code),status")
+        .gte("kickoff_at", since)
+        .lte("kickoff_at", now)
+        .order("kickoff_at", { ascending: false })
+        .limit(5);
+
+      if (!matches || matches.length === 0) return [];
+
+      const matchIds = matches.map(m => m.id);
+      const memberIds = ranking.map(r => r.id);
+
+      const { data: preds } = await supabase
+        .from("predictions")
+        .select("user_id,match_id,result_90,btts,total_25,total_35,exact_home,exact_away,points")
+        .in("match_id", matchIds)
+        .in("user_id", memberIds);
+
+      return matches.map((m: any) => ({
+        match: m,
+        predictions: (preds ?? [])
+          .filter(p => p.match_id === m.id)
+          .map(p => ({
+            ...p,
+            member: ranking.find(r => r.id === p.user_id),
+          }))
+          .filter(p => p.member),
+      })).filter(m => m.predictions.length > 0);
     },
   });
 
@@ -508,6 +548,22 @@ function LigaPage() {
         )}
       </div>
 
+      {/* ── PREVISÕES DO GRUPO ───────────────────────────────── */}
+      {user && isMember && groupPredictions.length > 0 && (
+        <div className="mx-5 mt-8 md:mx-8">
+          <div className="mb-4 flex items-center gap-2">
+            <Eye className="h-4 w-4 text-muted-foreground" />
+            <h2 className="font-display text-xl">Previsões do Grupo</h2>
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">após início do jogo</span>
+          </div>
+          <div className="space-y-3">
+            {groupPredictions.map(({ match, predictions }: any) => (
+              <MatchPredCard key={match.id} match={match} predictions={predictions} currentUserId={user.id} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── VOTAR NOS JOGOS ──────────────────────────────────── */}
       {user && isMember && (
         <div className="mx-5 mt-4 md:mx-8">
@@ -565,6 +621,86 @@ function LigaPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const RESULT_LABEL: Record<string, string> = { home: "Casa", draw: "Empate", away: "Fora" };
+const BTTS_LABEL: Record<string, string> = { yes: "Sim", no: "Não" };
+const GOALS_LABEL: Record<string, string> = { over: "Mais", under: "Menos" };
+
+function MatchPredCard({ match, predictions, currentUserId }: { match: any; predictions: any[]; currentUserId: string }) {
+  const [open, setOpen] = useState(true);
+  const finished = match.status === "finished";
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-card/70">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex w-full items-center justify-between px-4 py-3 hover:bg-accent/50 transition-smooth"
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="text-lg">{match.home?.flag ?? "🏳"}</span>
+          <span className="text-sm font-bold truncate">{match.home?.name}</span>
+          <span className="text-xs text-muted-foreground shrink-0">vs</span>
+          <span className="text-sm font-bold truncate">{match.away?.name}</span>
+          <span className="text-lg">{match.away?.flag ?? "🏳"}</span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0 ml-2">
+          {finished && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-muted-foreground">FIM</span>}
+          {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </div>
+      </button>
+
+      {open && (
+        <div className="border-t border-border divide-y divide-border/50">
+          {predictions.map((p: any) => {
+            const isMe = p.user_id === currentUserId;
+            const scored = finished && p.points != null && p.points > 0;
+            const missed = finished && p.points != null && p.points === 0;
+            return (
+              <div key={p.user_id} className={`flex items-center gap-3 px-4 py-2.5 ${isMe ? "bg-gold/5" : ""}`}>
+                <UserAvatar avatarUrl={p.member?.avatar_url} name={p.member?.display_name ?? "?"} size={7} className="rounded-full shrink-0" />
+                <span className={`text-xs font-semibold shrink-0 w-20 truncate ${isMe ? "text-gold" : ""}`}>
+                  {p.member?.display_name}{isMe ? " (tu)" : ""}
+                </span>
+                <div className="flex flex-1 flex-wrap gap-1.5">
+                  {p.result_90 && (
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
+                      {RESULT_LABEL[p.result_90] ?? p.result_90}
+                    </span>
+                  )}
+                  {p.btts && (
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
+                      BTTS {BTTS_LABEL[p.btts] ?? p.btts}
+                    </span>
+                  )}
+                  {p.total_25 && (
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
+                      2.5 {GOALS_LABEL[p.total_25] ?? p.total_25}
+                    </span>
+                  )}
+                  {p.total_35 && (
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
+                      3.5 {GOALS_LABEL[p.total_35] ?? p.total_35}
+                    </span>
+                  )}
+                  {p.exact_home != null && p.exact_away != null && (
+                    <span className="rounded-full bg-wc-blue/20 px-2 py-0.5 text-[10px] font-bold text-wc-blue">
+                      {p.exact_home}–{p.exact_away}
+                    </span>
+                  )}
+                </div>
+                {finished && (
+                  <span className={`shrink-0 text-xs font-bold ${scored ? "text-wc-green" : missed ? "text-muted-foreground/50" : ""}`}>
+                    {scored ? `+${p.points}` : missed ? "0" : ""}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

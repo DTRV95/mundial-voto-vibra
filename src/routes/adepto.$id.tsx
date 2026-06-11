@@ -38,7 +38,9 @@ function PublicProfile() {
         .eq("user_id", id)
         .order("created_at", { ascending: false })
         .limit(20);
-      return data ?? [];
+      const now = new Date().toISOString();
+      // mostra previsões de jogos que já começaram (kickoff no passado)
+      return (data ?? []).filter((p: any) => p.match?.kickoff_at <= now);
     },
   });
 

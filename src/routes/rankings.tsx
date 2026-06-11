@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, TrendingUp, TrendingDown, Minus, Share2, Users2 } from "lucide-react";
+import { Trophy, TrendingUp, TrendingDown, Minus, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
@@ -103,17 +103,6 @@ function Rankings() {
           return a.predictions_made - b.predictions_made;
         })
         .slice(0, 5);
-    },
-  });
-
-  const { data: totalParticipants = 0 } = useQuery({
-    queryKey: ["ranking-total-members"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("pool_members")
-        .select("user_id");
-      const unique = new Set((data ?? []).map(p => p.user_id));
-      return unique.size;
     },
   });
 
@@ -245,21 +234,6 @@ function Rankings() {
                   </tr>
                 );
               })}
-
-              {/* Barra total de participantes */}
-              {rows.length > 0 && (
-                <tr className="border-t border-border">
-                  <td colSpan={6} className="px-4 py-2.5">
-                    <div className="flex items-center justify-center gap-2 rounded-xl bg-secondary/60 px-3 py-2">
-                      <Users2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-xs text-muted-foreground">
-                        <span className="font-bold tabular-nums text-foreground">{totalParticipants.toLocaleString("pt-PT")}</span>
-                        {" "}pessoas a competir nos torneios
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              )}
 
               {/* Posição do utilizador fora do top 5 */}
               {myPosition && (

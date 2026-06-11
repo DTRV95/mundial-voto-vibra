@@ -107,20 +107,12 @@ function Rankings() {
   });
 
   const { data: totalParticipants = 0 } = useQuery({
-    queryKey: ["ranking-total", phase],
+    queryKey: ["ranking-total-members"],
     queryFn: async () => {
-      if (phase === "geral") {
-        const { count } = await supabase
-          .from("profiles")
-          .select("id", { count: "exact", head: true })
-          .gt("predictions_made", 0);
-        return count ?? 0;
-      }
-      const { data: preds } = await supabase
-        .from("predictions")
-        .select("user_id,match:match_id!inner(phase)")
-        .eq("match.phase", phase);
-      const unique = new Set((preds ?? []).map(p => p.user_id));
+      const { data } = await supabase
+        .from("pool_members")
+        .select("user_id");
+      const unique = new Set((data ?? []).map(p => p.user_id));
       return unique.size;
     },
   });
@@ -262,7 +254,7 @@ function Rankings() {
                       <Users2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                       <span className="text-xs text-muted-foreground">
                         <span className="font-bold tabular-nums text-foreground">{totalParticipants.toLocaleString("pt-PT")}</span>
-                        {" "}participantes no torneio global
+                        {" "}pessoas a competir nos torneios
                       </span>
                     </div>
                   </td>

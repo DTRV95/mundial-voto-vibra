@@ -122,24 +122,26 @@ function Rankings() {
         .select("id, name, code");
       if (!pools || pools.length === 0) return [];
 
-      const results = await Promise.all(
-        pools.map(async (pool) => {
-          const { data: members } = await supabase
-            .from("pool_members")
-            .select("user_id")
-            .eq("pool_id", pool.id);
-          if (!members || members.length === 0) return { ...pool, total_points: 0, members: 0 };
+      // Busca todos os membros e perfis de uma vez (evita N+1 queries)
+      const { data: allMembers } = await supabase
+        .from("pool_members")
+        .select("pool_id, user_id");
 
-          const userIds = members.map(m => m.user_id);
-          const { data: profiles } = await supabase
-            .from("profiles")
-            .select("total_points")
-            .in("id", userIds);
+      if (!allMembers || allMembers.length === 0) return [];
 
-          const total = (profiles ?? []).reduce((s, p) => s + (p.total_points ?? 0), 0);
-          return { ...pool, total_points: total, members: members.length };
-        })
-      );
+      const userIds = [...new Set(allMembers.map(m => m.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, total_points")
+        .in("id", userIds);
+
+      const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p.total_points ?? 0]));
+
+      const results = pools.map(pool => {
+        const members = allMembers.filter(m => m.pool_id === pool.id);
+        const total = members.reduce((s, m) => s + (profileMap[m.user_id] ?? 0), 0);
+        return { ...pool, total_points: total, members: members.length };
+      });
 
       return results
         .filter(l => l.members > 0)

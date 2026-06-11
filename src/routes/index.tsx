@@ -67,7 +67,6 @@ function Home() {
   const { data: topPools = [] } = useQuery({
     queryKey: ["pools", "ranking"],
     queryFn: async () => {
-      // Buscar ligas (visível também para utilizadores não autenticados se RLS permitir)
       const { data: pools } = await supabase
         .from("pools")
         .select("id, name")
@@ -76,31 +75,28 @@ function Home() {
 
       if (!pools || pools.length === 0) return [];
 
-      // Tentar buscar membros (pode falhar para utilizadores anónimos)
       const poolIds = pools.map((p) => p.id);
       const { data: members } = await supabase
         .from("pool_members")
-        .select("pool_id, user_id, joined_at")
+        .select("pool_id, user_id")
         .in("pool_id", poolIds);
 
       if (!members || members.length === 0) {
         return pools.map((p) => ({ id: p.id, name: p.name, points: 0, members: 0 }));
       }
 
-      // Buscar previsões para calcular pontos por liga
       const userIds = [...new Set(members.map((m) => m.user_id))];
-      const { data: preds } = await supabase
-        .from("predictions")
-        .select("user_id, points, created_at")
-        .in("user_id", userIds);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, total_points")
+        .in("id", userIds);
+
+      const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p.total_points ?? 0]));
 
       const poolPoints: Record<string, number> = {};
       const poolMemberCount: Record<string, number> = {};
       for (const member of members) {
-        const pts = (preds ?? [])
-          .filter((p) => p.user_id === member.user_id && p.created_at >= member.joined_at)
-          .reduce((sum, p) => sum + (p.points ?? 0), 0);
-        poolPoints[member.pool_id] = (poolPoints[member.pool_id] ?? 0) + pts;
+        poolPoints[member.pool_id] = (poolPoints[member.pool_id] ?? 0) + (profileMap[member.user_id] ?? 0);
         poolMemberCount[member.pool_id] = (poolMemberCount[member.pool_id] ?? 0) + 1;
       }
 

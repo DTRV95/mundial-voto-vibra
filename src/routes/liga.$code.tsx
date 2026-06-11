@@ -91,53 +91,24 @@ function LigaPage() {
 
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url")
+        .select("id, display_name, avatar_url, total_points, predictions_made, predictions_correct")
         .in("id", userIds);
 
-      const results = await Promise.all(
-        members.map(async (member) => {
-          try {
-            const { data: preds } = await supabase
-              .from("predictions")
-              .select("points, created_at")
-              .eq("user_id", member.user_id)
-              .gte("created_at", member.joined_at);
-
-            const points = (preds ?? []).reduce((sum, p) => sum + (p.points ?? 0), 0);
-            const made = (preds ?? []).length;
-            const correct = (preds ?? []).filter((p) => (p.points ?? 0) > 0).length;
-            const profile = profiles?.find((pr) => pr.id === member.user_id);
-
-            return {
-              id: member.user_id,
-              display_name: profile?.display_name ?? "Adepto",
-              avatar_url: (profile as any)?.avatar_url ?? null,
-              total_points: points,
-              predictions_made: made,
-              predictions_correct: correct,
-              joined_at: member.joined_at,
-            };
-          } catch {
-            const profile = profiles?.find((pr) => pr.id === member.user_id);
-            return {
-              id: member.user_id,
-              display_name: profile?.display_name ?? "Adepto",
-              avatar_url: (profile as any)?.avatar_url ?? null,
-              total_points: 0,
-              predictions_made: 0,
-              predictions_correct: 0,
-              joined_at: member.joined_at,
-            };
-          }
-        })
-      );
-
-      return results.sort((a, b) => {
-        if (b.total_points !== a.total_points) return b.total_points - a.total_points;
-        const accA = a.predictions_made > 0 ? a.predictions_correct / a.predictions_made : 0;
-        const accB = b.predictions_made > 0 ? b.predictions_correct / b.predictions_made : 0;
-        return accB - accA;
-      });
+      return (profiles ?? [])
+        .map((profile) => ({
+          id: profile.id,
+          display_name: profile.display_name ?? "Adepto",
+          avatar_url: (profile as any).avatar_url ?? null,
+          total_points: profile.total_points ?? 0,
+          predictions_made: profile.predictions_made ?? 0,
+          predictions_correct: profile.predictions_correct ?? 0,
+        }))
+        .sort((a, b) => {
+          if (b.total_points !== a.total_points) return b.total_points - a.total_points;
+          const accA = a.predictions_made > 0 ? a.predictions_correct / a.predictions_made : 0;
+          const accB = b.predictions_made > 0 ? b.predictions_correct / b.predictions_made : 0;
+          return accB - accA;
+        });
     },
   });
 

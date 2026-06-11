@@ -36,6 +36,22 @@ function Home() {
     },
   });
 
+  const { data: votedTodayIds = new Set<string>() } = useQuery({
+    queryKey: ["voted-today", user?.id],
+    enabled: !!user?.id && todays.length > 0,
+    queryFn: async () => {
+      const ids = todays.map(m => m.id);
+      const { data } = await supabase
+        .from("predictions")
+        .select("match_id")
+        .eq("user_id", user!.id)
+        .in("match_id", ids);
+      return new Set((data ?? []).map((p: any) => p.match_id));
+    },
+  });
+
+  const todaysWithVoted = todays.map(m => ({ ...m, already_voted: votedTodayIds.has(m.id) }));
+
   const { data: topLeaders = [] } = useQuery({
     queryKey: ["leaders", "home"],
     queryFn: async () => {
@@ -319,7 +335,7 @@ function Home() {
           </div>
           <Link to="/jogos" className="text-xs font-bold text-wc-red">Ver todos →</Link>
         </div>
-        {todays.length === 0 ? (
+        {todaysWithVoted.length === 0 ? (
           <EmptyState
             title="Sem jogos para hoje"
             subtitle="Volta amanhã ou explora as próximas fases."
@@ -332,16 +348,16 @@ function Home() {
                 className="flex gap-3 overflow-x-auto pb-3"
                 style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}
               >
-                {todays.map((m) => (
+                {todaysWithVoted.map((m) => (
                   <div key={m.id} style={{ scrollSnapAlign: "start", minWidth: "82vw", maxWidth: "82vw" }}>
                     <MatchCard match={m} />
                   </div>
                 ))}
               </div>
               {/* Indicador de scroll */}
-              {todays.length > 1 && (
+              {todaysWithVoted.length > 1 && (
                 <div className="flex justify-center gap-1.5 pt-1">
-                  {todays.map((_, i) => (
+                  {todaysWithVoted.map((_, i) => (
                     <div key={i} className={`h-1 rounded-full bg-gold/40 ${i === 0 ? "w-4 bg-gold/80" : "w-1.5"}`} />
                   ))}
                 </div>
@@ -349,7 +365,7 @@ function Home() {
             </div>
             {/* Desktop — grid normal */}
             <div className="hidden md:grid gap-3 md:grid-cols-2">
-              {todays.map((m) => <MatchCard key={m.id} match={m} />)}
+              {todaysWithVoted.map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
           </>
         )}

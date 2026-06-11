@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,7 @@ function genCode() {
 
 function Ligas() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const [newName, setNewName] = useState("");
   const [newPrize, setNewPrize] = useState("");
@@ -77,11 +78,12 @@ function Ligas() {
       await supabase.from("pool_members").insert({ pool_id: pool.id, user_id: user!.id });
       return pool;
     },
-    onSuccess: () => {
+    onSuccess: (pool: any) => {
       setNewName("");
       setNewPrize("");
       qc.invalidateQueries({ queryKey: ["my-pools"] });
       toast.success("Torneio criado!");
+      navigate({ to: "/liga/$code", params: { code: pool.code } });
     },
     onError: () => toast.error("Erro ao criar liga."),
   });

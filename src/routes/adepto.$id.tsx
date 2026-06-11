@@ -42,6 +42,18 @@ function PublicProfile() {
     },
   });
 
+  const { data: globalRank } = useQuery({
+    queryKey: ["public-global-rank", id],
+    enabled: !!profile,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gt("total_points", profile!.total_points ?? 0);
+      return (count ?? 0) + 1;
+    },
+  });
+
   const { data: leagues = [] } = useQuery({
     queryKey: ["public-leagues", id],
     enabled: !!profile,
@@ -116,8 +128,16 @@ function PublicProfile() {
               </div>
             </div>
 
+            {/* Rank global destaque */}
+            {globalRank && (
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold/20 border border-gold/30 px-3 py-1.5">
+                <Trophy className="h-3.5 w-3.5 text-gold" />
+                <span className="text-xs font-bold text-gold">#{globalRank}º no ranking global</span>
+              </div>
+            )}
+
             {/* Stats */}
-            <div className="mt-5 grid grid-cols-3 gap-3">
+            <div className="mt-3 grid grid-cols-3 gap-3">
               <div className="rounded-xl bg-white/10 px-3 py-2.5 text-center">
                 <p className="font-display text-2xl text-white">{profile.total_points ?? 0}</p>
                 <p className="text-[10px] text-white/60 uppercase tracking-wider">Pontos</p>

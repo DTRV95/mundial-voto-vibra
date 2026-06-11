@@ -170,6 +170,26 @@ function LigaPage() {
     },
   });
 
+  // Rank global de cada membro
+  const { data: globalRanks = {} } = useQuery({
+    queryKey: ["pool-global-ranks", pool?.id],
+    enabled: !!pool && ranking.length > 0,
+    queryFn: async () => {
+      const { data: allProfiles } = await supabase
+        .from("profiles")
+        .select("id,total_points")
+        .order("total_points", { ascending: false });
+
+      if (!allProfiles) return {};
+      const memberIds = new Set(ranking.map(r => r.id));
+      const ranks: Record<string, number> = {};
+      allProfiles.forEach((p, i) => {
+        if (memberIds.has(p.id)) ranks[p.id] = i + 1;
+      });
+      return ranks;
+    },
+  });
+
   // Previsões do grupo — jogos iniciados nos últimos 3 dias
   const { data: groupPredictions = [] } = useQuery({
     queryKey: ["pool-group-preds", pool?.id],
@@ -527,6 +547,11 @@ function LigaPage() {
                         {isMe && <span className="shrink-0 text-[9px] font-bold text-wc-red uppercase tracking-wider">Tu</span>}
                         {r.id === pool?.created_by && (
                           <span className="shrink-0 text-[10px]" title="Criador do torneio">👑</span>
+                        )}
+                        {globalRanks[r.id] && (
+                          <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-gold/15 px-1.5 py-0.5 text-[9px] font-bold text-gold">
+                            #{globalRanks[r.id]}º global
+                          </span>
                         )}
                         {votedTodayIds.has(r.id) && (
                           <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-wc-green/15 px-1.5 py-0.5 text-[9px] font-bold text-wc-green">

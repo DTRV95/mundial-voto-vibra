@@ -439,7 +439,7 @@ function Home() {
                 </div>
                 <h3 className="font-display text-xl">Leader Board Torneios</h3>
               </div>
-              <Link to="/ligas" className="text-xs font-bold text-white/80 hover:text-white">Ver todos →</Link>
+              <Link to="/rankings" search={{ tab: "ligas" } as any} className="text-xs font-bold text-white/80 hover:text-white">Ver todos →</Link>
             </div>
             {topPools.length === 0 ? (
               <div className="px-5 py-5 text-center">
@@ -464,8 +464,8 @@ function Home() {
                   ))}
                 </ol>
                 <div className="border-t border-white/20 px-5 py-3 text-center">
-                  <Link to="/ligas" className="text-xs font-bold text-white/60 hover:text-white transition-smooth">
-                    + Convida os teus amigos e cria um torneio
+                  <Link to="/rankings" search={{ tab: "ligas" } as any} className="text-xs font-bold text-white/60 hover:text-white transition-smooth">
+                    Ver ranking completo de torneios →
                   </Link>
                 </div>
               </>

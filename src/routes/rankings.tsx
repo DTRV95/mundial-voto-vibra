@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,11 +37,15 @@ export const Route = createFileRoute("/rankings")({
       { name: "description", content: "Vê o ranking dos adeptos por fase do Mundial." },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: (search.tab as string) === "ligas" ? "ligas" : "individual",
+  }),
   component: Rankings,
 });
 
 function Rankings() {
-  const [tab, setTab] = useState<"individual" | "ligas">("individual");
+  const search = useSearch({ from: "/rankings" });
+  const [tab, setTab] = useState<"individual" | "ligas">(search.tab as "individual" | "ligas");
   const [phase, setPhase] = useState<typeof PHASES[number]["key"]>("geral");
   const [showAll, setShowAll] = useState(false);
   const { user } = useAuth();

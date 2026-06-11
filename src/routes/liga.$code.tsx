@@ -139,6 +139,35 @@ function LigaPage() {
     },
   });
 
+  const { data: votedTodayIds = new Set<string>() } = useQuery({
+    queryKey: ["pool-voted-today", pool?.id],
+    enabled: !!pool && ranking.length > 0,
+    queryFn: async () => {
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      const end = new Date(); end.setHours(23, 59, 59, 999);
+
+      // jogos de hoje
+      const { data: todayMatches } = await supabase
+        .from("matches")
+        .select("id")
+        .gte("kickoff_at", start.toISOString())
+        .lte("kickoff_at", end.toISOString());
+
+      if (!todayMatches || todayMatches.length === 0) return new Set<string>();
+
+      const matchIds = todayMatches.map(m => m.id);
+      const memberIds = ranking.map(r => r.id);
+
+      const { data: preds } = await supabase
+        .from("predictions")
+        .select("user_id")
+        .in("user_id", memberIds)
+        .in("match_id", matchIds);
+
+      return new Set((preds ?? []).map(p => p.user_id));
+    },
+  });
+
   const joinPool = useMutation({
     mutationFn: async () => {
       const { error } = await supabase
@@ -346,7 +375,10 @@ function LigaPage() {
             {podium[1] && (
               <div className="flex flex-1 flex-col items-center gap-2">
                 <UserAvatar avatarUrl={(podium[1] as any).avatar_url} name={(podium[1] as any).display_name} size={10} className="rounded-full" />
-                <p className="text-center text-xs font-semibold leading-tight line-clamp-1 max-w-[80px]">{(podium[1] as any).display_name}</p>
+                <div className="text-center">
+                  <p className="text-xs font-semibold leading-tight line-clamp-1 max-w-[80px]">{(podium[1] as any).display_name}</p>
+                  {votedTodayIds.has((podium[1] as any).id) && <p className="text-[9px] text-wc-green font-bold">✓ votou hoje</p>}
+                </div>
                 <p className="font-display text-sm text-muted-foreground">{(podium[1] as any).total_points} pts</p>
                 <div className={`w-full ${PODIUM_H[1]} ${PODIUM_BG[1]} rounded-t-xl flex items-start justify-center pt-2`}>
                   <span className="text-xl">🥈</span>
@@ -360,10 +392,13 @@ function LigaPage() {
                   <UserAvatar avatarUrl={(podium[0] as any).avatar_url} name={(podium[0] as any).display_name} size={14} className="rounded-full" />
                   <span className="absolute -top-2 -right-1 text-lg">👑</span>
                 </div>
-                <p className="text-center text-xs font-bold leading-tight line-clamp-1 max-w-[80px]">
-                  {(podium[0] as any).display_name}
-                  {(podium[0] as any).id === pool?.created_by && " 👑"}
-                </p>
+                <div className="text-center">
+                  <p className="text-xs font-bold leading-tight line-clamp-1 max-w-[80px]">
+                    {(podium[0] as any).display_name}
+                    {(podium[0] as any).id === pool?.created_by && " 👑"}
+                  </p>
+                  {votedTodayIds.has((podium[0] as any).id) && <p className="text-[9px] text-wc-green font-bold">✓ votou hoje</p>}
+                </div>
                 <p className="font-display text-base text-gold font-bold">{(podium[0] as any).total_points} pts</p>
                 <div className={`w-full ${PODIUM_H[0]} ${PODIUM_BG[0]} rounded-t-xl flex items-start justify-center pt-2 trophy-shine`}>
                   <span className="text-2xl">🥇</span>
@@ -374,7 +409,10 @@ function LigaPage() {
             {podium[2] && (
               <div className="flex flex-1 flex-col items-center gap-2">
                 <UserAvatar avatarUrl={(podium[2] as any).avatar_url} name={(podium[2] as any).display_name} size={10} className="rounded-full" />
-                <p className="text-center text-xs font-semibold leading-tight line-clamp-1 max-w-[80px]">{(podium[2] as any).display_name}</p>
+                <div className="text-center">
+                  <p className="text-xs font-semibold leading-tight line-clamp-1 max-w-[80px]">{(podium[2] as any).display_name}</p>
+                  {votedTodayIds.has((podium[2] as any).id) && <p className="text-[9px] text-wc-green font-bold">✓ votou hoje</p>}
+                </div>
                 <p className="font-display text-sm text-muted-foreground">{(podium[2] as any).total_points} pts</p>
                 <div className={`w-full ${PODIUM_H[2]} ${PODIUM_BG[2]} rounded-t-xl flex items-start justify-center pt-2`}>
                   <span className="text-xl">🥉</span>
@@ -439,6 +477,11 @@ function LigaPage() {
                         {isMe && <span className="shrink-0 text-[9px] font-bold text-wc-red uppercase tracking-wider">Tu</span>}
                         {r.id === pool?.created_by && (
                           <span className="shrink-0 text-[10px]" title="Criador do torneio">👑</span>
+                        )}
+                        {votedTodayIds.has(r.id) && (
+                          <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-wc-green/15 px-1.5 py-0.5 text-[9px] font-bold text-wc-green">
+                            ✓ votou hoje
+                          </span>
                         )}
                       </div>
                       <div className="mt-1 flex items-center gap-2">

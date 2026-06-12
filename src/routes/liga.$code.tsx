@@ -787,7 +787,7 @@ const BTTS_LABEL: Record<string, string> = { yes: "Sim", no: "Não" };
 const GOALS_LABEL: Record<string, string> = { over: "Mais", under: "Menos" };
 
 function MatchPredCard({ match, predictions, currentUserId }: { match: any; predictions: any[]; currentUserId: string }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const finished = match.status === "finished";
 
   return (

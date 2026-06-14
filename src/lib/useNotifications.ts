@@ -112,31 +112,7 @@ export function useNotifications() {
         });
       }
 
-      // ── 2. Resultados de jogos com previsões do utilizador ─────────────────
-      const seenResults = getStorage<Record<string, boolean>>(RESULT_KEY, {});
-
-      const { data: preds } = await supabase
-        .from("predictions")
-        .select("id, points, match:match_id(id, home_score, away_score, status, home:home_team_id(name), away:away_team_id(name))")
-        .eq("user_id", user!.id);
-
-      for (const p of (preds ?? [])) {
-        const match = (p as any).match;
-        if (!match || match.status !== "finished") continue;
-        if (seenResults[match.id]) continue;
-
-        notifications.push({
-          type: "result",
-          matchId: match.id,
-          home: match.home?.name ?? "Casa",
-          away: match.away?.name ?? "Fora",
-          homeScore: match.home_score ?? 0,
-          awayScore: match.away_score ?? 0,
-          pointsEarned: p.points ?? 0,
-        });
-      }
-
-      // ── 3. Ultrapassado no ranking global ──────────────────────────────────
+      // ── 2. Ultrapassado no ranking global ──────────────────────────────────
       const { data: myProfile } = await supabase
         .from("profiles").select("total_points").eq("id", user!.id).maybeSingle();
 

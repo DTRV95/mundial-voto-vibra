@@ -8,7 +8,7 @@ import { AvatarPicker, UserAvatar } from "@/components/AvatarPicker";
 import { toast } from "sonner";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { formatDate } from "@/lib/format";
-import { useNotifications, markChatRead, markResultsSeen, markRankSeen } from "@/lib/useNotifications";
+import { useNotifications, markChatRead, markRankSeen } from "@/lib/useNotifications";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({ meta: [{ title: "Perfil — Uma Geração" }] }),
@@ -260,25 +260,6 @@ function Perfil() {
                     )}
                   </div>
                 </Link>
-              );
-
-              if (notif.type === "result") return (
-                <button
-                  key={`result-${notif.matchId}`}
-                  onClick={() => { markResultsSeen([notif.matchId]); refetchNotifs(); }}
-                  className="w-full text-left overflow-hidden rounded-2xl border border-wc-green/30 bg-wc-green/5 hover:bg-wc-green/10 transition-smooth px-4 py-3 flex items-center justify-between gap-3"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Trophy className="h-4 w-4 text-wc-green shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Resultado</p>
-                      <p className="text-sm font-semibold truncate">{notif.home} {notif.homeScore}–{notif.awayScore} {notif.away}</p>
-                    </div>
-                  </div>
-                  <span className={`shrink-0 font-bold text-sm ${notif.pointsEarned > 0 ? "text-wc-green" : "text-muted-foreground"}`}>
-                    {notif.pointsEarned > 0 ? `+${notif.pointsEarned} pts` : "0 pts"}
-                  </span>
-                </button>
               );
 
               if (notif.type === "rank") return (

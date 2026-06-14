@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import logoSvg from "@/assets/logo.svg";
 import { useQuery } from "@tanstack/react-query";
 import { UserAvatar } from "@/components/AvatarPicker";
-import { useUnreadMessages } from "@/lib/useUnreadMessages";
+import { useNotifications } from "@/lib/useNotifications";
 
 const items = [
   { to: "/",        label: "Home",     icon: Home },
@@ -43,8 +43,8 @@ export function SideNav() {
     },
   });
 
-  const { data: unread } = useUnreadMessages();
-  const unreadCount = unread?.total ?? 0;
+  const { data: notifs } = useNotifications();
+  const unreadCount = notifs?.total ?? 0;
 
   return (
     <aside className="hidden md:flex fixed left-0 top-0 h-full w-56 flex-col border-r border-border bg-card z-40 shadow-elegant">

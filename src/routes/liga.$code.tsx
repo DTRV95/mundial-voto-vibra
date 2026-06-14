@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
@@ -232,6 +232,25 @@ function LigaPage() {
     },
     onError: (e: any) => toast.error(e.message ?? "Erro ao entrar."),
   });
+
+  const kickMember = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase
+        .from("pool_members")
+        .delete()
+        .eq("pool_id", pool!.id)
+        .eq("user_id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pool-ranking"] });
+      qc.invalidateQueries({ queryKey: ["pool-member"] });
+      toast.success("Membro removido do torneio.");
+    },
+    onError: () => toast.error("Erro ao remover membro."),
+  });
+
+  const isCreator = user?.id === pool?.created_by;
 
 function copyLink() {
     const url = window.location.href;
@@ -555,6 +574,19 @@ function copyLink() {
                       <div className="font-display text-lg leading-none text-gold">{r.total_points}</div>
                       <div className="text-[10px] text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</div>
                     </div>
+
+                    {/* Expulsar — só criador, nunca a si próprio */}
+                    {isCreator && !isMe && (
+                      <button
+                        onClick={() => {
+                          if (confirm(`Expulsar ${r.display_name} do torneio?`)) kickMember.mutate(r.id);
+                        }}
+                        className="shrink-0 rounded-lg p-1.5 text-muted-foreground/40 hover:bg-wc-red/10 hover:text-wc-red transition-smooth"
+                        title="Expulsar membro"
+                      >
+                        <UserX className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );

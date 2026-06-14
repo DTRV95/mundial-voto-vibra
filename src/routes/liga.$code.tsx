@@ -54,7 +54,7 @@ function LigaPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pools")
-        .select("id, name, code, created_by, prize")
+        .select("id, name, code, created_by, prize, created_at")
         .eq("code", code.toUpperCase())
         .maybeSingle();
       if (error) throw error;
@@ -170,7 +170,9 @@ function LigaPage() {
     queryKey: ["pool-group-preds", pool?.id],
     enabled: !!pool && !!isMember && ranking.length > 0,
     queryFn: async () => {
-      const since = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+      // Nunca mostrar jogos anteriores à criação da liga
+      const since = pool!.created_at && pool!.created_at > threeDaysAgo ? pool!.created_at : threeDaysAgo;
       const now = new Date().toISOString();
 
       const { data: matches } = await supabase

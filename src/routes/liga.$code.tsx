@@ -82,7 +82,7 @@ function LigaPage() {
     queryFn: async () => {
       const { data: members } = await supabase
         .from("pool_members")
-        .select("user_id, joined_at")
+        .select("user_id, start_points")
         .eq("pool_id", pool!.id);
 
       if (!members || members.length === 0) return [];
@@ -95,14 +95,18 @@ function LigaPage() {
         .in("id", userIds);
 
       return (profiles ?? [])
-        .map((profile) => ({
-          id: profile.id,
-          display_name: profile.display_name ?? "Adepto",
-          avatar_url: (profile as any).avatar_url ?? null,
-          total_points: profile.total_points ?? 0,
-          predictions_made: profile.predictions_made ?? 0,
-          predictions_correct: profile.predictions_correct ?? 0,
-        }))
+        .map((profile) => {
+          const member = members.find(m => m.user_id === profile.id);
+          const league_points = (profile.total_points ?? 0) - (member?.start_points ?? 0);
+          return {
+            id: profile.id,
+            display_name: profile.display_name ?? "Adepto",
+            avatar_url: (profile as any).avatar_url ?? null,
+            total_points: Math.max(0, league_points),
+            predictions_made: profile.predictions_made ?? 0,
+            predictions_correct: profile.predictions_correct ?? 0,
+          };
+        })
         .sort((a, b) => {
           if (b.total_points !== a.total_points) return b.total_points - a.total_points;
           const accA = a.predictions_made > 0 ? a.predictions_correct / a.predictions_made : 0;
@@ -203,9 +207,18 @@ function LigaPage() {
 
   const joinPool = useMutation({
     mutationFn: async () => {
+      // Busca pontos actuais para usar como ponto de partida na liga
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("total_points")
+        .eq("id", user!.id)
+        .maybeSingle();
+
+      const start_points = profile?.total_points ?? 0;
+
       const { error } = await supabase
         .from("pool_members")
-        .insert({ pool_id: pool!.id, user_id: user!.id });
+        .insert({ pool_id: pool!.id, user_id: user!.id, start_points });
       if (error?.code === "23505") return;
       if (error) throw error;
     },

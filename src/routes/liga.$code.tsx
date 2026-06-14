@@ -396,24 +396,6 @@ function copyLink() {
         </div>
       )}
 
-      {/* ── JOIN (autenticado, não membro) ───────────────────── */}
-      {user && isMember === false && (
-        <div className="mx-5 mt-5 md:mx-8 overflow-hidden rounded-2xl bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.35)" }}>
-          <div className="flex items-center justify-between gap-3 p-5 text-white">
-            <div>
-              <p className="font-semibold">Aceitas o desafio?</p>
-              <p className="text-sm text-white/80">Junta-te ao torneio e compete a partir de agora.</p>
-            </div>
-            <button
-              onClick={() => joinPool.mutate()}
-              disabled={joinPool.isPending}
-              className="shrink-0 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-wc-green disabled:opacity-50 transition-smooth hover:scale-[1.02]"
-            >
-              Entrar no Torneio
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ── O MEU RANKING (membro, fora do top 3) ────────────── */}
       {user && isMember && myRank >= 3 && ranking[myRank] && (

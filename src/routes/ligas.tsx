@@ -75,7 +75,9 @@ function Ligas() {
       if (error) throw error;
 
       // auto-entrar na liga
-      await supabase.from("pool_members").insert({ pool_id: pool.id, user_id: user!.id });
+      const { data: myProfile } = await supabase.from("profiles").select("total_points").eq("id", user!.id).maybeSingle();
+      const start_points = myProfile?.total_points ?? 0;
+      await supabase.from("pool_members").insert({ pool_id: pool.id, user_id: user!.id, start_points });
       return pool;
     },
     onSuccess: (pool: any) => {
@@ -97,9 +99,11 @@ function Ligas() {
         .maybeSingle();
       if (error || !pool) throw new Error("Liga não encontrada.");
 
+      const { data: myProfile } = await supabase.from("profiles").select("total_points").eq("id", user!.id).maybeSingle();
+      const start_points = myProfile?.total_points ?? 0;
       const { error: joinError } = await supabase
         .from("pool_members")
-        .insert({ pool_id: pool.id, user_id: user!.id });
+        .insert({ pool_id: pool.id, user_id: user!.id, start_points });
       if (joinError?.code === "23505") throw new Error("Já és membro deste torneio.");
       if (joinError) throw joinError;
       return pool;

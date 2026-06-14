@@ -233,13 +233,7 @@ function LigaPage() {
     onError: (e: any) => toast.error(e.message ?? "Erro ao entrar."),
   });
 
-  useEffect(() => {
-    if (user && pool && isMember === false && !joinPool.isPending && !joinPool.isSuccess) {
-      joinPool.mutate();
-    }
-  }, [user?.id, pool?.id, isMember, joinPool.isPending]);
-
-  function copyLink() {
+function copyLink() {
     const url = window.location.href;
     if (navigator.share) {
       navigator.share({ title: `Liga "${pool?.name}"`, text: "Junta-te ao meu torneio no Uma Geração 🏆", url });

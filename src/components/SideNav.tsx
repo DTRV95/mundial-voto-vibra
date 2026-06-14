@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import logoSvg from "@/assets/logo.svg";
 import { useQuery } from "@tanstack/react-query";
 import { UserAvatar } from "@/components/AvatarPicker";
+import { useUnreadMessages } from "@/lib/useUnreadMessages";
 
 const items = [
   { to: "/",        label: "Home",     icon: Home },
@@ -41,6 +42,9 @@ export function SideNav() {
       return data;
     },
   });
+
+  const { data: unread } = useUnreadMessages();
+  const unreadCount = unread?.total ?? 0;
 
   return (
     <aside className="hidden md:flex fixed left-0 top-0 h-full w-56 flex-col border-r border-border bg-card z-40 shadow-elegant">
@@ -112,7 +116,14 @@ export function SideNav() {
       {user ? (
         <div className="border-t border-border p-4 space-y-3">
           <div className="flex items-center gap-3">
-            <UserAvatar avatarUrl={profile?.avatar_url} name={profile?.display_name ?? displayName} size={9} className="rounded-full" />
+            <Link to="/perfil" className="relative shrink-0">
+              <UserAvatar avatarUrl={profile?.avatar_url} name={profile?.display_name ?? displayName} size={9} className="rounded-full" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-wc-red text-[9px] font-bold text-white ring-2 ring-background">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </Link>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold text-foreground">{displayName}</p>
               {isAdmin ? (

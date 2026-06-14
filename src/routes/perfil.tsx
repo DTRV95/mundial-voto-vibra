@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Star, Flame, Calendar, ImageIcon } from "lucide-react";
+import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Star, Flame, Calendar, ImageIcon, Bell } from "lucide-react";
 import { AvatarPicker, UserAvatar } from "@/components/AvatarPicker";
 import { toast } from "sonner";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { formatDate } from "@/lib/format";
+import { useUnreadMessages, markAsRead } from "@/lib/useUnreadMessages";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({ meta: [{ title: "Perfil — Uma Geração" }] }),
@@ -22,6 +23,8 @@ function Perfil() {
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", search: { redirect: "/perfil" } });
   }, [user, loading, navigate]);
+
+  const { data: unread, refetch: refetchUnread } = useUnreadMessages();
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id], enabled: !!user?.id,
@@ -324,6 +327,46 @@ function Perfil() {
           </ul>
         )}
       </section>
+
+      {/* Notificações */}
+      {unread && unread.leagues.length > 0 && (
+        <section className="mt-8">
+          <div className="mb-4 flex items-center gap-2">
+            <Bell className="h-4 w-4 text-wc-red" />
+            <h2 className="font-display text-xl">Notificações</h2>
+            <span className="rounded-full bg-wc-red px-2 py-0.5 text-[10px] font-bold text-white">{unread.total}</span>
+          </div>
+          <div className="space-y-3">
+            {unread.leagues.map(league => (
+              <Link
+                key={league.poolCode}
+                to="/liga/$code"
+                params={{ code: league.poolCode }}
+                onClick={() => { markAsRead(league.poolCode); refetchUnread(); }}
+                className="block overflow-hidden rounded-2xl border border-wc-red/30 bg-wc-red/5 hover:bg-wc-red/10 transition-smooth"
+              >
+                <div className="flex items-center justify-between px-4 py-2.5 border-b border-wc-red/20">
+                  <span className="text-sm font-bold">{league.poolName}</span>
+                  <span className="text-[10px] font-semibold text-wc-red">{league.messages.length} nova{league.messages.length !== 1 ? "s" : ""}</span>
+                </div>
+                <div className="divide-y divide-border/50">
+                  {league.messages.slice(0, 3).map(msg => (
+                    <div key={msg.id} className="px-4 py-2">
+                      <p className="text-[11px] font-semibold text-muted-foreground">{msg.sender}</p>
+                      <p className="text-sm truncate">{msg.body}</p>
+                    </div>
+                  ))}
+                  {league.messages.length > 3 && (
+                    <div className="px-4 py-2 text-[11px] text-muted-foreground">
+                      +{league.messages.length - 3} mensagens...
+                    </div>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Terminar sessão — visível em mobile */}
       <div className="mt-8 md:hidden">

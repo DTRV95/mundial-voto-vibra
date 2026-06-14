@@ -122,10 +122,10 @@ function Rankings() {
         .select("id, name, code");
       if (!pools || pools.length === 0) return [];
 
-      // Busca todos os membros e perfis de uma vez (evita N+1 queries)
+      // Busca membros com start_points
       const { data: allMembers } = await supabase
         .from("pool_members")
-        .select("pool_id, user_id");
+        .select("pool_id, user_id, start_points");
 
       if (!allMembers || allMembers.length === 0) return [];
 
@@ -139,7 +139,11 @@ function Rankings() {
 
       const results = pools.map(pool => {
         const members = allMembers.filter(m => m.pool_id === pool.id);
-        const total = members.reduce((s, m) => s + (profileMap[m.user_id] ?? 0), 0);
+        // Pontos da liga = total_points - start_points (pontos ganhos desde que entrou)
+        const total = members.reduce((s, m) => {
+          const league_pts = Math.max(0, (profileMap[m.user_id] ?? 0) - (m.start_points ?? 0));
+          return s + league_pts;
+        }, 0);
         return { ...pool, total_points: total, members: members.length };
       });
 

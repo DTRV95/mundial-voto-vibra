@@ -221,6 +221,86 @@ function Perfil() {
         </div>
       </div>
 
+      {/* Notificações */}
+      {notifs && notifs.total > 0 && (
+        <section className="mb-6">
+          <div className="mb-4 flex items-center gap-2">
+            <Bell className="h-4 w-4 text-wc-red" />
+            <h2 className="font-display text-xl">Notificações</h2>
+            <span className="rounded-full bg-wc-red px-2 py-0.5 text-[10px] font-bold text-white">{notifs.total}</span>
+          </div>
+          <div className="space-y-3">
+            {notifs.items.map((notif, i) => {
+              if (notif.type === "chat") return (
+                <Link
+                  key={`chat-${notif.poolCode}`}
+                  to="/liga/$code"
+                  params={{ code: notif.poolCode }}
+                  onClick={() => { markChatRead(notif.poolCode); refetchNotifs(); }}
+                  className="block overflow-hidden rounded-2xl border border-wc-red/30 bg-wc-red/5 hover:bg-wc-red/10 transition-smooth"
+                >
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-wc-red/20">
+                    <div className="flex items-center gap-2">
+                      <Bell className="h-3.5 w-3.5 text-wc-red" />
+                      <span className="text-sm font-bold">{notif.poolName}</span>
+                    </div>
+                    <span className="text-[10px] font-semibold text-wc-red">{notif.messages.length} mensagem{notif.messages.length !== 1 ? "s" : ""} nova{notif.messages.length !== 1 ? "s" : ""}</span>
+                  </div>
+                  <div className="divide-y divide-border/50">
+                    {notif.messages.slice(0, 3).map(msg => (
+                      <div key={msg.id} className="px-4 py-2">
+                        <p className="text-[11px] font-semibold text-muted-foreground">{msg.sender}</p>
+                        <p className="text-sm truncate">{msg.body}</p>
+                      </div>
+                    ))}
+                    {notif.messages.length > 3 && (
+                      <div className="px-4 py-2 text-[11px] text-muted-foreground">
+                        +{notif.messages.length - 3} mensagens...
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              );
+
+              if (notif.type === "result") return (
+                <button
+                  key={`result-${notif.matchId}`}
+                  onClick={() => { markResultsSeen([notif.matchId]); refetchNotifs(); }}
+                  className="w-full text-left overflow-hidden rounded-2xl border border-wc-green/30 bg-wc-green/5 hover:bg-wc-green/10 transition-smooth px-4 py-3 flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Trophy className="h-4 w-4 text-wc-green shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Resultado</p>
+                      <p className="text-sm font-semibold truncate">{notif.home} {notif.homeScore}–{notif.awayScore} {notif.away}</p>
+                    </div>
+                  </div>
+                  <span className={`shrink-0 font-bold text-sm ${notif.pointsEarned > 0 ? "text-wc-green" : "text-muted-foreground"}`}>
+                    {notif.pointsEarned > 0 ? `+${notif.pointsEarned} pts` : "0 pts"}
+                  </span>
+                </button>
+              );
+
+              if (notif.type === "rank") return (
+                <button
+                  key={`rank-${i}`}
+                  onClick={() => { markRankSeen(notif.currentRank); refetchNotifs(); }}
+                  className="w-full text-left overflow-hidden rounded-2xl border border-orange-400/30 bg-orange-400/5 hover:bg-orange-400/10 transition-smooth px-4 py-3 flex items-center gap-3"
+                >
+                  <Trophy className="h-4 w-4 text-orange-400 shrink-0" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Ranking global</p>
+                    <p className="text-sm font-semibold">Desceste do #{notif.previousRank}º para o #{notif.currentRank}º lugar</p>
+                  </div>
+                </button>
+              );
+
+              return null;
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Torneios */}
       {myPools.length > 0 && (
         <section className="mb-6">
@@ -327,86 +407,6 @@ function Perfil() {
           </ul>
         )}
       </section>
-
-      {/* Notificações */}
-      {notifs && notifs.total > 0 && (
-        <section className="mt-8">
-          <div className="mb-4 flex items-center gap-2">
-            <Bell className="h-4 w-4 text-wc-red" />
-            <h2 className="font-display text-xl">Notificações</h2>
-            <span className="rounded-full bg-wc-red px-2 py-0.5 text-[10px] font-bold text-white">{notifs.total}</span>
-          </div>
-          <div className="space-y-3">
-            {notifs.items.map((notif, i) => {
-              if (notif.type === "chat") return (
-                <Link
-                  key={`chat-${notif.poolCode}`}
-                  to="/liga/$code"
-                  params={{ code: notif.poolCode }}
-                  onClick={() => { markChatRead(notif.poolCode); refetchNotifs(); }}
-                  className="block overflow-hidden rounded-2xl border border-wc-red/30 bg-wc-red/5 hover:bg-wc-red/10 transition-smooth"
-                >
-                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-wc-red/20">
-                    <div className="flex items-center gap-2">
-                      <Bell className="h-3.5 w-3.5 text-wc-red" />
-                      <span className="text-sm font-bold">{notif.poolName}</span>
-                    </div>
-                    <span className="text-[10px] font-semibold text-wc-red">{notif.messages.length} mensagem{notif.messages.length !== 1 ? "s" : ""} nova{notif.messages.length !== 1 ? "s" : ""}</span>
-                  </div>
-                  <div className="divide-y divide-border/50">
-                    {notif.messages.slice(0, 3).map(msg => (
-                      <div key={msg.id} className="px-4 py-2">
-                        <p className="text-[11px] font-semibold text-muted-foreground">{msg.sender}</p>
-                        <p className="text-sm truncate">{msg.body}</p>
-                      </div>
-                    ))}
-                    {notif.messages.length > 3 && (
-                      <div className="px-4 py-2 text-[11px] text-muted-foreground">
-                        +{notif.messages.length - 3} mensagens...
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              );
-
-              if (notif.type === "result") return (
-                <button
-                  key={`result-${notif.matchId}`}
-                  onClick={() => { markResultsSeen([notif.matchId]); refetchNotifs(); }}
-                  className="w-full text-left overflow-hidden rounded-2xl border border-wc-green/30 bg-wc-green/5 hover:bg-wc-green/10 transition-smooth px-4 py-3 flex items-center justify-between gap-3"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Trophy className="h-4 w-4 text-wc-green shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Resultado</p>
-                      <p className="text-sm font-semibold truncate">{notif.home} {notif.homeScore}–{notif.awayScore} {notif.away}</p>
-                    </div>
-                  </div>
-                  <span className={`shrink-0 font-bold text-sm ${notif.pointsEarned > 0 ? "text-wc-green" : "text-muted-foreground"}`}>
-                    {notif.pointsEarned > 0 ? `+${notif.pointsEarned} pts` : "0 pts"}
-                  </span>
-                </button>
-              );
-
-              if (notif.type === "rank") return (
-                <button
-                  key={`rank-${i}`}
-                  onClick={() => { markRankSeen(notif.currentRank); refetchNotifs(); }}
-                  className="w-full text-left overflow-hidden rounded-2xl border border-orange-400/30 bg-orange-400/5 hover:bg-orange-400/10 transition-smooth px-4 py-3 flex items-center gap-3"
-                >
-                  <Trophy className="h-4 w-4 text-orange-400 shrink-0" />
-                  <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Ranking global</p>
-                    <p className="text-sm font-semibold">Desceste do #{notif.previousRank}º para o #{notif.currentRank}º lugar</p>
-                  </div>
-                </button>
-              );
-
-              return null;
-            })}
-          </div>
-        </section>
-      )}
 
       {/* Terminar sessão — visível em mobile */}
       <div className="mt-8 md:hidden">

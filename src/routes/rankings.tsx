@@ -372,7 +372,7 @@ function Rankings() {
           ) : (
             <div className="divide-y divide-border">
               {leagueRanking.map((league, i) => (
-                <div key={league.id} className="flex items-center gap-3 px-4 py-3">
+                <Link key={league.id} to="/liga/$code" params={{ code: league.code }} className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-smooth">
                   <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
                     i === 0 ? "bg-gold text-background" : i < 3 ? "bg-gold/30 text-gold" : "bg-secondary text-muted-foreground"
                   }`}>
@@ -389,7 +389,7 @@ function Rankings() {
                     <p className="font-display text-lg text-gold leading-none">{league.total_points}</p>
                     <p className="text-[10px] text-muted-foreground">pts totais</p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX, UserPlus, Search } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX, UserPlus, Search, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
@@ -40,6 +40,20 @@ function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg"
       {initials}
     </div>
   );
+}
+
+function RankTrend({ userId, poolId, currentRank }: { userId: string; poolId: string; currentRank: number }) {
+  const key = `liga_rank_prev_${poolId}_${userId}`;
+  const stored = typeof window !== "undefined" ? localStorage.getItem(key) : null;
+  const prev = stored ? Number(stored) : null;
+
+  useEffect(() => {
+    localStorage.setItem(key, String(currentRank));
+  }, [key, currentRank]);
+
+  if (!prev || prev === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/40" />;
+  if (currentRank < prev) return <TrendingUp className="h-3.5 w-3.5 text-green-400" />;
+  return <TrendingDown className="h-3.5 w-3.5 text-red-400" />;
 }
 
 function LigaPage() {
@@ -572,6 +586,11 @@ function copyLink() {
                         </div>
                         <span className="shrink-0 text-[10px] text-muted-foreground">{acc}%</span>
                       </div>
+                    </div>
+
+                    {/* Seta de tendência */}
+                    <div className="shrink-0">
+                      <RankTrend userId={r.id} poolId={pool!.id} currentRank={i + 1} />
                     </div>
 
                     {/* Pontos */}

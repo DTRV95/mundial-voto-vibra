@@ -9,17 +9,16 @@ import { useAuth } from "@/lib/useAuth";
 
 function RankTrend({ userId, currentRank }: { userId: string; currentRank: number }) {
   const key = `rank_prev_${userId}`;
-  const [prev, setPrev] = useState<number | null>(null);
+  const stored = typeof window !== "undefined" ? localStorage.getItem(key) : null;
+  const prev = stored ? Number(stored) : null;
 
   useEffect(() => {
-    const stored = localStorage.getItem(key);
-    if (stored) setPrev(Number(stored));
     localStorage.setItem(key, String(currentRank));
   }, [key, currentRank]);
 
-  if (!prev || prev === currentRank) return <Minus className="h-3 w-3 text-muted-foreground" />;
-  if (currentRank < prev) return <TrendingUp className="h-3 w-3 text-green-400" />;
-  return <TrendingDown className="h-3 w-3 text-red-400" />;
+  if (!prev || prev === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/40" />;
+  if (currentRank < prev) return <TrendingUp className="h-3.5 w-3.5 text-green-400" />;
+  return <TrendingDown className="h-3.5 w-3.5 text-red-400" />;
 }
 
 const PHASES = [
@@ -354,7 +353,7 @@ function Rankings() {
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{acc}%</td>
                     <td className="px-2 py-2.5 text-right">
-                      {isMe && user && <RankTrend userId={user.id} currentRank={i + 1} />}
+                      <RankTrend userId={r.id} currentRank={i + 1} />
                     </td>
                   </tr>
                 );

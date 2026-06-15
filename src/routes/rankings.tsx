@@ -42,14 +42,14 @@ export const Route = createFileRoute("/rankings")({
     links: [{ rel: "canonical", href: "https://mundial-voto-vibra.davidvilaverde.workers.dev/rankings" }],
   }),
   validateSearch: (search: Record<string, unknown>) => ({
-    tab: (search.tab as string) === "ligas" ? "ligas" : "individual",
+    tab: ["ligas", "jogos"].includes(search.tab as string) ? (search.tab as string) : "individual",
   }),
   component: Rankings,
 });
 
 function Rankings() {
   const search = useSearch({ from: "/rankings" });
-  const [tab, setTab] = useState<"individual" | "ligas">(search.tab as "individual" | "ligas");
+  const [tab, setTab] = useState<"individual" | "ligas" | "jogos">(search.tab as "individual" | "ligas" | "jogos");
   const [phase, setPhase] = useState<typeof PHASES[number]["key"]>("geral");
   const [showAll, setShowAll] = useState(false);
   const { user } = useAuth();
@@ -157,6 +157,41 @@ function Rankings() {
     },
   });
 
+  // Ranking por jogo
+  const { data: matchRanking = [] } = useQuery({
+    queryKey: ["match-ranking"],
+    enabled: tab === "jogos",
+    queryFn: async () => {
+      const { data: matches } = await supabase
+        .from("matches")
+        .select("id,kickoff_at,phase,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .eq("status", "finished")
+        .order("kickoff_at", { ascending: false })
+        .limit(20);
+      if (!matches || matches.length === 0) return [];
+
+      const results = await Promise.all(matches.map(async (m: any) => {
+        const { data: preds } = await supabase
+          .from("predictions")
+          .select("user_id, points")
+          .eq("match_id", m.id)
+          .gt("points", 0)
+          .order("points", { ascending: false })
+          .limit(5);
+        if (!preds || preds.length === 0) return { match: m, topScorers: [] };
+        const userIds = preds.map((p: any) => p.user_id);
+        const { data: profiles } = await supabase
+          .from("profiles").select("id,display_name,avatar_url").in("id", userIds);
+        const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
+        return {
+          match: m,
+          topScorers: preds.map((p: any) => ({ ...profileMap[p.user_id], points: p.points })).filter((p: any) => p.id),
+        };
+      }));
+      return results.filter(r => r.topScorers.length > 0);
+    },
+  });
+
   // Posição do utilizador autenticado — sempre mostrada no fundo
   const myEntry = rows.find(r => r.id === user?.id);
   const myRank  = myEntry ? rows.indexOf(myEntry) + 1 : null;
@@ -218,6 +253,16 @@ function Rankings() {
           }`}
         >
           <Shield className="h-3.5 w-3.5" /> Ligas
+        </button>
+        <button
+          onClick={() => setTab("jogos")}
+          className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold transition-smooth ${
+            tab === "jogos"
+              ? "border-wc-red bg-wc-red text-white"
+              : "border-border bg-card/60 text-muted-foreground hover:border-wc-red/40"
+          }`}
+        >
+          <Trophy className="h-3.5 w-3.5" /> Por Jogo
         </button>
       </div>
 
@@ -399,6 +444,49 @@ function Rankings() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── RANKING POR JOGO ───────────────────────────────── */}
+      {tab === "jogos" && (
+        <div className="space-y-4">
+          {matchRanking.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-card/70 p-10 text-center">
+              <Trophy className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
+              <p className="font-display text-lg">Ainda sem jogos terminados</p>
+            </div>
+          ) : matchRanking.map(({ match, topScorers }: any) => (
+            <div key={match.id} className="overflow-hidden rounded-2xl border border-border bg-card/70">
+              {/* Cabeçalho do jogo */}
+              <Link to="/jogo/$id" params={{ id: match.id }}
+                className="flex items-center justify-between px-4 py-3 border-b border-border/50 hover:bg-accent/50 transition-smooth"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs font-semibold truncate">{(match.home as any)?.name}</span>
+                  <span className="text-xs text-muted-foreground">vs</span>
+                  <span className="text-xs font-semibold truncate">{(match.away as any)?.name}</span>
+                </div>
+                <span className="shrink-0 text-[10px] text-muted-foreground ml-2">Ver jogo →</span>
+              </Link>
+              {/* Top 5 pontuadores */}
+              <div className="divide-y divide-border/50">
+                {topScorers.map((u: any, i: number) => (
+                  <Link key={u.id} to="/adepto/$id" params={{ id: u.id }}
+                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-accent/50 transition-smooth"
+                  >
+                    <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold ${
+                      i === 0 ? "bg-gold text-background" : i === 1 ? "bg-gold/30 text-gold" : i === 2 ? "bg-gold/15 text-gold" : "bg-secondary text-muted-foreground"
+                    }`}>
+                      {i < 3 ? ["🥇","🥈","🥉"][i] : i + 1}
+                    </span>
+                    <UserAvatar avatarUrl={u.avatar_url} name={u.display_name} size={6} className="rounded-full shrink-0" />
+                    <span className="flex-1 text-sm font-semibold truncate">{u.display_name}</span>
+                    <span className="shrink-0 font-display text-base text-gold">+{u.points} <span className="text-[10px] font-sans text-muted-foreground">pts</span></span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

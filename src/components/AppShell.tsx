@@ -5,6 +5,7 @@ import { SideNav } from "./SideNav";
 import { TopNav } from "./TopNav";
 import { Footer } from "./Footer";
 import { CookieBanner } from "./CookieBanner";
+import { OnboardingModal } from "./OnboardingModal";
 import { UserAvatar } from "./AvatarPicker";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { useNotifications } from "@/lib/useNotifications";
@@ -107,6 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Footer />
       </div>
       <BottomNav />
+      <OnboardingModal />
       <CookieBanner />
     </div>
   );

@@ -66,7 +66,9 @@ export function useNotifications() {
   return useQuery({
     queryKey: ["notifications", user?.id],
     enabled: !!user?.id,
-    refetchInterval: 60_000,
+    refetchInterval: 5 * 60_000, // 5 minutos
+    refetchOnWindowFocus: false,
+    staleTime: 2 * 60_000, // 2 minutos
     queryFn: async (): Promise<{ total: number; items: Notification[] }> => {
       const notifications: Notification[] = [];
 

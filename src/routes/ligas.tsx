@@ -26,8 +26,11 @@ function Ligas() {
   const qc = useQueryClient();
   const [newName, setNewName] = useState("");
   const [newPrize, setNewPrize] = useState("");
+  const [newEmoji, setNewEmoji] = useState("⚽");
   const [joinCode, setJoinCode] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const EMOJIS = ["⚽", "🍺", "👨‍👩‍👧", "💼", "🏆", "🎮", "🎓", "🏋️", "🎉", "🔥", "💪", "🤝", "🦁", "🐉", "🌍"];
 
   // Ligas onde o utilizador é membro
   const { data: myPools = [] } = useQuery({
@@ -36,7 +39,7 @@ function Ligas() {
     queryFn: async () => {
       const { data } = await supabase
         .from("pool_members")
-        .select("pool:pool_id(id, name, code, created_by, prize)")
+        .select("pool:pool_id(id, name, code, created_by, prize, emoji)")
         .eq("user_id", user!.id);
       return (data ?? []).map((r: any) => r.pool).filter(Boolean);
     },
@@ -61,7 +64,7 @@ function Ligas() {
   });
 
   const createPool = useMutation({
-    mutationFn: async ({ name, prize }: { name: string; prize: string }) => {
+    mutationFn: async ({ name, prize, emoji }: { name: string; prize: string; emoji: string }) => {
       let code = genCode();
       // garantir código único (retry simples)
       const { data: existing } = await supabase.from("pools").select("id").eq("code", code).maybeSingle();
@@ -69,7 +72,7 @@ function Ligas() {
 
       const { data: pool, error } = await supabase
         .from("pools")
-        .insert({ name, code, created_by: user!.id, prize: prize || null })
+        .insert({ name, code, created_by: user!.id, prize: prize || null, emoji })
         .select()
         .single();
       if (error) throw error;
@@ -83,6 +86,7 @@ function Ligas() {
     onSuccess: (pool: any) => {
       setNewName("");
       setNewPrize("");
+      setNewEmoji("⚽");
       qc.invalidateQueries({ queryKey: ["my-pools"] });
       toast.success("Torneio criado!");
       navigate({ to: "/liga/$code", params: { code: pool.code } });
@@ -187,7 +191,24 @@ function Ligas() {
         <h2 className="mb-3 font-display text-lg flex items-center gap-2">
           <Plus className="h-5 w-5 text-wc-red" /> Criar Torneio
         </h2>
-        <div className="space-y-2">
+        <div className="space-y-3">
+          {/* Emoji picker */}
+          <div>
+            <p className="mb-1.5 text-xs text-muted-foreground font-medium">Escolhe um ícone para o torneio</p>
+            <div className="flex flex-wrap gap-2">
+              {EMOJIS.map(e => (
+                <button
+                  key={e}
+                  type="button"
+                  onClick={() => setNewEmoji(e)}
+                  className={`h-9 w-9 rounded-xl text-xl transition-all ${newEmoji === e ? "bg-wc-red/15 ring-2 ring-wc-red scale-110" : "bg-secondary hover:bg-secondary/80"}`}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <input
             type="text"
             id="nome-torneio"
@@ -209,11 +230,11 @@ function Ligas() {
             />
           </div>
           <button
-            onClick={() => newName.trim() && createPool.mutate({ name: newName.trim(), prize: newPrize.trim() })}
+            onClick={() => newName.trim() && createPool.mutate({ name: newName.trim(), prize: newPrize.trim(), emoji: newEmoji })}
             disabled={!newName.trim() || createPool.isPending}
             className="w-full rounded-xl bg-wc-red py-2.5 text-sm font-bold text-white shadow-gold disabled:opacity-50"
           >
-            Criar Torneio
+            {newEmoji} Criar Torneio
           </button>
         </div>
       </div>
@@ -290,6 +311,7 @@ function Ligas() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
+                      {pool.emoji && <span className="text-2xl leading-none">{pool.emoji}</span>}
                       <Link to="/liga/$code" params={{ code: pool.code }}
                         className="font-display text-lg hover:text-wc-red transition-smooth">
                         {pool.name}

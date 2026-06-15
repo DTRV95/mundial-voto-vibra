@@ -70,7 +70,7 @@ function LigaPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pools")
-        .select("id, name, code, created_by, prize, created_at")
+        .select("id, name, code, created_by, prize, created_at, emoji")
         .eq("code", code.toUpperCase())
         .maybeSingle();
       if (error) throw error;
@@ -379,7 +379,10 @@ function copyLink() {
           </Link>
 
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Torneio Privado · {pool.code}</p>
-          <h1 className="font-display text-[clamp(2rem,8vw,3.5rem)] leading-none text-white">{pool.name}</h1>
+          <h1 className="font-display text-[clamp(2rem,8vw,3.5rem)] leading-none text-white flex items-center gap-3">
+            {(pool as any).emoji && <span className="text-[clamp(1.8rem,7vw,3rem)]">{(pool as any).emoji}</span>}
+            {pool.name}
+          </h1>
 
           {/* Stats strip */}
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">

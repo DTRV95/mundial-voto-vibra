@@ -122,7 +122,7 @@ function Rankings() {
     queryFn: async () => {
       const { data: pools } = await supabase
         .from("pools")
-        .select("id, name, code");
+        .select("id, name, code, emoji");
       if (!pools || pools.length === 0) return [];
 
       // Busca membros com start_points
@@ -429,7 +429,10 @@ function Rankings() {
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate">{league.name}</p>
+                    <p className="text-sm font-semibold truncate flex items-center gap-1.5">
+                      {(league as any).emoji && <span>{(league as any).emoji}</span>}
+                      {league.name}
+                    </p>
                     <div className="flex items-center gap-1 mt-0.5">
                       <Users2 className="h-3 w-3 text-muted-foreground" />
                       <span className="text-[10px] text-muted-foreground">{league.members} membro{league.members !== 1 ? "s" : ""}</span>

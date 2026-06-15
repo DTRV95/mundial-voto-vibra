@@ -63,6 +63,9 @@ function LigaPage() {
   const [copied, setCopied] = useState(false);
   const [addSearch, setAddSearch] = useState("");
   const [addTarget, setAddTarget] = useState<{ id: string; display_name: string; total_points: number; avatar_url: string | null } | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const EMOJIS = ["⚽", "🍺", "👨‍👩‍👧", "💼", "🏆", "🎮", "🎓", "🏋️", "🎉", "🔥", "💪", "🤝", "🦁", "🐉", "🌍"];
 
   const { data: pool, isLoading, isError } = useQuery({
     queryKey: ["pool", code],
@@ -249,6 +252,19 @@ function LigaPage() {
     onError: (e: any) => toast.error(e.message ?? "Erro ao entrar."),
   });
 
+  const updateEmoji = useMutation({
+    mutationFn: async (emoji: string) => {
+      const { error } = await supabase.from("pools").update({ emoji }).eq("id", pool!.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pool", code] });
+      setShowEmojiPicker(false);
+      toast.success("Ícone atualizado!");
+    },
+    onError: () => toast.error("Erro ao atualizar ícone."),
+  });
+
   const kickMember = useMutation({
     mutationFn: async (userId: string) => {
       const { error } = await supabase
@@ -380,9 +396,28 @@ function copyLink() {
 
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Torneio Privado · {pool.code}</p>
           <h1 className="font-display text-[clamp(2rem,8vw,3.5rem)] leading-none text-white flex items-center gap-3">
-            {(pool as any).emoji && <span className="text-[clamp(1.8rem,7vw,3rem)]">{(pool as any).emoji}</span>}
+            <button
+              onClick={() => isCreator && setShowEmojiPicker(p => !p)}
+              className={`text-[clamp(1.8rem,7vw,3rem)] leading-none ${isCreator ? "cursor-pointer hover:scale-110 transition-transform" : "cursor-default"}`}
+              title={isCreator ? "Mudar ícone" : undefined}
+            >
+              {(pool as any).emoji || "⚽"}
+            </button>
             {pool.name}
           </h1>
+          {isCreator && showEmojiPicker && (
+            <div className="mt-3 flex flex-wrap gap-2 p-3 rounded-2xl bg-black/30 backdrop-blur-sm w-fit">
+              {EMOJIS.map(e => (
+                <button
+                  key={e}
+                  onClick={() => updateEmoji.mutate(e)}
+                  className={`h-10 w-10 rounded-xl text-2xl transition-all hover:scale-110 ${(pool as any).emoji === e ? "bg-white/30 ring-2 ring-white" : "bg-white/10 hover:bg-white/20"}`}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Stats strip */}
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">

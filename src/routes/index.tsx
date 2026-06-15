@@ -76,7 +76,7 @@ function Home() {
       const poolIds = pools.map((p) => p.id);
       const { data: members } = await supabase
         .from("pool_members")
-        .select("pool_id, user_id")
+        .select("pool_id, user_id, start_points")
         .in("pool_id", poolIds);
 
       if (!members || members.length === 0) {
@@ -94,7 +94,8 @@ function Home() {
       const poolPoints: Record<string, number> = {};
       const poolMemberCount: Record<string, number> = {};
       for (const member of members) {
-        poolPoints[member.pool_id] = (poolPoints[member.pool_id] ?? 0) + (profileMap[member.user_id] ?? 0);
+        const leaguePts = Math.max(0, (profileMap[member.user_id] ?? 0) - (member.start_points ?? 0));
+        poolPoints[member.pool_id] = (poolPoints[member.pool_id] ?? 0) + leaguePts;
         poolMemberCount[member.pool_id] = (poolMemberCount[member.pool_id] ?? 0) + 1;
       }
 

@@ -435,22 +435,10 @@ function copyLink() {
       )}
 
 
-      {/* ── JOIN — não membro com convite ────────────────────── */}
+      {/* ── JOIN — não membro: acesso negado ─────────────────── */}
       {user && isMember === false && (
-        <div className="mx-5 mt-5 md:mx-8 overflow-hidden rounded-2xl bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.35)" }}>
-          <div className="flex items-center justify-between gap-3 p-5 text-white">
-            <div>
-              <p className="font-semibold">Foste convidado!</p>
-              <p className="text-sm text-white/80">Junta-te ao torneio e compete a partir de agora.</p>
-            </div>
-            <button
-              onClick={() => joinPool.mutate()}
-              disabled={joinPool.isPending}
-              className="shrink-0 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-wc-green disabled:opacity-50 transition-smooth hover:scale-[1.02]"
-            >
-              {joinPool.isPending ? "A entrar..." : "Entrar no Torneio"}
-            </button>
-          </div>
+        <div className="mx-5 mt-5 md:mx-8 overflow-hidden rounded-2xl border border-border bg-muted/40 p-5">
+          <p className="text-sm text-muted-foreground text-center">Este torneio é privado. Pede ao criador para te adicionar.</p>
         </div>
       )}
 

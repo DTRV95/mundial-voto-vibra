@@ -307,26 +307,31 @@ function JogoPage() {
             labels={{ yes: "Sim", no: "Não" }} total={community.length} />}
         </MarketCard>
 
-        <MarketCard title="Total de golos — 2.5" closed={closed} pts="2 pts">
-          <VoteOptions value={pred.total_25} disabled={closed}
-            options={[
-              { v: "over", label: "Mais de 2.5", pct: analysis?.prob_over25 },
-              { v: "under", label: "Menos de 2.5", pct: analysis?.prob_under25 },
-            ]}
-            onChange={(v) => set("total_25", v)} />
-          {showCommunity && <CommunityLine votes={community.map(c => c.total_25)}
-            labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
-        </MarketCard>
-
-        <MarketCard title="Total de golos — 3.5" closed={closed} pts="3 pts">
-          <VoteOptions value={pred.total_35} disabled={closed}
-            options={[
-              { v: "over", label: "Mais de 3.5", pct: analysis?.prob_over35 },
-              { v: "under", label: "Menos de 3.5", pct: analysis?.prob_under35 },
-            ]}
-            onChange={(v) => set("total_35", v)} />
-          {showCommunity && <CommunityLine votes={community.map(c => c.total_35)}
-            labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
+        <MarketCard title="Total de golos" closed={closed} pts="2–3 pts">
+          <div className="space-y-3">
+            <div>
+              <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">2.5 golos <span className="text-gold font-semibold">2 pts</span></p>
+              <VoteOptions value={pred.total_25} disabled={closed}
+                options={[
+                  { v: "over", label: "Mais de 2.5", pct: analysis?.prob_over25 },
+                  { v: "under", label: "Menos de 2.5", pct: analysis?.prob_under25 },
+                ]}
+                onChange={(v) => set("total_25", v)} />
+              {showCommunity && <CommunityLine votes={community.map(c => c.total_25)}
+                labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
+            </div>
+            <div className="border-t border-border/50 pt-3">
+              <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">3.5 golos <span className="text-gold font-semibold">3 pts</span></p>
+              <VoteOptions value={pred.total_35} disabled={closed}
+                options={[
+                  { v: "over", label: "Mais de 3.5", pct: analysis?.prob_over35 },
+                  { v: "under", label: "Menos de 3.5", pct: analysis?.prob_under35 },
+                ]}
+                onChange={(v) => set("total_35", v)} />
+              {showCommunity && <CommunityLine votes={community.map(c => c.total_35)}
+                labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
+            </div>
+          </div>
         </MarketCard>
 
         <MarketCard title="Resultado correto" closed={closed} pts="10 pts 🔥">

@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
-import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check } from "lucide-react";
+import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy } from "lucide-react";
+import { UserAvatar } from "@/components/AvatarPicker";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 
 export const Route = createFileRoute("/jogo/$id")({
@@ -63,6 +64,28 @@ function JogoPage() {
         .select("result_90,btts,total_25,total_35,double_chance,combo_15,combo_35,exact_home,exact_away")
         .eq("match_id", id);
       return data ?? [];
+    },
+  });
+
+  const { data: topScorers = [] } = useQuery({
+    queryKey: ["match-top-scorers", id],
+    enabled: !!match && (match as any).status === "finished",
+    queryFn: async () => {
+      const { data: preds } = await supabase
+        .from("predictions")
+        .select("user_id, points")
+        .eq("match_id", id)
+        .gt("points", 0)
+        .order("points", { ascending: false })
+        .limit(10);
+      if (!preds || preds.length === 0) return [];
+      const userIds = preds.map((p: any) => p.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, display_name, avatar_url")
+        .in("id", userIds);
+      const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
+      return preds.map((p: any) => ({ ...profileMap[p.user_id], points: p.points })).filter((p: any) => p.id);
     },
   });
 
@@ -352,6 +375,32 @@ function JogoPage() {
         </MarketCard>
 
       </section>
+
+      {/* Top pontuadores do jogo */}
+      {topScorers.length > 0 && (
+        <section className="mt-6">
+          <div className="mb-3 flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-gold" />
+            <h3 className="font-display text-lg">Melhores previsões</h3>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-border bg-card/70 divide-y divide-border/50">
+            {topScorers.map((u: any, i: number) => (
+              <Link key={u.id} to="/adepto/$id" params={{ id: u.id }}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-smooth"
+              >
+                <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
+                  i === 0 ? "bg-gold text-background" : i === 1 ? "bg-gold/40 text-gold" : i === 2 ? "bg-gold/20 text-gold" : "bg-secondary text-muted-foreground"
+                }`}>
+                  {i < 3 ? ["🥇","🥈","🥉"][i] : i + 1}
+                </span>
+                <UserAvatar avatarUrl={u.avatar_url} name={u.display_name} size={7} className="rounded-full shrink-0" />
+                <span className="flex-1 text-sm font-semibold truncate">{u.display_name}</span>
+                <span className="shrink-0 font-display text-lg text-gold">+{u.points} <span className="text-xs font-sans text-muted-foreground">pts</span></span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Save */}
       <div className="sticky bottom-20 md:bottom-6 mt-6">

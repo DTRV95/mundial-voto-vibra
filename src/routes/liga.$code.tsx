@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX, UserPlus, Search } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
@@ -47,6 +47,8 @@ function LigaPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
+  const [addSearch, setAddSearch] = useState("");
+  const [addTarget, setAddTarget] = useState<{ id: string; display_name: string; total_points: number; avatar_url: string | null } | null>(null);
 
   const { data: pool, isLoading, isError } = useQuery({
     queryKey: ["pool", code],
@@ -251,6 +253,42 @@ function LigaPage() {
   });
 
   const isCreator = user?.id === pool?.created_by;
+
+  const { data: searchResults = [] } = useQuery({
+    queryKey: ["user-search", addSearch],
+    enabled: addSearch.trim().length >= 2,
+    queryFn: async () => {
+      const memberIds = new Set(ranking.map((r: any) => r.id));
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, display_name, total_points, avatar_url")
+        .ilike("display_name", `%${addSearch.trim()}%`)
+        .order("total_points", { ascending: false })
+        .limit(8);
+      return (data ?? []).filter((u: any) => !memberIds.has(u.id));
+    },
+  });
+
+  const addMember = useMutation({
+    mutationFn: async ({ userId, startFromZero }: { userId: string; startFromZero: boolean }) => {
+      const { data: profile } = await supabase
+        .from("profiles").select("total_points").eq("id", userId).maybeSingle();
+      const start_points = startFromZero ? (profile?.total_points ?? 0) : 0;
+      const { error } = await supabase
+        .from("pool_members")
+        .insert({ pool_id: pool!.id, user_id: userId, start_points });
+      if (error?.code === "23505") throw new Error("Utilizador já é membro.");
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pool-ranking"] });
+      qc.invalidateQueries({ queryKey: ["pool-member"] });
+      setAddSearch("");
+      setAddTarget(null);
+      toast.success("Membro adicionado!");
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao adicionar membro."),
+  });
 
 function copyLink() {
     const url = window.location.href;
@@ -673,6 +711,86 @@ function copyLink() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ADICIONAR MEMBRO (só criador) ──────────────────────── */}
+      {isCreator && (
+        <div className="mx-5 mt-8 md:mx-8">
+          <div className="mb-3 flex items-center gap-2">
+            <UserPlus className="h-4 w-4 text-muted-foreground" />
+            <h2 className="font-display text-xl">Adicionar membro</h2>
+          </div>
+          <div className="rounded-2xl border border-border bg-card/70 p-4">
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Pesquisar utilizador pelo nome..."
+                value={addSearch}
+                onChange={e => setAddSearch(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-wc-red/40"
+              />
+            </div>
+            {addSearch.trim().length >= 2 && (
+              <div className="space-y-1">
+                {searchResults.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-3">Nenhum utilizador encontrado.</p>
+                ) : searchResults.map((u: any) => (
+                  <button
+                    key={u.id}
+                    onClick={() => setAddTarget(u)}
+                    className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-accent transition-smooth"
+                  >
+                    <UserAvatar avatarUrl={u.avatar_url} name={u.display_name} size={7} className="rounded-full shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{u.display_name}</p>
+                      <p className="text-[11px] text-muted-foreground">{u.total_points} pts globais</p>
+                    </div>
+                    <span className="shrink-0 text-xs text-wc-red font-semibold">Adicionar</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmação de pontos */}
+      {addTarget && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center px-4 pb-4 sm:pb-0">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setAddTarget(null)} />
+          <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-card shadow-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <UserAvatar avatarUrl={addTarget.avatar_url} name={addTarget.display_name} size={10} className="rounded-full" />
+              <div>
+                <p className="font-display text-lg">{addTarget.display_name}</p>
+                <p className="text-sm text-muted-foreground">{addTarget.total_points} pontos globais</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-5">Como deve entrar neste torneio?</p>
+            <div className="space-y-2">
+              <button
+                onClick={() => addMember.mutate({ userId: addTarget.id, startFromZero: false })}
+                disabled={addMember.isPending}
+                className="w-full rounded-2xl border-2 border-gold/40 bg-gold/10 px-4 py-3.5 text-left hover:bg-gold/20 transition-smooth disabled:opacity-50"
+              >
+                <p className="font-bold text-sm">Com os pontos que já tem</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Entra com {addTarget.total_points} pts — conta tudo desde o início do torneio</p>
+              </button>
+              <button
+                onClick={() => addMember.mutate({ userId: addTarget.id, startFromZero: true })}
+                disabled={addMember.isPending}
+                className="w-full rounded-2xl border-2 border-wc-red/40 bg-wc-red/10 px-4 py-3.5 text-left hover:bg-wc-red/20 transition-smooth disabled:opacity-50"
+              >
+                <p className="font-bold text-sm">A partir do zero</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Só contam os pontos feitos a partir de agora</p>
+              </button>
+            </div>
+            <button onClick={() => setAddTarget(null)} className="mt-3 w-full text-center text-xs text-muted-foreground hover:text-foreground transition-smooth">
+              Cancelar
+            </button>
           </div>
         </div>
       )}

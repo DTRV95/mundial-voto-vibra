@@ -44,7 +44,7 @@ function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg"
 
 function LigaPage() {
   const { code } = Route.useParams();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
   const [addSearch, setAddSearch] = useState("");
@@ -406,31 +406,9 @@ function copyLink() {
       </div>
 
       {/* ── CONVITE (não autenticado) ─────────────────────────── */}
-      {!user && (
-        <div className="mx-5 mt-5 md:mx-8 overflow-hidden rounded-2xl bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.35)" }}>
-          <div className="p-5 text-white">
-            <p className="font-display text-xl mb-1">Foste convidado!</p>
-            <p className="text-sm text-white/80 mb-4">
-              Cria uma conta gratuita em menos de 1 minuto, entra no torneio e começa a votar nos jogos do Mundial 2026.
-            </p>
-            <div className="flex flex-col gap-2">
-              <Link
-                to="/auth"
-                search={{ redirect: `/liga/${code}` } as any}
-                className="block w-full rounded-xl bg-white py-3 text-center text-sm font-bold text-wc-green shadow-elegant transition-smooth hover:scale-[1.01]"
-              >
-                Criar conta grátis e entrar no torneio
-              </Link>
-              <Link
-                to="/auth"
-                search={{ redirect: `/liga/${code}` } as any}
-                className="block w-full rounded-xl border border-white/30 py-2.5 text-center text-sm font-semibold text-white hover:bg-white/10 transition-smooth"
-              >
-                Já tenho conta — entrar
-              </Link>
-            </div>
-            <p className="mt-3 text-center text-[11px] text-white/60">Grátis. Sem apostas. Só diversão.</p>
-          </div>
+      {!user && !loading && (
+        <div className="mx-5 mt-5 md:mx-8 overflow-hidden rounded-2xl border border-border bg-muted/40 p-5">
+          <p className="text-sm text-muted-foreground text-center">Este torneio é privado. Faz <Link to="/auth" className="underline">login</Link> para verificar o teu acesso.</p>
         </div>
       )}
 

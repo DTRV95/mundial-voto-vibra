@@ -28,8 +28,14 @@ function Perfil() {
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id], enabled: !!user?.id,
+    staleTime: 0,
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("*").eq("id", user!.id).maybeSingle();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) console.error("Profile fetch error:", error);
       return data;
     },
   });

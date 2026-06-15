@@ -5,7 +5,11 @@ import { SideNav } from "./SideNav";
 import { TopNav } from "./TopNav";
 import { Footer } from "./Footer";
 import { CookieBanner } from "./CookieBanner";
+import { UserAvatar } from "./AvatarPicker";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
+import { useNotifications } from "@/lib/useNotifications";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Shield, HelpCircle } from "lucide-react";
 import logoSvg from "@/assets/logo.svg";
 
@@ -13,6 +17,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const isAdmin = useIsAdmin(user?.id);
   const loggedIn = !loading && !!user;
+  const { data: notifs } = useNotifications();
+  const unreadCount = notifs?.total ?? 0;
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile-avatar", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("avatar_url, display_name").eq("id", user!.id).maybeSingle();
+      return data;
+    },
+  });
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -63,8 +78,13 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             )}
             {user && !isAdmin && (
-              <Link to="/perfil" className="grid h-8 w-8 place-items-center rounded-full bg-muted font-display text-sm text-foreground">
-                {(user.user_metadata?.display_name ?? user.email ?? "U").charAt(0).toUpperCase()}
+              <Link to="/perfil" className="relative">
+                <UserAvatar avatarUrl={profile?.avatar_url} name={profile?.display_name ?? user.email ?? "U"} size={8} className="rounded-full" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-wc-red text-[9px] font-bold text-white ring-1 ring-background">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </Link>
             )}
             {!user && (

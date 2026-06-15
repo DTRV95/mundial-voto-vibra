@@ -270,7 +270,8 @@ function Rankings() {
             <p className="text-sm text-muted-foreground">Sê o primeiro a votar para subir ao topo.</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[480px] text-sm">
             <thead className="bg-secondary/50 text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-left">#</th>
@@ -357,6 +358,7 @@ function Rankings() {
               )}
             </tbody>
           </table>
+          </div>
         )}
       </div>}
 

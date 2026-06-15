@@ -10,9 +10,13 @@ import { CalendarClock, CheckCircle2 } from "lucide-react";
 export const Route = createFileRoute("/jogos")({
   head: () => ({
     meta: [
-      { title: "Jogos — Voz do Mundial" },
-      { name: "description", content: "Calendário completo dos jogos do Mundial. Filtra por dia ou fase e deixa as tuas previsões." },
+      { title: "Jogos do Mundial 2026 — Uma Geração" },
+      { name: "description", content: "Calendário completo dos jogos do Mundial 2026. Filtra por dia ou fase e deixa as tuas previsões antes do apito inicial." },
+      { property: "og:title", content: "Jogos do Mundial 2026 — Uma Geração" },
+      { property: "og:description", content: "Todos os jogos do Mundial 2026. Vota nas tuas previsões e compara com a comunidade." },
+      { property: "og:url", content: "https://mundial-voto-vibra.davidvilaverde.workers.dev/jogos" },
     ],
+    links: [{ rel: "canonical", href: "https://mundial-voto-vibra.davidvilaverde.workers.dev/jogos" }],
   }),
   component: Jogos,
 });

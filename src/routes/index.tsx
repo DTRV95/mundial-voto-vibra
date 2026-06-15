@@ -8,12 +8,31 @@ import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { useAuth } from "@/lib/useAuth";
 import trophyImg from "@/assets/trophy-hero.jpg";
 
+const SITE = "https://mundial-voto-vibra.davidvilaverde.workers.dev";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Uma Geração — Vota, compara e vibra com a comunidade" },
-      { name: "description", content: "Faz a tua previsão para cada jogo do Mundial, compara com a comunidade e compete nos rankings por fase." },
+      { name: "description", content: "Faz a tua previsão para cada jogo do Mundial 2026, compara com a comunidade e compete nos rankings por fase." },
+      { property: "og:title", content: "Uma Geração — Mundial 2026" },
+      { property: "og:description", content: "Faz as tuas previsões, compara com a comunidade e vibra com cada jogo do Mundial 2026." },
+      { property: "og:url", content: `${SITE}/` },
+      { property: "og:image", content: `${SITE}/og-image.png` },
     ],
+    links: [{ rel: "canonical", href: `${SITE}/` }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SportsOrganization",
+        "name": "Uma Geração",
+        "url": SITE,
+        "description": "Comunidade de previsões do Mundial 2026",
+        "sport": "Futebol",
+        "sameAs": ["https://instagram.com/umageracao2026"],
+      }),
+    }],
   }),
   component: Home,
 });

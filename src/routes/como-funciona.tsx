@@ -4,9 +4,13 @@ import { Trophy, Target, Star, Zap, Users, ChevronRight, HelpCircle } from "luci
 export const Route = createFileRoute("/como-funciona")({
   head: () => ({
     meta: [
-      { title: "Como Funciona — Uma Geração" },
-      { name: "description", content: "Aprende como funcionam as previsões, os pontos e os torneios do Uma Geração." },
+      { title: "Como Funciona — Uma Geração | Previsões Mundial 2026" },
+      { name: "description", content: "Aprende como funciona o sistema de previsões, pontuações e torneios privados do Uma Geração para o Mundial 2026." },
+      { property: "og:title", content: "Como Funciona — Uma Geração" },
+      { property: "og:description", content: "Guia completo sobre previsões, pontos e torneios privados do Mundial 2026." },
+      { property: "og:url", content: "https://mundial-voto-vibra.davidvilaverde.workers.dev/como-funciona" },
     ],
+    links: [{ rel: "canonical", href: "https://mundial-voto-vibra.davidvilaverde.workers.dev/como-funciona" }],
   }),
   component: ComoFunciona,
 });

@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Páginas públicas
+Allow: /jogos
+Allow: /rankings
+Allow: /noticias
+Allow: /como-funciona
+Allow: /grupos
+Allow: /premios
+
+# Páginas privadas — não indexar
+Disallow: /perfil
+Disallow: /admin
+Disallow: /auth
+
+Sitemap: https://mundial-voto-vibra.davidvilaverde.workers.dev/sitemap.xml

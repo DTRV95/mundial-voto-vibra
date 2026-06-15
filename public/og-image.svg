@@ -1,0 +1,45 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B1A1A;stop-opacity:1" />
+      <stop offset="55%" style="stop-color:#5C0F0F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a3e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="stripe" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="33%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="33%" style="stop-color:#CC0000;stop-opacity:1" />
+      <stop offset="66%" style="stop-color:#CC0000;stop-opacity:1" />
+      <stop offset="66%" style="stop-color:#006600;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#006600;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" />
+
+  <!-- Tricolor stripe bottom -->
+  <rect x="0" y="622" width="1200" height="8" fill="url(#stripe)" />
+
+  <!-- Trophy watermark -->
+  <text x="950" y="480" font-size="320" opacity="0.06" fill="white" font-family="serif">🏆</text>
+
+  <!-- Logo circle -->
+  <circle cx="140" cy="120" r="50" fill="white" fill-opacity="0.15" />
+  <text x="140" y="135" text-anchor="middle" font-size="40" fill="white">⚽</text>
+
+  <!-- App name -->
+  <text x="210" y="105" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="white" letter-spacing="2">UMA GERAÇÃO</text>
+  <text x="212" y="145" font-family="Arial, sans-serif" font-size="20" fill="white" fill-opacity="0.6" letter-spacing="6">MUNDIAL 2026</text>
+
+  <!-- Main headline -->
+  <text x="100" y="310" font-family="Georgia, serif" font-size="72" font-weight="bold" fill="white">Vota. Compara.</text>
+  <text x="100" y="400" font-family="Georgia, serif" font-size="72" font-weight="bold" fill="#D4AF37">Vibra.</text>
+
+  <!-- Subtitle -->
+  <text x="100" y="480" font-family="Arial, sans-serif" font-size="28" fill="white" fill-opacity="0.75">Faz as tuas previsões e compete com a comunidade</text>
+  <text x="100" y="520" font-family="Arial, sans-serif" font-size="28" fill="white" fill-opacity="0.75">de adeptos do Mundial 2026.</text>
+
+  <!-- URL -->
+  <text x="100" y="590" font-family="Arial, sans-serif" font-size="20" fill="white" fill-opacity="0.45">umageracao2026.com</text>
+</svg>

@@ -38,7 +38,8 @@ function PublicProfile() {
         .select("id,result_90,btts,total_25,total_35,exact_home,exact_away,points,created_at,match:match_id(kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
         .eq("user_id", id)
         .order("created_at", { ascending: false });
-      return (data ?? []).filter((p: any) => p.match && p.match.kickoff_at <= now);
+      // só mostra jogos que já começaram; se match for null (RLS) mostra na mesma
+      return (data ?? []).filter((p: any) => !p.match || p.match.kickoff_at <= now);
     },
   });
 
@@ -191,54 +192,35 @@ function PublicProfile() {
               const finished = match?.status === "finished";
               const scored = finished && p.points > 0;
               return (
-                <div key={p.id} className={`overflow-hidden rounded-2xl border ${scored ? "border-wc-green/30 bg-wc-green/5" : "border-border bg-card/70"}`}>
+                <div key={p.id} className={`overflow-hidden rounded-2xl border ${scored ? "border-wc-green/30 bg-wc-green/5" : finished ? "border-border bg-card/70" : "border-border/50 bg-card/40"}`}>
                   {/* Cabeçalho do jogo */}
                   <div className="flex items-center justify-between gap-2 px-4 py-2.5 border-b border-border/50">
                     <div className="flex items-center gap-2 min-w-0">
-                      <TeamBadge code={match.home?.code} flag={match.home?.flag} name={match.home?.name} size="sm" />
-                      <span className="text-xs font-semibold truncate">{match.home?.name}</span>
-                      {finished && (
-                        <span className="text-xs font-bold text-foreground shrink-0">{match.home_score}–{match.away_score}</span>
+                      {match ? (
+                        <>
+                          <TeamBadge code={match.home?.code} flag={match.home?.flag} name={match.home?.name} size="sm" />
+                          <span className="text-xs font-semibold truncate">{match.home?.name ?? "?"}</span>
+                          {finished && <span className="text-xs font-bold text-foreground shrink-0">{match.home_score}–{match.away_score}</span>}
+                          {!finished && <span className="text-[10px] text-muted-foreground shrink-0">vs</span>}
+                          <span className="text-xs font-semibold truncate">{match.away?.name ?? "?"}</span>
+                          <TeamBadge code={match.away?.code} flag={match.away?.flag} name={match.away?.name} size="sm" />
+                        </>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Jogo #{p.match_id?.slice(0, 6)}</span>
                       )}
-                      <span className="text-[10px] text-muted-foreground shrink-0">{finished ? "" : "vs"}</span>
-                      <span className="text-xs font-semibold truncate">{match.away?.name}</span>
-                      <TeamBadge code={match.away?.code} flag={match.away?.flag} name={match.away?.name} size="sm" />
                     </div>
-                    {finished && (
-                      <span className={`shrink-0 text-sm font-bold ${scored ? "text-wc-green" : "text-muted-foreground/50"}`}>
-                        {scored ? `+${p.points}` : "0 pts"}
-                      </span>
-                    )}
-                    {!finished && (
-                      <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">pendente</span>
-                    )}
+                    <span className={`shrink-0 font-display text-base font-bold ${scored ? "text-wc-green" : finished ? "text-muted-foreground/40" : "text-muted-foreground/40"}`}>
+                      {finished ? (scored ? `+${p.points} pts` : "0 pts") : "—"}
+                    </span>
                   </div>
-                  {/* Mercados apostados */}
+                  {/* Mercados */}
                   <div className="flex flex-wrap gap-1.5 px-4 py-2.5">
-                    {p.result_90 && (
-                      <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
-                        {RESULT_LABEL[p.result_90] ?? p.result_90}
-                      </span>
-                    )}
-                    {p.btts && (
-                      <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
-                        {BTTS_LABEL[p.btts] ?? p.btts}
-                      </span>
-                    )}
-                    {p.total_25 && (
-                      <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
-                        2.5 {GOALS_LABEL[p.total_25] ?? p.total_25}
-                      </span>
-                    )}
-                    {p.total_35 && (
-                      <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
-                        3.5 {GOALS_LABEL[p.total_35] ?? p.total_35}
-                      </span>
-                    )}
+                    {p.result_90 && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">{RESULT_LABEL[p.result_90] ?? p.result_90}</span>}
+                    {p.btts && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">{BTTS_LABEL[p.btts] ?? p.btts}</span>}
+                    {p.total_25 && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">2.5 {GOALS_LABEL[p.total_25] ?? p.total_25}</span>}
+                    {p.total_35 && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">3.5 {GOALS_LABEL[p.total_35] ?? p.total_35}</span>}
                     {p.exact_home != null && p.exact_away != null && (
-                      <span className="rounded-full bg-wc-blue/20 px-2 py-0.5 text-[10px] font-bold text-wc-blue">
-                        {p.exact_home}–{p.exact_away}
-                      </span>
+                      <span className="rounded-full bg-wc-blue/20 px-2 py-0.5 text-[10px] font-bold text-wc-blue">{p.exact_home}–{p.exact_away}</span>
                     )}
                   </div>
                 </div>

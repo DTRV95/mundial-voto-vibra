@@ -223,9 +223,14 @@ function PredictionsList({ predictions }: { predictions: any[] }) {
                     <span className="text-xs text-muted-foreground">Jogo sem dados</span>
                   )}
                 </div>
-                <span className={`shrink-0 font-display text-base font-bold ${scored ? "text-wc-green" : "text-muted-foreground/40"}`}>
-                  {finished ? (scored ? `+${p.points} pts` : "0 pts") : "—"}
-                </span>
+                {finished && (
+                  <span className={`shrink-0 text-sm font-bold ${scored ? "text-wc-green" : "text-muted-foreground/50"}`}>
+                    {scored ? `+${p.points}` : "0 pts"}
+                  </span>
+                )}
+                {!finished && (
+                  <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">pendente</span>
+                )}
               </div>
               <div className="flex flex-wrap gap-1.5 px-4 py-2.5">
                 {p.result_90 && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">{RESULT_LABEL[p.result_90] ?? p.result_90}</span>}

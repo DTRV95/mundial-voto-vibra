@@ -7,17 +7,17 @@ import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 
-function RankTrend({ userId, currentPoints }: { userId: string; currentPoints: number }) {
-  const key = `pts_prev_${userId}`;
+function RankTrend({ userId, currentRank }: { userId: string; currentRank: number }) {
+  const key = `rank_prev_${userId}`;
   const stored = typeof window !== "undefined" ? localStorage.getItem(key) : null;
   const prev = stored ? Number(stored) : null;
 
   useEffect(() => {
-    localStorage.setItem(key, String(currentPoints));
-  }, [key, currentPoints]);
+    localStorage.setItem(key, String(currentRank));
+  }, [key, currentRank]);
 
-  if (prev === null || prev === currentPoints) return <Minus className="h-3 w-3 text-muted-foreground/40" />;
-  if (currentPoints > prev) return <TrendingUp className="h-3.5 w-3.5 text-green-400" />;
+  if (prev === null || prev === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/40" />;
+  if (currentRank < prev) return <TrendingUp className="h-3.5 w-3.5 text-green-400" />;
   return <TrendingDown className="h-3.5 w-3.5 text-red-400" />;
 }
 
@@ -353,7 +353,7 @@ function Rankings() {
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{acc}%</td>
                     <td className="px-2 py-2.5 text-right">
-                      <RankTrend userId={r.id} currentPoints={r.points} />
+                      <RankTrend userId={r.id} currentRank={i + 1} />
                     </td>
                   </tr>
                 );
@@ -385,7 +385,7 @@ function Rankings() {
                       {myPosition.predictions_made > 0 ? Math.round((myPosition.predictions_correct / myPosition.predictions_made) * 100) : 0}%
                     </td>
                     <td className="px-2 py-2.5 text-right">
-                      {user && <RankTrend userId={user.id} currentPoints={myPosition.points} />}
+                      {user && <RankTrend userId={user.id} currentRank={myPosition.rank} />}
                     </td>
                   </tr>
                 </>

@@ -42,17 +42,17 @@ function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg"
   );
 }
 
-function RankTrend({ userId, poolId, currentPoints }: { userId: string; poolId: string; currentPoints: number }) {
-  const key = `liga_pts_prev_${poolId}_${userId}`;
+function RankTrend({ userId, poolId, currentRank }: { userId: string; poolId: string; currentRank: number }) {
+  const key = `liga_rank_prev_${poolId}_${userId}`;
   const stored = typeof window !== "undefined" ? localStorage.getItem(key) : null;
   const prev = stored ? Number(stored) : null;
 
   useEffect(() => {
-    localStorage.setItem(key, String(currentPoints));
-  }, [key, currentPoints]);
+    localStorage.setItem(key, String(currentRank));
+  }, [key, currentRank]);
 
-  if (prev === null || prev === currentPoints) return <Minus className="h-3 w-3 text-muted-foreground/40" />;
-  if (currentPoints > prev) return <TrendingUp className="h-3.5 w-3.5 text-green-400" />;
+  if (prev === null || prev === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/40" />;
+  if (currentRank < prev) return <TrendingUp className="h-3.5 w-3.5 text-green-400" />;
   return <TrendingDown className="h-3.5 w-3.5 text-red-400" />;
 }
 
@@ -628,7 +628,7 @@ function copyLink() {
 
                     {/* Seta de tendência */}
                     <div className="shrink-0">
-                      <RankTrend userId={r.id} poolId={pool!.id} currentPoints={r.total_points} />
+                      <RankTrend userId={r.id} poolId={pool!.id} currentRank={i + 1} />
                     </div>
 
                     {/* Pontos */}

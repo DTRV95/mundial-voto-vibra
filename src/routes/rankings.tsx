@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useSearch, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Trophy, TrendingUp, TrendingDown, Minus, Share2, Shield, Users2 } from "lucide-react";
@@ -7,17 +7,9 @@ import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 
-function RankTrend({ userId, currentRank }: { userId: string; currentRank: number }) {
-  const key = `rank_prev_${userId}`;
-  const stored = typeof window !== "undefined" ? localStorage.getItem(key) : null;
-  const prev = stored ? Number(stored) : null;
-
-  useEffect(() => {
-    localStorage.setItem(key, String(currentRank));
-  }, [key, currentRank]);
-
-  if (prev === null || prev === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/40" />;
-  if (currentRank < prev) return <TrendingUp className="h-3.5 w-3.5 text-green-400" />;
+function RankTrend({ currentRank, previousRank }: { currentRank: number; previousRank: number | null }) {
+  if (!previousRank || previousRank === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/40" />;
+  if (currentRank < previousRank) return <TrendingUp className="h-3.5 w-3.5 text-green-400" />;
   return <TrendingDown className="h-3.5 w-3.5 text-red-400" />;
 }
 
@@ -59,16 +51,18 @@ function Rankings() {
       if (phase === "geral") {
         const query = supabase
           .from("profiles")
-          .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct")
+          .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct,previous_rank")
           .order("total_points", { ascending: false });
         const { data } = showAll ? await query : await query.limit(5);
-        return (data ?? []).map((r) => ({
+        return (data ?? []).map((r, i) => ({
           id: r.id,
           display_name: r.display_name,
           avatar_url: (r as any).avatar_url,
           points: r.total_points,
           predictions_made: r.predictions_made,
           predictions_correct: r.predictions_correct,
+          previous_rank: (r as any).previous_rank ?? null,
+          current_rank: i + 1,
         }));
       }
 
@@ -202,7 +196,7 @@ function Rankings() {
       if (phase === "geral") {
         const { data: me } = await supabase
           .from("profiles")
-          .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct")
+          .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct,previous_rank")
           .eq("id", user!.id)
           .maybeSingle();
         if (!me) return null;
@@ -217,6 +211,7 @@ function Rankings() {
           points: me.total_points,
           predictions_made: me.predictions_made,
           predictions_correct: me.predictions_correct,
+          previous_rank: (me as any).previous_rank ?? null,
           rank: (count ?? 0) + 1,
         };
       }
@@ -353,7 +348,7 @@ function Rankings() {
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{acc}%</td>
                     <td className="px-2 py-2.5 text-right">
-                      <RankTrend userId={r.id} currentRank={i + 1} />
+                      <RankTrend currentRank={i + 1} previousRank={r.previous_rank} />
                     </td>
                   </tr>
                 );
@@ -385,7 +380,7 @@ function Rankings() {
                       {myPosition.predictions_made > 0 ? Math.round((myPosition.predictions_correct / myPosition.predictions_made) * 100) : 0}%
                     </td>
                     <td className="px-2 py-2.5 text-right">
-                      {user && <RankTrend userId={user.id} currentRank={myPosition.rank} />}
+                      {user && <RankTrend currentRank={myPosition.rank} previousRank={myPosition.previous_rank} />}
                     </td>
                   </tr>
                 </>

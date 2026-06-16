@@ -2,15 +2,15 @@ import { createFileRoute, Link, useSearch, useNavigate } from "@tanstack/react-r
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, TrendingUp, TrendingDown, Minus, Share2, Shield, Users2 } from "lucide-react";
+import { Trophy, ArrowUp, ArrowDown, Minus, Share2, Shield, Users2 } from "lucide-react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 
 function RankTrend({ currentRank, previousRank }: { currentRank: number; previousRank: number | null }) {
-  if (!previousRank || previousRank === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/40" />;
-  if (currentRank < previousRank) return <TrendingUp className="h-3.5 w-3.5 text-green-400" />;
-  return <TrendingDown className="h-3.5 w-3.5 text-red-400" />;
+  if (!previousRank || previousRank === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/30" />;
+  if (currentRank < previousRank) return <ArrowUp className="h-3 w-3 text-green-400" />;
+  return <ArrowDown className="h-3 w-3 text-red-400" />;
 }
 
 const PHASES = [
@@ -322,7 +322,6 @@ function Rankings() {
                 <th className="px-2 py-2 text-right">Pts</th>
                 <th className="px-2 py-2 text-right">Acertos</th>
                 <th className="px-2 py-2 text-right">%</th>
-                <th className="px-2 py-2 text-right"></th>
               </tr>
             </thead>
             <tbody>
@@ -342,14 +341,12 @@ function Rankings() {
                       <Link to="/adepto/$id" params={{ id: r.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
                         <UserAvatar avatarUrl={(r as any).avatar_url} name={r.display_name} size={7} className="rounded-full" />
                         <span className={`font-medium ${isMe ? "text-wc-red" : ""}`}>{r.display_name ?? "Adepto"}{isMe && " (tu)"}</span>
+                        <RankTrend currentRank={i + 1} previousRank={r.previous_rank} />
                       </Link>
                     </td>
                     <td className="px-2 py-2.5 text-right font-display text-gold">{r.points}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{acc}%</td>
-                    <td className="px-2 py-2.5 text-right">
-                      <RankTrend currentRank={i + 1} previousRank={r.previous_rank} />
-                    </td>
                   </tr>
                 );
               })}
@@ -358,7 +355,7 @@ function Rankings() {
               {!showAll && myPosition && (
                 <>
                   <tr className="border-t border-border">
-                    <td colSpan={5} className="px-3 py-1 text-center text-[10px] text-muted-foreground tracking-widest">
+                    <td colSpan={5} className="px-3 py-1 text-center text-[10px] text-muted-foreground tracking-widest" />
                       · · ·
                     </td>
                   </tr>
@@ -372,15 +369,13 @@ function Rankings() {
                       <Link to="/adepto/$id" params={{ id: myPosition.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
                         <UserAvatar avatarUrl={myPosition.avatar_url} name={myPosition.display_name} size={7} className="rounded-full" />
                         <span className="font-medium text-wc-red">{myPosition.display_name ?? "Tu"} (tu)</span>
+                        {user && <RankTrend currentRank={myPosition.rank} previousRank={myPosition.previous_rank} />}
                       </Link>
                     </td>
                     <td className="px-2 py-2.5 text-right font-display text-gold">{myPosition.points}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">{myPosition.predictions_correct}/{myPosition.predictions_made}</td>
                     <td className="px-2 py-2.5 text-right text-muted-foreground">
                       {myPosition.predictions_made > 0 ? Math.round((myPosition.predictions_correct / myPosition.predictions_made) * 100) : 0}%
-                    </td>
-                    <td className="px-2 py-2.5 text-right">
-                      {user && <RankTrend currentRank={myPosition.rank} previousRank={myPosition.previous_rank} />}
                     </td>
                   </tr>
                 </>

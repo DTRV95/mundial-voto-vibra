@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX, UserPlus, Search, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX, UserPlus, Search, ArrowUp, ArrowDown, Minus } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
@@ -51,9 +51,9 @@ function RankTrend({ userId, poolId, currentRank }: { userId: string; poolId: st
     localStorage.setItem(key, String(currentRank));
   }, [key, currentRank]);
 
-  if (prev === null || prev === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/40" />;
-  if (currentRank < prev) return <TrendingUp className="h-3.5 w-3.5 text-green-400" />;
-  return <TrendingDown className="h-3.5 w-3.5 text-red-400" />;
+  if (prev === null || prev === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/30" />;
+  if (currentRank < prev) return <ArrowUp className="h-3 w-3 text-green-400" />;
+  return <ArrowDown className="h-3 w-3 text-red-400" />;
 }
 
 function LigaPage() {
@@ -600,6 +600,7 @@ function copyLink() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <Link to="/adepto/$id" params={{ id: r.id }} className="truncate text-sm font-semibold hover:underline">{r.display_name}</Link>
+                        <RankTrend userId={r.id} poolId={pool!.id} currentRank={i + 1} />
                         {isMe && <span className="shrink-0 text-[9px] font-bold text-wc-red uppercase tracking-wider">Tu</span>}
                         {r.id === pool?.created_by && (
                           <span className="shrink-0 text-[10px]" title="Criador do torneio">👑</span>
@@ -624,11 +625,6 @@ function copyLink() {
                         </div>
                         <span className="shrink-0 text-[10px] text-muted-foreground">{acc}%</span>
                       </div>
-                    </div>
-
-                    {/* Seta de tendência */}
-                    <div className="shrink-0">
-                      <RankTrend userId={r.id} poolId={pool!.id} currentRank={i + 1} />
                     </div>
 
                     {/* Pontos */}

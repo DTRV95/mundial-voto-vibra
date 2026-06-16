@@ -37,9 +37,8 @@ function PublicProfile() {
         .from("predictions")
         .select("id,result_90,btts,total_25,total_35,exact_home,exact_away,points,created_at,match:match_id(kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
         .eq("user_id", id)
-        .lte("match.kickoff_at", now)
         .order("created_at", { ascending: false });
-      return (data ?? []).filter((p: any) => p.match?.kickoff_at <= now);
+      return (data ?? []).filter((p: any) => p.match && p.match.kickoff_at <= now);
     },
   });
 

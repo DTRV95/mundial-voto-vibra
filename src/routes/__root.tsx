@@ -224,8 +224,12 @@ function RootComponent() {
 
   useEffect(() => {
     // Quando um novo deploy acontece, os chunks JS antigos deixam de existir.
-    // O Vite emite este evento — fazemos reload silencioso para carregar os novos assets.
-    const handler = () => window.location.reload();
+    // Só fazemos reload se ainda não tentámos nesta sessão.
+    const handler = () => {
+      if (sessionStorage.getItem("preload_reloaded")) return;
+      sessionStorage.setItem("preload_reloaded", "1");
+      window.location.reload();
+    };
     window.addEventListener("vite:preloadError", handler);
     return () => window.removeEventListener("vite:preloadError", handler);
   }, []);

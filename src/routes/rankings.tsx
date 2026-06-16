@@ -340,8 +340,10 @@ function Rankings() {
                     <td className="px-3 py-2.5">
                       <Link to="/adepto/$id" params={{ id: r.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
                         <UserAvatar avatarUrl={(r as any).avatar_url} name={r.display_name} size={7} className="rounded-full" />
-                        <span className={`font-medium ${isMe ? "text-wc-red" : ""}`}>{r.display_name ?? "Adepto"}{isMe && " (tu)"}</span>
-                        <RankTrend currentRank={i + 1} previousRank={r.previous_rank} />
+                        <span className={`inline-flex items-center gap-0.5 font-medium ${isMe ? "text-wc-red" : ""}`}>
+                          {r.display_name ?? "Adepto"}{isMe && " (tu)"}
+                          <RankTrend currentRank={i + 1} previousRank={r.previous_rank} />
+                        </span>
                       </Link>
                     </td>
                     <td className="px-2 py-2.5 text-right font-display text-gold">{r.points}</td>
@@ -368,8 +370,10 @@ function Rankings() {
                     <td className="px-3 py-2.5">
                       <Link to="/adepto/$id" params={{ id: myPosition.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
                         <UserAvatar avatarUrl={myPosition.avatar_url} name={myPosition.display_name} size={7} className="rounded-full" />
-                        <span className="font-medium text-wc-red">{myPosition.display_name ?? "Tu"} (tu)</span>
-                        {user && <RankTrend currentRank={myPosition.rank} previousRank={myPosition.previous_rank} />}
+                        <span className="inline-flex items-center gap-0.5 font-medium text-wc-red">
+                          {myPosition.display_name ?? "Tu"} (tu)
+                          {user && <RankTrend currentRank={myPosition.rank} previousRank={myPosition.previous_rank} />}
+                        </span>
                       </Link>
                     </td>
                     <td className="px-2 py-2.5 text-right font-display text-gold">{myPosition.points}</td>

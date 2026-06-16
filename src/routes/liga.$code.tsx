@@ -599,8 +599,10 @@ function copyLink() {
                     {/* Nome + barra de progresso */}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <Link to="/adepto/$id" params={{ id: r.id }} className="truncate text-sm font-semibold hover:underline">{r.display_name}</Link>
-                        <RankTrend userId={r.id} poolId={pool!.id} currentRank={i + 1} />
+                        <span className="inline-flex items-center gap-0.5 min-w-0">
+                          <Link to="/adepto/$id" params={{ id: r.id }} className="truncate text-sm font-semibold hover:underline">{r.display_name}</Link>
+                          <RankTrend userId={r.id} poolId={pool!.id} currentRank={i + 1} />
+                        </span>
                         {isMe && <span className="shrink-0 text-[9px] font-bold text-wc-red uppercase tracking-wider">Tu</span>}
                         {r.id === pool?.created_by && (
                           <span className="shrink-0 text-[10px]" title="Criador do torneio">👑</span>

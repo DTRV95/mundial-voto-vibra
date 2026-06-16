@@ -357,7 +357,7 @@ function Rankings() {
               {!showAll && myPosition && (
                 <>
                   <tr className="border-t border-border">
-                    <td colSpan={5} className="px-3 py-1 text-center text-[10px] text-muted-foreground tracking-widest" />
+                    <td colSpan={5} className="px-3 py-1 text-center text-[10px] text-muted-foreground tracking-widest">
                       · · ·
                     </td>
                   </tr>

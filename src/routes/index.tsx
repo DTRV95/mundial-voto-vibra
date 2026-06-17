@@ -125,6 +125,32 @@ function Home() {
     },
   });
 
+  const { data: myDivision } = useQuery({
+    queryKey: ["my-division-home", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data: me } = await supabase
+        .from("profiles")
+        .select("total_points")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (!me) return null;
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gt("total_points", me.total_points ?? 0);
+      const rank = (count ?? 0) + 1;
+      const DIVISIONS = [
+        { label: "1ª Liga",            emoji: "🏆", min: 1,  max: 5,   border: "border-cyan-400/40",    bg: "bg-cyan-400/10",    text: "text-cyan-400" },
+        { label: "2ª Liga",            emoji: "⚽", min: 6,  max: 15,  border: "border-yellow-400/40",  bg: "bg-yellow-400/10",  text: "text-yellow-400" },
+        { label: "Distrital",          emoji: "🟡", min: 16, max: 30,  border: "border-slate-400/40",   bg: "bg-slate-400/10",   text: "text-slate-400" },
+        { label: "Liga do Zé Povinho", emoji: "🟢", min: 31, max: Infinity, border: "border-green-700/40", bg: "bg-green-700/10", text: "text-green-600" },
+      ];
+      const div = DIVISIONS.find(d => rank >= d.min && rank <= d.max) ?? DIVISIONS[3];
+      return { rank, points: me.total_points ?? 0, ...div };
+    },
+  });
+
   const myLeaderEntry = topLeaders.find((u: any) => u.id === user?.id);
   const { data: myLeaderRank } = useQuery({
     queryKey: ["my-rank-home", user?.id],
@@ -338,6 +364,23 @@ function Home() {
               </Link>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ===================== DIVISÃO DO UTILIZADOR ===================== */}
+      {user && myDivision && (
+        <div className="mx-5 mt-4 md:mx-8">
+          <Link to="/rankings" search={{ tab: "divisoes" } as any}
+            className={`flex items-center gap-4 rounded-2xl border ${myDivision.border} ${myDivision.bg} px-5 py-4 transition-smooth hover:opacity-90`}
+          >
+            <span className="text-4xl">{myDivision.emoji}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">A tua divisão</p>
+              <p className={`font-display text-xl leading-none ${myDivision.text}`}>{myDivision.label}</p>
+              <p className="text-xs text-muted-foreground mt-1">#{myDivision.rank}º global · {myDivision.points} pts</p>
+            </div>
+            <ArrowRight className={`h-4 w-4 shrink-0 ${myDivision.text}`} />
+          </Link>
         </div>
       )}
 

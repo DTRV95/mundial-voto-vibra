@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, ArrowRight, LogIn } from "lucide-react";
+import { Trophy, LogIn } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = (createFileRoute as any)("/entrar/$code")({
@@ -45,12 +45,14 @@ function EntrarPage() {
     },
   });
 
-  // Auto-redirect if already a member
+  // Auto-join and redirect once we know the user is logged in and not yet a member
   useEffect(() => {
     if (isMember) {
       navigate({ to: "/liga/$code", params: { code: code.toUpperCase() } });
+    } else if (user && pool && isMember === false && !joinPool.isPending && !joinPool.isSuccess) {
+      joinPool.mutate();
     }
-  }, [isMember, code, navigate]);
+  }, [isMember, user, pool, code, navigate]);
 
   const joinPool = useMutation({
     mutationFn: async () => {
@@ -163,31 +165,11 @@ function EntrarPage() {
               Precisas de uma conta para entrar no torneio. É grátis e rápido!
             </p>
           </div>
-        ) : memberLoading ? (
-          <div className="flex justify-center py-4">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-wc-red border-t-transparent" />
-          </div>
         ) : (
-          // Utilizador autenticado — botão de entrar
-          <div className="space-y-3">
-            <button
-              onClick={() => joinPool.mutate()}
-              disabled={joinPool.isPending}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-wc-red px-5 py-4 text-base font-bold text-white shadow-gold transition-smooth hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:scale-100"
-            >
-              {joinPool.isPending ? (
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              ) : (
-                <>
-                  <Trophy className="h-5 w-5" />
-                  Entrar no torneio
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-            <p className="text-center text-xs text-muted-foreground">
-              Os teus pontos a partir de agora contam para a classificação desta liga.
-            </p>
+          // Utilizador autenticado — a entrar automaticamente
+          <div className="flex flex-col items-center gap-3 py-4">
+            <div className="h-7 w-7 animate-spin rounded-full border-2 border-wc-red border-t-transparent" />
+            <p className="text-sm text-muted-foreground">A entrar no torneio…</p>
           </div>
         )}
       </div>

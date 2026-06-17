@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Shield, HelpCircle } from "lucide-react";
 import logoSvg from "@/assets/logo.svg";
+import { FeedbackModal } from "./FeedbackModal";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -110,6 +111,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <BottomNav />
       <OnboardingModal />
       <CookieBanner />
+      {loggedIn && <FeedbackModal />}
     </div>
   );
 }

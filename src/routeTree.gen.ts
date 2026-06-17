@@ -28,6 +28,7 @@ import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as NoticiasIdRouteImport } from './routes/noticias.$id'
 import { Route as LigaCodeRouteImport } from './routes/liga.$code'
 import { Route as JogoIdRouteImport } from './routes/jogo.$id'
+import { Route as EntrarCodeRouteImport } from './routes/entrar.$code'
 import { Route as AdeptoIdRouteImport } from './routes/adepto.$id'
 
 const TermosRoute = TermosRouteImport.update({
@@ -125,6 +126,11 @@ const JogoIdRoute = JogoIdRouteImport.update({
   path: '/jogo/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntrarCodeRoute = EntrarCodeRouteImport.update({
+  id: '/entrar/$code',
+  path: '/entrar/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdeptoIdRoute = AdeptoIdRouteImport.update({
   id: '/adepto/$id',
   path: '/adepto/$id',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
   '/adepto/$id': typeof AdeptoIdRoute
+  '/entrar/$code': typeof EntrarCodeRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
   '/noticias/$id': typeof NoticiasIdRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
   '/adepto/$id': typeof AdeptoIdRoute
+  '/entrar/$code': typeof EntrarCodeRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
   '/noticias/$id': typeof NoticiasIdRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
   '/adepto/$id': typeof AdeptoIdRoute
+  '/entrar/$code': typeof EntrarCodeRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
   '/noticias/$id': typeof NoticiasIdRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/suporte'
     | '/termos'
     | '/adepto/$id'
+    | '/entrar/$code'
     | '/jogo/$id'
     | '/liga/$code'
     | '/noticias/$id'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/suporte'
     | '/termos'
     | '/adepto/$id'
+    | '/entrar/$code'
     | '/jogo/$id'
     | '/liga/$code'
     | '/noticias/$id'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/suporte'
     | '/termos'
     | '/adepto/$id'
+    | '/entrar/$code'
     | '/jogo/$id'
     | '/liga/$code'
     | '/noticias/$id'
@@ -284,6 +296,7 @@ export interface RootRouteChildren {
   SuporteRoute: typeof SuporteRoute
   TermosRoute: typeof TermosRoute
   AdeptoIdRoute: typeof AdeptoIdRoute
+  EntrarCodeRoute: typeof EntrarCodeRoute
   JogoIdRoute: typeof JogoIdRoute
   LigaCodeRoute: typeof LigaCodeRoute
   NoticiasIdRoute: typeof NoticiasIdRoute
@@ -425,6 +438,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JogoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entrar/$code': {
+      id: '/entrar/$code'
+      path: '/entrar/$code'
+      fullPath: '/entrar/$code'
+      preLoaderRoute: typeof EntrarCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/adepto/$id': {
       id: '/adepto/$id'
       path: '/adepto/$id'
@@ -452,6 +472,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuporteRoute: SuporteRoute,
   TermosRoute: TermosRoute,
   AdeptoIdRoute: AdeptoIdRoute,
+  EntrarCodeRoute: EntrarCodeRoute,
   JogoIdRoute: JogoIdRoute,
   LigaCodeRoute: LigaCodeRoute,
   NoticiasIdRoute: NoticiasIdRoute,

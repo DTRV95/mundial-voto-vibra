@@ -16,7 +16,7 @@ type Ratings = Record<typeof QUESTIONS[number]["key"], number>;
 
 const STORAGE_KEY = "feedback_done";
 // Show after 3 minutes, but only if not already submitted
-const DELAY_MS = 1 * 60 * 1000;
+const DELAY_MS = 30 * 1000;
 
 export function FeedbackModal() {
   const { user } = useAuth();

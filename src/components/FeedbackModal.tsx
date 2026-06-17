@@ -75,10 +75,10 @@ export function FeedbackModal() {
             className="absolute right-4 top-4 rounded-full bg-white/10 p-1.5 text-white/60 hover:text-white transition-smooth">
             <X className="h-4 w-4" />
           </button>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Uma mensagem nossa</p>
-          <h2 className="font-display text-2xl text-white leading-tight">Precisamos de ti 💛</h2>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">A tua opinião importa</p>
+          <h2 className="font-display text-2xl text-white leading-tight">Ajuda-nos a melhorar</h2>
           <p className="text-sm text-white/75 mt-2 leading-relaxed">
-            Estamos a construir isto de raiz e cada pessoa que experimenta ajuda-nos a melhorar. O teu olhar detecta o que nós já não conseguimos ver. Juntos, chegamos mais longe.
+            O Uma Geração está em constante evolução e a tua experiência é a nossa bússola. Com o teu feedback conseguimos identificar o que falha e o que pode ser melhor. Obrigado por fazeres parte disto.
           </p>
         </div>
 

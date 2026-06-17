@@ -16,7 +16,7 @@ type Ratings = Record<typeof QUESTIONS[number]["key"], number>;
 
 const STORAGE_KEY = "feedback_done";
 // Show after 3 minutes, but only if not already submitted
-const DELAY_MS = 3 * 60 * 1000;
+const DELAY_MS = 1 * 60 * 1000;
 
 export function FeedbackModal() {
   const { user } = useAuth();
@@ -26,10 +26,11 @@ export function FeedbackModal() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
+    if (!user) return;
     if (localStorage.getItem(STORAGE_KEY)) return;
     const t = setTimeout(() => setVisible(true), DELAY_MS);
     return () => clearTimeout(t);
-  }, []);
+  }, [user?.id]);
 
   function dismiss() {
     setVisible(false);

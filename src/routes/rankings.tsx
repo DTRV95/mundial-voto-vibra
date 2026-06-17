@@ -306,12 +306,19 @@ function Rankings() {
                 <div className="divide-y divide-border/50">
                   {members.map((u, i) => {
                     const isMe = u.id === user?.id;
+                    const isTop3 = i < 3;
+                    const isBottom3 = i >= members.length - 3 && members.length > 3;
                     return (
                       <Link key={u.id} to="/adepto/$id" params={{ id: u.id }}
-                        className={`flex items-center gap-3 px-4 py-2.5 hover:bg-accent/50 transition-smooth ${isMe ? div.bg : ""}`}
+                        className={`flex items-center gap-3 px-4 py-2.5 hover:bg-accent/50 transition-smooth ${
+                          isMe ? div.bg : isTop3 ? "bg-wc-green/5" : isBottom3 ? "bg-wc-red/5" : ""
+                        }`}
                       >
                         <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
-                          i === 0 ? `bg-gradient-to-b ${div.color} text-white` : "bg-secondary text-muted-foreground"
+                          i === 0 ? `bg-gradient-to-b ${div.color} text-white` :
+                          isTop3 ? "bg-wc-green/20 text-wc-green" :
+                          isBottom3 ? "bg-wc-red/20 text-wc-red" :
+                          "bg-secondary text-muted-foreground"
                         }`}>
                           {i === 0 ? <Crown className="h-3.5 w-3.5" /> : i + 1}
                         </span>

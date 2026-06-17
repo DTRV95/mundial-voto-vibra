@@ -2,7 +2,7 @@ import { createFileRoute, Link, useSearch, useNavigate } from "@tanstack/react-r
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, ArrowUp, ArrowDown, Minus, Share2, Shield, Users2 } from "lucide-react";
+import { Trophy, ArrowUp, ArrowDown, Minus, Share2, Shield, Users2, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
@@ -33,14 +33,25 @@ export const Route = createFileRoute("/rankings")({
     links: [{ rel: "canonical", href: "https://mundial-voto-vibra.davidvilaverde.workers.dev/rankings" }],
   }),
   validateSearch: (search: Record<string, unknown>) => ({
-    tab: ["ligas", "jogos"].includes(search.tab as string) ? (search.tab as string) : "individual",
+    tab: ["ligas", "jogos", "divisoes"].includes(search.tab as string) ? (search.tab as string) : "individual",
   }),
   component: Rankings,
 });
 
+const DIVISIONS = [
+  { key: "diamante", label: "Diamante", emoji: "💎", min: 1,  max: 5,   color: "from-cyan-400 to-blue-500",   border: "border-cyan-400/40",   bg: "bg-cyan-400/10",   text: "text-cyan-400" },
+  { key: "ouro",     label: "Ouro",     emoji: "🥇", min: 6,  max: 15,  color: "from-yellow-400 to-amber-500", border: "border-gold/40",       bg: "bg-gold/10",       text: "text-gold" },
+  { key: "prata",    label: "Prata",    emoji: "🥈", min: 16, max: 30,  color: "from-slate-300 to-slate-500",  border: "border-slate-400/40",  bg: "bg-slate-400/10",  text: "text-slate-400" },
+  { key: "bronze",   label: "Bronze",   emoji: "🥉", min: 31, max: Infinity, color: "from-orange-700 to-amber-800", border: "border-orange-700/40", bg: "bg-orange-700/10", text: "text-orange-600" },
+] as const;
+
+function getDivision(rank: number) {
+  return DIVISIONS.find(d => rank >= d.min && rank <= d.max) ?? DIVISIONS[3];
+}
+
 function Rankings() {
   const search = useSearch({ from: "/rankings" });
-  const [tab, setTab] = useState<"individual" | "ligas" | "jogos">(search.tab as "individual" | "ligas" | "jogos");
+  const [tab, setTab] = useState<"individual" | "ligas" | "jogos" | "divisoes">(search.tab as any);
   const [phase, setPhase] = useState<typeof PHASES[number]["key"]>("geral");
   const [showAll, setShowAll] = useState(false);
   const { user } = useAuth();
@@ -219,6 +230,23 @@ function Rankings() {
     },
   });
 
+  // Query para divisões — todos os utilizadores ordenados por pontos
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ["all-users-ranking"],
+    enabled: tab === "divisoes",
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id,display_name,avatar_url,total_points,previous_rank")
+        .order("total_points", { ascending: false });
+      return (data ?? []).map((r, i) => ({
+        ...r,
+        rank: i + 1,
+        division: getDivision(i + 1),
+      }));
+    },
+  });
+
   return (
     <div className="px-5 pt-6">
       <header className="mb-5">
@@ -257,6 +285,16 @@ function Rankings() {
           }`}
         >
           <Trophy className="h-3.5 w-3.5" /> Por Jogo
+        </button>
+        <button
+          onClick={() => setTab("divisoes")}
+          className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold transition-smooth ${
+            tab === "divisoes"
+              ? "border-wc-red bg-wc-red text-white"
+              : "border-border bg-card/60 text-muted-foreground hover:border-wc-red/40"
+          }`}
+        >
+          💎 Divisões
         </button>
       </div>
 
@@ -483,6 +521,87 @@ function Rankings() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── DIVISÕES ────────────────────────────────────────── */}
+      {tab === "divisoes" && (
+        <div className="space-y-6">
+          {/* Cartão da divisão do utilizador */}
+          {user && (() => {
+            const me = allUsers.find(u => u.id === user.id);
+            if (!me) return null;
+            const div = me.division;
+            return (
+              <div className={`rounded-2xl border ${div.border} ${div.bg} p-4`}>
+                <p className="text-xs text-muted-foreground mb-1">A tua divisão</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-4xl">{div.emoji}</span>
+                  <div>
+                    <p className={`font-display text-2xl ${div.text}`}>{div.label}</p>
+                    <p className="text-xs text-muted-foreground">#{me.rank}º global · {me.total_points} pts</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Todas as divisões */}
+          {DIVISIONS.map(div => {
+            const members = allUsers.filter(u => u.rank >= div.min && u.rank <= div.max);
+            if (members.length === 0) return null;
+            return (
+              <div key={div.key} className={`overflow-hidden rounded-2xl border ${div.border}`}>
+                {/* Header da divisão */}
+                <div className={`flex items-center gap-3 px-4 py-3 bg-gradient-to-r ${div.color} bg-opacity-10`}
+                  style={{ background: `linear-gradient(90deg, var(--card) 0%, oklch(from ${div.key === "diamante" ? "0.7 0.15 220" : div.key === "ouro" ? "0.8 0.15 85" : div.key === "prata" ? "0.7 0.05 220" : "0.5 0.1 50"} l c h) 100%)` }}>
+                  <span className="text-2xl">{div.emoji}</span>
+                  <div className="flex-1">
+                    <p className={`font-display text-lg ${div.text}`}>{div.label}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {div.max === Infinity ? `${div.min}º em diante` : `${div.min}º ao ${div.max}º`} · {members.length} adepto{members.length !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+                {/* Membros */}
+                <div className="divide-y divide-border/50">
+                  {members.map((u, i) => {
+                    const isMe = u.id === user?.id;
+                    return (
+                      <Link key={u.id} to="/adepto/$id" params={{ id: u.id }}
+                        className={`flex items-center gap-3 px-4 py-2.5 hover:bg-accent/50 transition-smooth ${isMe ? div.bg : ""}`}
+                      >
+                        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
+                          i === 0 ? `bg-gradient-to-b ${div.color} text-white` : "bg-secondary text-muted-foreground"
+                        }`}>
+                          {i === 0 ? <Crown className="h-3.5 w-3.5" /> : u.rank}
+                        </span>
+                        <UserAvatar avatarUrl={(u as any).avatar_url} name={u.display_name} size={7} className="rounded-full shrink-0" />
+                        <span className={`flex-1 text-sm font-semibold truncate ${isMe ? div.text : ""}`}>
+                          {u.display_name}{isMe && " (tu)"}
+                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <RankTrend currentRank={u.rank} previousRank={(u as any).previous_rank} />
+                          <span className="font-display text-base text-gold">{u.total_points}</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+                {/* Zona de subida/descida */}
+                {div.key !== "diamante" && div.key !== "bronze" && members.length > 0 && (
+                  <div className="border-t border-border/50 bg-wc-green/5 px-4 py-1.5">
+                    <p className="text-[10px] text-wc-green">↑ Top 3 sobe de divisão</p>
+                  </div>
+                )}
+                {div.key === "bronze" && members.length > 0 && (
+                  <div className="border-t border-border/50 bg-wc-green/5 px-4 py-1.5">
+                    <p className="text-[10px] text-wc-green">↑ Top 3 sobe para Prata</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 

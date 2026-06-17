@@ -313,7 +313,7 @@ function Rankings() {
                         <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
                           i === 0 ? `bg-gradient-to-b ${div.color} text-white` : "bg-secondary text-muted-foreground"
                         }`}>
-                          {i === 0 ? <Crown className="h-3.5 w-3.5" /> : u.rank}
+                          {i === 0 ? <Crown className="h-3.5 w-3.5" /> : i + 1}
                         </span>
                         <UserAvatar avatarUrl={(u as any).avatar_url} name={u.display_name} size={7} className="rounded-full shrink-0" />
                         <span className={`flex-1 text-sm font-semibold truncate ${isMe ? div.text : ""}`}>

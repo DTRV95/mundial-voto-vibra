@@ -39,10 +39,10 @@ export const Route = createFileRoute("/rankings")({
 });
 
 const DIVISIONS = [
-  { key: "diamante", label: "Diamante", emoji: "💎", min: 1,  max: 5,   color: "from-cyan-400 to-blue-500",   border: "border-cyan-400/40",   bg: "bg-cyan-400/10",   text: "text-cyan-400" },
-  { key: "ouro",     label: "Ouro",     emoji: "🥇", min: 6,  max: 15,  color: "from-yellow-400 to-amber-500", border: "border-gold/40",       bg: "bg-gold/10",       text: "text-gold" },
-  { key: "prata",    label: "Prata",    emoji: "🥈", min: 16, max: 30,  color: "from-slate-300 to-slate-500",  border: "border-slate-400/40",  bg: "bg-slate-400/10",  text: "text-slate-400" },
-  { key: "bronze",   label: "Bronze",   emoji: "🥉", min: 31, max: Infinity, color: "from-orange-700 to-amber-800", border: "border-orange-700/40", bg: "bg-orange-700/10", text: "text-orange-600" },
+  { key: "primeira", label: "1ª Liga",   emoji: "🏆", min: 1,  max: 5,   color: "from-cyan-400 to-blue-500",    border: "border-cyan-400/40",   bg: "bg-cyan-400/10",   text: "text-cyan-400" },
+  { key: "segunda",  label: "2ª Liga",   emoji: "⚽", min: 6,  max: 15,  color: "from-yellow-400 to-amber-500", border: "border-gold/40",       bg: "bg-gold/10",       text: "text-gold" },
+  { key: "distrital",label: "Distrital", emoji: "🟡", min: 16, max: 30,  color: "from-slate-300 to-slate-500",  border: "border-slate-400/40",  bg: "bg-slate-400/10",  text: "text-slate-400" },
+  { key: "regional", label: "Regional",  emoji: "🟢", min: 31, max: Infinity, color: "from-green-700 to-emerald-800", border: "border-green-700/40", bg: "bg-green-700/10", text: "text-green-600" },
 ] as const;
 
 function getDivision(rank: number) {
@@ -294,7 +294,7 @@ function Rankings() {
               : "border-border bg-card/60 text-muted-foreground hover:border-wc-red/40"
           }`}
         >
-          💎 Divisões
+          🏆 Divisões
         </button>
       </div>
 

@@ -10,7 +10,14 @@ export function useAuth() {
   useEffect(() => {
     // onAuthStateChange dispara INITIAL_SESSION imediatamente com a sessão atual,
     // evitando double-setState causado por chamar getSession() separadamente.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      // Ignore token refresh events that don't change the user — prevents
+      // spurious re-renders / loading flashes on mobile where Supabase fires
+      // TOKEN_REFRESHED repeatedly.
+      if (event === "TOKEN_REFRESHED") {
+        setLoading(false);
+        return;
+      }
       setSession(s);
       setUser(s?.user ?? null);
       setLoading(false);

@@ -333,7 +333,7 @@ function copyLink() {
   }
 
   function shareWhatsApp() {
-    const url = window.location.href;
+    const url = `${window.location.origin}/entrar/${pool?.code}`;
     const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${pool?.name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }

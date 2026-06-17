@@ -2,8 +2,7 @@ import { createFileRoute, Link, useSearch, useNavigate } from "@tanstack/react-r
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, ArrowUp, ArrowDown, Minus, Share2, Shield, Users2, Crown } from "lucide-react";
-import { toast } from "sonner";
+import { Trophy, ArrowUp, ArrowDown, Minus, Shield, Users2, Crown } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 
@@ -13,13 +12,6 @@ function RankTrend({ currentRank, previousRank }: { currentRank: number; previou
   return <ArrowDown className="h-3 w-3 text-red-400" />;
 }
 
-const PHASES = [
-  { key: "geral", label: "Ranking Geral" },
-  { key: "grupos", label: "Fase de Grupos" },
-  { key: "oitavos", label: "Oitavos" },
-  { key: "quartos", label: "Quartos" },
-  { key: "meias", label: "Meias-Finais" },
-] as const;
 
 export const Route = createFileRoute("/rankings")({
   head: () => ({
@@ -33,7 +25,7 @@ export const Route = createFileRoute("/rankings")({
     links: [{ rel: "canonical", href: "https://mundial-voto-vibra.davidvilaverde.workers.dev/rankings" }],
   }),
   validateSearch: (search: Record<string, unknown>) => ({
-    tab: ["ligas", "jogos", "divisoes"].includes(search.tab as string) ? (search.tab as string) : "individual",
+    tab: ["ligas", "jogos", "divisoes"].includes(search.tab as string) ? (search.tab as string) : "divisoes",
   }),
   component: Rankings,
 });
@@ -51,74 +43,8 @@ function getDivision(rank: number) {
 
 function Rankings() {
   const search = useSearch({ from: "/rankings" });
-  const [tab, setTab] = useState<"individual" | "ligas" | "jogos" | "divisoes">(search.tab as any);
-  const [phase, setPhase] = useState<typeof PHASES[number]["key"]>("geral");
-  const [showAll, setShowAll] = useState(false);
+  const [tab, setTab] = useState<"ligas" | "jogos" | "divisoes">(search.tab as any ?? "divisoes");
   const { user } = useAuth();
-
-  const { data: rows = [] } = useQuery({
-    queryKey: ["ranking", phase, showAll],
-    queryFn: async () => {
-      if (phase === "geral") {
-        const query = supabase
-          .from("profiles")
-          .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct,previous_rank")
-          .order("total_points", { ascending: false });
-        const { data } = showAll ? await query : await query.limit(5);
-        return (data ?? []).map((r, i) => ({
-          id: r.id,
-          display_name: r.display_name,
-          avatar_url: (r as any).avatar_url,
-          points: r.total_points,
-          predictions_made: r.predictions_made,
-          predictions_correct: r.predictions_correct,
-          previous_rank: (r as any).previous_rank ?? null,
-          current_rank: i + 1,
-        }));
-      }
-
-      // Ranking por fase: usar !inner para filtrar por fase do jogo
-      const { data: preds } = await supabase
-        .from("predictions")
-        .select("user_id,points,match:match_id!inner(phase)")
-        .eq("match.phase", phase);
-
-      if (!preds || preds.length === 0) return [];
-
-      // Agregar por utilizador
-      const map: Record<string, { points: number; made: number; correct: number }> = {};
-      for (const p of preds) {
-        if (!map[p.user_id]) map[p.user_id] = { points: 0, made: 0, correct: 0 };
-        map[p.user_id].points += p.points ?? 0;
-        map[p.user_id].made += 1;
-        if ((p.points ?? 0) > 0) map[p.user_id].correct += 1;
-      }
-
-      const userIds = Object.keys(map);
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id,display_name,avatar_url")
-        .in("id", userIds);
-
-      return (profiles ?? [])
-        .map((pr) => ({
-          id: pr.id,
-          display_name: pr.display_name,
-          avatar_url: (pr as any).avatar_url,
-          points: map[pr.id]?.points ?? 0,
-          predictions_made: map[pr.id]?.made ?? 0,
-          predictions_correct: map[pr.id]?.correct ?? 0,
-        }))
-        .sort((a, b) => {
-          if (b.points !== a.points) return b.points - a.points;
-          const accA = a.predictions_made > 0 ? a.predictions_correct / a.predictions_made : 0;
-          const accB = b.predictions_made > 0 ? b.predictions_correct / b.predictions_made : 0;
-          if (accB !== accA) return accB - accA;
-          return a.predictions_made - b.predictions_made;
-        })
-        .slice(0, 5);
-    },
-  });
 
   // Ranking de ligas
   const { data: leagueRanking = [] } = useQuery({
@@ -196,40 +122,6 @@ function Rankings() {
     },
   });
 
-  // Posição do utilizador autenticado — sempre mostrada no fundo
-  const myEntry = rows.find(r => r.id === user?.id);
-  const myRank  = myEntry ? rows.indexOf(myEntry) + 1 : null;
-
-  const { data: myPosition } = useQuery({
-    queryKey: ["my-rank", phase, user?.id],
-    enabled: !!user?.id && rows.length > 0,
-    queryFn: async () => {
-      if (phase === "geral") {
-        const { data: me } = await supabase
-          .from("profiles")
-          .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct,previous_rank")
-          .eq("id", user!.id)
-          .maybeSingle();
-        if (!me) return null;
-        const { count } = await supabase
-          .from("profiles")
-          .select("id", { count: "exact", head: true })
-          .gt("total_points", me.total_points);
-        return {
-          id: me.id,
-          display_name: me.display_name,
-          avatar_url: (me as any).avatar_url,
-          points: me.total_points,
-          predictions_made: me.predictions_made,
-          predictions_correct: me.predictions_correct,
-          previous_rank: (me as any).previous_rank ?? null,
-          rank: (count ?? 0) + 1,
-        };
-      }
-      return null;
-    },
-  });
-
   // Query para divisões — todos os utilizadores ordenados por pontos
   const { data: allUsers = [] } = useQuery({
     queryKey: ["all-users-ranking"],
@@ -257,14 +149,14 @@ function Rankings() {
       {/* Tabs principais */}
       <div className="mb-5 flex gap-2">
         <button
-          onClick={() => setTab("individual")}
+          onClick={() => setTab("divisoes")}
           className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold transition-smooth ${
-            tab === "individual"
+            tab === "divisoes"
               ? "border-wc-red bg-wc-red text-white"
               : "border-border bg-card/60 text-muted-foreground hover:border-wc-red/40"
           }`}
         >
-          <Trophy className="h-3.5 w-3.5" /> Individual
+          🏆 Divisões
         </button>
         <button
           onClick={() => setTab("ligas")}
@@ -286,161 +178,8 @@ function Rankings() {
         >
           <Trophy className="h-3.5 w-3.5" /> Por Jogo
         </button>
-        <button
-          onClick={() => setTab("divisoes")}
-          className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold transition-smooth ${
-            tab === "divisoes"
-              ? "border-wc-red bg-wc-red text-white"
-              : "border-border bg-card/60 text-muted-foreground hover:border-wc-red/40"
-          }`}
-        >
-          🏆 Divisões
-        </button>
       </div>
 
-      {/* Sub-tabs de fase (só no individual) */}
-      {tab === "individual" && (
-        <div className="mb-5 -mx-5 overflow-x-auto px-5">
-          <div className="flex gap-2">
-            {PHASES.map((p) => (
-              <button
-                key={p.key}
-                onClick={() => setPhase(p.key)}
-                className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition-smooth ${
-                  phase === p.key
-                    ? "border-gold bg-gold text-background"
-                    : "border-border bg-card/60 text-muted-foreground hover:border-gold/40"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── RANKING INDIVIDUAL ─────────────────────────────── */}
-      {/* Partilhar posição */}
-      {tab === "individual" && user && (myRank || myPosition) && (
-        <div className="mb-4">
-          <button
-            onClick={() => {
-              const rank = myRank ?? myPosition?.rank;
-              const pts  = myRank ? rows[myRank - 1]?.points : myPosition?.points;
-              const text = `Estou em ${rank}º lugar com ${pts} pontos no ranking do Uma Geração 🏆\nVota no Mundial 2026: ${window.location.origin}/rankings`;
-              if (navigator.share) {
-                navigator.share({ title: "O meu ranking — Uma Geração", text, url: `${window.location.origin}/rankings` });
-              } else {
-                navigator.clipboard.writeText(text);
-                toast.success("Texto copiado para partilhar!");
-              }
-            }}
-            className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-2 text-xs font-semibold text-gold hover:bg-gold/20 transition-smooth"
-          >
-            <Share2 className="h-3.5 w-3.5" />
-            Partilhar a minha posição
-          </button>
-        </div>
-      )}
-
-      {tab === "individual" && <div className="overflow-hidden rounded-2xl border border-border bg-card/70">
-        {rows.length === 0 ? (
-          <div className="p-10 text-center">
-            <Trophy className="mx-auto mb-2 h-8 w-8 text-gold" />
-            <p className="font-display text-lg">Ainda sem ranking</p>
-            <p className="text-sm text-muted-foreground">Sê o primeiro a votar para subir ao topo.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-          <table className="w-full min-w-[480px] text-sm">
-            <thead className="bg-secondary/50 text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 text-left">#</th>
-                <th className="px-3 py-2 text-left">Adepto</th>
-                <th className="px-2 py-2 text-right">Pts</th>
-                <th className="px-2 py-2 text-right">Acertos</th>
-                <th className="px-2 py-2 text-right">%</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => {
-                const acc = r.predictions_made > 0
-                  ? Math.round((r.predictions_correct / r.predictions_made) * 100)
-                  : 0;
-                const isMe = r.id === user?.id;
-                return (
-                  <tr key={r.id} className={`border-t border-border ${isMe ? "bg-gold/5" : ""}`}>
-                    <td className="px-3 py-2.5">
-                      <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                        i === 0 ? "bg-gold text-background" : i < 3 ? "bg-gold/30 text-gold" : isMe ? "bg-wc-red/20 text-wc-red" : "bg-secondary"
-                      }`}>{i + 1}</span>
-                    </td>
-                    <td className="px-3 py-2.5">
-                      <Link to="/adepto/$id" params={{ id: r.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
-                        <UserAvatar avatarUrl={(r as any).avatar_url} name={r.display_name} size={7} className="rounded-full" />
-                        <span className={`inline-flex items-center gap-0.5 font-medium ${isMe ? "text-wc-red" : ""}`}>
-                          {r.display_name ?? "Adepto"}{isMe && " (tu)"}
-                          <RankTrend currentRank={i + 1} previousRank={r.previous_rank} />
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-2 py-2.5 text-right font-display text-gold">{r.points}</td>
-                    <td className="px-2 py-2.5 text-right text-muted-foreground">{r.predictions_correct}/{r.predictions_made}</td>
-                    <td className="px-2 py-2.5 text-right text-muted-foreground">{acc}%</td>
-                  </tr>
-                );
-              })}
-
-              {/* Posição do utilizador fora do top 5 — só quando não está em modo expandido */}
-              {!showAll && myPosition && (
-                <>
-                  <tr className="border-t border-border">
-                    <td colSpan={5} className="px-3 py-1 text-center text-[10px] text-muted-foreground tracking-widest">
-                      · · ·
-                    </td>
-                  </tr>
-                  <tr className="border-t border-wc-red/20 bg-wc-red/5">
-                    <td className="px-3 py-2.5">
-                      <span className="grid h-7 w-7 place-items-center rounded-full bg-wc-red/20 text-xs font-bold text-wc-red">
-                        {myPosition.rank}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2.5">
-                      <Link to="/adepto/$id" params={{ id: myPosition.id }} className="flex items-center gap-2 hover:opacity-80 transition-smooth">
-                        <UserAvatar avatarUrl={myPosition.avatar_url} name={myPosition.display_name} size={7} className="rounded-full" />
-                        <span className="inline-flex items-center gap-0.5 font-medium text-wc-red">
-                          {myPosition.display_name ?? "Tu"} (tu)
-                          {user && <RankTrend currentRank={myPosition.rank} previousRank={myPosition.previous_rank} />}
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-2 py-2.5 text-right font-display text-gold">{myPosition.points}</td>
-                    <td className="px-2 py-2.5 text-right text-muted-foreground">{myPosition.predictions_correct}/{myPosition.predictions_made}</td>
-                    <td className="px-2 py-2.5 text-right text-muted-foreground">
-                      {myPosition.predictions_made > 0 ? Math.round((myPosition.predictions_correct / myPosition.predictions_made) * 100) : 0}%
-                    </td>
-                  </tr>
-                </>
-              )}
-
-              {/* Botão ver todos / ver menos */}
-              {phase === "geral" && (
-                <tr className="border-t border-border">
-                  <td colSpan={6} className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => setShowAll(v => !v)}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-1.5 text-xs font-semibold text-muted-foreground hover:border-gold/40 hover:text-gold transition-smooth"
-                    >
-                      {showAll ? "Ver menos ↑" : `Ver classificação completa ↓`}
-                    </button>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          </div>
-        )}
-      </div>}
 
       {/* ── RANKING DE LIGAS ───────────────────────────────── */}
       {tab === "ligas" && (
@@ -554,7 +293,7 @@ function Rankings() {
               <div key={div.key} className={`overflow-hidden rounded-2xl border ${div.border}`}>
                 {/* Header da divisão */}
                 <div className={`flex items-center gap-3 px-4 py-3 bg-gradient-to-r ${div.color} bg-opacity-10`}
-                  style={{ background: `linear-gradient(90deg, var(--card) 0%, oklch(from ${div.key === "diamante" ? "0.7 0.15 220" : div.key === "ouro" ? "0.8 0.15 85" : div.key === "prata" ? "0.7 0.05 220" : "0.5 0.1 50"} l c h) 100%)` }}>
+                  style={{ background: `linear-gradient(90deg, var(--card) 0%, oklch(from ${div.key === "primeira" ? "0.7 0.15 220" : div.key === "segunda" ? "0.8 0.15 85" : div.key === "distrital" ? "0.7 0.05 220" : "0.5 0.15 145"} l c h) 100%)` }}>
                   <span className="text-2xl">{div.emoji}</span>
                   <div className="flex-1">
                     <p className={`font-display text-lg ${div.text}`}>{div.label}</p>
@@ -589,14 +328,14 @@ function Rankings() {
                   })}
                 </div>
                 {/* Zona de subida/descida */}
-                {div.key !== "diamante" && div.key !== "bronze" && members.length > 0 && (
+                {div.key !== "primeira" && div.key !== "regional" && members.length > 0 && (
                   <div className="border-t border-border/50 bg-wc-green/5 px-4 py-1.5">
                     <p className="text-[10px] text-wc-green">↑ Top 3 sobe de divisão</p>
                   </div>
                 )}
-                {div.key === "bronze" && members.length > 0 && (
+                {div.key === "regional" && members.length > 0 && (
                   <div className="border-t border-border/50 bg-wc-green/5 px-4 py-1.5">
-                    <p className="text-[10px] text-wc-green">↑ Top 3 sobe para Prata</p>
+                    <p className="text-[10px] text-wc-green">↑ Top 3 sobe para Distrital</p>
                   </div>
                 )}
               </div>

@@ -76,9 +76,9 @@ export function FeedbackModal() {
             <X className="h-4 w-4" />
           </button>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Uma mensagem nossa</p>
-          <h2 className="font-display text-2xl text-white leading-tight">Obrigado por estares aqui 🙏</h2>
+          <h2 className="font-display text-2xl text-white leading-tight">Precisamos de ti 💛</h2>
           <p className="text-sm text-white/75 mt-2 leading-relaxed">
-            Isto é um projeto feito com muito carinho e dedicação. O facto de estares aqui a experimentar significa muito para nós. Dá-nos 30 segundos e diz-nos o que achas — cada estrela conta.
+            Estamos a construir isto de raiz e cada pessoa que experimenta ajuda-nos a melhorar. O teu olhar detecta o que nós já não conseguimos ver. Juntos, chegamos mais longe.
           </p>
         </div>
 

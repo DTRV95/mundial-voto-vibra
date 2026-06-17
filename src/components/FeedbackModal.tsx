@@ -75,9 +75,11 @@ export function FeedbackModal() {
             className="absolute right-4 top-4 rounded-full bg-white/10 p-1.5 text-white/60 hover:text-white transition-smooth">
             <X className="h-4 w-4" />
           </button>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">1 minuto do teu tempo</p>
-          <h2 className="font-display text-2xl text-white leading-tight">Como está a app?</h2>
-          <p className="text-xs text-white/60 mt-1">Classifica de 1 a 5 — ajuda-nos a melhorar.</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Uma mensagem nossa</p>
+          <h2 className="font-display text-2xl text-white leading-tight">Obrigado por estares aqui 🙏</h2>
+          <p className="text-sm text-white/75 mt-2 leading-relaxed">
+            Isto é um projeto feito com muito carinho e dedicação. O facto de estares aqui a experimentar significa muito para nós. Dá-nos 30 segundos e diz-nos o que achas — cada estrela conta.
+          </p>
         </div>
 
         {done ? (

@@ -22,6 +22,7 @@ export function FeedbackModal() {
   const { user } = useAuth();
   const [visible, setVisible] = useState(false);
   const [ratings, setRatings] = useState<Partial<Ratings>>({});
+  const [comentario, setComentario] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -46,6 +47,7 @@ export function FeedbackModal() {
       await (supabase as any).from("feedback").insert({
         user_id: user?.id ?? null,
         ...ratings,
+        comentario: comentario.trim() || null,
       });
       localStorage.setItem(STORAGE_KEY, "permanent");
       setDone(true);
@@ -78,7 +80,7 @@ export function FeedbackModal() {
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">A tua opinião importa</p>
           <h2 className="font-display text-2xl text-white leading-tight">Ajuda-nos a melhorar</h2>
           <p className="text-sm text-white/75 mt-2 leading-relaxed">
-            O Uma Geração está em constante evolução e a tua experiência é a nossa bússola. Com o teu feedback conseguimos identificar o que falha e o que pode ser melhor. Obrigado por fazeres parte disto.
+            Estamos a construir isto de raiz e cada pessoa que experimenta ajuda-nos a melhorar. O teu olhar detecta o que nós já não conseguimos ver. Obrigado por fazeres parte disto.
           </p>
         </div>
 
@@ -112,6 +114,17 @@ export function FeedbackModal() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="px-6 pb-4">
+              <textarea
+                value={comentario}
+                onChange={e => setComentario(e.target.value)}
+                placeholder="Algum comentário adicional? (opcional)"
+                maxLength={500}
+                rows={3}
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-wc-red/50 transition-smooth"
+              />
             </div>
 
             <div className="px-6 pb-6 flex gap-3">

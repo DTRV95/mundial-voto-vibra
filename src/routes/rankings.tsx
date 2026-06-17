@@ -328,16 +328,6 @@ function Rankings() {
                   })}
                 </div>
                 {/* Zona de subida/descida */}
-                {div.key !== "primeira" && div.key !== "regional" && members.length > 0 && (
-                  <div className="border-t border-border/50 bg-wc-green/5 px-4 py-1.5">
-                    <p className="text-[10px] text-wc-green">↑ Top 3 sobe de divisão</p>
-                  </div>
-                )}
-                {div.key === "regional" && members.length > 0 && (
-                  <div className="border-t border-border/50 bg-wc-green/5 px-4 py-1.5">
-                    <p className="text-[10px] text-wc-green">↑ Top 3 sobe para Distrital</p>
-                  </div>
-                )}
               </div>
             );
           })}

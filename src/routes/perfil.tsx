@@ -260,7 +260,7 @@ function Perfil() {
             <StatDetail icon={<CheckCircle2 className="h-5 w-5 text-wc-green" />} value={profile?.predictions_correct ?? 0} label="Acertos"
               desc="Jogos em que acertaste no vencedor ou empate" colorClass="text-foreground"
               borderClass="border-border" bgClass="bg-card/60" />
-            <StatDetail icon={<XCircle className="h-5 w-5 text-wc-red" />} value={Math.max(0, finishedGames.length - (profile?.predictions_correct ?? 0))} label="Erros"
+            <StatDetail icon={<XCircle className="h-5 w-5 text-wc-red" />} value={Math.max(0, (profile?.predictions_made ?? 0) - (profile?.predictions_correct ?? 0))} label="Erros"
               desc="Jogos em que erraste o resultado final" colorClass="text-foreground"
               borderClass="border-border" bgClass="bg-card/60" />
           </div>

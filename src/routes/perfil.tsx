@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Flame, Calendar, ImageIcon, Bell, BarChart2, Zap, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Flame, Star, Calendar, ImageIcon, Bell, BarChart2, Zap, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { AvatarPicker, UserAvatar } from "@/components/AvatarPicker";
 import { toast } from "sonner";
 import { TeamBadge } from "@/lib/teamColors.tsx";
@@ -469,20 +469,20 @@ function Perfil() {
       )}
 
       {/* Melhor jogo */}
-      {bestGame && (
+      {bestGame && (bestGame as any).match && (
         <section className="mb-6">
           <h2 className="mb-3 font-display text-lg flex items-center gap-2">
             <Flame className="h-4 w-4 text-wc-red" /> Melhor jogo
           </h2>
-          <Link to="/jogo/$id" params={{ id: (bestGame as any).match.id }}
+          <Link to="/jogo/$id" params={{ id: (bestGame as any).match?.id }}
             className="flex items-center justify-between rounded-2xl border border-gold/30 bg-gold/10 p-4 transition-smooth hover:border-gold/60">
             <div className="flex items-center gap-3">
-              <TeamBadge code={(bestGame as any).match.home.code} flag={(bestGame as any).match.home.flag} name={(bestGame as any).match.home.name} size="sm" />
+              <TeamBadge code={(bestGame as any).match?.home?.code} flag={(bestGame as any).match?.home?.flag} name={(bestGame as any).match?.home?.name ?? ""} size="sm" />
               <div>
-                <p className="font-semibold text-sm">{(bestGame as any).match.home.name} vs {(bestGame as any).match.away.name}</p>
-                <p className="text-xs text-muted-foreground">{formatDate((bestGame as any).match.kickoff_at)}</p>
+                <p className="font-semibold text-sm">{(bestGame as any).match?.home?.name} vs {(bestGame as any).match?.away?.name}</p>
+                <p className="text-xs text-muted-foreground">{formatDate((bestGame as any).match?.kickoff_at)}</p>
               </div>
-              <TeamBadge code={(bestGame as any).match.away.code} flag={(bestGame as any).match.away.flag} name={(bestGame as any).match.away.name} size="sm" />
+              <TeamBadge code={(bestGame as any).match?.away?.code} flag={(bestGame as any).match?.away?.flag} name={(bestGame as any).match?.away?.name ?? ""} size="sm" />
             </div>
             <div className="text-right">
               <p className="font-display text-2xl text-gold">{(bestGame as any).points}</p>

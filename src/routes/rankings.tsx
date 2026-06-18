@@ -74,11 +74,11 @@ function Rankings() {
 
       const results = pools.map(pool => {
         const members = allMembers.filter(m => m.pool_id === pool.id);
-        // Pontos da liga = total_points - start_points (pontos ganhos desde que entrou)
-        const total = members.reduce((s, m) => {
-          const league_pts = Math.max(0, (profileMap[m.user_id] ?? 0) - (m.start_points ?? 0));
-          return s + league_pts;
-        }, 0);
+        const memberPts = members
+          .map(m => Math.max(0, (profileMap[m.user_id] ?? 0) - (m.start_points ?? 0)))
+          .sort((a, b) => b - a);
+        const topN = Math.min(3, memberPts.length);
+        const total = memberPts.slice(0, topN).reduce((s, p) => s + p, 0);
         return { ...pool, total_points: total, members: members.length };
       });
 
@@ -184,6 +184,10 @@ function Rankings() {
 
       {/* ── RANKING DE LIGAS ───────────────────────────────── */}
       {tab === "ligas" && (
+        <>
+        <p className="mb-3 text-[11px] text-muted-foreground text-center">
+          Pontuação calculada com base nos <span className="font-semibold text-foreground">top 3 membros</span> de cada torneio — justo para grupos de qualquer tamanho.
+        </p>
         <div className="overflow-hidden rounded-2xl border border-border bg-card/70">
           {leagueRanking.length === 0 ? (
             <div className="p-10 text-center">
@@ -219,6 +223,7 @@ function Rankings() {
             </div>
           )}
         </div>
+        </>
       )}
 
       {/* ── RANKING POR JOGO ───────────────────────────────── */}

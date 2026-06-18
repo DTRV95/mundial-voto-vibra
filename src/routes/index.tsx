@@ -112,16 +112,21 @@ function Home() {
 
       const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p.total_points ?? 0]));
 
-      const poolPoints: Record<string, number> = {};
-      const poolMemberCount: Record<string, number> = {};
+      // Agrupar pontos por pool e aplicar regra top-3
+      const poolMemberPts: Record<string, number[]> = {};
       for (const member of members) {
         const leaguePts = Math.max(0, (profileMap[member.user_id] ?? 0) - (member.start_points ?? 0));
-        poolPoints[member.pool_id] = (poolPoints[member.pool_id] ?? 0) + leaguePts;
-        poolMemberCount[member.pool_id] = (poolMemberCount[member.pool_id] ?? 0) + 1;
+        if (!poolMemberPts[member.pool_id]) poolMemberPts[member.pool_id] = [];
+        poolMemberPts[member.pool_id].push(leaguePts);
       }
 
       return pools
-        .map((p) => ({ id: p.id, name: p.name, points: poolPoints[p.id] ?? 0, members: poolMemberCount[p.id] ?? 0 }))
+        .map((p) => {
+          const pts = (poolMemberPts[p.id] ?? []).sort((a, b) => b - a);
+          const topN = Math.min(3, pts.length);
+          const points = pts.slice(0, topN).reduce((s, v) => s + v, 0);
+          return { id: p.id, name: p.name, points, members: pts.length };
+        })
         .sort((a, b) => b.points - a.points)
         .slice(0, 5);
     },

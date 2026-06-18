@@ -191,39 +191,85 @@ function Home() {
     enabled: !user || following !== undefined,
     queryFn: async () => {
       const followingIds = following ? [...following] : [];
+      if (followingIds.length === 0) return [];
 
-      const { data: preds } = await supabase
-        .from("predictions")
-        .select("id,created_at,user_id,match_id")
-        .in("user_id", followingIds.length > 0 ? followingIds : ["__none__"])
-        .order("created_at", { ascending: false })
-        .limit(30);
-      if (!preds || preds.length === 0) return [];
+      const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
-      const matchIds = [...new Set(preds.map((p: any) => p.match_id))];
-      const userIds = [...new Set(preds.map((p: any) => p.user_id))];
-
-      const [{ data: matches }, { data: profiles }] = await Promise.all([
+      const [{ data: preds }, { data: streakProfiles }] = await Promise.all([
         supabase
-          .from("matches")
-          .select("id,home:home_team_id(name,flag),away:away_team_id(name,flag)")
-          .in("id", matchIds),
+          .from("predictions")
+          .select("id,created_at,user_id,match_id,exact_home,exact_away,points")
+          .in("user_id", followingIds)
+          .gte("created_at", twoDaysAgo)
+          .order("created_at", { ascending: false })
+          .limit(40),
         supabase
           .from("profiles")
-          .select("id,display_name")
-          .in("id", userIds),
+          .select("id,display_name,vote_streak,total_points")
+          .in("id", followingIds),
+      ]);
+
+      const matchIds = [...new Set((preds ?? []).map((p: any) => p.match_id))];
+      const userIds = [...new Set((preds ?? []).map((p: any) => p.user_id))];
+
+      const [{ data: matches }, { data: profiles }] = await Promise.all([
+        matchIds.length > 0
+          ? supabase.from("matches").select("id,home_score,away_score,voting_open,home:home_team_id(name,flag),away:away_team_id(name,flag)").in("id", matchIds)
+          : Promise.resolve({ data: [] }),
+        userIds.length > 0
+          ? supabase.from("profiles").select("id,display_name").in("id", userIds)
+          : Promise.resolve({ data: [] }),
       ]);
 
       const matchMap = Object.fromEntries((matches ?? []).map((m: any) => [m.id, m]));
       const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
 
-      return preds
-        .map((p: any) => ({
-          ...p,
-          match: matchMap[p.match_id],
-          profile: profileMap[p.user_id],
-        }))
-        .filter((p: any) => p.match && p.profile);
+      const events: any[] = [];
+
+      // Eventos de previsões
+      for (const p of (preds ?? [])) {
+        const match = matchMap[p.match_id];
+        const profile = profileMap[p.user_id];
+        if (!match || !profile) continue;
+
+        const finished = match.home_score != null;
+        const isExact = finished && p.exact_home === match.home_score && p.exact_away === match.away_score;
+        const isCorrect = finished && (p.points ?? 0) > 0;
+
+        if (finished && !isCorrect) continue; // errou — não mostra
+
+        events.push({
+          id: p.id,
+          createdAt: p.created_at,
+          type: isExact ? "exact" : finished ? "correct" : "voted",
+          name: profile.display_name ?? "Alguém",
+          home: match.home?.name ?? "",
+          away: match.away?.name ?? "",
+          homeFlag: match.home?.flag ?? "",
+          awayFlag: match.away?.flag ?? "",
+          homeScore: match.home_score,
+          awayScore: match.away_score,
+          predHome: p.exact_home,
+          predAway: p.exact_away,
+        });
+      }
+
+      // Eventos de streak (múltiplos de 5)
+      const STREAK_MILESTONES = [5, 10, 15, 20, 25, 30, 50];
+      for (const sp of (streakProfiles ?? [])) {
+        if (sp.vote_streak > 0 && STREAK_MILESTONES.includes(sp.vote_streak)) {
+          events.push({
+            id: `streak-${sp.id}`,
+            createdAt: new Date().toISOString(),
+            type: "streak",
+            name: sp.display_name ?? "Alguém",
+            streak: sp.vote_streak,
+          });
+        }
+      }
+
+      // Ordena por data desc
+      return events.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 30);
     },
     staleTime: 60_000,
   });
@@ -551,20 +597,47 @@ function Home() {
               <div className="border-t border-border">
                 <div className="divide-y divide-border">
                   {activityFeed.slice(0, feedShown).map((item: any) => {
-                    const home = item.match?.home?.name ?? "";
-                    const away = item.match?.away?.name ?? "";
-                    const homeFlag = item.match?.home?.flag ?? "";
-                    const name = item.profile?.display_name ?? "Alguém";
-                    const mins = Math.floor((Date.now() - new Date(item.created_at).getTime()) / 60000);
+                    const mins = Math.floor((Date.now() - new Date(item.createdAt).getTime()) / 60000);
                     const timeAgo = mins < 1 ? "agora" : mins < 60 ? `há ${mins} min` : `há ${Math.floor(mins / 60)}h`;
+                    const matchText = `${item.home} vs ${item.away}`;
+
+                    let emoji = "⚽";
+                    let content: React.ReactNode;
+
+                    if (item.type === "exact") {
+                      emoji = "⚡";
+                      content = <>
+                        <span className="font-semibold">{item.name}</span>
+                        <span className="text-muted-foreground"> acertou o placard exato! </span>
+                        <span className="font-medium">{item.homeFlag} {item.home} {item.homeScore}–{item.awayScore} {item.away} {item.awayFlag}</span>
+                      </>;
+                    } else if (item.type === "correct") {
+                      emoji = "🎯";
+                      content = <>
+                        <span className="font-semibold">{item.name}</span>
+                        <span className="text-muted-foreground"> acertou em </span>
+                        <span className="font-medium">{matchText}</span>
+                      </>;
+                    } else if (item.type === "streak") {
+                      emoji = "🔥";
+                      content = <>
+                        <span className="font-semibold">{item.name}</span>
+                        <span className="text-muted-foreground"> está em streak de </span>
+                        <span className="font-medium text-orange-400">{item.streak} jogos seguidos!</span>
+                      </>;
+                    } else {
+                      emoji = item.homeFlag || "⚽";
+                      content = <>
+                        <span className="font-semibold">{item.name}</span>
+                        <span className="text-muted-foreground"> votou em </span>
+                        <span className="font-medium">{matchText}</span>
+                      </>;
+                    }
+
                     return (
                       <div key={item.id} className="flex items-center gap-3 px-5 py-2.5">
-                        <span className="text-base shrink-0">{homeFlag}</span>
-                        <p className="flex-1 min-w-0 text-xs text-foreground">
-                          <span className="font-semibold">{name}</span>
-                          <span className="text-muted-foreground"> votou em </span>
-                          <span className="font-medium">{home} vs {away}</span>
-                        </p>
+                        <span className="text-base shrink-0">{emoji}</span>
+                        <p className="flex-1 min-w-0 text-xs text-foreground">{content}</p>
                         <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo}</span>
                       </div>
                     );

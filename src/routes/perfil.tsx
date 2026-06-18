@@ -348,9 +348,9 @@ function Perfil() {
             <BarChart2 className="h-4 w-4 text-wc-blue" /> Estatísticas Gerais
           </h2>
           <div className="grid grid-cols-2 gap-3">
-            <StatDetail icon={<CheckCircle2 className="h-5 w-5 text-wc-green" />} value={`${correctGames}/${finishedGames.length}`} label="Resultados certos"
-              context={`${acc}% de acerto`}
-              desc="Jogos em que acertaste quem ganhou ou o empate (1X2)" colorClass="text-wc-green"
+            <StatDetail icon={<CheckCircle2 className="h-5 w-5 text-wc-green" />} value={`${correctGames}/${finishedGames.length}`} label="Jogos pontuados"
+              context={`${acc}% dos jogos`}
+              desc="Jogos em que ganhaste pelo menos 1 ponto (em qualquer mercado)" colorClass="text-wc-green"
               borderClass="border-wc-green/30" bgClass="bg-wc-green/5" />
             <StatDetail icon={<Zap className="h-5 w-5 text-wc-blue" />} value={`${exactScores}/${finishedGames.length}`} label="Placares exatos"
               context={finishedGames.length > 0 ? `${Math.round((exactScores / finishedGames.length) * 100)}% de acerto` : ""}

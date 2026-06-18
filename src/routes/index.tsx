@@ -439,7 +439,7 @@ function Home() {
                   const isToday = new Date(m.kickoff_at).toDateString() === new Date().toDateString();
                   const time = new Date(m.kickoff_at).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
                   return (
-                    <Link key={m.id} to="/jogos"
+                    <Link key={m.id} to="/jogo/$id" params={{ id: String(m.id) }}
                       className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-2.5 hover:bg-white/20 transition-smooth">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <TeamBadge code={m.home?.code} flag={m.home?.flag} name={m.home?.name} size="sm" />

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper, Star, Gift, ChevronUp, ChevronDown } from "lucide-react";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { supabase } from "@/integrations/supabase/client";
@@ -185,15 +185,6 @@ function Home() {
   const [feedOpen, setFeedOpen] = useState(() => localStorage.getItem("feed_open") !== "0");
   const [feedShown, setFeedShown] = useState(5);
   const feedSentinelRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = feedSentinelRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setFeedShown(n => n + 5);
-    }, { threshold: 1 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [feedOpen, activityFeed.length]);
   const { data: following } = useFollowing();
 
   const { data: activityFeed = [] } = useQuery({
@@ -283,6 +274,16 @@ function Home() {
     },
     staleTime: 60_000,
   });
+
+  useEffect(() => {
+    const el = feedSentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setFeedShown(n => n + 5);
+    }, { threshold: 1 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [feedOpen, activityFeed.length]);
 
   const myLeaderEntry = topLeaders.find((u: any) => u.id === user?.id);
   const { data: myLeaderRank } = useQuery({

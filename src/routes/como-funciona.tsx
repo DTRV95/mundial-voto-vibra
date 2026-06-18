@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trophy, Target, Star, Zap, Users, ChevronRight, HelpCircle } from "lucide-react";
+import { Trophy, Target, Star, Zap, Users, ChevronRight, HelpCircle, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/como-funciona")({
   head: () => ({
@@ -70,14 +70,13 @@ function ComoFunciona() {
 
       {/* Previsões */}
       <Section icon={Target} title="Tipos de Previsão">
-        <p className="mb-3 text-sm text-muted-foreground">Antes de cada jogo podes fazer várias previsões independentes. Tens até ao apito inicial para submeter.</p>
+        <p className="mb-3 text-sm text-muted-foreground">Antes de cada jogo podes fazer várias previsões independentes. Tens até ao apito inicial para submeter — depois fecha.</p>
         <div className="divide-y divide-border rounded-xl border border-border bg-background/40 overflow-hidden">
-          <PointRow label="Resultado (1X2)" pts="3–4 pts" note="Vitória casa/fora = 3 pts · Empate = 4 pts (mais difícil, vale mais!)" />
-          <PointRow label="Ambas as equipas marcam (BTTS)" pts="2 pts" note="Ambas as equipas têm de marcar pelo menos 1 golo" />
-          <PointRow label="Total de golos (2.5 / 3.5)" pts="2–3 pts" note="Mais/menos de 2.5 ou 3.5 golos no total" />
-          <PointRow label="Dupla hipótese" pts="1 pt" note="Equipa da casa ou empate · Empate ou fora — mais seguro mas vale menos" />
-          <PointRow label="Resultado exato" pts="10 pts" note="Acertares no marcador exacto — a mais difícil e a que mais vale!" />
-          <PointRow label="Combo especial (1.5 / 3.5)" pts="4–5 pts" note="Previsões combinadas de golos + resultado" />
+          <PointRow label="Resultado (1X2)" pts="3–4 pts" note="Vitória casa/fora = 3 pts · Empate = 4 pts (mais difícil, vale mais)" />
+          <PointRow label="Ambas as equipas marcam (BTTS)" pts="2 pts" note="Sim ou Não — ambas têm de marcar pelo menos 1 golo" />
+          <PointRow label="Total de golos +/- 2.5" pts="2 pts" note="Mais ou menos de 2.5 golos no total do jogo" />
+          <PointRow label="Total de golos +/- 3.5" pts="3 pts" note="Mais ou menos de 3.5 golos — mais difícil, vale mais" />
+          <PointRow label="Marcador exato" pts="10 pts" note="Acertar no placard exacto — a mais difícil e a que mais vale!" />
         </div>
       </Section>
 
@@ -99,44 +98,61 @@ function ComoFunciona() {
         </ul>
       </Section>
 
-      {/* Ranking */}
-      <Section icon={Trophy} title="Rankings e Desempate">
-        <p className="mb-3 text-sm text-muted-foreground">Há um ranking geral e rankings por fase do Mundial (Grupos, Oitavos, etc.). Em caso de empate na pontuação aplica-se:</p>
-        <ol className="space-y-2">
+      {/* Ranking e Divisões */}
+      <Section icon={Trophy} title="Rankings e Divisões">
+        <p className="mb-3 text-sm text-muted-foreground">Há um ranking geral onde todos competem. Com base na tua posição és colocado numa divisão:</p>
+        <div className="divide-y divide-border rounded-xl border border-border bg-background/40 overflow-hidden mb-4">
           {[
-            "Maior pontuação total",
-            "Maior percentagem de acerto",
-            "Menor número de previsões feitas (qualidade > quantidade)",
-            "Quem submeteu a previsão primeiro",
-          ].map((rule, i) => (
-            <li key={i} className="flex items-center gap-2.5 text-sm">
-              <span className="shrink-0 grid h-6 w-6 place-items-center rounded-full bg-secondary text-xs font-bold text-muted-foreground">{i + 1}</span>
-              <span>{rule}</span>
-            </li>
+            { emoji: "🏆", label: "1ª Liga", desc: "Top 5 jogadores" },
+            { emoji: "⚽", label: "2ª Liga", desc: "Posições 6 a 15" },
+            { emoji: "🟡", label: "Distrital", desc: "Posições 16 a 30" },
+            { emoji: "🟢", label: "Liga do Zé Povinho", desc: "A partir da posição 31" },
+          ].map(({ emoji, label, desc }) => (
+            <div key={label} className="flex items-center gap-3 px-3 py-2.5">
+              <span className="text-lg">{emoji}</span>
+              <div>
+                <p className="text-sm font-semibold">{label}</p>
+                <p className="text-xs text-muted-foreground">{desc}</p>
+              </div>
+            </div>
           ))}
-        </ol>
+        </div>
+        <p className="text-xs text-muted-foreground">Em caso de empate: maior pontuação → maior % de acerto → quem votou primeiro.</p>
       </Section>
 
       {/* Torneios */}
-      <Section icon={Users} title="Torneios Privados (Ligas)">
-        <p className="mb-3 text-sm text-muted-foreground">Cria um torneio privado para competir com amigos. Tens o teu próprio ranking separado do ranking geral.</p>
+      <Section icon={Users} title="Torneios Privados">
+        <p className="mb-3 text-sm text-muted-foreground">Cria um torneio privado para competir com amigos e família, com o teu próprio ranking separado.</p>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li className="flex items-start gap-2">
-            <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-            Cria um torneio e partilha o código de 6 letras com os amigos.
-          </li>
-          <li className="flex items-start gap-2">
-            <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-            Os pontos são os mesmos do ranking geral — não precisas de votar duas vezes.
-          </li>
-          <li className="flex items-start gap-2">
-            <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-            Podes estar em vários torneios ao mesmo tempo.
-          </li>
-          <li className="flex items-start gap-2">
-            <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-            O criador do torneio pode eliminar o grupo a qualquer momento.
-          </li>
+          {[
+            "Cria um torneio e partilha o código de 6 letras com os teus amigos.",
+            "Os pontos são os mesmos do ranking geral — não precisas de votar duas vezes.",
+            "Podes estar em vários torneios ao mesmo tempo.",
+            "Cada torneio tem o seu próprio chat para falares com os membros.",
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      {/* Comunidade */}
+      <Section icon={TrendingUp} title="Comunidade e Feed">
+        <p className="mb-3 text-sm text-muted-foreground">O Uma Geração tem uma componente social que torna tudo mais interessante:</p>
+        <ul className="space-y-2 text-sm text-muted-foreground">
+          {[
+            "Segue outros adeptos no ranking e acompanha a actividade deles no feed.",
+            "Quando um jogo termina, vês quem acertou o resultado ou o marcador exato.",
+            "As percentagens da comunidade só ficam visíveis depois de votares — o segredo é do clube.",
+            "Recebes uma notificação quando alguém te começa a seguir.",
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+              {item}
+            </li>
+          ))}
         </ul>
       </Section>
 
@@ -144,9 +160,9 @@ function ComoFunciona() {
       <Section icon={Zap} title="Dicas para Subir no Ranking">
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {[
-            { tip: "Aposta no resultado exato", detail: "São 10 pts de uma vez — vale a pena arriscar." },
-            { tip: "Não ignores o BTTS", detail: "Jogos com equipas ofensivas têm alta probabilidade." },
-            { tip: "Qualidade > Quantidade", detail: "Menos previsões mas mais acertadas bate mais previsões erradas." },
+            { tip: "Arrisca no marcador exato", detail: "São 10 pts de uma vez — mesmo que só acertes 1 em 10, compensa." },
+            { tip: "Não ignores o BTTS", detail: "Em jogos entre equipas ofensivas tem alta probabilidade de saírem golos dos dois lados." },
+            { tip: "Qualidade > Quantidade", detail: "Menos previsões mas mais acertadas é sempre melhor do que votar em tudo." },
             { tip: "Submete cedo", detail: "Em caso de empate de pontos, quem votou primeiro leva a vantagem." },
           ].map(({ tip, detail }, i) => (
             <div key={i} className="rounded-xl border border-border bg-background/40 p-3">

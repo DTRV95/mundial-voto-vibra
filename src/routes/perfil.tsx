@@ -432,6 +432,19 @@ function Perfil() {
             <Bell className="h-4 w-4 text-wc-red" />
             <h2 className="font-display text-xl">Notificações</h2>
             <span className="rounded-full bg-wc-red px-2 py-0.5 text-[10px] font-bold text-white">{notifs.total}</span>
+            <button
+              onClick={() => {
+                notifs.items.forEach(n => {
+                  if (n.type === "chat") markChatRead(n.poolCode);
+                  else if (n.type === "rank") markRankSeen(n.currentRank);
+                  else if (n.type === "follow") markFollowSeen(n.id);
+                });
+                refetchNotifs();
+              }}
+              className="ml-auto text-[11px] font-semibold text-muted-foreground hover:text-wc-red transition-smooth"
+            >
+              Limpar tudo
+            </button>
           </div>
           <div className="space-y-3">
             {notifs.items.map((notif, i) => {

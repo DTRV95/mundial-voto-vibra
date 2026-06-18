@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Star, Flame, Calendar, ImageIcon, Bell } from "lucide-react";
+import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Star, Flame, Calendar, ImageIcon, Bell, BarChart2, Zap, TrendingUp } from "lucide-react";
 import { AvatarPicker, UserAvatar } from "@/components/AvatarPicker";
 import { toast } from "sonner";
 import { TeamBadge } from "@/lib/teamColors.tsx";
@@ -32,7 +32,7 @@ function Perfil() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct")
+        .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct,vote_streak,max_vote_streak")
         .eq("id", user!.id)
         .maybeSingle();
       if (error) console.error("Profile fetch error:", error);
@@ -134,6 +134,13 @@ function Perfil() {
     ? pointsHistory.reduce((a: any, b: any) => a.points > b.points ? a : b)
     : null;
 
+  const finishedGames = history.filter((h: any) => h.match?.home_score != null);
+  const exactScores = finishedGames.filter((h: any) => h.exact_home && h.exact_away).length;
+  const totalPoints = finishedGames.reduce((sum: number, h: any) => sum + (h.points ?? 0), 0);
+  const avgPoints = finishedGames.length > 0 ? (totalPoints / finishedGames.length).toFixed(1) : "—";
+  const currentStreak = (profile as any)?.vote_streak ?? 0;
+  const maxStreak = (profile as any)?.max_vote_streak ?? 0;
+
   async function signOut() {
     await supabase.auth.signOut();
     toast.success("Sessão terminada");
@@ -226,6 +233,61 @@ function Perfil() {
           </div>
         </div>
       </div>
+
+      {/* Estatísticas detalhadas */}
+      {(profile?.predictions_made ?? 0) > 0 && (
+        <section className="mb-6">
+          <h2 className="mb-3 font-display text-lg flex items-center gap-2">
+            <BarChart2 className="h-4 w-4 text-wc-blue" /> Estatísticas
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-orange-400/30 bg-orange-400/5 p-4 flex items-center gap-3">
+              <span className="text-2xl">🔥</span>
+              <div>
+                <p className="font-display text-2xl leading-none text-orange-400">{currentStreak}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Streak atual</p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-gold/30 bg-gold/5 p-4 flex items-center gap-3">
+              <Star className="h-5 w-5 text-gold shrink-0" />
+              <div>
+                <p className="font-display text-2xl leading-none text-gold">{maxStreak}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Melhor streak</p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-wc-green/30 bg-wc-green/5 p-4 flex items-center gap-3">
+              <Zap className="h-5 w-5 text-wc-green shrink-0" />
+              <div>
+                <p className="font-display text-2xl leading-none text-wc-green">{exactScores}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Resultados exatos</p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-wc-blue/30 bg-wc-blue/5 p-4 flex items-center gap-3">
+              <TrendingUp className="h-5 w-5 text-wc-blue shrink-0" />
+              <div>
+                <p className="font-display text-2xl leading-none text-wc-blue">{avgPoints}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Média pts/jogo</p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-border bg-card/60 p-4 flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-wc-green shrink-0" />
+              <div>
+                <p className="font-display text-2xl leading-none">{profile?.predictions_correct ?? 0}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Acertos</p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-border bg-card/60 p-4 flex items-center gap-3">
+              <XCircle className="h-5 w-5 text-wc-red shrink-0" />
+              <div>
+                <p className="font-display text-2xl leading-none">
+                  {Math.max(0, finishedGames.length - (profile?.predictions_correct ?? 0))}
+                </p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Erros</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Notificações */}
       {notifs && notifs.total > 0 && (

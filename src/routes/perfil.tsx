@@ -16,6 +16,8 @@ export const Route = createFileRoute("/perfil")({
   component: Perfil,
 });
 
+type MarketStat = { correct: number; total: number };
+
 function Perfil() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -159,7 +161,6 @@ function Perfil() {
   }
 
   // Estatísticas por mercado
-  type MarketStat = { correct: number; total: number };
   const markets: Record<string, MarketStat> = {
     "Resultado final": { correct: 0, total: 0 },
     "Placar exato":    { correct: 0, total: 0 },

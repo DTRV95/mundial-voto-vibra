@@ -368,35 +368,9 @@ function Perfil() {
           </h2>
           <div className="rounded-2xl border border-border bg-card/60 overflow-hidden divide-y divide-border">
             {marketList.map((m) => (
-              <div key={m.name} className="px-4 py-4">
-                {/* Nome + acerto geral */}
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-semibold text-sm">{m.name}</span>
-                  <span className="text-[11px] text-muted-foreground">{m.correct} acertos em {m.total} jogos</span>
-                </div>
-                {/* Barra de progresso neutra */}
-                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-3">
-                  <div className="h-full rounded-full bg-gold" style={{ width: `${m.pct}%` }} />
-                </div>
-                {/* Breakdown por opção */}
-                {m.options.length > 0 && (
-                  <div className="space-y-2">
-                    {m.options.map((o) => {
-                      const oPct = o.total > 0 ? Math.round((o.correct / o.total) * 100) : 0;
-                      return (
-                        <div key={o.label} className="flex items-center gap-3">
-                          <span className="w-28 shrink-0 text-[12px] text-muted-foreground">{o.label}</span>
-                          <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
-                            <div className="h-full rounded-full bg-wc-blue/50" style={{ width: `${oPct}%` }} />
-                          </div>
-                          <span className="w-16 text-right text-[12px] font-semibold tabular-nums">
-                            {oPct}% <span className="text-muted-foreground font-normal">({o.correct}/{o.total})</span>
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+              <div key={m.name} className="flex items-center justify-between px-4 py-3">
+                <span className="text-sm font-semibold">{m.name}</span>
+                <span className="text-sm text-muted-foreground">{m.correct} acertos em {m.total} jogos</span>
               </div>
             ))}
           </div>

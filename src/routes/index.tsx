@@ -243,7 +243,7 @@ function Home() {
             .in("match_id", finishedMatchIds)
         : { data: [] };
 
-      // Votos em jogos abertos — buscar info do jogo
+      // Votos em jogos abertos — buscar info do jogo e palpite
       const openMatchIds = [...new Set((recentVotes ?? []).map((v: any) => v.match_id))];
       const { data: openMatches } = openMatchIds.length > 0
         ? await supabase
@@ -253,6 +253,18 @@ function Home() {
             .eq("voting_open", true)
         : { data: [] };
       const openMatchMap = Object.fromEntries((openMatches ?? []).map((m: any) => [m.id, m]));
+
+      // Buscar palpites (result_90, exact) para votos abertos
+      const { data: openPredDetails } = openMatchIds.length > 0
+        ? await supabase
+            .from("predictions")
+            .select("user_id,match_id,result_90,exact_home,exact_away")
+            .in("user_id", followingIds)
+            .in("match_id", openMatchIds)
+        : { data: [] };
+      const openPredMap = Object.fromEntries(
+        (openPredDetails ?? []).map((p: any) => [`${p.user_id}-${p.match_id}`, p])
+      );
 
       const events: any[] = [];
       const DIVISIONS = [
@@ -281,18 +293,24 @@ function Home() {
         });
       }
 
-      // 2. Votos em jogos ainda abertos
+      // 2. Palpites em jogos ainda abertos — só mostra se tiver result_90 ou placar exato
       for (const v of (recentVotes ?? [])) {
         const match = openMatchMap[v.match_id];
         const profile = profileMap[v.user_id];
         if (!match || !profile) continue;
+        const pred = openPredMap[`${v.user_id}-${v.match_id}`];
+        if (!pred?.result_90 && pred?.exact_home == null) continue; // sem palpite relevante, ignora
+        const hasExact = pred.exact_home != null && pred.exact_away != null;
         events.push({
           id: `vote-${v.id}`,
           createdAt: v.created_at,
-          type: "voted",
+          type: "prediction",
           name: profile.display_name ?? "Alguém",
           home: match.home?.name ?? "", away: match.away?.name ?? "",
-          homeFlag: match.home?.flag ?? "",
+          homeFlag: match.home?.flag ?? "", awayFlag: match.away?.flag ?? "",
+          result90: pred.result_90,
+          exactHome: hasExact ? pred.exact_home : null,
+          exactAway: hasExact ? pred.exact_away : null,
         });
       }
 
@@ -711,13 +729,33 @@ function Home() {
                         <span className="text-muted-foreground"> entrou no Top 3 da </span>
                         <span className="font-medium">{item.division}!</span>
                       </>;
+                    } else if (item.type === "prediction") {
+                      const resultLabel =
+                        item.result90 === "home" ? `vitória de ${item.home}` :
+                        item.result90 === "away" ? `vitória de ${item.away}` :
+                        item.result90 === "draw" ? "empate" : null;
+                      if (item.exactHome != null) {
+                        emoji = "🎯";
+                        content = <>
+                          <span className="font-semibold">{item.name}</span>
+                          <span className="text-muted-foreground"> prevê </span>
+                          <span className="font-medium">{item.homeFlag} {item.home} {item.exactHome}–{item.exactAway} {item.away} {item.awayFlag}</span>
+                        </>;
+                      } else if (resultLabel) {
+                        emoji = "⚽";
+                        content = <>
+                          <span className="font-semibold">{item.name}</span>
+                          <span className="text-muted-foreground"> aposta em </span>
+                          <span className="font-medium">{resultLabel}</span>
+                          <span className="text-muted-foreground"> em {matchText}</span>
+                        </>;
+                      } else {
+                        // fallback sem dados — não renderiza
+                        return null;
+                      }
                     } else {
-                      emoji = item.homeFlag || "⚽";
-                      content = <>
-                        <span className="font-semibold">{item.name}</span>
-                        <span className="text-muted-foreground"> votou em </span>
-                        <span className="font-medium">{matchText}</span>
-                      </>;
+                      // tipo desconhecido — não renderiza
+                      return null;
                     }
 
                     return (

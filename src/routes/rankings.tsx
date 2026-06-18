@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Trophy, ArrowUp, ArrowDown, Minus, Shield, Users2, Crown } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
+import { FollowButton } from "@/components/FollowButton";
 
 function RankTrend({ currentRank, previousRank }: { currentRank: number; previousRank: number | null }) {
   if (!previousRank || previousRank === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/30" />;
@@ -309,11 +310,9 @@ function Rankings() {
                     const isTop3 = i < 3;
                     const isBottom3 = i >= members.length - 3 && members.length > 3;
                     return (
-                      <Link key={u.id} to="/adepto/$id" params={{ id: u.id }}
-                        className={`flex items-center gap-3 px-4 py-2.5 hover:bg-accent/50 transition-smooth ${
-                          isMe ? div.bg : isTop3 ? "bg-wc-green/5" : isBottom3 ? "bg-wc-red/5" : ""
-                        }`}
-                      >
+                      <div key={u.id} className={`flex items-center gap-3 px-4 py-2.5 ${
+                        isMe ? div.bg : isTop3 ? "bg-wc-green/5" : isBottom3 ? "bg-wc-red/5" : ""
+                      }`}>
                         <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
                           i === 0 ? `bg-gradient-to-b ${div.color} text-white` :
                           isTop3 ? "bg-wc-green/20 text-wc-green" :
@@ -322,15 +321,18 @@ function Rankings() {
                         }`}>
                           {i === 0 ? <Crown className="h-3.5 w-3.5" /> : i + 1}
                         </span>
-                        <UserAvatar avatarUrl={(u as any).avatar_url} name={u.display_name} size={7} className="rounded-full shrink-0" />
-                        <span className={`flex-1 text-sm font-semibold truncate ${isMe ? div.text : ""}`}>
-                          {u.display_name}{isMe && " (tu)"}
-                        </span>
+                        <Link to="/adepto/$id" params={{ id: u.id }} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-smooth">
+                          <UserAvatar avatarUrl={(u as any).avatar_url} name={u.display_name} size={7} className="rounded-full shrink-0" />
+                          <span className={`flex-1 text-sm font-semibold truncate ${isMe ? div.text : ""}`}>
+                            {u.display_name}{isMe && " (tu)"}
+                          </span>
+                        </Link>
                         <div className="flex items-center gap-2 shrink-0">
                           <RankTrend currentRank={u.rank} previousRank={(u as any).previous_rank} />
                           <span className="font-display text-base text-gold">{u.total_points}</span>
+                          {!isMe && <FollowButton targetId={u.id} />}
                         </div>
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>

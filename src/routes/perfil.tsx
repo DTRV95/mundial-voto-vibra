@@ -8,7 +8,9 @@ import { AvatarPicker, UserAvatar } from "@/components/AvatarPicker";
 import { toast } from "sonner";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { formatDate } from "@/lib/format";
-import { useNotifications, markChatRead, markRankSeen } from "@/lib/useNotifications";
+import { useNotifications, markChatRead, markRankSeen, markFollowSeen } from "@/lib/useNotifications";
+import { FollowButton } from "@/components/FollowButton";
+import { UserAvatar } from "@/components/AvatarPicker";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({ meta: [{ title: "Perfil — Uma Geração" }] }),
@@ -319,6 +321,24 @@ function Perfil() {
                     <p className="text-sm font-semibold">Desceste do #{notif.previousRank}º para o #{notif.currentRank}º lugar</p>
                   </div>
                 </button>
+              );
+
+              if (notif.type === "follow") return (
+                <div
+                  key={`follow-${notif.id}`}
+                  className="overflow-hidden rounded-2xl border border-wc-blue/30 bg-wc-blue/5 px-4 py-3 flex items-center gap-3"
+                >
+                  <UserAvatar avatarUrl={notif.followerAvatar} name={notif.followerName} size={9} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Novo seguidor</p>
+                    <p className="text-sm font-semibold truncate">{notif.followerName} começou a seguir-te</p>
+                  </div>
+                  <FollowButton targetId={notif.followerId} size="sm" />
+                  <button onClick={() => { markFollowSeen(notif.id); refetchNotifs(); }}
+                    className="text-muted-foreground hover:text-foreground transition-smooth">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               );
 
               return null;

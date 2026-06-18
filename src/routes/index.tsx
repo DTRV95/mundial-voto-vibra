@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { PushNotificationPrompt } from "@/components/PushNotificationPrompt";
 import { useAuth } from "@/lib/useAuth";
+import { useFollowing } from "@/lib/useFollow";
 import trophyImg from "@/assets/trophy-hero.jpg";
 
 const SITE = "https://mundial-voto-vibra.davidvilaverde.workers.dev";
@@ -183,13 +184,18 @@ function Home() {
 
   const [feedOpen, setFeedOpen] = useState(() => localStorage.getItem("feed_open") !== "0");
   const [feedShown, setFeedShown] = useState(5);
+  const { data: following } = useFollowing();
 
   const { data: activityFeed = [] } = useQuery({
-    queryKey: ["activity-feed"],
+    queryKey: ["activity-feed", user?.id, following ? [...following].join(",") : ""],
+    enabled: !user || following !== undefined,
     queryFn: async () => {
+      const followingIds = following ? [...following] : [];
+
       const { data: preds } = await supabase
         .from("predictions")
         .select("id,created_at,user_id,match_id")
+        .in("user_id", followingIds.length > 0 ? followingIds : ["__none__"])
         .order("created_at", { ascending: false })
         .limit(30);
       if (!preds || preds.length === 0) return [];
@@ -517,6 +523,14 @@ function Home() {
       <PushNotificationPrompt />
 
       {/* ===================== FEED DE ATIVIDADE ===================== */}
+      {user && following !== undefined && following.size === 0 && (
+        <div className="mx-5 mt-4 md:mx-8">
+          <div className="rounded-2xl border border-dashed border-border bg-card/40 px-5 py-4 text-center">
+            <p className="text-sm font-semibold">Segue outros adeptos para ver a sua atividade aqui</p>
+            <p className="text-xs text-muted-foreground mt-1">Vai ao <Link to="/rankings" className="underline underline-offset-2">ranking</Link> e carrega em "Seguir"</p>
+          </div>
+        </div>
+      )}
       {activityFeed.length > 0 && (
         <div className="mx-5 mt-4 md:mx-8">
           <div className="overflow-hidden rounded-2xl border border-border bg-card">

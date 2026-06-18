@@ -151,6 +151,35 @@ function Home() {
     },
   });
 
+  const { data: pendingMatches = [] } = useQuery({
+    queryKey: ["pending-votes", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const now = new Date();
+      const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
+      const tomorrowEnd = new Date(now); tomorrowEnd.setDate(tomorrowEnd.getDate() + 1); tomorrowEnd.setHours(23, 59, 59, 999);
+
+      const { data: matches } = await supabase
+        .from("matches")
+        .select("id,kickoff_at,voting_open,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .gte("kickoff_at", now.toISOString())
+        .lte("kickoff_at", tomorrowEnd.toISOString())
+        .eq("voting_open", true)
+        .order("kickoff_at");
+
+      if (!matches || matches.length === 0) return [];
+
+      const { data: voted } = await supabase
+        .from("predictions")
+        .select("match_id")
+        .eq("user_id", user!.id)
+        .in("match_id", matches.map((m: any) => m.id));
+
+      const votedIds = new Set((voted ?? []).map((p: any) => p.match_id));
+      return (matches as any[]).filter(m => !votedIds.has(m.id));
+    },
+  });
+
   const myLeaderEntry = topLeaders.find((u: any) => u.id === user?.id);
   const { data: myLeaderRank } = useQuery({
     queryKey: ["my-rank-home", user?.id],
@@ -381,6 +410,58 @@ function Home() {
             </div>
             <ArrowRight className={`h-4 w-4 shrink-0 ${myDivision.text}`} />
           </Link>
+        </div>
+      )}
+
+      {/* ===================== JOGOS POR VOTAR ===================== */}
+      {user && pendingMatches.length > 0 && (
+        <div className="mx-5 mt-4 md:mx-8">
+          <div className="overflow-hidden rounded-2xl bg-wc-green panini-stripes"
+            style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.40)" }}>
+            <div className="px-5 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Não percas pontos</p>
+                  <h3 className="font-display text-xl text-white leading-tight">
+                    {pendingMatches.length === 1
+                      ? "1 jogo por votar"
+                      : `${pendingMatches.length} jogos por votar`}
+                  </h3>
+                </div>
+                <Link to="/jogos"
+                  className="shrink-0 rounded-xl bg-white/15 border border-white/20 px-3 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth">
+                  Ver todos →
+                </Link>
+              </div>
+              <div className="space-y-2">
+                {pendingMatches.slice(0, 3).map((m: any) => {
+                  const isToday = new Date(m.kickoff_at).toDateString() === new Date().toDateString();
+                  const time = new Date(m.kickoff_at).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+                  return (
+                    <Link key={m.id} to="/jogos"
+                      className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-2.5 hover:bg-white/20 transition-smooth">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <TeamBadge code={m.home?.code} flag={m.home?.flag} name={m.home?.name} size="sm" />
+                        <span className="text-xs font-semibold text-white truncate">{m.home?.name}</span>
+                        <span className="text-[10px] text-white/40 shrink-0">vs</span>
+                        <span className="text-xs font-semibold text-white truncate">{m.away?.name}</span>
+                        <TeamBadge code={m.away?.code} flag={m.away?.flag} name={m.away?.name} size="sm" />
+                      </div>
+                      <span className="shrink-0 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white">
+                        {isToday ? `Hoje ${time}` : `Amanhã ${time}`}
+                      </span>
+                    </Link>
+                  );
+                })}
+                {pendingMatches.length > 3 && (
+                  <Link to="/jogos"
+                    className="flex items-center justify-center py-1.5 text-xs font-semibold text-white/60 hover:text-white transition-smooth">
+                    +{pendingMatches.length - 3} mais →
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

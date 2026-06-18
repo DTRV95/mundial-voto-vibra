@@ -241,50 +241,24 @@ function Perfil() {
             <BarChart2 className="h-4 w-4 text-wc-blue" /> Estatísticas
           </h2>
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-orange-400/30 bg-orange-400/5 p-4 flex items-center gap-3">
-              <span className="text-2xl">🔥</span>
-              <div>
-                <p className="font-display text-2xl leading-none text-orange-400">{currentStreak}</p>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Streak atual</p>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-gold/30 bg-gold/5 p-4 flex items-center gap-3">
-              <Star className="h-5 w-5 text-gold shrink-0" />
-              <div>
-                <p className="font-display text-2xl leading-none text-gold">{maxStreak}</p>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Melhor streak</p>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-wc-green/30 bg-wc-green/5 p-4 flex items-center gap-3">
-              <Zap className="h-5 w-5 text-wc-green shrink-0" />
-              <div>
-                <p className="font-display text-2xl leading-none text-wc-green">{exactScores}</p>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Resultados exatos</p>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-wc-blue/30 bg-wc-blue/5 p-4 flex items-center gap-3">
-              <TrendingUp className="h-5 w-5 text-wc-blue shrink-0" />
-              <div>
-                <p className="font-display text-2xl leading-none text-wc-blue">{avgPoints}</p>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Média pts/jogo</p>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-border bg-card/60 p-4 flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-wc-green shrink-0" />
-              <div>
-                <p className="font-display text-2xl leading-none">{profile?.predictions_correct ?? 0}</p>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Acertos</p>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-border bg-card/60 p-4 flex items-center gap-3">
-              <XCircle className="h-5 w-5 text-wc-red shrink-0" />
-              <div>
-                <p className="font-display text-2xl leading-none">
-                  {Math.max(0, finishedGames.length - (profile?.predictions_correct ?? 0))}
-                </p>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">Erros</p>
-              </div>
-            </div>
+            <StatDetail icon={<span className="text-2xl">🔥</span>} value={currentStreak} label="Streak atual"
+              desc="Jogos consecutivos votados sem falhar nenhum" colorClass="text-orange-400"
+              borderClass="border-orange-400/30" bgClass="bg-orange-400/5" />
+            <StatDetail icon={<Star className="h-5 w-5 text-gold" />} value={maxStreak} label="Melhor streak"
+              desc="O teu recorde pessoal de jogos seguidos votados" colorClass="text-gold"
+              borderClass="border-gold/30" bgClass="bg-gold/5" />
+            <StatDetail icon={<Zap className="h-5 w-5 text-wc-green" />} value={exactScores} label="Resultados exatos"
+              desc="Vezes que acertaste no placard exato do jogo" colorClass="text-wc-green"
+              borderClass="border-wc-green/30" bgClass="bg-wc-green/5" />
+            <StatDetail icon={<TrendingUp className="h-5 w-5 text-wc-blue" />} value={avgPoints} label="Média pts/jogo"
+              desc="Pontuação média por jogo com resultado apurado" colorClass="text-wc-blue"
+              borderClass="border-wc-blue/30" bgClass="bg-wc-blue/5" />
+            <StatDetail icon={<CheckCircle2 className="h-5 w-5 text-wc-green" />} value={profile?.predictions_correct ?? 0} label="Acertos"
+              desc="Jogos em que acertaste no vencedor ou empate" colorClass="text-foreground"
+              borderClass="border-border" bgClass="bg-card/60" />
+            <StatDetail icon={<XCircle className="h-5 w-5 text-wc-red" />} value={Math.max(0, finishedGames.length - (profile?.predictions_correct ?? 0))} label="Erros"
+              desc="Jogos em que erraste o resultado final" colorClass="text-foreground"
+              borderClass="border-border" bgClass="bg-card/60" />
           </div>
         </section>
       )}
@@ -466,6 +440,22 @@ function Perfil() {
           <LogOut className="h-4 w-4" />
           Terminar sessão
         </button>
+      </div>
+    </div>
+  );
+}
+
+function StatDetail({ icon, value, label, desc, colorClass, borderClass, bgClass }: {
+  icon: React.ReactNode; value: React.ReactNode; label: string; desc: string;
+  colorClass: string; borderClass: string; bgClass: string;
+}) {
+  return (
+    <div className={`rounded-2xl border ${borderClass} ${bgClass} p-4 flex items-start gap-3`}>
+      <div className="shrink-0 mt-0.5">{icon}</div>
+      <div className="min-w-0">
+        <p className={`font-display text-2xl leading-none ${colorClass}`}>{value}</p>
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">{label}</p>
+        <p className="text-[11px] text-muted-foreground/70 mt-1 leading-tight">{desc}</p>
       </div>
     </div>
   );

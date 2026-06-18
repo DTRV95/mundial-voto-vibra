@@ -46,7 +46,7 @@ function Perfil() {
     queryFn: async () => {
       const { data } = await supabase
         .from("predictions")
-        .select("id,points,result_90,exact_home,exact_away,created_at,match:match_id(id,kickoff_at,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
+        .select("id,points,result_90,btts,total_25,total_35,double_chance,exact_home,exact_away,created_at,match:match_id(id,kickoff_at,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(200);
@@ -147,7 +147,7 @@ function Perfil() {
   const currentStreak = (profile as any)?.vote_streak ?? 0;
   const maxStreak = (profile as any)?.max_vote_streak ?? 0;
 
-  // Melhor sequência de acertos consecutivos
+  // Melhor sequência de acertos consecutivos no resultado final
   const sortedFinished = [...finishedGames].sort((a: any, b: any) =>
     new Date(a.match?.kickoff_at ?? 0).getTime() - new Date(b.match?.kickoff_at ?? 0).getTime()
   );
@@ -157,6 +157,62 @@ function Perfil() {
     if ((g.points ?? 0) > 0) { curCorrectStreak++; bestCorrectStreak = Math.max(bestCorrectStreak, curCorrectStreak); }
     else curCorrectStreak = 0;
   }
+
+  // Estatísticas por mercado
+  type MarketStat = { correct: number; total: number };
+  const markets: Record<string, MarketStat> = {
+    "Resultado final": { correct: 0, total: 0 },
+    "Placar exato":    { correct: 0, total: 0 },
+    "Ambas marcam":    { correct: 0, total: 0 },
+    "+/- 2.5 golos":   { correct: 0, total: 0 },
+    "+/- 3.5 golos":   { correct: 0, total: 0 },
+    "Dupla hipótese":  { correct: 0, total: 0 },
+  };
+  for (const h of finishedGames as any[]) {
+    const hs = h.match?.home_score ?? null;
+    const as_ = h.match?.away_score ?? null;
+    if (hs === null || as_ === null) continue;
+    const actualResult = hs > as_ ? "home" : hs < as_ ? "away" : "draw";
+    const totalGoals = hs + as_;
+    const bttsBool = hs > 0 && as_ > 0;
+
+    if (h.result_90) {
+      markets["Resultado final"].total++;
+      if (h.result_90 === actualResult) markets["Resultado final"].correct++;
+    }
+    if (h.exact_home != null && h.exact_away != null) {
+      markets["Placar exato"].total++;
+      if (h.exact_home === hs && h.exact_away === as_) markets["Placar exato"].correct++;
+    }
+    if ((h as any).btts) {
+      markets["Ambas marcam"].total++;
+      const predictedBtts = (h as any).btts === "yes";
+      if (predictedBtts === bttsBool) markets["Ambas marcam"].correct++;
+    }
+    if ((h as any).total_25) {
+      markets["+/- 2.5 golos"].total++;
+      const over = totalGoals > 2;
+      if (((h as any).total_25 === "over" && over) || ((h as any).total_25 === "under" && !over)) markets["+/- 2.5 golos"].correct++;
+    }
+    if ((h as any).total_35) {
+      markets["+/- 3.5 golos"].total++;
+      const over = totalGoals > 3;
+      if (((h as any).total_35 === "over" && over) || ((h as any).total_35 === "under" && !over)) markets["+/- 3.5 golos"].correct++;
+    }
+    if ((h as any).double_chance) {
+      markets["Dupla hipótese"].total++;
+      const dc = (h as any).double_chance;
+      const ok = (dc === "1x" && actualResult !== "away") || (dc === "x2" && actualResult !== "home") || (dc === "12" && actualResult !== "draw");
+      if (ok) markets["Dupla hipótese"].correct++;
+    }
+  }
+
+  const marketList = Object.entries(markets)
+    .filter(([, s]) => s.total >= 3)
+    .map(([name, s]) => ({ name, pct: Math.round((s.correct / s.total) * 100), correct: s.correct, total: s.total }))
+    .sort((a, b) => b.pct - a.pct);
+  const bestMarket = marketList[0] ?? null;
+  const worstMarket = marketList.length > 1 ? marketList[marketList.length - 1] : null;
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -258,30 +314,32 @@ function Perfil() {
             <BarChart2 className="h-4 w-4 text-wc-blue" /> Estatísticas
           </h2>
           <div className="grid grid-cols-2 gap-3">
-            <StatDetail icon={<span className="text-2xl">🔥</span>} value={currentStreak} label="Streak atual"
-              context={maxStreak > 0 ? `recorde: ${maxStreak}` : undefined}
+            <StatDetail icon={<span className="text-2xl">🔥</span>} value={currentStreak} label="Streak de votos"
+              context={maxStreak > 0 ? `recorde: ${maxStreak} jogos` : undefined}
               desc="Jogos consecutivos votados sem falhar nenhum" colorClass="text-orange-400"
               borderClass="border-orange-400/30" bgClass="bg-orange-400/5" />
-            <StatDetail icon={<Zap className="h-5 w-5 text-wc-green" />} value={exactScores} label="Placares exatos"
-              context={`em ${finishedGames.length} jogos`}
-              desc="Vezes que acertaste no placard exato do jogo" colorClass="text-wc-green"
-              borderClass="border-wc-green/30" bgClass="bg-wc-green/5" />
-            <StatDetail icon={<TrendingUp className="h-5 w-5 text-wc-blue" />} value={avgPoints} label="Média pts/jogo"
-              context={`${finishedGames.length} jogos apurados`}
-              desc="Pontuação média por jogo com resultado apurado" colorClass="text-wc-blue"
-              borderClass="border-wc-blue/30" bgClass="bg-wc-blue/5" />
             <StatDetail icon={<Star className="h-5 w-5 text-gold" />} value={bestCorrectStreak} label="Melhor sequência"
-              context="acertos consecutivos"
-              desc="Maior número de resultados certos seguidos" colorClass="text-gold"
+              context="resultados 1X2 certos seguidos"
+              desc="Maior número de resultados finais acertados consecutivamente" colorClass="text-gold"
               borderClass="border-gold/30" bgClass="bg-gold/5" />
-            <StatDetail icon={<CheckCircle2 className="h-5 w-5 text-wc-green" />} value={correctGames} label="Acertos"
-              context={`em ${finishedGames.length} jogos`}
-              desc="Jogos em que acertaste no vencedor ou empate" colorClass="text-foreground"
-              borderClass="border-border" bgClass="bg-card/60" />
-            <StatDetail icon={<Target className="h-5 w-5 text-wc-blue" />} value={`${acc}%`} label="Taxa de acerto"
-              context={`${correctGames} em ${finishedGames.length}`}
-              desc="Percentagem de jogos em que acertaste o resultado" colorClass="text-wc-blue"
-              borderClass="border-wc-blue/20" bgClass="bg-wc-blue/5" />
+            <StatDetail icon={<CheckCircle2 className="h-5 w-5 text-wc-green" />} value={`${correctGames}/${finishedGames.length}`} label="Resultados certos"
+              context={`${acc}% de acerto`}
+              desc="Jogos em que acertaste quem ganhou ou o empate (1X2)" colorClass="text-wc-green"
+              borderClass="border-wc-green/30" bgClass="bg-wc-green/5" />
+            <StatDetail icon={<Zap className="h-5 w-5 text-wc-blue" />} value={`${exactScores}/${finishedGames.length}`} label="Placares exatos"
+              context={finishedGames.length > 0 ? `${Math.round((exactScores / finishedGames.length) * 100)}% de acerto` : ""}
+              desc="Vezes que acertaste o placard exacto (ex: Portugal 2-1 Espanha)" colorClass="text-wc-blue"
+              borderClass="border-wc-blue/30" bgClass="bg-wc-blue/5" />
+            <StatDetail icon={<TrendingUp className="h-5 w-5 text-wc-green" />}
+              value={bestMarket ? `${bestMarket.pct}%` : "—"} label="Melhor mercado"
+              context={bestMarket ? `${bestMarket.name} · ${bestMarket.correct}/${bestMarket.total}` : "poucos dados"}
+              desc="O mercado onde tens maior percentagem de acerto" colorClass="text-wc-green"
+              borderClass="border-wc-green/30" bgClass="bg-wc-green/5" />
+            <StatDetail icon={<XCircle className="h-5 w-5 text-wc-red" />}
+              value={worstMarket ? `${worstMarket.pct}%` : "—"} label="Pior mercado"
+              context={worstMarket ? `${worstMarket.name} · ${worstMarket.correct}/${worstMarket.total}` : "poucos dados"}
+              desc="O mercado onde tens menor percentagem de acerto" colorClass="text-wc-red"
+              borderClass="border-wc-red/30" bgClass="bg-wc-red/5" />
           </div>
         </section>
       )}

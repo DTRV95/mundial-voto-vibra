@@ -10,7 +10,6 @@ import { TeamBadge } from "@/lib/teamColors.tsx";
 import { formatDate } from "@/lib/format";
 import { useNotifications, markChatRead, markRankSeen, markFollowSeen } from "@/lib/useNotifications";
 import { FollowButton } from "@/components/FollowButton";
-import { UserAvatar } from "@/components/AvatarPicker";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({ meta: [{ title: "Perfil — Uma Geração" }] }),

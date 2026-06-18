@@ -181,7 +181,7 @@ function Home() {
     },
   });
 
-  const [feedOpen, setFeedOpen] = useState(true);
+  const [feedOpen, setFeedOpen] = useState(() => localStorage.getItem("feed_open") !== "0");
   const [feedShown, setFeedShown] = useState(5);
 
   const { data: activityFeed = [] } = useQuery({
@@ -521,7 +521,7 @@ function Home() {
         <div className="mx-5 mt-4 md:mx-8">
           <div className="overflow-hidden rounded-2xl border border-border bg-card">
             <button
-              onClick={() => setFeedOpen(o => !o)}
+              onClick={() => setFeedOpen(o => { const next = !o; localStorage.setItem("feed_open", next ? "1" : "0"); return next; })}
               className="flex w-full items-center justify-between px-5 py-3 hover:bg-muted/40 transition-smooth"
             >
               <div className="flex items-center gap-2">

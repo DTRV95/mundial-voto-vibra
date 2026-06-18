@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Star, Flame, Calendar, ImageIcon, Bell, BarChart2, Zap, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Flame, Calendar, ImageIcon, Bell, BarChart2, Zap, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { AvatarPicker, UserAvatar } from "@/components/AvatarPicker";
 import { toast } from "sonner";
 import { TeamBadge } from "@/lib/teamColors.tsx";
@@ -330,14 +330,6 @@ function Perfil() {
             <BarChart2 className="h-4 w-4 text-wc-blue" /> Estatísticas Gerais
           </h2>
           <div className="grid grid-cols-2 gap-3">
-            <StatDetail icon={<span className="text-2xl">🔥</span>} value={currentStreak} label="Streak de votos"
-              context={maxStreak > 0 ? `recorde: ${maxStreak} jogos` : undefined}
-              desc="Jogos consecutivos votados sem falhar nenhum" colorClass="text-orange-400"
-              borderClass="border-orange-400/30" bgClass="bg-orange-400/5" />
-            <StatDetail icon={<Star className="h-5 w-5 text-gold" />} value={bestCorrectStreak} label="Melhor sequência"
-              context="resultados 1X2 certos seguidos"
-              desc="Maior número de resultados finais acertados consecutivamente" colorClass="text-gold"
-              borderClass="border-gold/30" bgClass="bg-gold/5" />
             <StatDetail icon={<CheckCircle2 className="h-5 w-5 text-wc-green" />} value={`${correctGames}/${finishedGames.length}`} label="Resultados certos"
               context={`${acc}% de acerto`}
               desc="Jogos em que acertaste quem ganhou ou o empate (1X2)" colorClass="text-wc-green"

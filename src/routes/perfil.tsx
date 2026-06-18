@@ -49,7 +49,7 @@ function Perfil() {
         .select("id,points,result_90,exact_home,exact_away,created_at,match:match_id(id,kickoff_at,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
-        .limit(30);
+        .limit(200);
       return data ?? [];
     },
   });
@@ -140,6 +140,8 @@ function Perfil() {
     h.exact_home != null && h.exact_away != null &&
     h.exact_home === h.match?.home_score && h.exact_away === h.match?.away_score
   ).length;
+  const correctGames = finishedGames.filter((h: any) => (h.points ?? 0) > 0).length;
+  const errorGames = finishedGames.filter((h: any) => (h.points ?? 0) === 0).length;
   const totalPoints = finishedGames.reduce((sum: number, h: any) => sum + (h.points ?? 0), 0);
   const avgPoints = finishedGames.length > 0 ? (totalPoints / finishedGames.length).toFixed(1) : "—";
   const currentStreak = (profile as any)?.vote_streak ?? 0;
@@ -257,10 +259,10 @@ function Perfil() {
             <StatDetail icon={<TrendingUp className="h-5 w-5 text-wc-blue" />} value={avgPoints} label="Média pts/jogo"
               desc="Pontuação média por jogo com resultado apurado" colorClass="text-wc-blue"
               borderClass="border-wc-blue/30" bgClass="bg-wc-blue/5" />
-            <StatDetail icon={<CheckCircle2 className="h-5 w-5 text-wc-green" />} value={profile?.predictions_correct ?? 0} label="Acertos"
+            <StatDetail icon={<CheckCircle2 className="h-5 w-5 text-wc-green" />} value={correctGames} label="Acertos"
               desc="Jogos em que acertaste no vencedor ou empate" colorClass="text-foreground"
               borderClass="border-border" bgClass="bg-card/60" />
-            <StatDetail icon={<XCircle className="h-5 w-5 text-wc-red" />} value={Math.max(0, (profile?.predictions_made ?? 0) - (profile?.predictions_correct ?? 0))} label="Erros"
+            <StatDetail icon={<XCircle className="h-5 w-5 text-wc-red" />} value={errorGames} label="Erros"
               desc="Jogos em que erraste o resultado final" colorClass="text-foreground"
               borderClass="border-border" bgClass="bg-card/60" />
           </div>

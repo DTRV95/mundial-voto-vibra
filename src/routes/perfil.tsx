@@ -323,11 +323,11 @@ function Perfil() {
         </div>
       </div>
 
-      {/* Estatísticas detalhadas */}
+      {/* Estatísticas gerais */}
       {finishedGames.length > 0 && (
         <section className="mb-6">
           <h2 className="mb-3 font-display text-lg flex items-center gap-2">
-            <BarChart2 className="h-4 w-4 text-wc-blue" /> Estatísticas
+            <BarChart2 className="h-4 w-4 text-wc-blue" /> Estatísticas Gerais
           </h2>
           <div className="grid grid-cols-2 gap-3">
             <StatDetail icon={<span className="text-2xl">🔥</span>} value={currentStreak} label="Streak de votos"
@@ -346,17 +346,55 @@ function Perfil() {
               context={finishedGames.length > 0 ? `${Math.round((exactScores / finishedGames.length) * 100)}% de acerto` : ""}
               desc="Vezes que acertaste o placard exacto (ex: Portugal 2-1 Espanha)" colorClass="text-wc-blue"
               borderClass="border-wc-blue/30" bgClass="bg-wc-blue/5" />
-            <StatDetail icon={<TrendingUp className="h-5 w-5 text-wc-green" />}
-              value={bestMarket ? `${bestMarket.pct}%` : "—"} label="Melhor mercado"
-              context={bestMarket ? `${bestMarket.name} · ${bestMarket.correct}/${bestMarket.total}` : "poucos dados"}
-              desc="O mercado onde tens maior percentagem de acerto" colorClass="text-wc-green"
-              borderClass="border-wc-green/30" bgClass="bg-wc-green/5" />
-            <StatDetail icon={<XCircle className="h-5 w-5 text-wc-red" />}
-              value={worstMarket ? `${worstMarket.pct}%` : "—"} label="Pior mercado"
-              context={worstMarket ? `${worstMarket.name} · ${worstMarket.correct}/${worstMarket.total}` : "poucos dados"}
-              desc="O mercado onde tens menor percentagem de acerto" colorClass="text-wc-red"
-              borderClass="border-wc-red/30" bgClass="bg-wc-red/5" />
           </div>
+        </section>
+      )}
+
+      {/* Estatísticas por mercado */}
+      {marketList.length > 0 && (
+        <section className="mb-6">
+          <h2 className="mb-3 font-display text-lg flex items-center gap-2">
+            <Target className="h-4 w-4 text-gold" /> Acerto por Mercado
+          </h2>
+          <div className="rounded-2xl border border-border bg-card/60 overflow-hidden">
+            {marketList.map((m, i) => (
+              <div key={m.name} className={`px-4 py-3 ${i < marketList.length - 1 ? "border-b border-border/60" : ""}`}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm font-semibold">{m.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-muted-foreground">{m.correct}/{m.total}</span>
+                    <span className={`font-display text-base ${m.pct >= 60 ? "text-wc-green" : m.pct >= 40 ? "text-gold" : "text-wc-red"}`}>
+                      {m.pct}%
+                    </span>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${m.pct >= 60 ? "bg-wc-green" : m.pct >= 40 ? "bg-gold" : "bg-wc-red"}`}
+                    style={{ width: `${m.pct}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          {(bestMarket || worstMarket) && (
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              {bestMarket && (
+                <div className="rounded-2xl border border-wc-green/30 bg-wc-green/5 px-4 py-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-wc-green/70 mb-0.5">Melhor mercado</p>
+                  <p className="font-semibold text-sm">{bestMarket.name}</p>
+                  <p className="font-display text-xl text-wc-green">{bestMarket.pct}%</p>
+                </div>
+              )}
+              {worstMarket && (
+                <div className="rounded-2xl border border-wc-red/30 bg-wc-red/5 px-4 py-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-wc-red/70 mb-0.5">Pior mercado</p>
+                  <p className="font-semibold text-sm">{worstMarket.name}</p>
+                  <p className="font-display text-xl text-wc-red">{worstMarket.pct}%</p>
+                </div>
+              )}
+            </div>
+          )}
         </section>
       )}
 

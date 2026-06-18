@@ -161,15 +161,20 @@ function Perfil() {
     else curCorrectStreak = 0;
   }
 
-  // Estatísticas por mercado
-  const markets: Record<string, MarketStat> = {
-    "Resultado final": { correct: 0, total: 0 },
-    "Placar exato":    { correct: 0, total: 0 },
-    "Ambas marcam":    { correct: 0, total: 0 },
-    "+/- 2.5 golos":   { correct: 0, total: 0 },
-    "+/- 3.5 golos":   { correct: 0, total: 0 },
-    "Dupla hipótese":  { correct: 0, total: 0 },
+  // Estatísticas por mercado com breakdown por opção
+  type OptionStat = { label: string; correct: number; total: number };
+  type MarketDetail = { correct: number; total: number; options: OptionStat[] };
+
+  const mkOpt = (label: string): OptionStat => ({ label, correct: 0, total: 0 });
+  const mktData: Record<string, MarketDetail> = {
+    "Resultado final": { correct: 0, total: 0, options: [mkOpt("Vitória casa"), mkOpt("Empate"), mkOpt("Vitória fora")] },
+    "Placar exato":    { correct: 0, total: 0, options: [] },
+    "Ambas marcam":    { correct: 0, total: 0, options: [mkOpt("Sim"), mkOpt("Não")] },
+    "+/- 2.5 golos":   { correct: 0, total: 0, options: [mkOpt("Mais de 2.5"), mkOpt("Menos de 2.5")] },
+    "+/- 3.5 golos":   { correct: 0, total: 0, options: [mkOpt("Mais de 3.5"), mkOpt("Menos de 3.5")] },
+    "Dupla hipótese":  { correct: 0, total: 0, options: [mkOpt("1X"), mkOpt("X2"), mkOpt("12")] },
   };
+
   for (const h of finishedGames as any[]) {
     const hs = h.match?.home_score ?? null;
     const as_ = h.match?.away_score ?? null;
@@ -179,42 +184,66 @@ function Perfil() {
     const bttsBool = hs > 0 && as_ > 0;
 
     if (h.result_90) {
-      markets["Resultado final"].total++;
-      if (h.result_90 === actualResult) markets["Resultado final"].correct++;
+      const mkt = mktData["Resultado final"];
+      mkt.total++;
+      const correct = h.result_90 === actualResult;
+      if (correct) mkt.correct++;
+      const optIdx = h.result_90 === "home" ? 0 : h.result_90 === "draw" ? 1 : 2;
+      mkt.options[optIdx].total++;
+      if (correct) mkt.options[optIdx].correct++;
     }
     if (h.exact_home != null && h.exact_away != null) {
-      markets["Placar exato"].total++;
-      if (h.exact_home === hs && h.exact_away === as_) markets["Placar exato"].correct++;
+      const mkt = mktData["Placar exato"];
+      mkt.total++;
+      if (h.exact_home === hs && h.exact_away === as_) mkt.correct++;
     }
-    if ((h as any).btts) {
-      markets["Ambas marcam"].total++;
-      const predictedBtts = (h as any).btts === "yes";
-      if (predictedBtts === bttsBool) markets["Ambas marcam"].correct++;
+    if (h.btts) {
+      const mkt = mktData["Ambas marcam"];
+      mkt.total++;
+      const predictedYes = h.btts === "yes";
+      const correct = predictedYes === bttsBool;
+      if (correct) mkt.correct++;
+      const optIdx = predictedYes ? 0 : 1;
+      mkt.options[optIdx].total++;
+      if (correct) mkt.options[optIdx].correct++;
     }
-    if ((h as any).total_25) {
-      markets["+/- 2.5 golos"].total++;
-      const over = totalGoals > 2;
-      if (((h as any).total_25 === "over" && over) || ((h as any).total_25 === "under" && !over)) markets["+/- 2.5 golos"].correct++;
+    if (h.total_25) {
+      const mkt = mktData["+/- 2.5 golos"];
+      mkt.total++;
+      const predictedOver = h.total_25 === "over";
+      const actualOver = totalGoals > 2;
+      const correct = predictedOver === actualOver;
+      if (correct) mkt.correct++;
+      const optIdx = predictedOver ? 0 : 1;
+      mkt.options[optIdx].total++;
+      if (correct) mkt.options[optIdx].correct++;
     }
-    if ((h as any).total_35) {
-      markets["+/- 3.5 golos"].total++;
-      const over = totalGoals > 3;
-      if (((h as any).total_35 === "over" && over) || ((h as any).total_35 === "under" && !over)) markets["+/- 3.5 golos"].correct++;
+    if (h.total_35) {
+      const mkt = mktData["+/- 3.5 golos"];
+      mkt.total++;
+      const predictedOver = h.total_35 === "over";
+      const actualOver = totalGoals > 3;
+      const correct = predictedOver === actualOver;
+      if (correct) mkt.correct++;
+      const optIdx = predictedOver ? 0 : 1;
+      mkt.options[optIdx].total++;
+      if (correct) mkt.options[optIdx].correct++;
     }
-    if ((h as any).double_chance) {
-      markets["Dupla hipótese"].total++;
-      const dc = (h as any).double_chance;
-      const ok = (dc === "1x" && actualResult !== "away") || (dc === "x2" && actualResult !== "home") || (dc === "12" && actualResult !== "draw");
-      if (ok) markets["Dupla hipótese"].correct++;
+    if (h.double_chance) {
+      const mkt = mktData["Dupla hipótese"];
+      mkt.total++;
+      const dc = h.double_chance;
+      const correct = (dc === "1x" && actualResult !== "away") || (dc === "x2" && actualResult !== "home") || (dc === "12" && actualResult !== "draw");
+      if (correct) mkt.correct++;
+      const optIdx = dc === "1x" ? 0 : dc === "x2" ? 1 : 2;
+      mkt.options[optIdx].total++;
+      if (correct) mkt.options[optIdx].correct++;
     }
   }
 
-  const marketList = Object.entries(markets)
-    .filter(([, s]) => s.total >= 3)
-    .map(([name, s]) => ({ name, pct: Math.round((s.correct / s.total) * 100), correct: s.correct, total: s.total }))
-    .sort((a, b) => b.pct - a.pct);
-  const bestMarket = marketList[0] ?? null;
-  const worstMarket = marketList.length > 1 ? marketList[marketList.length - 1] : null;
+  const marketList = Object.entries(mktData)
+    .filter(([, m]) => m.total >= 1)
+    .map(([name, m]) => ({ name, pct: Math.round((m.correct / m.total) * 100), correct: m.correct, total: m.total, options: m.options.filter(o => o.total > 0) }));
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -348,26 +377,50 @@ function Perfil() {
           <h2 className="mb-3 font-display text-lg flex items-center gap-2">
             <Target className="h-4 w-4 text-gold" /> Acerto por Mercado
           </h2>
-          <div className="rounded-2xl border border-border bg-card/60 overflow-hidden">
-            {marketList.map((m, i) => (
-              <div key={m.name} className={`px-4 py-3 ${i < marketList.length - 1 ? "border-b border-border/60" : ""}`}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm font-semibold">{m.name}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-muted-foreground">{m.correct}/{m.total}</span>
-                    <span className={`font-display text-base ${m.pct >= 60 ? "text-wc-green" : m.pct >= 40 ? "text-gold" : "text-wc-red"}`}>
-                      {m.pct}%
-                    </span>
+          <div className="space-y-3">
+            {marketList.map((m) => {
+              const color = m.pct >= 60 ? "text-wc-green" : m.pct >= 40 ? "text-gold" : "text-wc-red";
+              const barColor = m.pct >= 60 ? "bg-wc-green" : m.pct >= 40 ? "bg-gold" : "bg-wc-red";
+              const borderColor = m.pct >= 60 ? "border-wc-green/20" : m.pct >= 40 ? "border-gold/20" : "border-wc-red/20";
+              return (
+                <div key={m.name} className={`rounded-2xl border ${borderColor} bg-card/60 overflow-hidden`}>
+                  {/* Cabeçalho do mercado */}
+                  <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                    <span className="font-semibold text-sm">{m.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-muted-foreground">{m.correct}/{m.total}</span>
+                      <span className={`font-display text-xl leading-none ${color}`}>{m.pct}%</span>
+                    </div>
                   </div>
+                  {/* Barra geral */}
+                  <div className="mx-4 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div className={`h-full rounded-full ${barColor}`} style={{ width: `${m.pct}%` }} />
+                  </div>
+                  {/* Breakdown por opção */}
+                  {m.options.length > 0 && (
+                    <div className="flex gap-2 flex-wrap px-4 pb-4 pt-3">
+                      {m.options.map((o) => {
+                        const oPct = o.total > 0 ? Math.round((o.correct / o.total) * 100) : 0;
+                        const isGood = oPct >= 60;
+                        const isMid = oPct >= 40 && oPct < 60;
+                        return (
+                          <div key={o.label} className={`flex-1 min-w-[80px] rounded-xl px-3 py-2 text-center ${
+                            isGood ? "bg-wc-green/10 border border-wc-green/25" :
+                            isMid  ? "bg-gold/10 border border-gold/25" :
+                                     "bg-muted/60 border border-border"
+                          }`}>
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{o.label}</p>
+                            <p className={`font-display text-lg leading-tight mt-0.5 ${isGood ? "text-wc-green" : isMid ? "text-gold" : "text-foreground"}`}>{oPct}%</p>
+                            <p className="text-[10px] text-muted-foreground">{o.correct}/{o.total}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {m.options.length === 0 && <div className="pb-4" />}
                 </div>
-                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-700 ${m.pct >= 60 ? "bg-wc-green" : m.pct >= 40 ? "bg-gold" : "bg-wc-red"}`}
-                    style={{ width: `${m.pct}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}

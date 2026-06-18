@@ -31,7 +31,7 @@ function Perfil() {
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id], enabled: !!user?.id,
-    staleTime: 0,
+    staleTime: 30_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")

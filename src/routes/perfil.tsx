@@ -147,6 +147,17 @@ function Perfil() {
   const currentStreak = (profile as any)?.vote_streak ?? 0;
   const maxStreak = (profile as any)?.max_vote_streak ?? 0;
 
+  // Melhor sequência de acertos consecutivos
+  const sortedFinished = [...finishedGames].sort((a: any, b: any) =>
+    new Date(a.match?.kickoff_at ?? 0).getTime() - new Date(b.match?.kickoff_at ?? 0).getTime()
+  );
+  let bestCorrectStreak = 0;
+  let curCorrectStreak = 0;
+  for (const g of sortedFinished) {
+    if ((g.points ?? 0) > 0) { curCorrectStreak++; bestCorrectStreak = Math.max(bestCorrectStreak, curCorrectStreak); }
+    else curCorrectStreak = 0;
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     toast.success("Sessão terminada");
@@ -241,30 +252,36 @@ function Perfil() {
       </div>
 
       {/* Estatísticas detalhadas */}
-      {(profile?.predictions_made ?? 0) > 0 && (
+      {finishedGames.length > 0 && (
         <section className="mb-6">
           <h2 className="mb-3 font-display text-lg flex items-center gap-2">
             <BarChart2 className="h-4 w-4 text-wc-blue" /> Estatísticas
           </h2>
           <div className="grid grid-cols-2 gap-3">
             <StatDetail icon={<span className="text-2xl">🔥</span>} value={currentStreak} label="Streak atual"
+              context={maxStreak > 0 ? `recorde: ${maxStreak}` : undefined}
               desc="Jogos consecutivos votados sem falhar nenhum" colorClass="text-orange-400"
               borderClass="border-orange-400/30" bgClass="bg-orange-400/5" />
-            <StatDetail icon={<Star className="h-5 w-5 text-gold" />} value={maxStreak} label="Melhor streak"
-              desc="O teu recorde pessoal de jogos seguidos votados" colorClass="text-gold"
-              borderClass="border-gold/30" bgClass="bg-gold/5" />
-            <StatDetail icon={<Zap className="h-5 w-5 text-wc-green" />} value={exactScores} label="Resultados exatos"
+            <StatDetail icon={<Zap className="h-5 w-5 text-wc-green" />} value={exactScores} label="Placares exatos"
+              context={`em ${finishedGames.length} jogos`}
               desc="Vezes que acertaste no placard exato do jogo" colorClass="text-wc-green"
               borderClass="border-wc-green/30" bgClass="bg-wc-green/5" />
             <StatDetail icon={<TrendingUp className="h-5 w-5 text-wc-blue" />} value={avgPoints} label="Média pts/jogo"
+              context={`${finishedGames.length} jogos apurados`}
               desc="Pontuação média por jogo com resultado apurado" colorClass="text-wc-blue"
               borderClass="border-wc-blue/30" bgClass="bg-wc-blue/5" />
+            <StatDetail icon={<Star className="h-5 w-5 text-gold" />} value={bestCorrectStreak} label="Melhor sequência"
+              context="acertos consecutivos"
+              desc="Maior número de resultados certos seguidos" colorClass="text-gold"
+              borderClass="border-gold/30" bgClass="bg-gold/5" />
             <StatDetail icon={<CheckCircle2 className="h-5 w-5 text-wc-green" />} value={correctGames} label="Acertos"
+              context={`em ${finishedGames.length} jogos`}
               desc="Jogos em que acertaste no vencedor ou empate" colorClass="text-foreground"
               borderClass="border-border" bgClass="bg-card/60" />
-            <StatDetail icon={<XCircle className="h-5 w-5 text-wc-red" />} value={errorGames} label="Erros"
-              desc="Jogos em que erraste o resultado final" colorClass="text-foreground"
-              borderClass="border-border" bgClass="bg-card/60" />
+            <StatDetail icon={<Target className="h-5 w-5 text-wc-blue" />} value={`${acc}%`} label="Taxa de acerto"
+              context={`${correctGames} em ${finishedGames.length}`}
+              desc="Percentagem de jogos em que acertaste o resultado" colorClass="text-wc-blue"
+              borderClass="border-wc-blue/20" bgClass="bg-wc-blue/5" />
           </div>
         </section>
       )}
@@ -469,17 +486,18 @@ function Perfil() {
   );
 }
 
-function StatDetail({ icon, value, label, desc, colorClass, borderClass, bgClass }: {
+function StatDetail({ icon, value, label, desc, context, colorClass, borderClass, bgClass }: {
   icon: React.ReactNode; value: React.ReactNode; label: string; desc: string;
-  colorClass: string; borderClass: string; bgClass: string;
+  context?: string; colorClass: string; borderClass: string; bgClass: string;
 }) {
   return (
     <div className={`rounded-2xl border ${borderClass} ${bgClass} p-4 flex items-start gap-3`}>
       <div className="shrink-0 mt-0.5">{icon}</div>
       <div className="min-w-0">
         <p className={`font-display text-2xl leading-none ${colorClass}`}>{value}</p>
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-0.5">{label}</p>
-        <p className="text-[11px] text-muted-foreground/70 mt-1 leading-tight">{desc}</p>
+        {context && <p className="text-[10px] text-muted-foreground/80 mt-0.5">{context}</p>}
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">{label}</p>
+        <p className="text-[11px] text-muted-foreground/60 mt-0.5 leading-tight">{desc}</p>
       </div>
     </div>
   );

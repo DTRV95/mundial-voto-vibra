@@ -52,7 +52,9 @@ function Jogos() {
         .from("matches")
         .select("id,kickoff_at,phase,status,voting_open,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code),predictions(count)")
         .order("kickoff_at");
-      return ((data as any) ?? []).map((m: any) => ({
+      return ((data as any) ?? [])
+        .filter((m: any) => m.home && m.away)
+        .map((m: any) => ({
         ...m,
         votes_count: m.predictions?.[0]?.count ?? 0,
       }));

@@ -16,6 +16,7 @@ export interface MatchCardData {
 }
 
 export function MatchCard({ match }: { match: MatchCardData }) {
+  if (!match.home || !match.away) return null;
   const status = votingStatus(match);
 
   const statusCls =

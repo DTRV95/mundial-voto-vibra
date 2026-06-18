@@ -151,35 +151,39 @@ export function useNotifications() {
       }
 
       // ── 3. Notificações de novos seguidores ───────────────────────────────
-      const seen = getStorage<Record<string, boolean>>(FOLLOW_KEY, {});
-      const { data: followNotifs } = await (supabase as any)
-        .from("follow_notifications")
-        .select("id,follower_id,created_at")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(10);
+      try {
+        const seen = getStorage<Record<string, boolean>>(FOLLOW_KEY, {});
+        const { data: followNotifs } = await (supabase as any)
+          .from("follow_notifications")
+          .select("id,follower_id,created_at")
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false })
+          .limit(10);
 
-      const unseenFollows = (followNotifs ?? []).filter((n: any) => !seen[n.id]);
-      if (unseenFollows.length > 0) {
-        const followerIds = unseenFollows.map((n: any) => n.follower_id);
-        const { data: followerProfiles } = await supabase
-          .from("profiles")
-          .select("id,display_name,avatar_url")
-          .in("id", followerIds);
-        const profileMap = Object.fromEntries((followerProfiles ?? []).map((p: any) => [p.id, p]));
+        const unseenFollows = (followNotifs ?? []).filter((n: any) => !seen[n.id]);
+        if (unseenFollows.length > 0) {
+          const followerIds = unseenFollows.map((n: any) => n.follower_id);
+          const { data: followerProfiles } = await supabase
+            .from("profiles")
+            .select("id,display_name,avatar_url")
+            .in("id", followerIds);
+          const profileMap = Object.fromEntries((followerProfiles ?? []).map((p: any) => [p.id, p]));
 
-        for (const n of unseenFollows) {
-          const p = profileMap[n.follower_id];
-          if (!p) continue;
-          notifications.push({
-            type: "follow",
-            id: n.id,
-            followerId: n.follower_id,
-            followerName: p.display_name ?? "Alguém",
-            followerAvatar: p.avatar_url ?? null,
-            createdAt: n.created_at,
-          });
+          for (const n of unseenFollows) {
+            const p = profileMap[n.follower_id];
+            if (!p) continue;
+            notifications.push({
+              type: "follow",
+              id: n.id,
+              followerId: n.follower_id,
+              followerName: p.display_name ?? "Alguém",
+              followerAvatar: p.avatar_url ?? null,
+              createdAt: n.created_at,
+            });
+          }
         }
+      } catch {
+        // tabela ainda não existe — ignora silenciosamente
       }
 
       const total = notifications.reduce((s, n) => {

@@ -302,9 +302,23 @@ function Perfil() {
 
           {/* Stats row */}
           <div className="mt-8 grid grid-cols-3 gap-3">
-            <StatCard icon={<Trophy className="h-4 w-4 text-gold" />} label="Pontos" value={profile?.total_points ?? 0} />
-            <StatCard icon={<Target className="h-4 w-4 text-wc-green" />} label="Previsões" value={profile?.predictions_made ?? 0} />
-            <StatCard icon={<Percent className="h-4 w-4 text-wc-blue" />} label="Acerto" value={`${acc}%`} />
+            {profile == null ? (
+              <>
+                {[0,1,2].map(i => (
+                  <div key={i} className="rounded-2xl border border-border bg-card/60 p-4 flex flex-col items-center gap-2">
+                    <div className="h-4 w-4 rounded-full bg-muted animate-pulse" />
+                    <div className="h-6 w-10 rounded bg-muted animate-pulse" />
+                    <div className="h-3 w-14 rounded bg-muted animate-pulse" />
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+                <StatCard icon={<Trophy className="h-4 w-4 text-gold" />} label="Pontos" value={profile.total_points ?? 0} />
+                <StatCard icon={<Target className="h-4 w-4 text-wc-green" />} label="Previsões" value={profile.predictions_made ?? 0} />
+                <StatCard icon={<Percent className="h-4 w-4 text-wc-blue" />} label="Acerto" value={`${acc}%`} />
+              </>
+            )}
           </div>
         </div>
       </div>

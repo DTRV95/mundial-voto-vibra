@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Star, Flame, Calendar, ImageIcon, Bell, BarChart2, Zap, TrendingUp } from "lucide-react";
+import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Star, Flame, Calendar, ImageIcon, Bell, BarChart2, Zap, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { AvatarPicker, UserAvatar } from "@/components/AvatarPicker";
 import { toast } from "sonner";
 import { TeamBadge } from "@/lib/teamColors.tsx";
@@ -69,6 +69,7 @@ function Perfil() {
 
   // Edição de nome
   const [avatarOpen, setAvatarOpen] = useState(false);
+  const [historyExpanded, setHistoryExpanded] = useState(false);
 
   async function saveAvatar(url: string) {
     await supabase.from("profiles").update({ avatar_url: url }).eq("id", user!.id);
@@ -478,57 +479,72 @@ function Perfil() {
               Ver jogos
             </Link>
           </div>
-        ) : (
-          <ul className="space-y-2">
-            {history.map((h: any) => {
-              const hasResult = h.match.home_score != null && h.match.away_score != null;
-              const pts = h.points ?? 0;
-              return (
-                <li key={h.id}>
-                  <Link to="/jogo/$id" params={{ id: h.match.id }}
-                    className="flex items-center gap-3 rounded-2xl border border-border bg-card/60 p-3 transition-smooth hover:border-gold/30 group">
-                    {/* Badges lado a lado */}
-                    <div className="flex items-center gap-1 shrink-0">
-                      <TeamBadge code={h.match.home?.code} flag={h.match.home?.flag} name={h.match.home?.name ?? ""} size="sm" />
-                      <span className="text-[10px] font-bold text-muted-foreground">vs</span>
-                      <TeamBadge code={h.match.away?.code} flag={h.match.away?.flag} name={h.match.away?.name ?? ""} size="sm" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold leading-tight truncate">
-                        {h.match.home?.name} vs {h.match.away?.name}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[11px] text-muted-foreground">{formatDate(h.match.kickoff_at)}</span>
-                        {hasResult && (
-                          <span className="text-[11px] font-bold text-muted-foreground">
-                            {h.match.home_score}–{h.match.away_score}
-                          </span>
-                        )}
-                        {h.result_90 && (
-                          <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                            {h.result_90 === "home" ? "Casa" : h.result_90 === "draw" ? "Empate" : "Fora"}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0 w-12">
-                      {hasResult ? (
-                        <>
-                          <p className={`font-display text-lg leading-tight ${pts > 0 ? "text-gold" : "text-muted-foreground"}`}>
-                            {pts > 0 ? `+${pts}` : "—"}
+        ) : (() => {
+          const visible = historyExpanded ? history : history.slice(0, 3);
+          return (
+            <>
+              <ul className="space-y-2">
+                {visible.map((h: any) => {
+                  const hasResult = h.match.home_score != null && h.match.away_score != null;
+                  const pts = h.points ?? 0;
+                  return (
+                    <li key={h.id}>
+                      <Link to="/jogo/$id" params={{ id: h.match.id }}
+                        className="flex items-center gap-3 rounded-2xl border border-border bg-card/60 p-3 transition-smooth hover:border-gold/30 group">
+                        <div className="flex items-center gap-1 shrink-0">
+                          <TeamBadge code={h.match.home?.code} flag={h.match.home?.flag} name={h.match.home?.name ?? ""} size="sm" />
+                          <span className="text-[10px] font-bold text-muted-foreground">vs</span>
+                          <TeamBadge code={h.match.away?.code} flag={h.match.away?.flag} name={h.match.away?.name ?? ""} size="sm" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold leading-tight truncate">
+                            {h.match.home?.name} vs {h.match.away?.name}
                           </p>
-                          <p className="text-[10px] text-muted-foreground">pts</p>
-                        </>
-                      ) : (
-                        <span className="text-[10px] uppercase tracking-wide text-muted-foreground/60">—</span>
-                      )}
-                    </div>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] text-muted-foreground">{formatDate(h.match.kickoff_at)}</span>
+                            {hasResult && (
+                              <span className="text-[11px] font-bold text-muted-foreground">
+                                {h.match.home_score}–{h.match.away_score}
+                              </span>
+                            )}
+                            {h.result_90 && (
+                              <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                                {h.result_90 === "home" ? "Casa" : h.result_90 === "draw" ? "Empate" : "Fora"}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0 w-12">
+                          {hasResult ? (
+                            <>
+                              <p className={`font-display text-lg leading-tight ${pts > 0 ? "text-gold" : "text-muted-foreground"}`}>
+                                {pts > 0 ? `+${pts}` : "—"}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">pts</p>
+                            </>
+                          ) : (
+                            <span className="text-[10px] uppercase tracking-wide text-muted-foreground/60">—</span>
+                          )}
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+              {history.length > 3 && (
+                <button
+                  onClick={() => setHistoryExpanded(e => !e)}
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl border border-border bg-card/40 py-2.5 text-xs font-semibold text-muted-foreground transition-smooth hover:border-gold/30 hover:text-gold"
+                >
+                  {historyExpanded
+                    ? <><ChevronUp className="h-3.5 w-3.5" /> Mostrar menos</>
+                    : <><ChevronDown className="h-3.5 w-3.5" /> Ver mais {history.length - 3} previsões</>
+                  }
+                </button>
+              )}
+            </>
+          );
+        })()}
       </section>
 
       {/* Terminar sessão — visível em mobile */}

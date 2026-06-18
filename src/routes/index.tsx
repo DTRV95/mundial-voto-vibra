@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper, Star, Gift, ChevronUp, ChevronDown } from "lucide-react";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { supabase } from "@/integrations/supabase/client";
@@ -184,6 +184,16 @@ function Home() {
 
   const [feedOpen, setFeedOpen] = useState(() => localStorage.getItem("feed_open") !== "0");
   const [feedShown, setFeedShown] = useState(5);
+  const feedSentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = feedSentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setFeedShown(n => n + 5);
+    }, { threshold: 1 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [feedOpen, activityFeed.length]);
   const { data: following } = useFollowing();
 
   const { data: activityFeed = [] } = useQuery({
@@ -645,12 +655,9 @@ function Home() {
                 </div>
 
                 {feedShown < activityFeed.length && (
-                  <button
-                    onClick={() => setFeedShown(n => n + 5)}
-                    className="flex w-full items-center justify-center py-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground border-t border-border transition-smooth"
-                  >
-                    Ver mais
-                  </button>
+                  <div ref={feedSentinelRef} className="flex items-center justify-center py-2.5 border-t border-border">
+                    <span className="text-[10px] text-muted-foreground/50">↓</span>
+                  </div>
                 )}
               </div>
             )}

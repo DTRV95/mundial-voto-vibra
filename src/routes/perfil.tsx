@@ -506,31 +506,31 @@ function Perfil() {
             </Link>
           </div>
         ) : (() => {
-          const visible = historyExpanded ? history : history.slice(0, 3);
+          const visible = (historyExpanded ? history : history.slice(0, 3)).filter((h: any) => h.match);
           return (
             <>
               <ul className="space-y-2">
                 {visible.map((h: any) => {
-                  const hasResult = h.match.home_score != null && h.match.away_score != null;
+                  const hasResult = h.match?.home_score != null && h.match?.away_score != null;
                   const pts = h.points ?? 0;
                   return (
                     <li key={h.id}>
-                      <Link to="/jogo/$id" params={{ id: h.match.id }}
+                      <Link to="/jogo/$id" params={{ id: h.match?.id }}
                         className="flex items-center gap-3 rounded-2xl border border-border bg-card/60 p-3 transition-smooth hover:border-gold/30 group">
                         <div className="flex items-center gap-1 shrink-0">
-                          <TeamBadge code={h.match.home?.code} flag={h.match.home?.flag} name={h.match.home?.name ?? ""} size="sm" />
+                          <TeamBadge code={h.match?.home?.code} flag={h.match?.home?.flag} name={h.match?.home?.name ?? ""} size="sm" />
                           <span className="text-[10px] font-bold text-muted-foreground">vs</span>
-                          <TeamBadge code={h.match.away?.code} flag={h.match.away?.flag} name={h.match.away?.name ?? ""} size="sm" />
+                          <TeamBadge code={h.match?.away?.code} flag={h.match?.away?.flag} name={h.match?.away?.name ?? ""} size="sm" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold leading-tight truncate">
-                            {h.match.home?.name} vs {h.match.away?.name}
+                            {h.match?.home?.name} vs {h.match?.away?.name}
                           </p>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-muted-foreground">{formatDate(h.match.kickoff_at)}</span>
+                            <span className="text-[11px] text-muted-foreground">{formatDate(h.match?.kickoff_at)}</span>
                             {hasResult && (
                               <span className="text-[11px] font-bold text-muted-foreground">
-                                {h.match.home_score}–{h.match.away_score}
+                                {h.match?.home_score}–{h.match?.away_score}
                               </span>
                             )}
                             {h.result_90 && (

@@ -18,7 +18,9 @@ import { FeedbackModal } from "./FeedbackModal";
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const isAdmin = useIsAdmin(user?.id);
+  // While loading, keep UI stable — don't flash between logged-in and logged-out states.
   const loggedIn = !loading && !!user;
+  const showNav = !loading;
   const { data: notifs } = useNotifications();
   const unreadCount = notifs?.total ?? 0;
 

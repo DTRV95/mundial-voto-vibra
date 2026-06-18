@@ -197,12 +197,14 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    // Quando um novo deploy acontece, os chunks JS antigos deixam de existir.
-    // Só fazemos reload se ainda não tentámos nesta sessão.
+    // After a new deploy, old JS chunks no longer exist.
+    // We reload once, but use a timestamp so future deploys (>60s ago) also trigger a reload.
     const handler = () => {
-      if (sessionStorage.getItem("preload_reloaded")) return;
-      sessionStorage.setItem("preload_reloaded", "1");
-      window.location.reload();
+      const last = Number(sessionStorage.getItem("preload_reloaded_at") ?? 0);
+      const now = Date.now();
+      if (now - last < 60_000) return; // already reloaded in the last 60s, stop
+      sessionStorage.setItem("preload_reloaded_at", String(now));
+      window.location.href = window.location.href; // full navigation, clears stale cache
     };
     window.addEventListener("vite:preloadError", handler);
     return () => window.removeEventListener("vite:preloadError", handler);

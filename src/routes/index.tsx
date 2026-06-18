@@ -606,7 +606,7 @@ function Home() {
 
             {feedOpen && (
               <div className="border-t border-border">
-                <div className="divide-y divide-border">
+                <div className="divide-y divide-border max-h-72 overflow-y-auto overscroll-contain">
                   {activityFeed.slice(0, feedShown).map((item: any) => {
                     const mins = Math.floor((Date.now() - new Date(item.createdAt).getTime()) / 60000);
                     const timeAgo = mins < 1 ? "agora" : mins < 60 ? `há ${mins} min` : `há ${Math.floor(mins / 60)}h`;

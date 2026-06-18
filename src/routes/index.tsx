@@ -194,70 +194,111 @@ function Home() {
       const followingIds = following ? [...following] : [];
       if (followingIds.length === 0) return [];
 
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
-      const [{ data: preds }, { data: streakProfiles }] = await Promise.all([
+      // Fetch em paralelo: jogos recentes terminados, votos recentes, perfis, activity_events
+      const [{ data: recentMatches }, { data: recentVotes }, { data: followedProfiles }, { data: activityEvents }] = await Promise.all([
+        // Jogos terminados na última semana
+        supabase
+          .from("matches")
+          .select("id,kickoff_at,home_score,away_score,home:home_team_id(name,flag),away:away_team_id(name,flag)")
+          .not("home_score", "is", null)
+          .gte("kickoff_at", sevenDaysAgo)
+          .order("kickoff_at", { ascending: false })
+          .limit(20),
+        // Votos recentes em jogos ainda abertos
         supabase
           .from("predictions")
-          .select("id,created_at,user_id,match_id,exact_home,exact_away,points")
+          .select("id,created_at,user_id,match_id")
           .in("user_id", followingIds)
           .gte("created_at", twoDaysAgo)
           .order("created_at", { ascending: false })
-          .limit(40),
+          .limit(20),
+        // Perfis dos seguidos
         supabase
           .from("profiles")
           .select("id,display_name,vote_streak,total_points")
           .in("id", followingIds),
+        // Eventos de atividade (divisão, top3)
+        (supabase as any)
+          .from("activity_events")
+          .select("id,user_id,type,data,created_at")
+          .in("user_id", followingIds)
+          .gte("created_at", sevenDaysAgo)
+          .order("created_at", { ascending: false })
+          .limit(20),
       ]);
 
-      const matchIds = [...new Set((preds ?? []).map((p: any) => p.match_id))];
-      const userIds = [...new Set((preds ?? []).map((p: any) => p.user_id))];
+      const profileMap = Object.fromEntries((followedProfiles ?? []).map((p: any) => [p.id, p]));
+      const finishedMatchIds = (recentMatches ?? []).map((m: any) => m.id);
+      const finishedMatchMap = Object.fromEntries((recentMatches ?? []).map((m: any) => [m.id, m]));
 
-      const [{ data: matches }, { data: profiles }] = await Promise.all([
-        matchIds.length > 0
-          ? supabase.from("matches").select("id,home_score,away_score,voting_open,home:home_team_id(name,flag),away:away_team_id(name,flag)").in("id", matchIds)
-          : Promise.resolve({ data: [] }),
-        userIds.length > 0
-          ? supabase.from("profiles").select("id,display_name").in("id", userIds)
-          : Promise.resolve({ data: [] }),
-      ]);
+      // Previsões dos seguidos nos jogos terminados
+      const { data: finishedPreds } = finishedMatchIds.length > 0
+        ? await supabase
+            .from("predictions")
+            .select("id,user_id,match_id,exact_home,exact_away,points,updated_at")
+            .in("user_id", followingIds)
+            .in("match_id", finishedMatchIds)
+        : { data: [] };
 
-      const matchMap = Object.fromEntries((matches ?? []).map((m: any) => [m.id, m]));
-      const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
+      // Votos em jogos abertos — buscar info do jogo
+      const openMatchIds = [...new Set((recentVotes ?? []).map((v: any) => v.match_id))];
+      const { data: openMatches } = openMatchIds.length > 0
+        ? await supabase
+            .from("matches")
+            .select("id,voting_open,home:home_team_id(name,flag),away:away_team_id(name,flag)")
+            .in("id", openMatchIds)
+            .eq("voting_open", true)
+        : { data: [] };
+      const openMatchMap = Object.fromEntries((openMatches ?? []).map((m: any) => [m.id, m]));
 
       const events: any[] = [];
+      const DIVISIONS = [
+        { label: "1ª Liga", min: 1, max: 5 },
+        { label: "2ª Liga", min: 6, max: 15 },
+        { label: "Distrital", min: 16, max: 30 },
+        { label: "Liga do Zé Povinho", min: 31, max: Infinity },
+      ];
 
-      // Eventos de previsões
-      for (const p of (preds ?? [])) {
-        const match = matchMap[p.match_id];
+      // 1. Acertos exatos e resultados corretos
+      for (const p of (finishedPreds ?? [])) {
+        const match = finishedMatchMap[p.match_id];
         const profile = profileMap[p.user_id];
         if (!match || !profile) continue;
-
-        const finished = match.home_score != null;
-        const isExact = finished && p.exact_home === match.home_score && p.exact_away === match.away_score;
-        const isCorrect = finished && (p.points ?? 0) > 0;
-
-        if (finished && !isCorrect) continue; // errou — não mostra
-
+        const isExact = p.exact_home === match.home_score && p.exact_away === match.away_score;
+        const isCorrect = (p.points ?? 0) > 0;
+        if (!isCorrect) continue;
         events.push({
           id: p.id,
-          createdAt: p.created_at,
-          type: isExact ? "exact" : finished ? "correct" : "voted",
+          createdAt: match.kickoff_at,
+          type: isExact ? "exact" : "correct",
           name: profile.display_name ?? "Alguém",
-          home: match.home?.name ?? "",
-          away: match.away?.name ?? "",
-          homeFlag: match.home?.flag ?? "",
-          awayFlag: match.away?.flag ?? "",
-          homeScore: match.home_score,
-          awayScore: match.away_score,
-          predHome: p.exact_home,
-          predAway: p.exact_away,
+          home: match.home?.name ?? "", away: match.away?.name ?? "",
+          homeFlag: match.home?.flag ?? "", awayFlag: match.away?.flag ?? "",
+          homeScore: match.home_score, awayScore: match.away_score,
         });
       }
 
-      // Eventos de streak (múltiplos de 5)
+      // 2. Votos em jogos ainda abertos
+      for (const v of (recentVotes ?? [])) {
+        const match = openMatchMap[v.match_id];
+        const profile = profileMap[v.user_id];
+        if (!match || !profile) continue;
+        events.push({
+          id: `vote-${v.id}`,
+          createdAt: v.created_at,
+          type: "voted",
+          name: profile.display_name ?? "Alguém",
+          home: match.home?.name ?? "", away: match.away?.name ?? "",
+          homeFlag: match.home?.flag ?? "",
+        });
+      }
+
+      // 3. Streak milestones
       const STREAK_MILESTONES = [5, 10, 15, 20, 25, 30, 50];
-      for (const sp of (streakProfiles ?? [])) {
+      for (const sp of (followedProfiles ?? [])) {
         if (sp.vote_streak > 0 && STREAK_MILESTONES.includes(sp.vote_streak)) {
           events.push({
             id: `streak-${sp.id}`,
@@ -269,8 +310,22 @@ function Home() {
         }
       }
 
-      // Ordena por data desc
-      return events.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 30);
+      // 4. Eventos de divisão e top3 da tabela activity_events
+      for (const e of (activityEvents ?? [])) {
+        const profile = profileMap[e.user_id];
+        if (!profile) continue;
+        events.push({
+          id: `evt-${e.id}`,
+          createdAt: e.created_at,
+          type: e.type,
+          name: profile.display_name ?? "Alguém",
+          ...e.data,
+        });
+      }
+
+      return events
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 30);
     },
     staleTime: 60_000,
   });
@@ -635,6 +690,20 @@ function Home() {
                         <span className="font-semibold">{item.name}</span>
                         <span className="text-muted-foreground"> está em streak de </span>
                         <span className="font-medium text-orange-400">{item.streak} jogos seguidos!</span>
+                      </>;
+                    } else if (item.type === "division_up") {
+                      emoji = "🏆";
+                      content = <>
+                        <span className="font-semibold">{item.name}</span>
+                        <span className="text-muted-foreground"> subiu para a </span>
+                        <span className="font-medium">{item.division}!</span>
+                      </>;
+                    } else if (item.type === "top3") {
+                      emoji = "⬆️";
+                      content = <>
+                        <span className="font-semibold">{item.name}</span>
+                        <span className="text-muted-foreground"> entrou no Top 3 da </span>
+                        <span className="font-medium">{item.division}!</span>
                       </>;
                     } else {
                       emoji = item.homeFlag || "⚽";

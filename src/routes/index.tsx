@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper, Star, Gift } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper, Star, Gift, ChevronUp, ChevronDown } from "lucide-react";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
@@ -179,6 +179,22 @@ function Home() {
       const votedIds = new Set((voted ?? []).map((p: any) => p.match_id));
       return (matches as any[]).filter(m => !votedIds.has(m.id));
     },
+  });
+
+  const [feedOpen, setFeedOpen] = useState(true);
+  const [feedShown, setFeedShown] = useState(5);
+
+  const { data: activityFeed = [] } = useQuery({
+    queryKey: ["activity-feed"],
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("predictions")
+        .select("id,created_at,user_id,match_id,profiles(display_name),matches(home:home_team_id(name,flag),away:away_team_id(name,flag),voting_open)")
+        .order("created_at", { ascending: false })
+        .limit(30);
+      return (data ?? []).filter((d: any) => d.profiles && d.matches);
+    },
+    staleTime: 60_000,
   });
 
   const myLeaderEntry = topLeaders.find((u: any) => u.id === user?.id);
@@ -474,6 +490,62 @@ function Home() {
 
       {/* ===================== NOTIFICAÇÕES PUSH ===================== */}
       <PushNotificationPrompt />
+
+      {/* ===================== FEED DE ATIVIDADE ===================== */}
+      {activityFeed.length > 0 && (
+        <div className="mx-5 mt-4 md:mx-8">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <button
+              onClick={() => setFeedOpen(o => !o)}
+              className="flex w-full items-center justify-between px-5 py-3 hover:bg-muted/40 transition-smooth"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm">⚡</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Atividade recente</span>
+              </div>
+              {feedOpen
+                ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+            </button>
+
+            {feedOpen && (
+              <div className="border-t border-border">
+                <div className="divide-y divide-border">
+                  {activityFeed.slice(0, feedShown).map((item: any) => {
+                    const home = item.matches?.home?.name ?? "";
+                    const away = item.matches?.away?.name ?? "";
+                    const homeFlag = item.matches?.home?.flag ?? "";
+                    const awayFlag = item.matches?.away?.flag ?? "";
+                    const name = item.profiles?.display_name ?? "Alguém";
+                    const mins = Math.floor((Date.now() - new Date(item.created_at).getTime()) / 60000);
+                    const timeAgo = mins < 1 ? "agora" : mins < 60 ? `há ${mins} min` : `há ${Math.floor(mins / 60)}h`;
+                    return (
+                      <div key={item.id} className="flex items-center gap-3 px-5 py-2.5">
+                        <span className="text-base shrink-0">{homeFlag}</span>
+                        <p className="flex-1 min-w-0 text-xs text-foreground">
+                          <span className="font-semibold">{name}</span>
+                          <span className="text-muted-foreground"> votou em </span>
+                          <span className="font-medium">{home} vs {away}</span>
+                        </p>
+                        <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {feedShown < activityFeed.length && (
+                  <button
+                    onClick={() => setFeedShown(n => n + 5)}
+                    className="flex w-full items-center justify-center py-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground border-t border-border transition-smooth"
+                  >
+                    Ver mais
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ===================== JOGOS DE HOJE ===================== */}
       <section className="px-5 pt-8 md:px-8 relative">

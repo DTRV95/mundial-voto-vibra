@@ -419,211 +419,6 @@ function Home() {
     },
   });
 
-  // ── Landing page para visitantes não autenticados ──────────────────────────
-  if (!user) {
-    return (
-      <div className="pb-16">
-        {/* HERO */}
-        <section className="relative px-4 pt-4 md:px-6 md:pt-5">
-          <div
-            className="relative overflow-hidden rounded-3xl bg-wc-red panini-stripes"
-            style={{ boxShadow: "0 12px 48px oklch(0.54 0.24 27 / 0.35)", minHeight: "220px" }}
-          >
-            <div className="absolute top-0 right-0 h-[75%] w-[38%] md:h-full md:w-[36%] overflow-hidden" style={{ borderBottomLeftRadius: "48px" }}>
-              <img src={trophyImg} alt="Troféu do Mundial" className="h-full w-full object-cover object-center trophy-shine" />
-            </div>
-            <div className="absolute bottom-0 left-0 h-16 w-16 md:h-20 md:w-20 bg-wc-green" style={{ borderTopRightRadius: "40px" }} />
-            <div className="relative px-5 py-5 md:px-10 md:py-8 pr-[42%] md:pr-[40%]">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-2 flex items-center gap-1.5">
-                <Sparkles className="h-3 w-3" /> Mundial 2026
-              </p>
-              <h1 className="font-display text-[clamp(2.8rem,10vw,6rem)] leading-none text-gold-metallic">
-                UMA<br />GERAÇÃO
-              </h1>
-              <p className="mt-3 text-sm md:text-base font-semibold text-white/90 max-w-xs leading-snug">
-                O jogo de previsões do Mundial.<br />Gratuito. Sem complicações.
-              </p>
-              <div className="hidden md:flex items-center gap-3 mt-5">
-                <Link to="/auth"
-                  className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
-                  Entrar grátis <ArrowRight className="h-4 w-4" />
-                </Link>
-                <a href="#como-funciona"
-                  className="rounded-2xl border-2 border-white/40 px-5 py-3 text-sm font-bold text-white transition-smooth hover:bg-white/10">
-                  Como funciona?
-                </a>
-              </div>
-            </div>
-            <div className="relative grid grid-cols-3 gap-px border-t border-white/20 bg-white/20">
-              {[{ label: "Equipas", value: "48" }, { label: "Jogos", value: "104" }, { label: "Países", value: "3" }].map(s => (
-                <div key={s.label} className="bg-white/10 py-3 text-center text-white">
-                  <div className="font-display text-2xl md:text-3xl leading-none">{s.value}</div>
-                  <div className="text-[10px] uppercase tracking-wider opacity-70 mt-0.5">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex gap-3 pt-4 md:hidden">
-            <Link to="/auth"
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
-              Entrar grátis <ArrowRight className="h-4 w-4" />
-            </Link>
-            <a href="#como-funciona"
-              className="inline-flex items-center justify-center rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 transition-smooth">
-              Como?
-            </a>
-          </div>
-        </section>
-
-        {/* PROPOSTA DE VALOR — 3 cards */}
-        <section className="px-5 pt-8 md:px-8">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {[
-              { emoji: "🎯", title: "Prevê cada jogo", desc: "Resultado, marcador exato, golos, BTTS — vota nos mercados que quiseres antes do apito." },
-              { emoji: "📊", title: "Compara com a comunidade", desc: "Depois de votares vês como o resto do país palpitou. O segredo é do clube." },
-              { emoji: "🏆", title: "Compete e sobe", desc: "Rankings globais por fase e torneios privados com os teus amigos. Quem sabe mais?" },
-            ].map(c => (
-              <div key={c.title} className="rounded-2xl border border-border bg-card/60 p-5">
-                <p className="text-3xl mb-3">{c.emoji}</p>
-                <h3 className="font-display text-lg mb-1">{c.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* COMO FUNCIONA */}
-        <section id="como-funciona" className="px-5 pt-10 md:px-8">
-          <h2 className="font-display text-2xl md:text-3xl mb-5">Como funciona</h2>
-          <div className="space-y-3">
-            {[
-              { n: "1", title: "Cria conta — é grátis", desc: "Regista-te em segundos com email ou Google. Sem cartão, sem truques." },
-              { n: "2", title: "Vota antes do apito", desc: "Escolhe o resultado, marcador exato ou outros mercados para cada jogo. Fecha ao apito inicial." },
-              { n: "3", title: "Soma pontos", desc: "Resultado certo: 3–4 pts. Marcador exato: 10 pts. Quanto mais mercados acertares, mais sobe." },
-              { n: "4", title: "Desafia os teus amigos", desc: "Cria um torneio privado, partilha o código e vê quem é o maior entendido em casa." },
-            ].map(({ n, title, desc }) => (
-              <div key={n} className="flex items-start gap-4 rounded-2xl border border-border bg-card/60 p-4">
-                <div className="shrink-0 grid h-9 w-9 place-items-center rounded-full bg-gold font-display text-lg text-background">{n}</div>
-                <div>
-                  <h3 className="font-semibold text-sm">{title}</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* PONTUAÇÃO */}
-        <section className="px-5 pt-8 md:px-8">
-          <h2 className="font-display text-xl mb-3">Quanto valem as previsões?</h2>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              { label: "Resultado 1X2",   pts: "3–4 pts" },
-              { label: "Marcador exato",  pts: "10 pts 🔥" },
-              { label: "BTTS / Golos",    pts: "2–3 pts" },
-              { label: "Dupla hipótese",  pts: "2 pts" },
-            ].map(({ label, pts }) => (
-              <div key={label} className="rounded-xl border border-border bg-card/60 px-3 py-3 text-center">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-                <p className="mt-1 font-display text-sm text-gold">{pts}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* TORNEIOS PRIVADOS */}
-        <section className="px-5 pt-8 md:px-8">
-          <div
-            className="overflow-hidden rounded-2xl panini-stripes"
-            style={{ background: "linear-gradient(135deg, oklch(0.20 0.06 270) 0%, oklch(0.28 0.10 300) 50%, oklch(0.22 0.08 250) 100%)", boxShadow: "0 6px 24px -4px oklch(0.20 0.06 270 / 0.6)" }}
-          >
-            <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 80% 50%, white 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
-            <div className="relative p-6 text-white">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40 mb-2">Para toda a família</p>
-              <h3 className="font-display text-2xl leading-tight mb-2">Quem sabe mais<br/>de futebol em casa?</h3>
-              <p className="text-sm text-white/65 leading-relaxed mb-5">Cria um torneio privado, convida os teus amigos e família e descubram quem é o maior entendido do Mundial 2026. Em 30 segundos tens o teu grupo pronto.</p>
-              <div className="flex gap-3">
-                <Link to="/auth"
-                  className="flex-1 rounded-xl bg-gold py-3 text-center text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.01] active:scale-95">
-                  Criar torneio grátis
-                </Link>
-                <Link to="/como-funciona"
-                  className="rounded-xl border border-white/20 px-4 py-3 text-sm font-semibold text-white/70 transition-smooth hover:border-white/40 hover:text-white">
-                  Saber mais
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* LÍDERES — prova social */}
-        {topLeaders.length > 0 && (
-          <section className="px-5 pt-8 md:px-8">
-            <h2 className="font-display text-xl mb-3">Quem está no topo</h2>
-            <div className="rounded-2xl overflow-hidden bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.45)" }}>
-              <ol>
-                {(topLeaders as any[]).slice(0, 5).map((u, i) => (
-                  <li key={i} className={`flex items-center justify-between px-5 py-3 text-white ${i < 4 ? "border-b border-white/20" : ""}`}>
-                    <span className="flex items-center gap-3">
-                      <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${i === 0 ? "bg-white text-wc-green" : "bg-white/20 text-white"}`}>{i + 1}</span>
-                      <span className="font-semibold text-sm">{u.display_name ?? "Adepto"}</span>
-                    </span>
-                    <span className="font-display text-lg">{u.total_points} <span className="text-xs font-sans opacity-70">pts</span></span>
-                  </li>
-                ))}
-              </ol>
-              <div className="border-t border-white/20 px-5 py-3 text-center">
-                <Link to="/auth" className="text-xs font-bold text-white/70 hover:text-white transition-smooth">
-                  Entra e começa a competir →
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* CTA FINAL */}
-        <section className="px-5 pt-10 pb-4 md:px-8">
-          <div className="rounded-2xl border border-gold/30 bg-gold/5 p-6 text-center">
-            <p className="font-display text-2xl mb-2">Pronto para jogar?</p>
-            <p className="text-sm text-muted-foreground mb-5">Regista-te gratuitamente e começa a votar antes do próximo jogo.</p>
-            <Link to="/auth"
-              className="inline-flex items-center gap-2 rounded-2xl bg-wc-red px-8 py-3.5 text-sm font-bold text-white shadow-gold transition-smooth hover:scale-[1.02] active:scale-95">
-              Entrar grátis <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </section>
-
-        {/* NOTÍCIAS — se houver */}
-        {featuredNewsList.length > 0 && (
-          <section className="px-5 pt-8 pb-2 md:px-8">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-2xl">Últimas Notícias</h2>
-              <Link to="/noticias" className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">Ver todas →</Link>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {(featuredNewsList as any[]).slice(0, 2).map((news: any) => (
-                <Link key={news.id} to="/noticias/$id" params={{ id: news.slug ?? news.id }}
-                  className="group flex gap-3 overflow-hidden rounded-2xl border border-border bg-card p-3 transition-smooth hover:border-gold/40">
-                  {news.image_url && (
-                    <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-xl">
-                      <img src={news.image_url} alt={news.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]" />
-                    </div>
-                  )}
-                  <div className="flex flex-col justify-center min-w-0">
-                    <p className="font-display text-sm leading-snug line-clamp-2">{news.title}</p>
-                    <p className="mt-1 text-[10px] text-muted-foreground">
-                      {new Date(news.created_at).toLocaleDateString("pt-PT", { day: "numeric", month: "long" })}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="pb-10">
 
@@ -633,23 +428,11 @@ function Home() {
           className="relative overflow-hidden rounded-3xl bg-wc-red panini-stripes"
           style={{ boxShadow: "0 12px 48px oklch(0.54 0.24 27 / 0.35)", minHeight: "200px" }}
         >
-          {/* ── Canto superior direito: troféu cores originais ─── */}
           <div className="absolute top-0 right-0 h-[75%] w-[38%] md:h-full md:w-[36%] overflow-hidden"
             style={{ borderBottomLeftRadius: "48px" }}>
-            <img
-              src={trophyImg}
-              alt="Troféu do Mundial"
-              className="h-full w-full object-cover object-center trophy-shine"
-            />
+            <img src={trophyImg} alt="Troféu do Mundial" className="h-full w-full object-cover object-center trophy-shine" />
           </div>
-
-          {/* ── Canto inferior esquerdo: bloco verde ──────────── */}
-          <div
-            className="absolute bottom-0 left-0 h-16 w-16 md:h-20 md:w-20 bg-wc-green"
-            style={{ borderTopRightRadius: "40px" }}
-          />
-
-          {/* ── Conteúdo principal ────────────────────────────── */}
+          <div className="absolute bottom-0 left-0 h-16 w-16 md:h-20 md:w-20 bg-wc-green" style={{ borderTopRightRadius: "40px" }} />
           <div className="relative px-5 py-4 md:px-10 md:py-6 pr-[42%] md:pr-[40%]">
             <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-2 flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" /> Mundial 2026
@@ -658,22 +441,25 @@ function Home() {
               UMA<br />GERAÇÃO
             </h1>
             <p className="mt-3 text-sm md:text-base font-semibold text-white/90 max-w-xs">
-              Vota, compara e vibra com a comunidade.
+              {user ? "Vota, compara e vibra com a comunidade." : "O jogo de previsões do Mundial. Gratuito. Sem complicações."}
             </p>
-            {/* CTAs — só desktop (mobile tem abaixo) */}
             <div className="hidden md:flex items-center gap-3 mt-6">
-              <Link to="/jogos"
-                className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
-                Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a href="#como-funciona"
-                className="rounded-2xl border-2 border-white/40 px-5 py-3 text-sm font-bold text-white transition-smooth hover:bg-white/10">
-                Como funciona
-              </a>
+              {user ? (
+                <Link to="/jogos" className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
+                  Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
+                </Link>
+              ) : (
+                <>
+                  <Link to="/auth" className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
+                    Entrar grátis <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <a href="#como-funciona" className="rounded-2xl border-2 border-white/40 px-5 py-3 text-sm font-bold text-white transition-smooth hover:bg-white/10">
+                    Como funciona
+                  </a>
+                </>
+              )}
             </div>
           </div>
-
-          {/* ── Stats strip ───────────────────────────────────── */}
           <div className="relative grid grid-cols-3 gap-px border-t border-white/20 bg-white/20">
             {[{ label: "Equipas", value: "48" }, { label: "Jogos", value: "104" }, { label: "Países", value: "3" }].map((s) => (
               <div key={s.label} className="bg-white/10 py-3 text-center text-white">
@@ -684,27 +470,73 @@ function Home() {
           </div>
         </div>
 
-        {/* CTAs mobile — abaixo do card */}
+        {/* CTAs mobile */}
         <div className="flex gap-3 pt-4 md:hidden">
-          <Link to="/jogos"
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
-            Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
-          </Link>
-          <a href="#como-funciona"
-            className="inline-flex items-center justify-center rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 transition-smooth">
-            Como?
-          </a>
+          {user ? (
+            <Link to="/jogos" className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
+              Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <>
+              <Link to="/auth" className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
+                Entrar grátis <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a href="#como-funciona" className="inline-flex items-center justify-center rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 transition-smooth">
+                Como?
+              </a>
+            </>
+          )}
         </div>
       </section>
 
       {/* ===================== COUNTDOWN + CTA ===================== */}
-      {nextMatch && (
-        <div className="mx-5 mt-4 md:mx-8">
-          <Countdown
-            kickoff_at={nextMatch.kickoff_at}
-            home={(nextMatch as any).home}
-            away={(nextMatch as any).away}
-          />
+      <div className={`mx-5 mt-4 md:mx-8 ${nextMatch && !user ? "grid gap-3 sm:grid-cols-2" : ""}`}>
+        {nextMatch && (
+          <Countdown kickoff_at={nextMatch.kickoff_at} home={(nextMatch as any).home} away={(nextMatch as any).away} />
+        )}
+        {!user && (
+          <div className="relative overflow-hidden rounded-2xl"
+            style={{ background: "linear-gradient(135deg, oklch(0.20 0.06 270) 0%, oklch(0.28 0.10 300) 50%, oklch(0.22 0.08 250) 100%)", boxShadow: "0 6px 24px -4px oklch(0.20 0.06 270 / 0.6)" }}>
+            <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 80% 50%, white 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+            <div className="absolute top-3 right-3 flex gap-1.5">
+              {["🇵🇹","🇧🇷","🇦🇷","🇫🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿"].map(f => <span key={f} className="text-base opacity-60">{f}</span>)}
+            </div>
+            <div className="relative p-5 text-white">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40 mb-1.5">Grátis · Sem cartão</p>
+              <h3 className="font-display text-[1.5rem] leading-tight">Quem sabe mais<br/>de futebol?</h3>
+              <ul className="mt-2.5 space-y-1 text-[12px] text-white/65">
+                <li className="flex items-center gap-1.5"><span className="text-gold">✓</span> Vota em cada jogo antes do apito</li>
+                <li className="flex items-center gap-1.5"><span className="text-gold">✓</span> Vê o que a comunidade palpitou</li>
+                <li className="flex items-center gap-1.5"><span className="text-gold">✓</span> Cria torneios com amigos e família</li>
+              </ul>
+              <div className="mt-4 flex gap-2">
+                <Link to="/auth"
+                  className="flex-1 rounded-xl bg-gold py-2.5 text-center text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.01] active:scale-95">
+                  Entrar grátis
+                </Link>
+                <a href="#como-funciona"
+                  className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold text-white/70 transition-smooth hover:border-white/40 hover:text-white">
+                  Como?
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ===================== BANNER PERSUASÃO — visitantes ===================== */}
+      {!user && (
+        <div className="mx-5 mt-6 md:mx-8">
+          <div className="relative overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/8 via-transparent to-transparent px-5 py-4">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 font-display text-6xl opacity-[0.06] select-none pointer-events-none">🏆</div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70 mb-1">Junta-te à comunidade</p>
+            <p className="font-display text-base leading-snug mb-0.5">Vota nestes jogos e vê se acertaste</p>
+            <p className="text-xs text-muted-foreground mb-3">Regista-te em segundos — é grátis, sem cartão, sem spam.</p>
+            <Link to="/auth"
+              className="inline-flex items-center gap-2 rounded-xl bg-wc-red px-5 py-2.5 text-sm font-bold text-white shadow-gold transition-smooth hover:scale-[1.01] active:scale-95">
+              Criar conta grátis <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </div>
       )}
 
@@ -1108,6 +940,22 @@ function Home() {
             </div>
           ))}
         </div>
+
+        {/* CTA final na secção — só para visitantes */}
+        {!user && (
+          <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-gold/5 p-5">
+            <div className="flex items-start gap-3">
+              <Users2 className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
+              <p className="text-sm text-muted-foreground">
+                Depois de votares desbloqueias as percentagens da comunidade — o que toda a gente palpitou. <span className="font-semibold text-foreground">O segredo é do clube.</span>
+              </p>
+            </div>
+            <Link to="/auth"
+              className="shrink-0 rounded-xl bg-wc-red px-5 py-2.5 text-sm font-bold text-white shadow-gold transition-smooth hover:scale-[1.01] active:scale-95 text-center whitespace-nowrap">
+              Entrar grátis →
+            </Link>
+          </div>
+        )}
 
       </section>
 

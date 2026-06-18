@@ -369,24 +369,6 @@ function Perfil() {
               </div>
             ))}
           </div>
-          {(bestMarket || worstMarket) && (
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              {bestMarket && (
-                <div className="rounded-2xl border border-wc-green/30 bg-wc-green/5 px-4 py-3">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-wc-green/70 mb-0.5">Melhor mercado</p>
-                  <p className="font-semibold text-sm">{bestMarket.name}</p>
-                  <p className="font-display text-xl text-wc-green">{bestMarket.pct}%</p>
-                </div>
-              )}
-              {worstMarket && (
-                <div className="rounded-2xl border border-wc-red/30 bg-wc-red/5 px-4 py-3">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-wc-red/70 mb-0.5">Pior mercado</p>
-                  <p className="font-semibold text-sm">{worstMarket.name}</p>
-                  <p className="font-display text-xl text-wc-red">{worstMarket.pct}%</p>
-                </div>
-              )}
-            </div>
-          )}
         </section>
       )}
 

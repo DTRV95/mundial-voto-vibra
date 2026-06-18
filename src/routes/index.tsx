@@ -187,12 +187,37 @@ function Home() {
   const { data: activityFeed = [] } = useQuery({
     queryKey: ["activity-feed"],
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data: preds } = await supabase
         .from("predictions")
-        .select("id,created_at,user_id,match_id,profiles(display_name),matches(home:home_team_id(name,flag),away:away_team_id(name,flag),voting_open)")
+        .select("id,created_at,user_id,match_id")
         .order("created_at", { ascending: false })
         .limit(30);
-      return (data ?? []).filter((d: any) => d.profiles && d.matches);
+      if (!preds || preds.length === 0) return [];
+
+      const matchIds = [...new Set(preds.map((p: any) => p.match_id))];
+      const userIds = [...new Set(preds.map((p: any) => p.user_id))];
+
+      const [{ data: matches }, { data: profiles }] = await Promise.all([
+        supabase
+          .from("matches")
+          .select("id,home:home_team_id(name,flag),away:away_team_id(name,flag)")
+          .in("id", matchIds),
+        supabase
+          .from("profiles")
+          .select("id,display_name")
+          .in("id", userIds),
+      ]);
+
+      const matchMap = Object.fromEntries((matches ?? []).map((m: any) => [m.id, m]));
+      const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
+
+      return preds
+        .map((p: any) => ({
+          ...p,
+          match: matchMap[p.match_id],
+          profile: profileMap[p.user_id],
+        }))
+        .filter((p: any) => p.match && p.profile);
     },
     staleTime: 60_000,
   });
@@ -512,11 +537,10 @@ function Home() {
               <div className="border-t border-border">
                 <div className="divide-y divide-border">
                   {activityFeed.slice(0, feedShown).map((item: any) => {
-                    const home = item.matches?.home?.name ?? "";
-                    const away = item.matches?.away?.name ?? "";
-                    const homeFlag = item.matches?.home?.flag ?? "";
-                    const awayFlag = item.matches?.away?.flag ?? "";
-                    const name = item.profiles?.display_name ?? "Alguém";
+                    const home = item.match?.home?.name ?? "";
+                    const away = item.match?.away?.name ?? "";
+                    const homeFlag = item.match?.home?.flag ?? "";
+                    const name = item.profile?.display_name ?? "Alguém";
                     const mins = Math.floor((Date.now() - new Date(item.created_at).getTime()) / 60000);
                     const timeAgo = mins < 1 ? "agora" : mins < 60 ? `há ${mins} min` : `há ${Math.floor(mins / 60)}h`;
                     return (

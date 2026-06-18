@@ -135,7 +135,10 @@ function Perfil() {
     : null;
 
   const finishedGames = history.filter((h: any) => h.match?.home_score != null);
-  const exactScores = finishedGames.filter((h: any) => h.exact_home && h.exact_away).length;
+  const exactScores = finishedGames.filter((h: any) =>
+    h.exact_home != null && h.exact_away != null &&
+    h.exact_home === h.match?.home_score && h.exact_away === h.match?.away_score
+  ).length;
   const totalPoints = finishedGames.reduce((sum: number, h: any) => sum + (h.points ?? 0), 0);
   const avgPoints = finishedGames.length > 0 ? (totalPoints / finishedGames.length).toFixed(1) : "—";
   const currentStreak = (profile as any)?.vote_streak ?? 0;

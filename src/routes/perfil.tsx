@@ -172,7 +172,6 @@ function Perfil() {
     "Ambas marcam":    { correct: 0, total: 0, options: [mkOpt("Sim"), mkOpt("Não")] },
     "+/- 2.5 golos":   { correct: 0, total: 0, options: [mkOpt("Mais de 2.5"), mkOpt("Menos de 2.5")] },
     "+/- 3.5 golos":   { correct: 0, total: 0, options: [mkOpt("Mais de 3.5"), mkOpt("Menos de 3.5")] },
-    "Dupla hipótese":  { correct: 0, total: 0, options: [mkOpt("1X"), mkOpt("X2"), mkOpt("12")] },
   };
 
   for (const h of finishedGames as any[]) {
@@ -226,16 +225,6 @@ function Perfil() {
       const correct = predictedOver === actualOver;
       if (correct) mkt.correct++;
       const optIdx = predictedOver ? 0 : 1;
-      mkt.options[optIdx].total++;
-      if (correct) mkt.options[optIdx].correct++;
-    }
-    if (h.double_chance) {
-      const mkt = mktData["Dupla hipótese"];
-      mkt.total++;
-      const dc = h.double_chance;
-      const correct = (dc === "1x" && actualResult !== "away") || (dc === "x2" && actualResult !== "home") || (dc === "12" && actualResult !== "draw");
-      if (correct) mkt.correct++;
-      const optIdx = dc === "1x" ? 0 : dc === "x2" ? 1 : 2;
       mkt.options[optIdx].total++;
       if (correct) mkt.options[optIdx].correct++;
     }
@@ -377,50 +366,39 @@ function Perfil() {
           <h2 className="mb-3 font-display text-lg flex items-center gap-2">
             <Target className="h-4 w-4 text-gold" /> Acerto por Mercado
           </h2>
-          <div className="space-y-3">
-            {marketList.map((m) => {
-              const color = m.pct >= 60 ? "text-wc-green" : m.pct >= 40 ? "text-gold" : "text-wc-red";
-              const barColor = m.pct >= 60 ? "bg-wc-green" : m.pct >= 40 ? "bg-gold" : "bg-wc-red";
-              const borderColor = m.pct >= 60 ? "border-wc-green/20" : m.pct >= 40 ? "border-gold/20" : "border-wc-red/20";
-              return (
-                <div key={m.name} className={`rounded-2xl border ${borderColor} bg-card/60 overflow-hidden`}>
-                  {/* Cabeçalho do mercado */}
-                  <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                    <span className="font-semibold text-sm">{m.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-muted-foreground">{m.correct}/{m.total}</span>
-                      <span className={`font-display text-xl leading-none ${color}`}>{m.pct}%</span>
-                    </div>
-                  </div>
-                  {/* Barra geral */}
-                  <div className="mx-4 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className={`h-full rounded-full ${barColor}`} style={{ width: `${m.pct}%` }} />
-                  </div>
-                  {/* Breakdown por opção */}
-                  {m.options.length > 0 && (
-                    <div className="flex gap-2 flex-wrap px-4 pb-4 pt-3">
-                      {m.options.map((o) => {
-                        const oPct = o.total > 0 ? Math.round((o.correct / o.total) * 100) : 0;
-                        const isGood = oPct >= 60;
-                        const isMid = oPct >= 40 && oPct < 60;
-                        return (
-                          <div key={o.label} className={`flex-1 min-w-[80px] rounded-xl px-3 py-2 text-center ${
-                            isGood ? "bg-wc-green/10 border border-wc-green/25" :
-                            isMid  ? "bg-gold/10 border border-gold/25" :
-                                     "bg-muted/60 border border-border"
-                          }`}>
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{o.label}</p>
-                            <p className={`font-display text-lg leading-tight mt-0.5 ${isGood ? "text-wc-green" : isMid ? "text-gold" : "text-foreground"}`}>{oPct}%</p>
-                            <p className="text-[10px] text-muted-foreground">{o.correct}/{o.total}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {m.options.length === 0 && <div className="pb-4" />}
+          <div className="rounded-2xl border border-border bg-card/60 overflow-hidden divide-y divide-border">
+            {marketList.map((m) => (
+              <div key={m.name} className="px-4 py-4">
+                {/* Nome + acerto geral */}
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-semibold text-sm">{m.name}</span>
+                  <span className="text-[11px] text-muted-foreground">{m.correct} acertos em {m.total} jogos</span>
                 </div>
-              );
-            })}
+                {/* Barra de progresso neutra */}
+                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-3">
+                  <div className="h-full rounded-full bg-gold" style={{ width: `${m.pct}%` }} />
+                </div>
+                {/* Breakdown por opção */}
+                {m.options.length > 0 && (
+                  <div className="space-y-2">
+                    {m.options.map((o) => {
+                      const oPct = o.total > 0 ? Math.round((o.correct / o.total) * 100) : 0;
+                      return (
+                        <div key={o.label} className="flex items-center gap-3">
+                          <span className="w-28 shrink-0 text-[12px] text-muted-foreground">{o.label}</span>
+                          <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
+                            <div className="h-full rounded-full bg-wc-blue/50" style={{ width: `${oPct}%` }} />
+                          </div>
+                          <span className="w-16 text-right text-[12px] font-semibold tabular-nums">
+                            {oPct}% <span className="text-muted-foreground font-normal">({o.correct}/{o.total})</span>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </section>
       )}

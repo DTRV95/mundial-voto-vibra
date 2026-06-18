@@ -186,6 +186,7 @@ export type Database = {
           id: string
           predictions_correct: number
           predictions_made: number
+          previous_rank: number | null
           total_points: number
           updated_at: string
           username: string | null
@@ -197,6 +198,7 @@ export type Database = {
           id: string
           predictions_correct?: number
           predictions_made?: number
+          previous_rank?: number | null
           total_points?: number
           updated_at?: string
           username?: string | null
@@ -208,6 +210,7 @@ export type Database = {
           id?: string
           predictions_correct?: number
           predictions_made?: number
+          previous_rank?: number | null
           total_points?: number
           updated_at?: string
           username?: string | null
@@ -248,6 +251,204 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      feedback: {
+        Row: {
+          comentario: string | null
+          created_at: string
+          design: number | null
+          facilidade: number | null
+          id: string
+          pontos: number | null
+          recomendacao: number | null
+          torneios: number | null
+          user_id: string | null
+        }
+        Insert: {
+          comentario?: string | null
+          created_at?: string
+          design?: number | null
+          facilidade?: number | null
+          id?: string
+          pontos?: number | null
+          recomendacao?: number | null
+          torneios?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          comentario?: string | null
+          created_at?: string
+          design?: number | null
+          facilidade?: number | null
+          id?: string
+          pontos?: number | null
+          recomendacao?: number | null
+          torneios?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      league_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          pool_code: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          pool_code: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          pool_code?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      match_odds: {
+        Row: {
+          created_at: string
+          id: string
+          match_id: string
+          prob_away: number
+          prob_btts_no: number
+          prob_btts_yes: number
+          prob_draw: number
+          prob_home: number
+          prob_over25: number
+          prob_over35: number
+          prob_under25: number
+          prob_under35: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_id: string
+          prob_away: number
+          prob_btts_no: number
+          prob_btts_yes: number
+          prob_draw: number
+          prob_home: number
+          prob_over25: number
+          prob_over35: number
+          prob_under25: number
+          prob_under35: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_id?: string
+          prob_away?: number
+          prob_btts_no?: number
+          prob_btts_yes?: number
+          prob_draw?: number
+          prob_home?: number
+          prob_over25?: number
+          prob_over35?: number
+          prob_under25?: number
+          prob_under35?: number
+        }
+        Relationships: []
+      }
+      news: {
+        Row: {
+          category: string
+          created_at: string
+          excerpt: string | null
+          id: string
+          image_position: string | null
+          image_url: string | null
+          published: boolean
+          slug: string | null
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          image_position?: string | null
+          image_url?: string | null
+          published?: boolean
+          slug?: string | null
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          image_position?: string | null
+          image_url?: string | null
+          published?: boolean
+          slug?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      pool_members: {
+        Row: {
+          created_at: string
+          id: string
+          joined_at: string
+          pool_id: string
+          start_points: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          joined_at?: string
+          pool_id: string
+          start_points?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          joined_at?: string
+          pool_id?: string
+          start_points?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pools: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          emoji: string | null
+          id: string
+          name: string
+          prize: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          emoji?: string | null
+          id?: string
+          name: string
+          prize?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          emoji?: string | null
+          id?: string
+          name?: string
+          prize?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

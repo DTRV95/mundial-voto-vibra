@@ -5,6 +5,7 @@ import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, Trending
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
+import { PushNotificationPrompt } from "@/components/PushNotificationPrompt";
 import { useAuth } from "@/lib/useAuth";
 import trophyImg from "@/assets/trophy-hero.jpg";
 
@@ -464,6 +465,9 @@ function Home() {
           </div>
         </div>
       )}
+
+      {/* ===================== NOTIFICAÇÕES PUSH ===================== */}
+      <PushNotificationPrompt />
 
       {/* ===================== JOGOS DE HOJE ===================== */}
       <section className="px-5 pt-8 md:px-8 relative">

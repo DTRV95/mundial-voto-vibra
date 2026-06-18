@@ -168,6 +168,40 @@ function JogoPage() {
     }
   }
 
+  async function sharePrediction() {
+    const homeName = (match?.home as any)?.name ?? "Casa";
+    const awayName = (match?.away as any)?.name ?? "Fora";
+
+    const result90Labels: Record<string, string> = {
+      home: `Vitória de ${homeName}`,
+      draw: "Empate",
+      away: `Vitória de ${awayName}`,
+    };
+    const bttsLabels: Record<string, string> = { yes: "Ambas marcam", no: "Nem ambas marcam" };
+    const total25Labels: Record<string, string> = { over: "+2.5 golos", under: "-2.5 golos" };
+    const total35Labels: Record<string, string> = { over: "+3.5 golos", under: "-3.5 golos" };
+
+    const lines: string[] = [`🏆 A minha previsão para ${homeName} vs ${awayName}:`];
+
+    if (pred.result_90) lines.push(`⚽ ${result90Labels[pred.result_90] ?? pred.result_90}`);
+    if (pred.btts) lines.push(`🎯 ${bttsLabels[pred.btts] ?? pred.btts}`);
+    if (pred.total_25) lines.push(`📊 ${total25Labels[pred.total_25] ?? pred.total_25}`);
+    if (pred.total_35) lines.push(`📊 ${total35Labels[pred.total_35] ?? pred.total_35}`);
+    if (pred.exact_home != null && pred.exact_away != null) {
+      lines.push(`🔢 Resultado exato: ${pred.exact_home}-${pred.exact_away}`);
+    }
+    lines.push("Vota também no Uma Geração: https://mundial-voto-vibra.davidvilaverde.workers.dev/jogos");
+
+    const text = lines.join("\n");
+
+    if (navigator.share) {
+      await navigator.share({ title: `${homeName} vs ${awayName} — Previsão`, text }).catch(() => {});
+    } else {
+      await navigator.clipboard.writeText(text);
+      toast.success("Previsão copiada!");
+    }
+  }
+
   async function save() {
     if (!user) { navigate({ to: "/auth", search: { redirect: `/jogo/${id}` } }); return; }
     if (closed) return;
@@ -411,6 +445,18 @@ function JogoPage() {
           {saved ? "✓ Guardado!" : closed ? "Votação fechada" : hasVoted ? "Atualizar Previsão" : "Guardar Previsão"}
         </button>
       </div>
+
+      {hasVoted && (
+        <div className="mt-3 flex justify-center">
+          <button
+            onClick={sharePrediction}
+            className="flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-smooth hover:bg-primary/20"
+          >
+            <Share2 className="h-4 w-4" />
+            Partilhar previsão
+          </button>
+        </div>
+      )}
 
       {!showCommunity && (
         <div className="mt-4 rounded-2xl border border-border bg-card/40 p-4 text-center">

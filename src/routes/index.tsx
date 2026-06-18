@@ -132,7 +132,7 @@ function Home() {
     queryFn: async () => {
       const { data: me } = await supabase
         .from("profiles")
-        .select("total_points")
+        .select("total_points,vote_streak,max_vote_streak")
         .eq("id", user!.id)
         .maybeSingle();
       if (!me) return null;
@@ -148,7 +148,7 @@ function Home() {
         { label: "Liga do Zé Povinho", emoji: "🟢", min: 31, max: Infinity, border: "border-green-700/40", bg: "bg-green-700/10", text: "text-green-600" },
       ];
       const div = DIVISIONS.find(d => rank >= d.min && rank <= d.max) ?? DIVISIONS[3];
-      return { rank, points: me.total_points ?? 0, ...div };
+      return { rank, points: me.total_points ?? 0, streak: (me as any).vote_streak ?? 0, maxStreak: (me as any).max_vote_streak ?? 0, ...div };
     },
   });
 
@@ -409,6 +409,12 @@ function Home() {
               <p className={`font-display text-xl leading-none ${myDivision.text}`}>{myDivision.label}</p>
               <p className="text-xs text-muted-foreground mt-1">#{myDivision.rank}º global · {myDivision.points} pts</p>
             </div>
+            {myDivision.streak > 0 && (
+              <div className="flex flex-col items-center shrink-0 rounded-xl bg-orange-500/15 border border-orange-500/30 px-3 py-1.5">
+                <span className="text-lg leading-none">🔥</span>
+                <span className="text-[11px] font-bold text-orange-400 leading-none mt-0.5">{myDivision.streak}</span>
+              </div>
+            )}
             <ArrowRight className={`h-4 w-4 shrink-0 ${myDivision.text}`} />
           </Link>
         </div>

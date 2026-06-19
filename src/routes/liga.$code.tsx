@@ -213,16 +213,18 @@ function LigaPage() {
         .in("match_id", matchIds)
         .in("user_id", memberIds);
 
-      return matches.map((m: any) => ({
-        match: m,
-        predictions: (preds ?? [])
-          .filter(p => p.match_id === m.id)
-          .map(p => ({
-            ...p,
-            member: ranking.find(r => r.id === p.user_id),
-          }))
-          .filter(p => p.member),
-      })).filter(m => m.predictions.length > 0);
+      return matches
+        .filter((m: any) => m.home && m.away)
+        .map((m: any) => ({
+          match: m,
+          predictions: (preds ?? [])
+            .filter(p => p.match_id === m.id)
+            .map(p => ({
+              ...p,
+              member: ranking.find(r => r.id === p.user_id),
+            }))
+            .filter(p => p.member),
+        })).filter(m => m.predictions.length > 0);
     },
   });
 

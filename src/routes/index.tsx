@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper, Star, Gift, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper, Star, Gift, ChevronUp, ChevronDown, Target } from "lucide-react";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
@@ -563,6 +563,26 @@ function Home() {
         </div>
       )}
 
+      {/* ===================== BANNER PROGNÓSTICOS — visitantes ===================== */}
+      {!user && (
+        <div className="mx-5 mt-3 md:mx-8">
+          <Link to="/noticias" search={{ prog: true } as any}
+            className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-border bg-card/70 px-4 py-3.5 transition-smooth hover:border-wc-blue/40"
+            style={{ background: "linear-gradient(135deg, oklch(0.20 0.04 250 / 0.6) 0%, oklch(0.16 0.03 260 / 0.4) 100%)" }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/10">
+                <Target className="h-4.5 w-4.5 text-white/80" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 leading-none mb-1">Análise antes de votar</p>
+                <p className="text-sm font-bold text-white leading-none">Ver prognósticos dos jogos →</p>
+              </div>
+            </div>
+          </Link>
+        </div>
+      )}
+
       {/* ===================== BANNER TORNEIO — logado sem liga ===================== */}
       {user && myPools.length === 0 && (
         <div className="mx-5 mt-4 md:mx-8">
@@ -1007,7 +1027,7 @@ function Home() {
         <section className="px-5 pt-10 pb-2 md:px-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-2xl md:text-3xl">Últimas Notícias</h2>
-            <Link to="/noticias" className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">
+            <Link to="/noticias" search={{} as any} className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">
               Ver todas →
             </Link>
           </div>
@@ -1081,7 +1101,7 @@ function Home() {
             );
           })()}
 
-          <Link to="/noticias"
+          <Link to="/noticias" search={{} as any}
             className="mt-3 block w-full rounded-2xl border border-border py-2.5 text-center text-xs font-bold text-muted-foreground transition-smooth hover:border-gold/40 hover:text-gold">
             Ver todas as notícias →
           </Link>

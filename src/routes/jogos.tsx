@@ -1,11 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { formatDate } from "@/lib/format";
-import { CalendarClock, CheckCircle2 } from "lucide-react";
+import { CalendarClock, CheckCircle2, Target } from "lucide-react";
 
 export const Route = createFileRoute("/jogos")({
   head: () => ({
@@ -128,6 +128,23 @@ function Jogos() {
         <h1 className="font-display text-3xl md:text-4xl">Jogos</h1>
         <p className="text-sm text-muted-foreground mt-0.5 capitalize">{formatDate(new Date().toISOString())}</p>
       </header>
+
+      {/* Banner prognósticos */}
+      <Link to="/noticias" search={{ prog: true } as any}
+        className="group mb-4 flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border px-4 py-3 transition-smooth hover:border-wc-blue/40"
+        style={{ background: "linear-gradient(135deg, oklch(0.20 0.04 250 / 0.5) 0%, oklch(0.16 0.02 260 / 0.3) 100%)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/10">
+            <Target className="h-4 w-4 text-white/70" />
+          </div>
+          <div>
+            <p className="text-[9px] font-bold uppercase tracking-widest text-white/40 leading-none mb-0.5">Antes de votares</p>
+            <p className="text-sm font-bold text-white/90 leading-none">Ver prognósticos</p>
+          </div>
+        </div>
+        <span className="text-xs font-bold text-white/50 group-hover:text-white/80 transition-smooth shrink-0">→</span>
+      </Link>
 
       {/* Filtros */}
       <div className="mb-3 -mx-4 md:mx-0 overflow-x-auto px-4 md:px-0">

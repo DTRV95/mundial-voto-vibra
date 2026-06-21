@@ -89,7 +89,7 @@ function Article() {
     return (
       <div className="px-4 pt-10 text-center">
         <p className="font-display text-2xl">Artigo não encontrado</p>
-        <Link to="/noticias" className="mt-4 inline-block text-sm text-gold">← Voltar às notícias</Link>
+        <Link to="/noticias" search={{} as any} className="mt-4 inline-block text-sm text-gold">← Voltar às notícias</Link>
       </div>
     );
   }
@@ -97,7 +97,7 @@ function Article() {
   return (
     <div className="px-4 pt-6 pb-16 md:px-8 max-w-2xl mx-auto">
       <Link
-        to="/noticias"
+        to="/noticias" search={{} as any}
         className="mb-8 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-smooth"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Notícias

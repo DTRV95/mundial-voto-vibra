@@ -531,50 +531,48 @@ function JogoPage() {
                   key={m.id}
                   to="/jogo/$id"
                   params={{ id: m.id }}
-                  className="group relative overflow-hidden rounded-2xl border border-wc-blue/30 transition-smooth"
-                  style={{
-                    background: "linear-gradient(135deg, oklch(0.20 0.06 250 / 0.9) 0%, oklch(0.16 0.08 270 / 0.95) 100%)",
-                    transition: "transform 220ms cubic-bezier(0.16,1,0.3,1), box-shadow 220ms ease",
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 32px -6px oklch(0.55 0.20 250 / 0.35)"; }}
+                  className="group relative overflow-hidden rounded-2xl border border-border bg-card transition-smooth"
+                  style={{ transition: "transform 220ms cubic-bezier(0.16,1,0.3,1), box-shadow 220ms ease" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -4px oklch(0.47 0.22 27 / 0.18)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
                 >
-                  {/* top accent */}
-                  <div className={`h-0.5 w-full ${alreadyVoted ? "bg-primary" : "bg-gradient-to-r from-wc-red via-gold to-wc-green"}`} />
+                  {/* top accent stripe */}
+                  <div className="h-1 w-full bg-gradient-to-r from-wc-red via-wc-blue to-wc-red" />
 
                   <div className="px-4 py-3">
                     {/* hora + estado */}
                     <div className="mb-3 flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-display text-base text-gold">{timeStr}</span>
-                        <span className="text-[11px] text-white/40 capitalize">{dateStr}</span>
+                        <span className="font-display text-sm text-wc-blue font-bold">{timeStr}</span>
+                        <span className="text-[11px] text-muted-foreground capitalize">{dateStr}</span>
                       </div>
                       {alreadyVoted ? (
-                        <span className="flex items-center gap-1 rounded-full border border-primary/40 bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">
+                        <span className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
                           <CheckCircle2 className="h-3 w-3" /> Votado
                         </span>
                       ) : (
-                        <span className="rounded-full border border-gold/40 bg-gold/15 px-2 py-0.5 text-[10px] font-bold text-gold group-hover:bg-gold/25 transition-smooth">
+                        <span className="rounded-full bg-wc-red px-2.5 py-0.5 text-[10px] font-bold text-white group-hover:opacity-90 transition-smooth">
                           Votar →
                         </span>
                       )}
                     </div>
 
                     {/* teams */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <div className="flex flex-1 flex-col items-center gap-1.5">
-                        <span className="text-4xl drop-shadow-sm">{mHome.flag}</span>
-                        <span className="text-[11px] font-bold text-white/80 text-center leading-tight">{mHome.name}</span>
+                        <span className="text-4xl">{mHome.flag}</span>
+                        <span className="text-[11px] font-semibold text-center leading-tight text-foreground">{mHome.name}</span>
                       </div>
-                      <div className="flex flex-col items-center gap-0.5 shrink-0">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-white/25">vs</span>
-                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 shrink-0">vs</span>
                       <div className="flex flex-1 flex-col items-center gap-1.5">
-                        <span className="text-4xl drop-shadow-sm">{mAway.flag}</span>
-                        <span className="text-[11px] font-bold text-white/80 text-center leading-tight">{mAway.name}</span>
+                        <span className="text-4xl">{mAway.flag}</span>
+                        <span className="text-[11px] font-semibold text-center leading-tight text-foreground">{mAway.name}</span>
                       </div>
                     </div>
                   </div>
+
+                  {/* subtle left border accent */}
+                  <div className="absolute left-0 top-1 bottom-0 w-0.5 bg-wc-blue/20 rounded-full" />
                 </Link>
               );
             })}

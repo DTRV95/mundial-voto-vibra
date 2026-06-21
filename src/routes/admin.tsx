@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
@@ -1073,12 +1073,15 @@ function PrognosticosAdmin() {
     setMainTrend(""); setAttentionPoint(""); setPublished(false); setEditId(null);
   }
 
+  const formRef = useRef<HTMLDivElement>(null);
+
   function loadEdit(p: any) {
     setEditId(p.id); setMatchId(p.match_id ?? null);
     setSuggestion(p.suggestion ?? ""); setSummary(p.summary ?? "");
     setBullets(Array.isArray(p.bullet_points) && p.bullet_points.length > 0 ? p.bullet_points : [""]);
     setMainTrend(p.main_trend ?? ""); setAttentionPoint(p.attention_point ?? "");
     setPublished(p.published ?? false);
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   }
 
   async function save() {
@@ -1120,6 +1123,13 @@ function PrognosticosAdmin() {
 
   return (
     <Section>
+      <div ref={formRef} className="scroll-mt-4">
+      {editId && (
+        <div className="mb-4 flex items-center justify-between rounded-xl border border-gold/40 bg-gold/10 px-3 py-2">
+          <p className="text-xs font-bold text-gold uppercase tracking-wider">A editar prognóstico</p>
+          <button onClick={reset} className="text-xs text-muted-foreground hover:text-foreground transition-smooth">✕ Cancelar</button>
+        </div>
+      )}
       <p className="mb-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
         {editId ? "Editar prognóstico" : "Novo prognóstico"}
       </p>
@@ -1219,6 +1229,7 @@ function PrognosticosAdmin() {
           )}
         </div>
       </div>
+      </div>
 
       {/* Lista de prognósticos */}
       {list.length > 0 && (
@@ -1237,7 +1248,9 @@ function PrognosticosAdmin() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 ml-2 shrink-0">
-                  <button onClick={() => loadEdit(p)} className="text-muted-foreground hover:text-foreground text-xs">Editar</button>
+                  <button onClick={() => loadEdit(p)} className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs font-semibold text-muted-foreground hover:border-gold/40 hover:text-gold transition-smooth">
+                    <Pencil className="h-3 w-3" /> Editar
+                  </button>
                   <button onClick={() => del(p.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
                 </div>
               </li>

@@ -30,7 +30,7 @@ const CATEGORY_STYLE: Record<string, { label: string; cls: string }> = {
 function Noticias() {
   const [showPrognosticos, setShowPrognosticos] = useState(false);
 
-  const { data: articles = [], isLoading } = useQuery({
+  const { data: articles = [], isLoading: loadingNews } = useQuery({
     queryKey: ["news", "all"],
     queryFn: async () => {
       const { data } = await supabase
@@ -42,12 +42,23 @@ function Noticias() {
     },
   });
 
-  const filtered = showPrognosticos
-    ? articles.filter((a: any) => a.category === "prognostico")
-    : articles.filter((a: any) => a.category !== "prognostico");
+  const { data: prognosticos = [], isLoading: loadingProg } = useQuery({
+    queryKey: ["prognosticos", "published"],
+    enabled: showPrognosticos,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("prognosticos")
+        .select("id,suggestion,summary,created_at,match:match_id(id,kickoff_at,home:home_team_id(name,flag),away:away_team_id(name,flag))")
+        .eq("published", true)
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
 
+  const isLoading = showPrognosticos ? loadingProg : loadingNews;
+  const filtered = articles.filter((a: any) => a.category !== "prognostico");
   const featured = (!showPrognosticos && filtered[0]) as any;
-  const rest = (!showPrognosticos ? filtered.slice(1) : filtered) as any[];
+  const rest = (!showPrognosticos ? filtered.slice(1) : prognosticos) as any[];
 
   return (
     <div className="px-4 pt-6 pb-10 md:px-8">
@@ -183,21 +194,11 @@ function Noticias() {
 
 function PrognosticoCard({ article }: { article: any }) {
   const match = article.match as any;
-  return (
-    <Link
-      to="/noticias/$id"
-      params={{ id: article.id }}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-wc-red/30 bg-card/70 transition-smooth hover:border-wc-red/60"
-      style={{ transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" }}
-      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 32px -6px oklch(0.54 0.24 27 / 0.2)"; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
-    >
-      {/* Stripe */}
-      <div className="h-0.5 w-full bg-gradient-to-r from-wc-red via-gold to-wc-green" />
-
+  const inner = (
+    <>
+      <div className="h-0.5 w-full bg-gradient-to-r from-wc-blue via-wc-green to-gold" />
       <div className="flex flex-1 flex-col p-4">
-        {/* Jogo associado */}
-        {match?.home && match?.away ? (
+        {match?.home && match?.away && (
           <div className="mb-3 flex items-center justify-between rounded-xl bg-secondary/60 px-3 py-2">
             <div className="flex items-center gap-1.5 text-xs font-bold">
               <span>{match.home.flag}</span>
@@ -209,26 +210,31 @@ function PrognosticoCard({ article }: { article: any }) {
               <span>{match.away.flag}</span>
             </div>
           </div>
-        ) : (
-          <div className="mb-3">
-            <CategoryBadge category="prognostico" small />
-          </div>
         )}
-
-        <h3 className="font-display text-base leading-tight line-clamp-2 flex-1">{article.title}</h3>
-        {article.excerpt && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{article.excerpt}</p>}
-
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Sugestão</p>
+        <p className="font-display text-base leading-tight flex-1">{article.suggestion}</p>
+        {article.summary && <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2">{article.summary}</p>}
         <div className="mt-3 flex items-center justify-between">
           <span className="text-[11px] text-muted-foreground">{formatArticleDate(article.created_at)}</span>
-          {match?.id ? (
-            <span className="text-[11px] font-bold text-wc-red group-hover:underline">Ver jogo →</span>
-          ) : (
-            <span className="text-[11px] font-bold text-wc-red group-hover:underline">Ler →</span>
-          )}
+          <span className="text-[11px] font-bold text-wc-blue group-hover:underline">Ver jogo →</span>
         </div>
       </div>
-    </Link>
+    </>
   );
+
+  const cls = "group flex flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-smooth hover:border-wc-blue/40";
+  const style = { transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" };
+  const hoverIn = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 32px -6px oklch(0.55 0.20 250 / 0.2)"; };
+  const hoverOut = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; };
+
+  if (match?.id) {
+    return (
+      <Link to="/jogo/$id" params={{ id: match.id }} className={cls} style={style} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={cls} style={style}>{inner}</div>;
 }
 
 function CategoryBadge({ category, className = "", small = false }: { category: string; className?: string; small?: boolean }) {

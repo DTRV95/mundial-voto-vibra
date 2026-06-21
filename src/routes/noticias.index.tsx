@@ -2,7 +2,7 @@ import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Newspaper, Clock, Target } from "lucide-react";
+import { TrendingUp, Newspaper, Clock, Target, CalendarClock } from "lucide-react";
 
 function readingTime(content?: string | null): number {
   if (!content) return 1;
@@ -53,7 +53,11 @@ function Noticias() {
         .select("id,suggestion,summary,created_at,match:match_id(id,kickoff_at,home:home_team_id(name,flag),away:away_team_id(name,flag))")
         .eq("published", true)
         .order("created_at", { ascending: false });
-      return data ?? [];
+      return ((data ?? []) as any[]).sort((a, b) => {
+        const ta = a.match?.kickoff_at ? new Date(a.match.kickoff_at).getTime() : Infinity;
+        const tb = b.match?.kickoff_at ? new Date(b.match.kickoff_at).getTime() : Infinity;
+        return ta - tb;
+      });
     },
   });
 
@@ -201,16 +205,28 @@ function PrognosticoCard({ article }: { article: any }) {
       <div className="h-0.5 w-full bg-gradient-to-r from-wc-blue via-wc-green to-gold" />
       <div className="flex flex-1 flex-col p-4">
         {match?.home && match?.away && (
-          <div className="mb-3 flex items-center justify-between rounded-xl bg-secondary/60 px-3 py-2">
-            <div className="flex items-center gap-1.5 text-xs font-bold">
-              <span>{match.home.flag}</span>
-              <span className="text-foreground">{match.home.name}</span>
+          <div className="mb-3 overflow-hidden rounded-xl bg-secondary/60">
+            <div className="flex items-center justify-between px-3 py-2">
+              <div className="flex items-center gap-1.5 text-xs font-bold">
+                <span>{match.home.flag}</span>
+                <span className="text-foreground">{match.home.name}</span>
+              </div>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase">vs</span>
+              <div className="flex items-center gap-1.5 text-xs font-bold">
+                <span className="text-foreground">{match.away.name}</span>
+                <span>{match.away.flag}</span>
+              </div>
             </div>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase">vs</span>
-            <div className="flex items-center gap-1.5 text-xs font-bold">
-              <span className="text-foreground">{match.away.name}</span>
-              <span>{match.away.flag}</span>
-            </div>
+            {match.kickoff_at && (
+              <div className="flex items-center gap-1 border-t border-border/30 px-3 py-1.5">
+                <CalendarClock className="h-3 w-3 text-muted-foreground shrink-0" />
+                <span className="text-[11px] text-muted-foreground capitalize">
+                  {new Date(match.kickoff_at).toLocaleDateString("pt-PT", { weekday: "short", day: "numeric", month: "short" })}
+                  {" · "}
+                  {new Date(match.kickoff_at).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+            )}
           </div>
         )}
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Sugestão</p>

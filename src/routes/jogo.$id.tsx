@@ -531,48 +531,59 @@ function JogoPage() {
                   key={m.id}
                   to="/jogo/$id"
                   params={{ id: m.id }}
-                  className="group relative overflow-hidden rounded-2xl border border-border bg-card transition-smooth"
+                  className="group relative overflow-hidden rounded-2xl border border-border transition-smooth"
                   style={{ transition: "transform 220ms cubic-bezier(0.16,1,0.3,1), box-shadow 220ms ease" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px -4px oklch(0.47 0.22 27 / 0.18)"; }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 32px -6px oklch(0.47 0.22 27 / 0.25)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
                 >
-                  {/* top accent stripe */}
-                  <div className="h-1 w-full bg-gradient-to-r from-wc-red via-wc-blue to-wc-red" />
+                  {/* split background — red left, blue right, diagonal cut */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(115deg, oklch(0.45 0.22 27 / 0.12) 0%, oklch(0.45 0.22 27 / 0.08) 45%, transparent 50%)" }} />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(115deg, transparent 50%, oklch(0.42 0.20 250 / 0.08) 55%, oklch(0.42 0.20 250 / 0.13) 100%)" }} />
+                  </div>
 
-                  <div className="px-4 py-3">
-                    {/* hora + estado */}
-                    <div className="mb-3 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-display text-sm text-wc-blue font-bold">{timeStr}</span>
-                        <span className="text-[11px] text-muted-foreground capitalize">{dateStr}</span>
-                      </div>
-                      {alreadyVoted ? (
-                        <span className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
-                          <CheckCircle2 className="h-3 w-3" /> Votado
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-wc-red px-2.5 py-0.5 text-[10px] font-bold text-white group-hover:opacity-90 transition-smooth">
-                          Votar →
-                        </span>
-                      )}
+                  {/* header strip */}
+                  <div className="relative flex items-center justify-between px-3 py-2 border-b border-border/40"
+                    style={{ background: "linear-gradient(90deg, oklch(0.45 0.22 27 / 0.07) 0%, transparent 40%, oklch(0.42 0.20 250 / 0.07) 100%)" }}>
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-1.5 w-1.5 rounded-full bg-wc-red" />
+                      <span className="font-display text-sm font-bold text-foreground">{timeStr}</span>
+                      <span className="text-[11px] text-muted-foreground capitalize">{dateStr}</span>
+                    </div>
+                    {alreadyVoted ? (
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-primary">
+                        <CheckCircle2 className="h-3 w-3" /> Votado
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-wc-red uppercase tracking-wider group-hover:text-wc-red/70 transition-smooth">Votar →</span>
+                    )}
+                  </div>
+
+                  {/* match body */}
+                  <div className="relative flex items-stretch">
+                    {/* home */}
+                    <div className="flex flex-1 flex-col items-center gap-2 px-3 py-4">
+                      <span className="text-5xl leading-none drop-shadow">{mHome.flag}</span>
+                      <span className="text-[11px] font-bold text-center leading-tight text-foreground/80">{mHome.name}</span>
                     </div>
 
-                    {/* teams */}
-                    <div className="flex items-center gap-2">
-                      <div className="flex flex-1 flex-col items-center gap-1.5">
-                        <span className="text-4xl">{mHome.flag}</span>
-                        <span className="text-[11px] font-semibold text-center leading-tight text-foreground">{mHome.name}</span>
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 shrink-0">vs</span>
-                      <div className="flex flex-1 flex-col items-center gap-1.5">
-                        <span className="text-4xl">{mAway.flag}</span>
-                        <span className="text-[11px] font-semibold text-center leading-tight text-foreground">{mAway.name}</span>
-                      </div>
+                    {/* vs divider */}
+                    <div className="flex flex-col items-center justify-center gap-1 shrink-0 py-4">
+                      <div className="w-px flex-1 bg-gradient-to-b from-transparent via-wc-red/40 to-transparent" />
+                      <span className="text-[10px] font-black tracking-widest text-muted-foreground/40 px-1">vs</span>
+                      <div className="w-px flex-1 bg-gradient-to-b from-transparent via-wc-blue/40 to-transparent" />
+                    </div>
+
+                    {/* away */}
+                    <div className="flex flex-1 flex-col items-center gap-2 px-3 py-4">
+                      <span className="text-5xl leading-none drop-shadow">{mAway.flag}</span>
+                      <span className="text-[11px] font-bold text-center leading-tight text-foreground/80">{mAway.name}</span>
                     </div>
                   </div>
 
-                  {/* subtle left border accent */}
-                  <div className="absolute left-0 top-1 bottom-0 w-0.5 bg-wc-blue/20 rounded-full" />
+                  {/* bottom red/blue corners */}
+                  <div className="absolute bottom-0 left-0 h-6 w-6 rounded-br-xl" style={{ background: "oklch(0.45 0.22 27 / 0.15)" }} />
+                  <div className="absolute bottom-0 right-0 h-6 w-6 rounded-bl-xl" style={{ background: "oklch(0.42 0.20 250 / 0.15)" }} />
                 </Link>
               );
             })}

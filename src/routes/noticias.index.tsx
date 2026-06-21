@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,7 @@ function readingTime(content?: string | null): number {
 }
 
 export const Route = createFileRoute("/noticias/")({
+  validateSearch: (s: Record<string, unknown>) => ({ prog: s.prog === "1" || s.prog === true }),
   head: () => ({
     meta: [
       { title: "Notícias — Uma Geração" },
@@ -28,7 +29,8 @@ const CATEGORY_STYLE: Record<string, { label: string; cls: string }> = {
 };
 
 function Noticias() {
-  const [showPrognosticos, setShowPrognosticos] = useState(false);
+  const { prog } = useSearch({ from: "/noticias/" });
+  const [showPrognosticos, setShowPrognosticos] = useState(prog ?? false);
 
   const { data: articles = [], isLoading: loadingNews } = useQuery({
     queryKey: ["news", "all"],

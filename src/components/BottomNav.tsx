@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarClock, Trophy, Users, User } from "lucide-react";
+import { Home, CalendarClock, Trophy, Users, User, Target } from "lucide-react";
 import { useAuth } from "@/lib/useAuth";
 import { useNotifications } from "@/lib/useNotifications";
 import { UserAvatar } from "@/components/AvatarPicker";
@@ -32,7 +32,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-50 border-t border-border bg-card/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] md:hidden shadow-elegant">
-      <ul className="mx-auto grid max-w-lg grid-cols-5">
+      <ul className="mx-auto grid max-w-lg grid-cols-6">
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => {
           const active = to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
           return (
@@ -51,6 +51,21 @@ export function BottomNav() {
             </li>
           );
         })}
+
+        {/* Prognósticos */}
+        <li>
+          <Link to="/noticias" search={{ prog: true } as any}
+            className={`relative flex flex-col items-center gap-1 py-3 text-[10px] font-bold tracking-wide uppercase transition-smooth ${
+              location.pathname.startsWith("/noticias") ? "text-wc-red" : "text-muted-foreground"
+            }`}
+          >
+            {location.pathname.startsWith("/noticias") && (
+              <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full bg-wc-red" />
+            )}
+            <Target className="h-6 w-6" strokeWidth={location.pathname.startsWith("/noticias") ? 2.4 : 1.6} />
+            <span>Picks</span>
+          </Link>
+        </li>
 
         {/* Perfil */}
         <li>

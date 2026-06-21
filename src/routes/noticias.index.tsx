@@ -27,23 +27,8 @@ const CATEGORY_STYLE: Record<string, { label: string; cls: string }> = {
   prognostico:  { label: "Prognóstico",       cls: "border-wc-red/40 bg-wc-red/10 text-wc-red" },
 };
 
-type FilterTab = "todas" | "prognosticos" | "analises" | "noticias";
-const TABS: { key: FilterTab; label: string }[] = [
-  { key: "todas",        label: "Todas" },
-  { key: "prognosticos", label: "Prognósticos" },
-  { key: "analises",    label: "Análises" },
-  { key: "noticias",    label: "Notícias" },
-];
-
-const TAB_CATEGORIES: Record<FilterTab, string[]> = {
-  todas:        [],
-  prognosticos: ["prognostico"],
-  analises:     ["analise", "antevisao"],
-  noticias:     ["noticia", "opiniao"],
-};
-
 function Noticias() {
-  const [tab, setTab] = useState<FilterTab>("todas");
+  const [showPrognosticos, setShowPrognosticos] = useState(false);
 
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ["news", "all"],
@@ -57,43 +42,32 @@ function Noticias() {
     },
   });
 
-  const filtered = tab === "todas"
-    ? articles
-    : articles.filter((a: any) => TAB_CATEGORIES[tab].includes(a.category));
+  const filtered = showPrognosticos
+    ? articles.filter((a: any) => a.category === "prognostico")
+    : articles.filter((a: any) => a.category !== "prognostico");
 
-  const isPrognosticos = tab === "prognosticos";
-  const featured = (!isPrognosticos && filtered[0]) as any;
-  const rest = (!isPrognosticos ? filtered.slice(1) : filtered) as any[];
+  const featured = (!showPrognosticos && filtered[0]) as any;
+  const rest = (!showPrognosticos ? filtered.slice(1) : filtered) as any[];
 
   return (
     <div className="px-4 pt-6 pb-10 md:px-8">
-      <header className="mb-5">
-        <h1 className="font-display text-3xl md:text-4xl">Notícias</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Antevisões, análises e as últimas do Mundial 2026.</p>
-      </header>
-
-      {/* Filtros */}
-      <div className="mb-6 -mx-4 md:mx-0 overflow-x-auto px-4 md:px-0">
-        <div className="flex gap-2 w-max">
-          {TABS.map(t => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth ${
-                tab === t.key
-                  ? t.key === "prognosticos"
-                    ? "border-wc-red bg-wc-red text-white"
-                    : "border-gold bg-gold text-background"
-                  : "border-border bg-card/60 text-muted-foreground hover:border-gold/40 hover:text-foreground"
-              }`}
-            >
-              {t.key === "prognosticos" && <Target className="h-3.5 w-3.5" />}
-              {t.key === "analises" && <TrendingUp className="h-3.5 w-3.5" />}
-              {t.label}
-            </button>
-          ))}
+      <header className="mb-5 flex items-center justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl md:text-4xl">Notícias</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Antevisões, análises e as últimas do Mundial 2026.</p>
         </div>
-      </div>
+        <button
+          onClick={() => setShowPrognosticos(v => !v)}
+          className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth ${
+            showPrognosticos
+              ? "border-wc-red bg-wc-red text-white"
+              : "border-border bg-card/60 text-muted-foreground"
+          }`}
+        >
+          <Target className="h-3.5 w-3.5" />
+          Prognósticos
+        </button>
+      </header>
 
       {isLoading && (
         <div className="space-y-4">
@@ -108,14 +82,14 @@ function Noticias() {
         <div className="rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center">
           <Newspaper className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" />
           <p className="font-display text-lg">
-            {tab === "prognosticos" ? "Sem prognósticos publicados" : "Sem artigos publicados"}
+            {showPrognosticos ? "Sem prognósticos publicados" : "Sem artigos publicados"}
           </p>
           <p className="text-sm text-muted-foreground mt-1">Volta em breve.</p>
         </div>
       )}
 
       {/* Prognósticos — layout em grid de cards */}
-      {isPrognosticos && rest.length > 0 && (
+      {showPrognosticos && rest.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {rest.map((a: any) => (
             <PrognosticoCard key={a.id} article={a} />
@@ -124,7 +98,7 @@ function Noticias() {
       )}
 
       {/* Outras categorias — layout normal com featured */}
-      {!isPrognosticos && (
+      {!showPrognosticos && (
         <>
           {featured && (
             <Link

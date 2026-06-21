@@ -650,6 +650,19 @@ function NewsAdmin() {
   const [editId, setEditId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [matchId, setMatchId] = useState<string | null>(null);
+  const [matchSearch, setMatchSearch] = useState("");
+
+  const { data: allMatches = [] } = useQuery({
+    queryKey: ["admin", "matches-for-news"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("matches")
+        .select("id,kickoff_at,home:home_team_id(name,flag),away:away_team_id(name,flag)")
+        .order("kickoff_at");
+      return (data ?? []).filter((m: any) => m.home && m.away);
+    },
+  });
 
   const { data: articles = [] } = useQuery({
     queryKey: ["admin", "news"],
@@ -659,6 +672,7 @@ function NewsAdmin() {
   function reset() {
     setTitle(""); setExcerpt(""); setContent(""); setImageUrl("");
     setImageCaption(""); setImagePosition("50% 50%"); setCategory("noticia"); setPublished(false); setEditId(null);
+    setMatchId(null); setMatchSearch("");
   }
 
   function loadEdit(a: any) {
@@ -666,6 +680,7 @@ function NewsAdmin() {
     setExcerpt(a.excerpt ?? ""); setContent(a.content ?? ""); setImageUrl(a.image_url ?? "");
     setImageCaption(a.image_caption ?? ""); setImagePosition(a.image_position ?? "50% 50%");
     setCategory(a.category); setPublished(a.published);
+    setMatchId(a.match_id ?? null);
   }
 
   async function uploadImage(file: File) {
@@ -694,10 +709,11 @@ function NewsAdmin() {
       image_url: imageUrl || null, image_caption: imageCaption || null,
       image_position: imageUrl ? imagePosition : null,
       category, published,
+      match_id: category === "prognostico" ? matchId : null,
     };
     const { error } = editId
-      ? await supabase.from("news").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", editId)
-      : await supabase.from("news").insert(payload);
+      ? await supabase.from("news").update({ ...(payload as any), updated_at: new Date().toISOString() }).eq("id", editId)
+      : await supabase.from("news").insert(payload as any);
     if (error) { toast.error(error.message); return; }
     toast.success(editId ? "Artigo actualizado!" : "Artigo criado!");
     reset(); qc.invalidateQueries({ queryKey: ["admin", "news"] });
@@ -832,12 +848,62 @@ function NewsAdmin() {
             <option value="analise">Análise ScoreLab</option>
             <option value="antevisao">Antevisão</option>
             <option value="opiniao">Opinião</option>
+            <option value="prognostico">Prognóstico</option>
           </select>
           <label className="flex items-center gap-2 rounded-xl border border-border bg-input px-3 py-2 text-sm cursor-pointer">
             <input type="checkbox" checked={published} onChange={e => setPublished(e.target.checked)} className="accent-gold" />
             Publicar
           </label>
         </div>
+
+        {category === "prognostico" && (
+          <div className="rounded-xl border border-wc-red/30 bg-wc-red/5 p-3 space-y-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-wc-red">Jogo associado</p>
+            {matchId && (() => {
+              const m = allMatches.find((m: any) => m.id === matchId) as any;
+              return m ? (
+                <div className="flex items-center justify-between rounded-lg bg-card border border-border px-3 py-2">
+                  <span className="text-sm font-semibold">
+                    {m.home.flag} {m.home.name} vs {m.away.name} {m.away.flag}
+                  </span>
+                  <button onClick={() => setMatchId(null)} className="text-xs text-muted-foreground hover:text-destructive">✕ Remover</button>
+                </div>
+              ) : null;
+            })()}
+            {!matchId && (
+              <>
+                <input
+                  placeholder="Pesquisar jogo..."
+                  value={matchSearch}
+                  onChange={e => setMatchSearch(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wc-red/40"
+                />
+                <div className="max-h-52 overflow-y-auto rounded-lg border border-border bg-background divide-y divide-border">
+                  {allMatches
+                    .filter((m: any) => {
+                      if (!matchSearch.trim()) return true;
+                      const q = matchSearch.toLowerCase();
+                      return m.home.name.toLowerCase().includes(q) || m.away.name.toLowerCase().includes(q);
+                    })
+                    .map((m: any) => (
+                      <button
+                        key={m.id}
+                        onClick={() => { setMatchId(m.id); setMatchSearch(""); }}
+                        className="flex w-full items-center justify-between px-3 py-2.5 text-left hover:bg-accent transition-smooth"
+                      >
+                        <span className="text-sm font-semibold">
+                          {m.home.flag} {m.home.name} <span className="text-muted-foreground font-normal">vs</span> {m.away.name} {m.away.flag}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground shrink-0 ml-2">
+                          {new Date(m.kickoff_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" })}
+                        </span>
+                      </button>
+                    ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Conteúdo */}
         <textarea

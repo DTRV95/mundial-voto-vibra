@@ -500,10 +500,10 @@ function PrognosticoCard({ prog }: { prog: any }) {
       >
         <div className="flex items-center gap-2">
           <Target className="h-4 w-4 text-wc-red" />
-          <span className="font-display text-base text-wc-red">Prognóstico</span>
-          <span className="rounded-full border border-wc-red/30 bg-wc-red/10 px-2.5 py-0.5 text-xs font-bold text-wc-red">
-            {prog.suggestion}
-          </span>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-wc-red/70 leading-none mb-0.5">Prognóstico</p>
+            <p className="text-sm font-bold text-wc-red leading-none">{prog.suggestion}</p>
+          </div>
         </div>
         <ChevronDown className={`h-4 w-4 text-wc-red transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>

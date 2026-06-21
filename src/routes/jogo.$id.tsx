@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
-import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target } from "lucide-react";
+import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target, CalendarClock, CheckCircle2 } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 
@@ -64,6 +64,34 @@ function JogoPage() {
         .select("result_90,btts,total_25,total_35,double_chance,combo_15,combo_35,exact_home,exact_away")
         .eq("match_id", id);
       return data ?? [];
+    },
+  });
+
+  const { data: nextMatches = [] } = useQuery({
+    queryKey: ["next-open-matches", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("matches")
+        .select("id,kickoff_at,phase,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .eq("voting_open", true)
+        .neq("id", id)
+        .order("kickoff_at")
+        .limit(4);
+      return ((data as any) ?? []).filter((m: any) => m.home && m.away);
+    },
+  });
+
+  const { data: nextVotedIds = new Set<string>() } = useQuery({
+    queryKey: ["next-voted-ids", user?.id, id],
+    enabled: !!user?.id && nextMatches.length > 0,
+    queryFn: async () => {
+      const ids = nextMatches.map((m: any) => m.id);
+      const { data } = await supabase
+        .from("predictions")
+        .select("match_id")
+        .eq("user_id", user!.id)
+        .in("match_id", ids);
+      return new Set((data ?? []).map((p: any) => p.match_id));
     },
   });
 
@@ -481,6 +509,58 @@ function JogoPage() {
           <Lock className="mx-auto mb-1.5 h-4 w-4 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">Vota para desbloquear a opinião da comunidade.</p>
         </div>
+      )}
+
+      {/* Próximos jogos a votar */}
+      {nextMatches.length > 0 && (
+        <aside className="mt-8 pt-6 border-t border-border">
+          <div className="mb-3 flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-muted-foreground" />
+            <h3 className="font-display text-lg">Próximos jogos</h3>
+          </div>
+          <div className="space-y-2">
+            {nextMatches.map((m: any) => {
+              const mHome = m.home as any;
+              const mAway = m.away as any;
+              const alreadyVoted = nextVotedIds.has(m.id);
+              return (
+                <Link
+                  key={m.id}
+                  to="/jogo/$id"
+                  params={{ id: m.id }}
+                  className="group flex items-center gap-3 rounded-xl border border-border bg-card/60 px-4 py-3 hover:border-gold/40 transition-smooth"
+                >
+                  <div className="flex flex-1 items-center justify-between min-w-0 gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-lg">{mHome.flag}</span>
+                      <span className="text-sm font-semibold truncate">{mHome.name}</span>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground shrink-0">vs</span>
+                    <div className="flex items-center gap-2 min-w-0 justify-end">
+                      <span className="text-sm font-semibold truncate text-right">{mAway.name}</span>
+                      <span className="text-lg">{mAway.flag}</span>
+                    </div>
+                  </div>
+                  <div className="shrink-0 flex items-center gap-1.5">
+                    {alreadyVoted ? (
+                      <span className="flex items-center gap-1 text-[11px] font-semibold text-primary">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Votado
+                      </span>
+                    ) : (
+                      <span className="text-xs font-bold text-gold group-hover:underline">Votar →</span>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+          <Link
+            to="/jogos"
+            className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-smooth"
+          >
+            Ver todos os jogos →
+          </Link>
+        </aside>
       )}
     </div>
   );

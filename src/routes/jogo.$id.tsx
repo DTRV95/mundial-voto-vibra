@@ -514,41 +514,61 @@ function JogoPage() {
       {/* Próximos jogos a votar */}
       {nextMatches.length > 0 && (
         <aside className="mt-8 pt-6 border-t border-border">
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-4 flex items-center gap-2">
             <CalendarClock className="h-4 w-4 text-muted-foreground" />
             <h3 className="font-display text-lg">Próximos jogos</h3>
           </div>
-          <div className="space-y-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {nextMatches.map((m: any) => {
               const mHome = m.home as any;
               const mAway = m.away as any;
               const alreadyVoted = nextVotedIds.has(m.id);
+              const kickoff = new Date(m.kickoff_at);
+              const timeStr = kickoff.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+              const dateStr = kickoff.toLocaleDateString("pt-PT", { weekday: "short", day: "numeric", month: "short" });
               return (
                 <Link
                   key={m.id}
                   to="/jogo/$id"
                   params={{ id: m.id }}
-                  className="group flex items-center gap-3 rounded-xl border border-border bg-card/60 px-4 py-3 hover:border-gold/40 transition-smooth"
+                  className="group relative overflow-hidden rounded-2xl border border-border bg-card/70 transition-smooth hover:border-gold/40"
+                  style={{ transition: "transform 220ms cubic-bezier(0.16,1,0.3,1), box-shadow 220ms ease" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px -6px oklch(0.82 0.15 88 / 0.18)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
                 >
-                  <div className="flex flex-1 items-center justify-between min-w-0 gap-3">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-lg">{mHome.flag}</span>
-                      <span className="text-sm font-semibold truncate">{mHome.name}</span>
+                  {/* top accent line */}
+                  <div className={`h-0.5 w-full ${alreadyVoted ? "bg-primary/50" : "bg-gradient-to-r from-gold/60 via-gold/30 to-transparent"}`} />
+
+                  <div className="px-4 py-3">
+                    {/* hora + fase */}
+                    <div className="mb-3 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-display text-base text-gold">{timeStr}</span>
+                        <span className="text-[11px] text-muted-foreground capitalize">{dateStr}</span>
+                      </div>
+                      {alreadyVoted ? (
+                        <span className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+                          <CheckCircle2 className="h-3 w-3" /> Votado
+                        </span>
+                      ) : (
+                        <span className="rounded-full border border-gold/30 bg-gold/10 px-2 py-0.5 text-[10px] font-bold text-gold">
+                          Votar →
+                        </span>
+                      )}
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground shrink-0">vs</span>
-                    <div className="flex items-center gap-2 min-w-0 justify-end">
-                      <span className="text-sm font-semibold truncate text-right">{mAway.name}</span>
-                      <span className="text-lg">{mAway.flag}</span>
+
+                    {/* teams */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-1 flex-col items-center gap-1">
+                        <span className="text-2xl">{mHome.flag}</span>
+                        <span className="text-[11px] font-semibold text-center leading-tight">{mHome.name}</span>
+                      </div>
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 shrink-0">vs</span>
+                      <div className="flex flex-1 flex-col items-center gap-1">
+                        <span className="text-2xl">{mAway.flag}</span>
+                        <span className="text-[11px] font-semibold text-center leading-tight">{mAway.name}</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="shrink-0 flex items-center gap-1.5">
-                    {alreadyVoted ? (
-                      <span className="flex items-center gap-1 text-[11px] font-semibold text-primary">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Votado
-                      </span>
-                    ) : (
-                      <span className="text-xs font-bold text-gold group-hover:underline">Votar →</span>
-                    )}
                   </div>
                 </Link>
               );
@@ -556,7 +576,7 @@ function JogoPage() {
           </div>
           <Link
             to="/jogos"
-            className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-smooth"
+            className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-smooth"
           >
             Ver todos os jogos →
           </Link>

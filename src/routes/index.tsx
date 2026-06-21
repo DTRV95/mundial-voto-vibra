@@ -48,12 +48,12 @@ function Home() {
       const end = new Date(); end.setHours(23, 59, 59, 999);
       const { data } = await supabase
         .from("matches")
-        .select("id,kickoff_at,phase,voting_open,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .select("id,kickoff_at,phase,voting_open,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code),predictions(count)")
         .gte("kickoff_at", start.toISOString())
         .lte("kickoff_at", end.toISOString())
         .order("kickoff_at")
         .limit(4);
-      return (data as any) ?? [];
+      return ((data as any) ?? []).map((m: any) => ({ ...m, votes_count: m.predictions?.[0]?.count ?? 0 }));
     },
   });
 

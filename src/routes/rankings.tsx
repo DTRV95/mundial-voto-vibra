@@ -124,7 +124,7 @@ function Rankings() {
   });
 
   // Query para divisões — todos os utilizadores ordenados por pontos
-  const { data: allUsers = [] } = useQuery({
+  const { data: allUsers = [], isLoading: loadingUsers } = useQuery({
     queryKey: ["all-users-ranking"],
     enabled: tab === "divisoes",
     queryFn: async () => {
@@ -270,7 +270,21 @@ function Rankings() {
       )}
 
       {/* ── DIVISÕES ────────────────────────────────────────── */}
-      {tab === "divisoes" && (
+      {tab === "divisoes" && loadingUsers && (
+        <div className="space-y-3">
+          <div className="h-24 shimmer rounded-2xl" />
+          {[0,1,2].map(i => (
+            <div key={i} className="overflow-hidden rounded-2xl border border-border">
+              <div className="h-14 shimmer" />
+              <div className="divide-y divide-border/50">
+                {[0,1,2,3,4].map(j => <div key={j} className="h-12 shimmer" />)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab === "divisoes" && !loadingUsers && (
         <div className="space-y-6">
           {/* Cartão da divisão do utilizador */}
           {user && (() => {

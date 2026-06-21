@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
-import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy } from "lucide-react";
+import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 
@@ -64,6 +64,22 @@ function JogoPage() {
         .select("result_90,btts,total_25,total_35,double_chance,combo_15,combo_35,exact_home,exact_away")
         .eq("match_id", id);
       return data ?? [];
+    },
+  });
+
+  const { data: prognostico } = useQuery({
+    queryKey: ["prognostico", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("news")
+        .select("id,title,excerpt,content")
+        .eq("match_id", id)
+        .eq("category", "prognostico")
+        .eq("published", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data ?? null;
     },
   });
 
@@ -330,6 +346,27 @@ function JogoPage() {
             </div>
           )}
         </div>
+      )}
+
+      {/* ── Prognóstico editorial ── */}
+      {prognostico && (
+        <Link
+          to="/noticias/$id"
+          params={{ id: prognostico.id }}
+          className="group mt-4 flex items-start gap-3 overflow-hidden rounded-2xl border border-wc-red/30 bg-wc-red/5 p-4 transition-smooth hover:border-wc-red/60 hover:bg-wc-red/8"
+        >
+          <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-wc-red/15">
+            <Target className="h-4 w-4 text-wc-red" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-wc-red/70 mb-0.5">Prognóstico</p>
+            <p className="text-sm font-semibold leading-snug line-clamp-2 text-foreground">{prognostico.title}</p>
+            {prognostico.excerpt && (
+              <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{prognostico.excerpt}</p>
+            )}
+          </div>
+          <span className="shrink-0 self-center text-xs font-bold text-wc-red group-hover:underline">Ler →</span>
+        </Link>
       )}
 
       {/* ── Markets ── */}

@@ -70,11 +70,10 @@ function JogoPage() {
   const { data: prognostico } = useQuery({
     queryKey: ["prognostico", id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("news")
-        .select("id,title,excerpt,content")
+      const { data } = await (supabase as any)
+        .from("prognosticos")
+        .select("id,suggestion,summary,bullet_points,main_trend,attention_point")
         .eq("match_id", id)
-        .eq("category", "prognostico")
         .eq("published", true)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -349,25 +348,7 @@ function JogoPage() {
       )}
 
       {/* ── Prognóstico editorial ── */}
-      {prognostico && (
-        <Link
-          to="/noticias/$id"
-          params={{ id: prognostico.id }}
-          className="group mt-4 flex items-start gap-3 overflow-hidden rounded-2xl border border-wc-red/30 bg-wc-red/5 p-4 transition-smooth hover:border-wc-red/60 hover:bg-wc-red/8"
-        >
-          <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-wc-red/15">
-            <Target className="h-4 w-4 text-wc-red" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-wc-red/70 mb-0.5">Prognóstico</p>
-            <p className="text-sm font-semibold leading-snug line-clamp-2 text-foreground">{prognostico.title}</p>
-            {prognostico.excerpt && (
-              <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{prognostico.excerpt}</p>
-            )}
-          </div>
-          <span className="shrink-0 self-center text-xs font-bold text-wc-red group-hover:underline">Ler →</span>
-        </Link>
-      )}
+      {prognostico && <PrognosticoCard prog={prognostico} />}
 
       {/* ── Markets ── */}
       <section className="mt-4 space-y-3">
@@ -499,6 +480,74 @@ function JogoPage() {
         <div className="mt-4 rounded-2xl border border-border bg-card/40 p-4 text-center">
           <Lock className="mx-auto mb-1.5 h-4 w-4 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">Vota para desbloquear a opinião da comunidade.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Prognóstico ─────────────────────────────────────────── */
+
+function PrognosticoCard({ prog }: { prog: any }) {
+  const [open, setOpen] = useState(false);
+  const bullets: string[] = Array.isArray(prog.bullet_points) ? prog.bullet_points : [];
+
+  return (
+    <div className="mt-4 overflow-hidden rounded-2xl border border-wc-red/30 bg-wc-red/5">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex w-full items-center justify-between px-4 py-3 hover:bg-wc-red/8 transition-smooth"
+      >
+        <div className="flex items-center gap-2">
+          <Target className="h-4 w-4 text-wc-red" />
+          <span className="font-display text-base text-wc-red">Prognóstico</span>
+          <span className="rounded-full border border-wc-red/30 bg-wc-red/10 px-2.5 py-0.5 text-xs font-bold text-wc-red">
+            {prog.suggestion}
+          </span>
+        </div>
+        <ChevronDown className={`h-4 w-4 text-wc-red transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="border-t border-wc-red/20 px-4 py-4 space-y-4">
+          {/* Resumo */}
+          {prog.summary && (
+            <div>
+              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Resumo</p>
+              <p className="text-sm text-foreground/90 leading-relaxed">{prog.summary}</p>
+            </div>
+          )}
+
+          {/* Pontos Essenciais */}
+          {bullets.length > 0 && (
+            <div>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pontos Essenciais</p>
+              <ul className="space-y-1.5">
+                {bullets.map((b, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-foreground/85">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-wc-red" />
+                    {b}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Tendência Principal */}
+          {prog.main_trend && (
+            <div className="rounded-xl border border-wc-red/20 bg-wc-red/5 px-3 py-3">
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-wc-red">Tendência Principal</p>
+              <p className="text-sm text-foreground/90 leading-relaxed">{prog.main_trend}</p>
+            </div>
+          )}
+
+          {/* Ponto de Atenção */}
+          {prog.attention_point && (
+            <div className="rounded-xl border border-gold/25 bg-gold/8 px-3 py-3">
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gold">Ponto de Atenção</p>
+              <p className="text-sm text-foreground/90 leading-relaxed">{prog.attention_point}</p>
+            </div>
+          )}
         </div>
       )}
     </div>

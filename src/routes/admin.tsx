@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { toast } from "sonner";
 import { PHASE_LABEL } from "@/lib/format";
-import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil, X, ImageIcon, Eye, Newspaper } from "lucide-react";
+import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil, X, ImageIcon, Eye, Newspaper, Target, ChevronUp, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Uma Geração" }] }),
@@ -76,7 +76,7 @@ function Stat({ label, value, icon }: { label: string; value: number; icon?: Rea
 }
 
 function Tabs() {
-  const [tab, setTab] = useState<"matches" | "analysis" | "news" | "teams" | "groups" | "prizes" | "suporte">("matches");
+  const [tab, setTab] = useState<"matches" | "analysis" | "news" | "prognosticos" | "teams" | "groups" | "prizes" | "suporte">("matches");
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["admin", "support-unread"],
@@ -92,8 +92,9 @@ function Tabs() {
 
   const tabs = [
     { k: "matches",  label: "Jogos" },
-    { k: "analysis", label: "ScoreLab" },
-    { k: "news",     label: "Notícias" },
+    { k: "analysis",     label: "ScoreLab" },
+    { k: "news",         label: "Notícias" },
+    { k: "prognosticos", label: "Prognósticos" },
     { k: "teams",    label: "Equipas" },
     { k: "groups",   label: "Grupos" },
     { k: "prizes",   label: "Prémios" },
@@ -118,8 +119,9 @@ function Tabs() {
       </div>
       {tab === "matches"  && <MatchesAdmin />}
       {tab === "analysis" && <AnalysisAdmin />}
-      {tab === "news"     && <NewsAdmin />}
-      {tab === "groups"   && <GroupsAdmin />}
+      {tab === "news"          && <NewsAdmin />}
+      {tab === "prognosticos"  && <PrognosticosAdmin />}
+      {tab === "groups"        && <GroupsAdmin />}
       {tab === "teams"    && <TeamsAdmin />}
       {tab === "prizes"   && <PrizesAdmin />}
       {tab === "suporte"  && <SuporteAdmin />}
@@ -970,6 +972,277 @@ function NewsAdmin() {
               </div>
             </li>
           ))}
+        </ul>
+      )}
+    </Section>
+  );
+}
+
+// ── HELPER PARTILHADO: match picker ─────────────────────────────────────────
+function MatchPicker({ value, onChange }: { value: string | null; onChange: (id: string | null) => void }) {
+  const [search, setSearch] = useState("");
+  const { data: matches = [] } = useQuery({
+    queryKey: ["admin", "all-matches-picker"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("matches")
+        .select("id,kickoff_at,phase,home:home_team_id(name,flag),away:away_team_id(name,flag)")
+        .order("kickoff_at");
+      return (data ?? []).filter((m: any) => m.home && m.away);
+    },
+  });
+
+  const selected = matches.find((m: any) => m.id === value) as any;
+
+  if (selected) {
+    return (
+      <div className="flex items-center justify-between rounded-xl border border-wc-red/40 bg-wc-red/5 px-3 py-2.5">
+        <div>
+          <p className="text-sm font-bold">
+            {selected.home.flag} {selected.home.name} <span className="text-muted-foreground font-normal">vs</span> {selected.away.name} {selected.away.flag}
+          </p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            {new Date(selected.kickoff_at).toLocaleDateString("pt-PT", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+          </p>
+        </div>
+        <button onClick={() => onChange(null)} className="text-xs text-muted-foreground hover:text-destructive ml-3 shrink-0">✕</button>
+      </div>
+    );
+  }
+
+  const filtered = matches.filter((m: any) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (m.home as any).name.toLowerCase().includes(q) || (m.away as any).name.toLowerCase().includes(q);
+  });
+
+  return (
+    <div className="space-y-2">
+      <input
+        placeholder="Pesquisar jogo..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wc-red/40"
+      />
+      <div className="max-h-52 overflow-y-auto rounded-xl border border-border bg-background divide-y divide-border">
+        {filtered.length === 0 && <p className="px-3 py-4 text-center text-xs text-muted-foreground">Sem resultados</p>}
+        {filtered.map((m: any) => (
+          <button
+            key={m.id}
+            onClick={() => { onChange(m.id); setSearch(""); }}
+            className="flex w-full items-center justify-between px-3 py-2.5 text-left hover:bg-accent transition-smooth"
+          >
+            <span className="text-sm font-semibold">
+              {m.home.flag} {m.home.name} <span className="text-muted-foreground font-normal text-xs">vs</span> {m.away.name} {m.away.flag}
+            </span>
+            <span className="text-[11px] text-muted-foreground shrink-0 ml-2">
+              {new Date(m.kickoff_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" })}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── PROGNÓSTICOS ─────────────────────────────────────────────────────────────
+function PrognosticosAdmin() {
+  const qc = useQueryClient();
+  const [matchId, setMatchId] = useState<string | null>(null);
+  const [suggestion, setSuggestion] = useState("");
+  const [summary, setSummary] = useState("");
+  const [bullets, setBullets] = useState<string[]>([""]);
+  const [mainTrend, setMainTrend] = useState("");
+  const [attentionPoint, setAttentionPoint] = useState("");
+  const [published, setPublished] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+
+  const { data: list = [] } = useQuery({
+    queryKey: ["admin", "prognosticos"],
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("prognosticos")
+        .select("id,match_id,suggestion,summary,bullet_points,main_trend,attention_point,published,created_at,match:match_id(kickoff_at,home:home_team_id(name,flag),away:away_team_id(name,flag))")
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  function reset() {
+    setMatchId(null); setSuggestion(""); setSummary(""); setBullets([""]);
+    setMainTrend(""); setAttentionPoint(""); setPublished(false); setEditId(null);
+  }
+
+  function loadEdit(p: any) {
+    setEditId(p.id); setMatchId(p.match_id ?? null);
+    setSuggestion(p.suggestion ?? ""); setSummary(p.summary ?? "");
+    setBullets(Array.isArray(p.bullet_points) && p.bullet_points.length > 0 ? p.bullet_points : [""]);
+    setMainTrend(p.main_trend ?? ""); setAttentionPoint(p.attention_point ?? "");
+    setPublished(p.published ?? false);
+  }
+
+  async function save() {
+    if (!matchId) { toast.error("Seleciona um jogo"); return; }
+    if (!suggestion.trim()) { toast.error("Sugestão de aposta obrigatória"); return; }
+    const payload = {
+      match_id: matchId, suggestion: suggestion.trim(),
+      summary: summary.trim() || null,
+      bullet_points: bullets.map(b => b.trim()).filter(Boolean),
+      main_trend: mainTrend.trim() || null,
+      attention_point: attentionPoint.trim() || null,
+      published,
+    };
+    const { error } = editId
+      ? await (supabase as any).from("prognosticos").update(payload).eq("id", editId)
+      : await (supabase as any).from("prognosticos").insert(payload);
+    if (error) { toast.error(error.message); return; }
+    toast.success(editId ? "Prognóstico atualizado!" : "Prognóstico criado!");
+    reset(); qc.invalidateQueries({ queryKey: ["admin", "prognosticos"] });
+  }
+
+  async function del(id: string) {
+    if (!confirm("Eliminar prognóstico?")) return;
+    await (supabase as any).from("prognosticos").delete().eq("id", id);
+    qc.invalidateQueries({ queryKey: ["admin", "prognosticos"] });
+  }
+
+  function addBullet() { setBullets(b => [...b, ""]); }
+  function removeBullet(i: number) { setBullets(b => b.filter((_, idx) => idx !== i)); }
+  function moveBullet(i: number, dir: -1 | 1) {
+    setBullets(b => {
+      const next = [...b];
+      const j = i + dir;
+      if (j < 0 || j >= next.length) return b;
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  }
+
+  return (
+    <Section>
+      <p className="mb-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        {editId ? "Editar prognóstico" : "Novo prognóstico"}
+      </p>
+      <div className="space-y-4">
+
+        {/* JOGO */}
+        <div>
+          <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-wc-red">Jogo</label>
+          <MatchPicker value={matchId} onChange={setMatchId} />
+        </div>
+
+        {/* SUGESTÃO */}
+        <div>
+          <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Sugestão de Aposta</label>
+          <input
+            placeholder="Ex: Espanha a vencer a 1ª parte"
+            value={suggestion}
+            onChange={e => setSuggestion(e.target.value)}
+            className={inputCls + " w-full font-semibold"}
+          />
+        </div>
+
+        {/* RESUMO */}
+        <div>
+          <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Resumo Curto</label>
+          <textarea
+            placeholder="Análise breve do contexto do jogo..."
+            value={summary}
+            onChange={e => setSummary(e.target.value)}
+            rows={4}
+            className={inputCls + " w-full resize-none"}
+          />
+        </div>
+
+        {/* PONTOS ESSENCIAIS */}
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Pontos Essenciais</label>
+            <button onClick={addBullet} className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs font-semibold text-muted-foreground hover:border-wc-red/40 hover:text-wc-red transition-smooth">
+              <Plus className="h-3 w-3" /> Adicionar
+            </button>
+          </div>
+          <div className="space-y-2">
+            {bullets.map((b, i) => (
+              <div key={i} className="flex items-center gap-1.5">
+                <div className="flex flex-col gap-0.5">
+                  <button onClick={() => moveBullet(i, -1)} disabled={i === 0} className="rounded p-0.5 text-muted-foreground/40 hover:text-muted-foreground disabled:opacity-20"><ChevronUp className="h-3 w-3" /></button>
+                  <button onClick={() => moveBullet(i, 1)} disabled={i === bullets.length - 1} className="rounded p-0.5 text-muted-foreground/40 hover:text-muted-foreground disabled:opacity-20"><ChevronDown className="h-3 w-3" /></button>
+                </div>
+                <input
+                  value={b}
+                  onChange={e => setBullets(prev => prev.map((x, idx) => idx === i ? e.target.value : x))}
+                  placeholder={`Ponto ${i + 1}`}
+                  className={inputCls + " flex-1 text-sm"}
+                />
+                <button onClick={() => removeBullet(i)} className="shrink-0 text-muted-foreground/40 hover:text-destructive transition-smooth"><X className="h-4 w-4" /></button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* TENDÊNCIA PRINCIPAL */}
+        <div>
+          <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Tendência Principal</label>
+          <textarea
+            placeholder="A leitura principal deste jogo..."
+            value={mainTrend}
+            onChange={e => setMainTrend(e.target.value)}
+            rows={3}
+            className={inputCls + " w-full resize-none"}
+          />
+        </div>
+
+        {/* PONTO DE ATENÇÃO */}
+        <div>
+          <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Ponto de Atenção</label>
+          <textarea
+            placeholder="O que pode correr de forma diferente..."
+            value={attentionPoint}
+            onChange={e => setAttentionPoint(e.target.value)}
+            rows={3}
+            className={inputCls + " w-full resize-none"}
+          />
+        </div>
+
+        {/* Publicar + Ações */}
+        <div className="flex gap-2">
+          <label className="flex items-center gap-2 rounded-xl border border-border bg-input px-3 py-2 text-sm cursor-pointer">
+            <input type="checkbox" checked={published} onChange={e => setPublished(e.target.checked)} className="accent-gold" />
+            Publicar
+          </label>
+          <button onClick={save} className={btnCls + " flex-1 justify-center"}>
+            {editId ? "Atualizar" : "Criar prognóstico"}
+          </button>
+          {editId && (
+            <button onClick={reset} className="rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground">Cancelar</button>
+          )}
+        </div>
+      </div>
+
+      {/* Lista de prognósticos */}
+      {list.length > 0 && (
+        <ul className="mt-5 space-y-2">
+          {list.map((p: any) => {
+            const m = p.match as any;
+            return (
+              <li key={p.id} className={rowItemCls}>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">
+                    {m?.home?.flag} {m?.home?.name} vs {m?.away?.name} {m?.away?.flag}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground mt-0.5">{p.suggestion}</p>
+                  <span className={`mt-1 inline-block text-[10px] font-bold uppercase ${p.published ? "text-primary" : "text-muted-foreground"}`}>
+                    {p.published ? "• Publicado" : "Rascunho"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 ml-2 shrink-0">
+                  <button onClick={() => loadEdit(p)} className="text-muted-foreground hover:text-foreground text-xs">Editar</button>
+                  <button onClick={() => del(p.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </Section>

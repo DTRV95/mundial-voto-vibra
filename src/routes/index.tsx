@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Trophy, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Newspaper, Star, Gift, ChevronUp, ChevronDown, Target } from "lucide-react";
+import { ArrowRight, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, CheckCircle2, XCircle, Zap, ChevronRight, Target } from "lucide-react";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
@@ -187,181 +187,186 @@ function Home() {
     },
   });
 
-  const [feedOpen, setFeedOpen] = useState(() => localStorage.getItem("feed_open") !== "0");
-  const [feedShown, setFeedShown] = useState(5);
-  const feedSentinelRef = useRef<HTMLDivElement>(null);
+  const [feedShown, setFeedShown] = useState(6);
+  const feedSentinelRef = useRef<HTMLButtonElement>(null);
   const { data: following } = useFollowing();
 
+  // Personal prediction results on finished matches
+  const { data: myResults = [] } = useQuery({
+    queryKey: ["my-results", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: finished } = await supabase
+        .from("matches")
+        .select("id,kickoff_at,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .not("home_score", "is", null)
+        .gte("kickoff_at", fourteenDaysAgo)
+        .order("kickoff_at", { ascending: false })
+        .limit(15);
+      if (!finished?.length) return [];
+      const { data: preds } = await supabase
+        .from("predictions")
+        .select("match_id,points,exact_home,exact_away,result_90")
+        .eq("user_id", user!.id)
+        .in("match_id", (finished as any[]).map(m => m.id));
+      if (!preds?.length) return [];
+      const predMap = Object.fromEntries((preds as any[]).map(p => [p.match_id, p]));
+      return (finished as any[])
+        .filter(m => predMap[m.id])
+        .map(m => {
+          const pred = predMap[m.id];
+          const isExact = pred.exact_home === m.home_score && pred.exact_away === m.away_score;
+          const isCorrect = (pred.points ?? 0) > 0;
+          return { ...m, pred, isExact, isCorrect };
+        })
+        .slice(0, 6);
+    },
+    staleTime: 120_000,
+  });
+
   const { data: activityFeed = [] } = useQuery({
-    queryKey: ["activity-feed", user?.id, following ? [...following].join(",") : ""],
-    enabled: !user || following !== undefined,
+    queryKey: ["activity-feed-v2", following ? [...following].join(",") : "none"],
+    enabled: following !== undefined,
     queryFn: async () => {
       const followingIds = following ? [...following] : [];
-      if (followingIds.length === 0) return [];
-
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
-      // Fetch em paralelo: jogos recentes terminados, votos recentes, perfis, activity_events
-      const [{ data: recentMatches }, { data: recentVotes }, { data: followedProfiles }, { data: activityEvents }] = await Promise.all([
-        // Jogos terminados na última semana
-        supabase
+      // Global activity_events (division_up, top3) — or filtered by following
+      const eventsBase = (supabase as any)
+        .from("activity_events")
+        .select("id,user_id,type,data,created_at")
+        .gte("created_at", sevenDaysAgo)
+        .order("created_at", { ascending: false })
+        .limit(30);
+      const { data: activityEvents } = followingIds.length > 0
+        ? await eventsBase.in("user_id", followingIds)
+        : await eventsBase;
+
+      if (!activityEvents?.length) return [];
+
+      // Fetch profiles for event authors
+      const authorIds = [...new Set((activityEvents as any[]).map((e: any) => e.user_id))];
+      const { data: authors } = await supabase
+        .from("profiles")
+        .select("id,display_name,total_points")
+        .in("id", authorIds);
+      const profileMap = Object.fromEntries((authors ?? []).map((p: any) => [p.id, p]));
+
+      // For following users: also include correct predictions on finished matches
+      let finishedPredEvents: any[] = [];
+      if (followingIds.length > 0) {
+        const { data: recentMatches } = await supabase
           .from("matches")
           .select("id,kickoff_at,home_score,away_score,home:home_team_id(name,flag),away:away_team_id(name,flag)")
           .not("home_score", "is", null)
           .gte("kickoff_at", sevenDaysAgo)
           .order("kickoff_at", { ascending: false })
-          .limit(20),
-        // Votos recentes em jogos ainda abertos
-        supabase
+          .limit(20);
+
+        const finishedIds = (recentMatches ?? []).map((m: any) => m.id);
+        const finishedMap = Object.fromEntries((recentMatches ?? []).map((m: any) => [m.id, m]));
+
+        if (finishedIds.length > 0) {
+          const { data: preds } = await supabase
+            .from("predictions")
+            .select("id,user_id,match_id,exact_home,exact_away,points")
+            .in("user_id", followingIds)
+            .in("match_id", finishedIds)
+            .gt("points", 0);
+
+          for (const p of (preds ?? [])) {
+            const match = finishedMap[p.match_id];
+            const profile = profileMap[p.user_id] ?? authors?.find((a: any) => a.id === p.user_id);
+            if (!match || !profile) continue;
+            const isExact = p.exact_home === match.home_score && p.exact_away === match.away_score;
+            finishedPredEvents.push({
+              id: `pred-${p.id}`,
+              createdAt: match.kickoff_at,
+              type: isExact ? "exact" : "correct",
+              name: profile.display_name ?? "Alguém",
+              home: match.home?.name ?? "", away: match.away?.name ?? "",
+              homeFlag: match.home?.flag ?? "", awayFlag: match.away?.flag ?? "",
+              homeScore: match.home_score, awayScore: match.away_score,
+            });
+          }
+        }
+
+        // Streak milestones for following
+        const STREAK_MILESTONES = [5, 10, 15, 20, 25, 30, 50];
+        const { data: followedProfiles } = await supabase
+          .from("profiles")
+          .select("id,display_name,vote_streak")
+          .in("id", followingIds)
+          .gt("vote_streak", 4);
+        for (const sp of (followedProfiles ?? [])) {
+          if (STREAK_MILESTONES.includes(sp.vote_streak)) {
+            finishedPredEvents.push({
+              id: `streak-${sp.id}`,
+              createdAt: new Date(Date.now() - 60000).toISOString(),
+              type: "streak",
+              name: sp.display_name ?? "Alguém",
+              streak: sp.vote_streak,
+            });
+          }
+        }
+
+        // Open-match predictions from following
+        const { data: recentVotes } = await supabase
           .from("predictions")
-          .select("id,created_at,user_id,match_id")
+          .select("id,created_at,user_id,match_id,result_90,exact_home,exact_away")
           .in("user_id", followingIds)
           .gte("created_at", twoDaysAgo)
           .order("created_at", { ascending: false })
-          .limit(20),
-        // Perfis dos seguidos
-        supabase
-          .from("profiles")
-          .select("id,display_name,vote_streak,total_points")
-          .in("id", followingIds),
-        // Eventos de atividade (divisão, top3)
-        (supabase as any)
-          .from("activity_events")
-          .select("id,user_id,type,data,created_at")
-          .in("user_id", followingIds)
-          .gte("created_at", sevenDaysAgo)
-          .order("created_at", { ascending: false })
-          .limit(20),
-      ]);
+          .limit(15);
 
-      const profileMap = Object.fromEntries((followedProfiles ?? []).map((p: any) => [p.id, p]));
-      const finishedMatchIds = (recentMatches ?? []).map((m: any) => m.id);
-      const finishedMatchMap = Object.fromEntries((recentMatches ?? []).map((m: any) => [m.id, m]));
-
-      // Previsões dos seguidos nos jogos terminados
-      const { data: finishedPreds } = finishedMatchIds.length > 0
-        ? await supabase
-            .from("predictions")
-            .select("id,user_id,match_id,exact_home,exact_away,points,updated_at")
-            .in("user_id", followingIds)
-            .in("match_id", finishedMatchIds)
-        : { data: [] };
-
-      // Votos em jogos abertos — buscar info do jogo e palpite
-      const openMatchIds = [...new Set((recentVotes ?? []).map((v: any) => v.match_id))];
-      const { data: openMatches } = openMatchIds.length > 0
-        ? await supabase
+        const openMatchIds = [...new Set((recentVotes ?? []).map((v: any) => v.match_id))];
+        if (openMatchIds.length > 0) {
+          const { data: openMatches } = await supabase
             .from("matches")
-            .select("id,voting_open,home:home_team_id(name,flag),away:away_team_id(name,flag)")
+            .select("id,home:home_team_id(name,flag),away:away_team_id(name,flag)")
             .in("id", openMatchIds)
-            .eq("voting_open", true)
-        : { data: [] };
-      const openMatchMap = Object.fromEntries((openMatches ?? []).map((m: any) => [m.id, m]));
-
-      // Buscar palpites (result_90, exact) para votos abertos
-      const { data: openPredDetails } = openMatchIds.length > 0
-        ? await supabase
-            .from("predictions")
-            .select("user_id,match_id,result_90,exact_home,exact_away")
-            .in("user_id", followingIds)
-            .in("match_id", openMatchIds)
-        : { data: [] };
-      const openPredMap = Object.fromEntries(
-        (openPredDetails ?? []).map((p: any) => [`${p.user_id}-${p.match_id}`, p])
-      );
-
-      const events: any[] = [];
-      const DIVISIONS = [
-        { label: "1ª Liga", min: 1, max: 5 },
-        { label: "2ª Liga", min: 6, max: 15 },
-        { label: "Distrital", min: 16, max: 30 },
-        { label: "Liga do Zé Povinho", min: 31, max: Infinity },
-      ];
-
-      // 1. Acertos exatos e resultados corretos
-      for (const p of (finishedPreds ?? [])) {
-        const match = finishedMatchMap[p.match_id];
-        const profile = profileMap[p.user_id];
-        if (!match || !profile) continue;
-        const isExact = p.exact_home === match.home_score && p.exact_away === match.away_score;
-        const isCorrect = (p.points ?? 0) > 0;
-        if (!isCorrect) continue;
-        events.push({
-          id: p.id,
-          createdAt: match.kickoff_at,
-          type: isExact ? "exact" : "correct",
-          name: profile.display_name ?? "Alguém",
-          home: match.home?.name ?? "", away: match.away?.name ?? "",
-          homeFlag: match.home?.flag ?? "", awayFlag: match.away?.flag ?? "",
-          homeScore: match.home_score, awayScore: match.away_score,
-        });
-      }
-
-      // 2. Palpites em jogos ainda abertos — só mostra se tiver result_90 ou placar exato
-      for (const v of (recentVotes ?? [])) {
-        const match = openMatchMap[v.match_id];
-        const profile = profileMap[v.user_id];
-        if (!match || !profile) continue;
-        const pred = openPredMap[`${v.user_id}-${v.match_id}`];
-        if (!pred?.result_90 && pred?.exact_home == null) continue; // sem palpite relevante, ignora
-        const hasExact = pred.exact_home != null && pred.exact_away != null;
-        events.push({
-          id: `vote-${v.id}`,
-          createdAt: v.created_at,
-          type: "prediction",
-          name: profile.display_name ?? "Alguém",
-          home: match.home?.name ?? "", away: match.away?.name ?? "",
-          homeFlag: match.home?.flag ?? "", awayFlag: match.away?.flag ?? "",
-          result90: pred.result_90,
-          exactHome: hasExact ? pred.exact_home : null,
-          exactAway: hasExact ? pred.exact_away : null,
-        });
-      }
-
-      // 3. Streak milestones
-      const STREAK_MILESTONES = [5, 10, 15, 20, 25, 30, 50];
-      for (const sp of (followedProfiles ?? [])) {
-        if (sp.vote_streak > 0 && STREAK_MILESTONES.includes(sp.vote_streak)) {
-          events.push({
-            id: `streak-${sp.id}`,
-            createdAt: new Date().toISOString(),
-            type: "streak",
-            name: sp.display_name ?? "Alguém",
-            streak: sp.vote_streak,
-          });
+            .eq("voting_open", true);
+          const openMatchMap = Object.fromEntries((openMatches ?? []).map((m: any) => [m.id, m]));
+          for (const v of (recentVotes ?? [])) {
+            const match = openMatchMap[v.match_id];
+            const profile = profileMap[v.user_id];
+            if (!match || !profile) continue;
+            if (!v.result_90 && v.exact_home == null) continue;
+            const hasExact = v.exact_home != null && v.exact_away != null;
+            finishedPredEvents.push({
+              id: `vote-${v.id}`,
+              createdAt: v.created_at,
+              type: "prediction",
+              name: profile.display_name ?? "Alguém",
+              home: match.home?.name ?? "", away: match.away?.name ?? "",
+              homeFlag: match.home?.flag ?? "", awayFlag: match.away?.flag ?? "",
+              result90: v.result_90,
+              exactHome: hasExact ? v.exact_home : null,
+              exactAway: hasExact ? v.exact_away : null,
+            });
+          }
         }
       }
 
-      // 4. Eventos de divisão e top3 da tabela activity_events
-      for (const e of (activityEvents ?? [])) {
+      const activityItems = (activityEvents as any[]).map((e: any) => {
         const profile = profileMap[e.user_id];
-        if (!profile) continue;
-        events.push({
+        return {
           id: `evt-${e.id}`,
           createdAt: e.created_at,
           type: e.type,
-          name: profile.display_name ?? "Alguém",
+          name: profile?.display_name ?? "Alguém",
           ...e.data,
-        });
-      }
+        };
+      });
 
-      return events
+      return [...activityItems, ...finishedPredEvents]
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 30);
     },
     staleTime: 60_000,
   });
-
-  useEffect(() => {
-    const el = feedSentinelRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setFeedShown(n => n + 5);
-    }, { threshold: 1 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [feedOpen, activityFeed.length]);
 
   const myLeaderEntry = topLeaders.find((u: any) => u.id === user?.id);
   const { data: myLeaderRank } = useQuery({
@@ -683,123 +688,210 @@ function Home() {
       {/* ===================== NOTIFICAÇÕES PUSH ===================== */}
       <PushNotificationPrompt />
 
-      {/* ===================== FEED DE ATIVIDADE ===================== */}
-      {user && following !== undefined && following.size === 0 && (
+      {/* ===================== OS TEUS RESULTADOS ===================== */}
+      {user && myResults.length > 0 && (
+        <section className="px-5 pt-6 md:px-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-xl">Os teus resultados</h2>
+            <Link to="/jogos" search={{ filter: "votados" } as any} className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">Ver todos →</Link>
+          </div>
+          {/* Mobile: horizontal scroll */}
+          <div className="-mx-5 px-5 md:mx-0 md:px-0">
+            <div className="flex gap-3 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible" style={{ scrollSnapType: "x mandatory", scrollbarWidth: "none" }}>
+              {myResults.map((r: any) => {
+                const isExact = r.isExact;
+                const isCorrect = r.isCorrect;
+                const datePart = new Date(r.kickoff_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" });
+                return (
+                  <Link
+                    key={r.id}
+                    to="/jogo/$id"
+                    params={{ id: r.id }}
+                    style={{ scrollSnapAlign: "start", minWidth: "72vw", maxWidth: "72vw" }}
+                    className={`group relative shrink-0 md:min-w-0 md:max-w-none overflow-hidden rounded-2xl border px-4 py-3.5 transition-smooth hover:scale-[1.01] ${
+                      isExact
+                        ? "border-gold/50 bg-gradient-to-br from-gold/15 via-gold/5 to-transparent"
+                        : isCorrect
+                          ? "border-wc-green/40 bg-gradient-to-br from-wc-green/12 via-wc-green/4 to-transparent"
+                          : "border-border bg-card/60"
+                    }`}
+                  >
+                    {/* Top row: result badge + date */}
+                    <div className="flex items-center justify-between mb-3">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                        isExact
+                          ? "bg-gold/20 text-gold border border-gold/30"
+                          : isCorrect
+                            ? "bg-wc-green/20 text-wc-green border border-wc-green/30"
+                            : "bg-muted text-muted-foreground border border-border"
+                      }`}>
+                        {isExact ? <Zap className="h-2.5 w-2.5" /> : isCorrect ? <CheckCircle2 className="h-2.5 w-2.5" /> : <XCircle className="h-2.5 w-2.5" />}
+                        {isExact ? "Placard exato" : isCorrect ? "Acertei" : "Errei"}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">{datePart}</span>
+                    </div>
+
+                    {/* Teams + Score */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-xl leading-none">{r.home?.flag ?? "🏳️"}</span>
+                        <span className="text-xs font-semibold truncate text-foreground/80">{r.home?.name}</span>
+                      </div>
+                      <div className="shrink-0 rounded-xl px-3 py-1 font-display text-xl text-foreground" style={{ background: "oklch(1 0 0 / 0.06)" }}>
+                        {r.home_score}–{r.away_score}
+                      </div>
+                      <div className="flex items-center gap-1.5 min-w-0 justify-end">
+                        <span className="text-xs font-semibold truncate text-foreground/80 text-right">{r.away?.name}</span>
+                        <span className="text-xl leading-none">{r.away?.flag ?? "🏳️"}</span>
+                      </div>
+                    </div>
+
+                    {/* Points earned */}
+                    {(r.pred.points ?? 0) > 0 && (
+                      <div className={`mt-2.5 flex items-center justify-end gap-1 text-xs font-bold ${isExact ? "text-gold" : "text-wc-green"}`}>
+                        <span>+{r.pred.points} pts</span>
+                      </div>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ===================== FEED DA COMUNIDADE ===================== */}
+      {activityFeed.length > 0 && (
+        <section className="px-5 pt-6 md:px-8">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-xl">Comunidade</h2>
+              {following && following.size === 0 && (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Global</span>
+              )}
+            </div>
+            {following && following.size === 0 && (
+              <Link to="/rankings" className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-smooth">Seguir adeptos →</Link>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            {activityFeed.slice(0, feedShown).map((item: any) => {
+              const mins = Math.floor((Date.now() - new Date(item.createdAt).getTime()) / 60000);
+              const timeAgo = mins < 1 ? "agora" : mins < 60 ? `há ${mins}m` : mins < 1440 ? `há ${Math.floor(mins / 60)}h` : `há ${Math.floor(mins / 1440)}d`;
+
+              if (item.type === "division_up" || item.type === "top3") {
+                const isTop3 = item.type === "top3";
+                const divColors: Record<string, string> = {
+                  "1ª Liga": "from-cyan-500/15 border-cyan-400/40 text-cyan-400",
+                  "2ª Liga": "from-yellow-500/15 border-yellow-400/40 text-yellow-400",
+                  "Distrital": "from-slate-500/15 border-slate-400/40 text-slate-400",
+                };
+                const colorSet = divColors[item.division] ?? "from-wc-green/15 border-wc-green/40 text-wc-green";
+                const [bgClass, borderClass, textClass] = colorSet.split(" ");
+                return (
+                  <div key={item.id} className={`flex items-center gap-3 overflow-hidden rounded-2xl border bg-gradient-to-r ${bgClass} to-transparent px-4 py-3 ${borderClass}`}>
+                    <span className="text-xl shrink-0">{isTop3 ? "⬆️" : "🏆"}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isTop3 ? "entrou no Top 3 da" : "subiu para a"}{" "}
+                        <span className={`font-bold ${textClass}`}>{item.division}</span>
+                      </p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo}</span>
+                  </div>
+                );
+              }
+
+              if (item.type === "exact") {
+                return (
+                  <div key={item.id} className="flex items-center gap-3 overflow-hidden rounded-2xl border border-gold/30 bg-gradient-to-r from-gold/12 to-transparent px-4 py-3">
+                    <Zap className="h-5 w-5 text-gold shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground">{item.name} acertou o placard!</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.homeFlag} {item.home} <span className="font-bold text-foreground">{item.homeScore}–{item.awayScore}</span> {item.away} {item.awayFlag}
+                      </p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo}</span>
+                  </div>
+                );
+              }
+
+              if (item.type === "correct") {
+                return (
+                  <div key={item.id} className="flex items-center gap-3 overflow-hidden rounded-2xl border border-wc-green/25 bg-gradient-to-r from-wc-green/10 to-transparent px-4 py-3">
+                    <CheckCircle2 className="h-5 w-5 text-wc-green shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground">{item.name} acertou</p>
+                      <p className="text-xs text-muted-foreground">{item.homeFlag} {item.home} vs {item.away} {item.awayFlag}</p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo}</span>
+                  </div>
+                );
+              }
+
+              if (item.type === "streak") {
+                return (
+                  <div key={item.id} className="flex items-center gap-3 overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-500/12 to-transparent px-4 py-3">
+                    <span className="text-xl shrink-0">🔥</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">streak de <span className="font-bold text-orange-400">{item.streak} jogos seguidos</span></p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo}</span>
+                  </div>
+                );
+              }
+
+              if (item.type === "prediction") {
+                const resultLabel =
+                  item.result90 === "home" ? item.home :
+                  item.result90 === "away" ? item.away :
+                  item.result90 === "draw" ? "empate" : null;
+                if (!resultLabel && item.exactHome == null) return null;
+                return (
+                  <div key={item.id} className="flex items-center gap-3 overflow-hidden rounded-2xl border border-border bg-card/60 px-4 py-3">
+                    <span className="text-xl shrink-0">⚽</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        aposta em{" "}
+                        <span className="font-semibold text-foreground">
+                          {item.exactHome != null
+                            ? `${item.home} ${item.exactHome}–${item.exactAway} ${item.away}`
+                            : resultLabel}
+                        </span>
+                        {" "}· {item.home} vs {item.away}
+                      </p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo}</span>
+                  </div>
+                );
+              }
+
+              return null;
+            })}
+          </div>
+
+          {feedShown < activityFeed.length && (
+            <button
+              ref={feedSentinelRef}
+              onClick={() => setFeedShown(n => n + 6)}
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl border border-border py-2.5 text-xs font-semibold text-muted-foreground transition-smooth hover:border-gold/40 hover:text-gold"
+            >
+              Ver mais <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </section>
+      )}
+
+      {user && following !== undefined && following.size === 0 && activityFeed.length === 0 && (
         <div className="mx-5 mt-4 md:mx-8">
           <div className="rounded-2xl border border-dashed border-border bg-card/40 px-5 py-4 text-center">
-            <p className="text-sm font-semibold">Segue outros adeptos para ver a sua atividade aqui</p>
-            <p className="text-xs text-muted-foreground mt-1">Vai ao <Link to="/rankings" className="underline underline-offset-2">ranking</Link> e carrega em "Seguir"</p>
-          </div>
-        </div>
-      )}
-      {activityFeed.length > 0 && (
-        <div className="mx-5 mt-4 md:mx-8">
-          <div className="overflow-hidden rounded-2xl border border-border bg-card">
-            <button
-              onClick={() => setFeedOpen(o => { const next = !o; localStorage.setItem("feed_open", next ? "1" : "0"); return next; })}
-              className="flex w-full items-center justify-between px-5 py-3 hover:bg-muted/40 transition-smooth"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-sm">⚡</span>
-                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Atividade recente</span>
-              </div>
-              {feedOpen
-                ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-            </button>
-
-            {feedOpen && (
-              <div className="border-t border-border">
-                <div className="divide-y divide-border max-h-72 overflow-y-auto overscroll-contain">
-                  {activityFeed.slice(0, feedShown).map((item: any) => {
-                    const mins = Math.floor((Date.now() - new Date(item.createdAt).getTime()) / 60000);
-                    const timeAgo = mins < 1 ? "agora" : mins < 60 ? `há ${mins} min` : `há ${Math.floor(mins / 60)}h`;
-                    const matchText = `${item.home} vs ${item.away}`;
-
-                    let emoji = "⚽";
-                    let content: React.ReactNode;
-
-                    if (item.type === "exact") {
-                      emoji = "⚡";
-                      content = <>
-                        <span className="font-semibold">{item.name}</span>
-                        <span className="text-muted-foreground"> acertou o placard exato! </span>
-                        <span className="font-medium">{item.homeFlag} {item.home} {item.homeScore}–{item.awayScore} {item.away} {item.awayFlag}</span>
-                      </>;
-                    } else if (item.type === "correct") {
-                      emoji = "🎯";
-                      content = <>
-                        <span className="font-semibold">{item.name}</span>
-                        <span className="text-muted-foreground"> acertou em </span>
-                        <span className="font-medium">{matchText}</span>
-                      </>;
-                    } else if (item.type === "streak") {
-                      emoji = "🔥";
-                      content = <>
-                        <span className="font-semibold">{item.name}</span>
-                        <span className="text-muted-foreground"> está em streak de </span>
-                        <span className="font-medium text-orange-400">{item.streak} jogos seguidos!</span>
-                      </>;
-                    } else if (item.type === "division_up") {
-                      emoji = "🏆";
-                      content = <>
-                        <span className="font-semibold">{item.name}</span>
-                        <span className="text-muted-foreground"> subiu para a </span>
-                        <span className="font-medium">{item.division}!</span>
-                      </>;
-                    } else if (item.type === "top3") {
-                      emoji = "⬆️";
-                      content = <>
-                        <span className="font-semibold">{item.name}</span>
-                        <span className="text-muted-foreground"> entrou no Top 3 da </span>
-                        <span className="font-medium">{item.division}!</span>
-                      </>;
-                    } else if (item.type === "prediction") {
-                      const resultLabel =
-                        item.result90 === "home" ? `vitória de ${item.home}` :
-                        item.result90 === "away" ? `vitória de ${item.away}` :
-                        item.result90 === "draw" ? "empate" : null;
-                      if (item.exactHome != null) {
-                        emoji = "🎯";
-                        content = <>
-                          <span className="font-semibold">{item.name}</span>
-                          <span className="text-muted-foreground"> prevê </span>
-                          <span className="font-medium">{item.homeFlag} {item.home} {item.exactHome}–{item.exactAway} {item.away} {item.awayFlag}</span>
-                        </>;
-                      } else if (resultLabel) {
-                        emoji = "⚽";
-                        content = <>
-                          <span className="font-semibold">{item.name}</span>
-                          <span className="text-muted-foreground"> aposta em </span>
-                          <span className="font-medium">{resultLabel}</span>
-                          <span className="text-muted-foreground"> em {matchText}</span>
-                        </>;
-                      } else {
-                        // fallback sem dados — não renderiza
-                        return null;
-                      }
-                    } else {
-                      // tipo desconhecido — não renderiza
-                      return null;
-                    }
-
-                    return (
-                      <div key={item.id} className="flex items-center gap-3 px-5 py-2.5">
-                        <span className="text-base shrink-0">{emoji}</span>
-                        <p className="flex-1 min-w-0 text-xs text-foreground">{content}</p>
-                        <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {feedShown < activityFeed.length && (
-                  <div ref={feedSentinelRef} className="flex items-center justify-center py-2.5 border-t border-border">
-                    <span className="text-[10px] text-muted-foreground/50">↓</span>
-                  </div>
-                )}
-              </div>
-            )}
+            <p className="text-sm font-semibold">A comunidade ainda não tem eventos recentes</p>
+            <p className="text-xs text-muted-foreground mt-1">Segue adeptos no <Link to="/rankings" className="underline underline-offset-2">ranking</Link> para ver a sua atividade aqui</p>
           </div>
         </div>
       )}

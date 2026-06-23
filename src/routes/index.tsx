@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, CheckCircle2, XCircle, Zap, ChevronRight, Target } from "lucide-react";
+
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
@@ -191,39 +192,6 @@ function Home() {
   const feedSentinelRef = useRef<HTMLButtonElement>(null);
   const { data: following } = useFollowing();
 
-  // Personal prediction results on finished matches
-  const { data: myResults = [] } = useQuery({
-    queryKey: ["my-results", user?.id],
-    enabled: !!user?.id,
-    queryFn: async () => {
-      const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
-      const { data: finished } = await supabase
-        .from("matches")
-        .select("id,kickoff_at,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
-        .not("home_score", "is", null)
-        .gte("kickoff_at", fourteenDaysAgo)
-        .order("kickoff_at", { ascending: false })
-        .limit(15);
-      if (!finished?.length) return [];
-      const { data: preds } = await supabase
-        .from("predictions")
-        .select("match_id,points,exact_home,exact_away,result_90")
-        .eq("user_id", user!.id)
-        .in("match_id", (finished as any[]).map(m => m.id));
-      if (!preds?.length) return [];
-      const predMap = Object.fromEntries((preds as any[]).map(p => [p.match_id, p]));
-      return (finished as any[])
-        .filter(m => predMap[m.id])
-        .map(m => {
-          const pred = predMap[m.id];
-          const isExact = pred.exact_home === m.home_score && pred.exact_away === m.away_score;
-          const isCorrect = (pred.points ?? 0) > 0;
-          return { ...m, pred, isExact, isCorrect };
-        })
-        .slice(0, 6);
-    },
-    staleTime: 120_000,
-  });
 
   const { data: activityFeed = [] } = useQuery({
     queryKey: ["activity-feed-v2", following ? [...following].join(",") : "none"],
@@ -688,77 +656,6 @@ function Home() {
       {/* ===================== NOTIFICAÇÕES PUSH ===================== */}
       <PushNotificationPrompt />
 
-      {/* ===================== OS TEUS RESULTADOS ===================== */}
-      {user && myResults.length > 0 && (
-        <section className="px-5 pt-6 md:px-8">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-xl">Os teus resultados</h2>
-            <Link to="/jogos" search={{ filter: "votados" } as any} className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">Ver todos →</Link>
-          </div>
-          {/* Mobile: horizontal scroll */}
-          <div className="-mx-5 px-5 md:mx-0 md:px-0">
-            <div className="flex gap-3 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible" style={{ scrollSnapType: "x mandatory", scrollbarWidth: "none" }}>
-              {myResults.map((r: any) => {
-                const isExact = r.isExact;
-                const isCorrect = r.isCorrect;
-                const datePart = new Date(r.kickoff_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" });
-                return (
-                  <Link
-                    key={r.id}
-                    to="/jogo/$id"
-                    params={{ id: r.id }}
-                    style={{ scrollSnapAlign: "start", minWidth: "72vw", maxWidth: "72vw" }}
-                    className={`group relative shrink-0 md:min-w-0 md:max-w-none overflow-hidden rounded-2xl border px-4 py-3.5 transition-smooth hover:scale-[1.01] ${
-                      isExact
-                        ? "border-gold/50 bg-gradient-to-br from-gold/15 via-gold/5 to-transparent"
-                        : isCorrect
-                          ? "border-wc-green/40 bg-gradient-to-br from-wc-green/12 via-wc-green/4 to-transparent"
-                          : "border-border bg-card/60"
-                    }`}
-                  >
-                    {/* Top row: result badge + date */}
-                    <div className="flex items-center justify-between mb-3">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                        isExact
-                          ? "bg-gold/20 text-gold border border-gold/30"
-                          : isCorrect
-                            ? "bg-wc-green/20 text-wc-green border border-wc-green/30"
-                            : "bg-muted text-muted-foreground border border-border"
-                      }`}>
-                        {isExact ? <Zap className="h-2.5 w-2.5" /> : isCorrect ? <CheckCircle2 className="h-2.5 w-2.5" /> : <XCircle className="h-2.5 w-2.5" />}
-                        {isExact ? "Placard exato" : isCorrect ? "Acertei" : "Errei"}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">{datePart}</span>
-                    </div>
-
-                    {/* Teams + Score */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-xl leading-none">{r.home?.flag ?? "🏳️"}</span>
-                        <span className="text-xs font-semibold truncate text-foreground/80">{r.home?.name}</span>
-                      </div>
-                      <div className="shrink-0 rounded-xl px-3 py-1 font-display text-xl text-foreground" style={{ background: "oklch(1 0 0 / 0.06)" }}>
-                        {r.home_score}–{r.away_score}
-                      </div>
-                      <div className="flex items-center gap-1.5 min-w-0 justify-end">
-                        <span className="text-xs font-semibold truncate text-foreground/80 text-right">{r.away?.name}</span>
-                        <span className="text-xl leading-none">{r.away?.flag ?? "🏳️"}</span>
-                      </div>
-                    </div>
-
-                    {/* Points earned */}
-                    {(r.pred.points ?? 0) > 0 && (
-                      <div className={`mt-2.5 flex items-center justify-end gap-1 text-xs font-bold ${isExact ? "text-gold" : "text-wc-green"}`}>
-                        <span>+{r.pred.points} pts</span>
-                      </div>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ===================== FEED DA COMUNIDADE ===================== */}
       {activityFeed.length > 0 && (

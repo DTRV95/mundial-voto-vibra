@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TrendingUp, Newspaper, Clock, Target } from "lucide-react";
@@ -30,9 +30,34 @@ const CATEGORY_STYLE: Record<string, { label: string; cls: string }> = {
   prognostico:  { label: "Prognóstico",       cls: "border-wc-red/40 bg-wc-red/10 text-wc-red" },
 };
 
+function dayKey(iso: string) {
+  return new Date(iso).toDateString();
+}
+
+function dayLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  const ds = new Date(d); ds.setHours(0, 0, 0, 0);
+  if (ds.getTime() === today.getTime()) return "Hoje";
+  if (ds.getTime() === tomorrow.getTime()) return "Amanhã";
+  return d.toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long" });
+}
+
+function shortDayLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  const ds = new Date(d); ds.setHours(0, 0, 0, 0);
+  if (ds.getTime() === today.getTime()) return "Hoje";
+  if (ds.getTime() === tomorrow.getTime()) return "Amanhã";
+  return d.toLocaleDateString("pt-PT", { weekday: "short", day: "numeric", month: "short" });
+}
+
 function Noticias() {
   const { prog } = useSearch({ from: "/noticias/" });
   const [showPrognosticos, setShowPrognosticos] = useState(prog ?? false);
+  const [dayFilter, setDayFilter] = useState<string>("todos");
 
   const { data: articles = [], isLoading: loadingNews } = useQuery({
     queryKey: ["news", "all"],
@@ -52,7 +77,7 @@ function Noticias() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("prognosticos")
-        .select("id,suggestion,summary,created_at,match:match_id(id,kickoff_at,home:home_team_id(name,flag),away:away_team_id(name,flag))")
+        .select("id,suggestion,summary,created_at,match:match_id(id,kickoff_at,phase,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
         .eq("published", true)
         .order("created_at", { ascending: false });
       return ((data ?? []) as any[]).sort((a, b) => {
@@ -63,10 +88,38 @@ function Noticias() {
     },
   });
 
+  // Unique days from prognósticos, in order
+  const progDays = useMemo(() => {
+    const seen = new Set<string>();
+    const days: { key: string; iso: string }[] = [];
+    for (const p of prognosticos as any[]) {
+      if (!p.match?.kickoff_at) continue;
+      const k = dayKey(p.match.kickoff_at);
+      if (!seen.has(k)) { seen.add(k); days.push({ key: k, iso: p.match.kickoff_at }); }
+    }
+    return days;
+  }, [prognosticos]);
+
+  // Prognósticos filtered + grouped by day
+  const filteredProg = useMemo(() => {
+    if (dayFilter === "todos") return prognosticos as any[];
+    return (prognosticos as any[]).filter(p => p.match?.kickoff_at && dayKey(p.match.kickoff_at) === dayFilter);
+  }, [prognosticos, dayFilter]);
+
+  const groupedProg = useMemo(() => {
+    const map: Record<string, any[]> = {};
+    for (const p of filteredProg) {
+      const k = p.match?.kickoff_at ? dayKey(p.match.kickoff_at) : "sem-data";
+      if (!map[k]) map[k] = [];
+      map[k].push(p);
+    }
+    return Object.entries(map).map(([key, items]) => ({ key, iso: items[0].match?.kickoff_at ?? "", items }));
+  }, [filteredProg]);
+
   const isLoading = showPrognosticos ? loadingProg : loadingNews;
   const filtered = articles.filter((a: any) => a.category !== "prognostico");
   const featured = (!showPrognosticos && filtered[0]) as any;
-  const rest = (!showPrognosticos ? filtered.slice(1) : prognosticos) as any[];
+  const rest = (!showPrognosticos ? filtered.slice(1) : []) as any[];
 
   return (
     <div className="px-4 pt-6 pb-10 md:px-8">
@@ -76,7 +129,7 @@ function Noticias() {
           <p className="text-sm text-muted-foreground mt-0.5">Antevisões, análises e as últimas do Mundial 2026.</p>
         </div>
         <button
-          onClick={() => setShowPrognosticos(v => !v)}
+          onClick={() => { setShowPrognosticos(v => !v); setDayFilter("todos"); }}
           className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth ${
             showPrognosticos
               ? "border-wc-red bg-wc-red text-white"
@@ -107,12 +160,79 @@ function Noticias() {
         </div>
       )}
 
-      {/* Prognósticos — layout em grid de cards */}
-      {showPrognosticos && rest.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {rest.map((a: any) => (
-            <PrognosticoCard key={a.id} article={a} />
+      {/* Prognósticos — filtros por dia + grid agrupado */}
+      {showPrognosticos && progDays.length > 0 && (
+        <div className="-mx-4 md:mx-0 mb-5 overflow-x-auto px-4 md:px-0">
+          <div className="flex gap-2 w-max">
+            <button
+              onClick={() => setDayFilter("todos")}
+              className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth ${
+                dayFilter === "todos"
+                  ? "border-gold bg-gold text-background shadow-gold"
+                  : "border-border bg-card/60 text-muted-foreground hover:border-gold/40 hover:text-foreground"
+              }`}
+            >
+              Todos
+              <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${dayFilter === "todos" ? "bg-background/20 text-background" : "bg-secondary text-muted-foreground"}`}>
+                {(prognosticos as any[]).length}
+              </span>
+            </button>
+            {progDays.map(({ key, iso }) => {
+              const count = (prognosticos as any[]).filter(p => p.match?.kickoff_at && dayKey(p.match.kickoff_at) === key).length;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setDayFilter(key)}
+                  className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth capitalize ${
+                    dayFilter === key
+                      ? "border-gold bg-gold text-background shadow-gold"
+                      : "border-border bg-card/60 text-muted-foreground hover:border-gold/40 hover:text-foreground"
+                  }`}
+                >
+                  {shortDayLabel(iso)}
+                  <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${dayFilter === key ? "bg-background/20 text-background" : "bg-secondary text-muted-foreground"}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {showPrognosticos && groupedProg.length > 0 && (
+        <div className="space-y-8">
+          {groupedProg.map(({ key, iso, items }) => (
+            <div key={key}>
+              {/* Day header — só quando mostra "Todos" */}
+              {dayFilter === "todos" && (
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="rounded-xl border border-border bg-card/60 px-3 py-1.5">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gold capitalize">
+                      {dayLabel(iso)}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground capitalize">
+                      {new Date(iso).toLocaleDateString("pt-PT", { day: "numeric", month: "long" })}
+                    </p>
+                  </div>
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground">{items.length} {items.length === 1 ? "análise" : "análises"}</span>
+                </div>
+              )}
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                {items.map((a: any) => <PrognosticoCard key={a.id} article={a} />)}
+              </div>
+            </div>
           ))}
+        </div>
+      )}
+
+      {showPrognosticos && !isLoading && groupedProg.length === 0 && prognosticos.length > 0 && (
+        <div className="rounded-2xl border border-dashed border-border bg-card/40 p-10 text-center">
+          <p className="font-display text-lg">Sem análises para este dia</p>
+          <button onClick={() => setDayFilter("todos")} className="mt-3 rounded-full border border-border px-4 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-smooth">
+            Ver todos os dias
+          </button>
         </div>
       )}
 

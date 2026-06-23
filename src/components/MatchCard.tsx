@@ -32,6 +32,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
     <Link
       to="/jogo/$id"
       params={{ id: match.id }}
+      onClick={() => { try { sessionStorage.setItem("jogos_return", "1"); } catch {} }}
       className="group block overflow-hidden rounded-2xl bg-card transition-smooth"
       style={{
         boxShadow: "0 2px 12px oklch(0 0 0 / 0.30), 0 0 0 1px oklch(1 0 0 / 0.06)",

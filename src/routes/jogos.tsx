@@ -55,12 +55,18 @@ function Jogos() {
   const [phase,  setPhaseRaw]  = useState<PhaseFilter>("todas");
   const { user } = useAuth();
 
-  // Read persisted filter after hydration (sessionStorage unavailable during SSR)
+  // Restore filter only when returning from a match page (flag set by MatchCard onClick)
   useEffect(() => {
-    const f = readSession<Filter>("jogos_filter", "hoje");
-    const p = readSession<PhaseFilter>("jogos_phase", "todas");
-    if (VALID_FILTERS.includes(f)) setFilterRaw(f);
-    if (VALID_PHASES.includes(p)) setPhaseRaw(p);
+    try {
+      const returning = sessionStorage.getItem("jogos_return");
+      if (returning) {
+        sessionStorage.removeItem("jogos_return");
+        const f = readSession<Filter>("jogos_filter", "hoje");
+        const p = readSession<PhaseFilter>("jogos_phase", "todas");
+        if (VALID_FILTERS.includes(f)) setFilterRaw(f);
+        if (VALID_PHASES.includes(p)) setPhaseRaw(p);
+      }
+    } catch { /* noop */ }
   }, []);
 
   function setFilter(f: Filter) { setFilterRaw(f); writeSession("jogos_filter", f); }

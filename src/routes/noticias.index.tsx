@@ -57,7 +57,8 @@ function shortDayLabel(iso: string) {
 function Noticias() {
   const { prog } = useSearch({ from: "/noticias/" });
   const [showPrognosticos, setShowPrognosticos] = useState(prog ?? false);
-  const [dayFilter, setDayFilter] = useState<string>("todos");
+  const todayKey = dayKey(new Date().toISOString());
+  const [dayFilter, setDayFilter] = useState<string>(todayKey);
 
   const { data: articles = [], isLoading: loadingNews } = useQuery({
     queryKey: ["news", "all"],
@@ -88,33 +89,25 @@ function Noticias() {
     },
   });
 
-  // Unique days from prognósticos, in order
+  // Unique days from today onwards, in order
   const progDays = useMemo(() => {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
     const seen = new Set<string>();
     const days: { key: string; iso: string }[] = [];
     for (const p of prognosticos as any[]) {
       if (!p.match?.kickoff_at) continue;
+      const d = new Date(p.match.kickoff_at); d.setHours(0, 0, 0, 0);
+      if (d < today) continue; // skip past days
       const k = dayKey(p.match.kickoff_at);
       if (!seen.has(k)) { seen.add(k); days.push({ key: k, iso: p.match.kickoff_at }); }
     }
     return days;
   }, [prognosticos]);
 
-  // Prognósticos filtered + grouped by day
+  // Prognósticos filtered by selected day
   const filteredProg = useMemo(() => {
-    if (dayFilter === "todos") return prognosticos as any[];
     return (prognosticos as any[]).filter(p => p.match?.kickoff_at && dayKey(p.match.kickoff_at) === dayFilter);
   }, [prognosticos, dayFilter]);
-
-  const groupedProg = useMemo(() => {
-    const map: Record<string, any[]> = {};
-    for (const p of filteredProg) {
-      const k = p.match?.kickoff_at ? dayKey(p.match.kickoff_at) : "sem-data";
-      if (!map[k]) map[k] = [];
-      map[k].push(p);
-    }
-    return Object.entries(map).map(([key, items]) => ({ key, iso: items[0].match?.kickoff_at ?? "", items }));
-  }, [filteredProg]);
 
   const isLoading = showPrognosticos ? loadingProg : loadingNews;
   const filtered = articles.filter((a: any) => a.category !== "prognostico");
@@ -160,23 +153,10 @@ function Noticias() {
         </div>
       )}
 
-      {/* Prognósticos — filtros por dia + grid agrupado */}
+      {/* Prognósticos — filtros por dia + grid */}
       {showPrognosticos && progDays.length > 0 && (
         <div className="-mx-4 md:mx-0 mb-5 overflow-x-auto px-4 md:px-0">
           <div className="flex gap-2 w-max">
-            <button
-              onClick={() => setDayFilter("todos")}
-              className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth ${
-                dayFilter === "todos"
-                  ? "border-gold bg-gold text-background shadow-gold"
-                  : "border-border bg-card/60 text-muted-foreground hover:border-gold/40 hover:text-foreground"
-              }`}
-            >
-              Todos
-              <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${dayFilter === "todos" ? "bg-background/20 text-background" : "bg-secondary text-muted-foreground"}`}>
-                {(prognosticos as any[]).length}
-              </span>
-            </button>
             {progDays.map(({ key, iso }) => {
               const count = (prognosticos as any[]).filter(p => p.match?.kickoff_at && dayKey(p.match.kickoff_at) === key).length;
               return (
@@ -200,38 +180,17 @@ function Noticias() {
         </div>
       )}
 
-      {showPrognosticos && groupedProg.length > 0 && (
-        <div className="space-y-8">
-          {groupedProg.map(({ key, iso, items }) => (
-            <div key={key}>
-              {/* Day header — só quando mostra "Todos" */}
-              {dayFilter === "todos" && (
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="rounded-xl border border-border bg-card/60 px-3 py-1.5">
-                    <p className="text-xs font-bold uppercase tracking-wider text-gold capitalize">
-                      {dayLabel(iso)}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground capitalize">
-                      {new Date(iso).toLocaleDateString("pt-PT", { day: "numeric", month: "long" })}
-                    </p>
-                  </div>
-                  <div className="flex-1 h-px bg-border" />
-                  <span className="text-xs text-muted-foreground">{items.length} {items.length === 1 ? "análise" : "análises"}</span>
-                </div>
-              )}
-              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-                {items.map((a: any) => <PrognosticoCard key={a.id} article={a} />)}
-              </div>
-            </div>
-          ))}
+      {showPrognosticos && filteredProg.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          {filteredProg.map((a: any) => <PrognosticoCard key={a.id} article={a} />)}
         </div>
       )}
 
-      {showPrognosticos && !isLoading && groupedProg.length === 0 && prognosticos.length > 0 && (
+      {showPrognosticos && !isLoading && filteredProg.length === 0 && progDays.length > 0 && (
         <div className="rounded-2xl border border-dashed border-border bg-card/40 p-10 text-center">
           <p className="font-display text-lg">Sem análises para este dia</p>
-          <button onClick={() => setDayFilter("todos")} className="mt-3 rounded-full border border-border px-4 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-smooth">
-            Ver todos os dias
+          <button onClick={() => setDayFilter(progDays[0].key)} className="mt-3 rounded-full border border-border px-4 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-smooth">
+            Ver próximo dia disponível
           </button>
         </div>
       )}

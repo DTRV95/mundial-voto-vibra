@@ -519,7 +519,7 @@ function Perfil() {
           <div className="rounded-2xl border border-dashed border-border bg-card/40 p-10 text-center">
             <p className="text-2xl mb-2">⚽</p>
             <p className="text-sm text-muted-foreground mb-4">Ainda não tens previsões.</p>
-            <Link to="/jogos" search={{ filter: "hoje", phase: "todas" } as any} className="inline-block rounded-full bg-gold px-5 py-2 text-xs font-semibold text-background">
+            <Link to="/jogos" className="inline-block rounded-full bg-gold px-5 py-2 text-xs font-semibold text-background">
               Ver jogos
             </Link>
           </div>

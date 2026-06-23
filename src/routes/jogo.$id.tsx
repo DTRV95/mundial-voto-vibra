@@ -275,7 +275,7 @@ function JogoPage() {
   return (
     <div className="px-4 pt-4 pb-10 md:px-8">
       <div className="flex items-center justify-between">
-        <Link to="/jogos" search={{ filter: "hoje", phase: "todas" } as any} className="text-xs text-muted-foreground">← Jogos</Link>
+        <Link to="/jogos" className="text-xs text-muted-foreground">← Jogos</Link>
         <button
           onClick={share}
           className="flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-smooth hover:border-gold/40 hover:text-gold"
@@ -590,7 +590,7 @@ function JogoPage() {
           </div>
           <Link
             to="/jogos"
-            search={{ filter: "hoje", phase: "todas" } as any}
+           
             className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-smooth"
           >
             Ver todos os jogos →

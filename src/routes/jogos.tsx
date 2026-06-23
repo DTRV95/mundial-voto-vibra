@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
@@ -7,14 +7,7 @@ import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { formatDate } from "@/lib/format";
 import { CalendarClock, CheckCircle2, Target } from "lucide-react";
 
-const VALID_FILTERS: Filter[] = ["hoje", "amanha", "semana", "votados", "todos"];
-const VALID_PHASES: PhaseFilter[] = ["todas", "grupos", "oitavos", "quartos", "meias", "final"];
-
 export const Route = createFileRoute("/jogos")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    filter: VALID_FILTERS.includes(s.filter as Filter) ? (s.filter as Filter) : "hoje",
-    phase: VALID_PHASES.includes(s.phase as PhaseFilter) ? (s.phase as PhaseFilter) : "todas",
-  }),
   head: () => ({
     meta: [
       { title: "Jogos do Mundial 2026 — Uma Geração" },
@@ -47,17 +40,25 @@ const PHASE_FILTERS: { key: PhaseFilter; label: string }[] = [
   { key: "final",    label: "Final" },
 ];
 
+const VALID_FILTERS: Filter[] = ["hoje", "amanha", "semana", "votados", "todos"];
+const VALID_PHASES: PhaseFilter[] = ["todas", "grupos", "oitavos", "quartos", "meias", "final"];
+
+function readSession<T>(key: string, fallback: T): T {
+  try { const v = sessionStorage.getItem(key); return v ? (v as unknown as T) : fallback; } catch { return fallback; }
+}
+function writeSession(key: string, value: string) {
+  try { sessionStorage.setItem(key, value); } catch { /* noop */ }
+}
+
 function Jogos() {
-  const { filter, phase } = useSearch({ from: "/jogos" });
-  const navigate = useNavigate({ from: "/jogos" });
+  const savedFilter = readSession<Filter>("jogos_filter", "hoje");
+  const savedPhase  = readSession<PhaseFilter>("jogos_phase", "todas");
+  const [filter, setFilterRaw] = useState<Filter>(VALID_FILTERS.includes(savedFilter) ? savedFilter : "hoje");
+  const [phase,  setPhaseRaw]  = useState<PhaseFilter>(VALID_PHASES.includes(savedPhase) ? savedPhase : "todas");
   const { user } = useAuth();
 
-  function setFilter(f: Filter) {
-    navigate({ search: (prev) => ({ ...prev, filter: f }), replace: true });
-  }
-  function setPhase(p: PhaseFilter) {
-    navigate({ search: (prev) => ({ ...prev, phase: p }), replace: true });
-  }
+  function setFilter(f: Filter) { setFilterRaw(f); writeSession("jogos_filter", f); }
+  function setPhase(p: PhaseFilter) { setPhaseRaw(p); writeSession("jogos_phase", p); }
 
   const { data: all = [], isLoading } = useQuery({
     queryKey: ["matches", "all"],

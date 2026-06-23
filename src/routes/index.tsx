@@ -468,7 +468,7 @@ function Home() {
             </p>
             <div className="hidden md:flex items-center gap-3 mt-6">
               {user ? (
-                <Link to="/jogos" className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
+                <Link to="/jogos" search={{ filter: "hoje", phase: "todas" } as any} className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
                   Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
                 </Link>
               ) : (
@@ -496,7 +496,7 @@ function Home() {
         {/* CTAs mobile */}
         <div className="flex gap-3 pt-4 md:hidden">
           {user ? (
-            <Link to="/jogos" className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
+            <Link to="/jogos" search={{ filter: "hoje", phase: "todas" } as any} className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
               Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
             </Link>
           ) : (
@@ -643,7 +643,7 @@ function Home() {
                       : `${pendingMatches.length} jogos por votar`}
                   </h3>
                 </div>
-                <Link to="/jogos"
+                <Link to="/jogos" search={{ filter: "hoje", phase: "todas" } as any}
                   className="shrink-0 rounded-xl bg-white/15 border border-white/20 px-3 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth">
                   Ver todos →
                 </Link>
@@ -669,7 +669,7 @@ function Home() {
                   );
                 })}
                 {pendingMatches.length > 3 && (
-                  <Link to="/jogos"
+                  <Link to="/jogos" search={{ filter: "hoje", phase: "todas" } as any}
                     className="flex items-center justify-center py-1.5 text-xs font-semibold text-white/60 hover:text-white transition-smooth">
                     +{pendingMatches.length - 3} mais →
                   </Link>
@@ -811,7 +811,7 @@ function Home() {
             <h2 className="font-display text-2xl md:text-3xl text-gray-900">Jogos de Hoje</h2>
             <p className="text-xs text-gray-400">Dá a tua previsão antes do apito inicial.</p>
           </div>
-          <Link to="/jogos" className="text-xs font-bold text-wc-red">Ver todos →</Link>
+          <Link to="/jogos" search={{ filter: "hoje", phase: "todas" } as any} className="text-xs font-bold text-wc-red">Ver todos →</Link>
         </div>
         {todaysWithVoted.length === 0 ? (
           <EmptyState

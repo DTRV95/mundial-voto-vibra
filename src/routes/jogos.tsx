@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
@@ -7,7 +7,14 @@ import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { formatDate } from "@/lib/format";
 import { CalendarClock, CheckCircle2, Target } from "lucide-react";
 
+const VALID_FILTERS: Filter[] = ["hoje", "amanha", "semana", "votados", "todos"];
+const VALID_PHASES: PhaseFilter[] = ["todas", "grupos", "oitavos", "quartos", "meias", "final"];
+
 export const Route = createFileRoute("/jogos")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    filter: VALID_FILTERS.includes(s.filter as Filter) ? (s.filter as Filter) : "hoje",
+    phase: VALID_PHASES.includes(s.phase as PhaseFilter) ? (s.phase as PhaseFilter) : "todas",
+  }),
   head: () => ({
     meta: [
       { title: "Jogos do Mundial 2026 — Uma Geração" },
@@ -41,9 +48,16 @@ const PHASE_FILTERS: { key: PhaseFilter; label: string }[] = [
 ];
 
 function Jogos() {
-  const [filter, setFilter] = useState<Filter>("hoje");
-  const [phase, setPhase] = useState<PhaseFilter>("todas");
+  const { filter, phase } = useSearch({ from: "/jogos" });
+  const navigate = useNavigate({ from: "/jogos" });
   const { user } = useAuth();
+
+  function setFilter(f: Filter) {
+    navigate({ search: (prev) => ({ ...prev, filter: f }), replace: true });
+  }
+  function setPhase(p: PhaseFilter) {
+    navigate({ search: (prev) => ({ ...prev, phase: p }), replace: true });
+  }
 
   const { data: all = [], isLoading } = useQuery({
     queryKey: ["matches", "all"],

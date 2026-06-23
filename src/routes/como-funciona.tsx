@@ -174,7 +174,7 @@ function ComoFunciona() {
       </Section>
 
       <div className="pt-2 text-center">
-        <Link to="/jogos"
+        <Link to="/jogos" search={{ filter: "hoje", phase: "todas" } as any}
           className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02]">
           Começar a votar <ChevronRight className="h-4 w-4" />
         </Link>

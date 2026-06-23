@@ -678,6 +678,7 @@ function copyLink() {
         <div className="mx-5 mt-4 md:mx-8">
           <Link
             to="/jogos"
+            search={{ filter: "hoje", phase: "todas" } as any}
             className="flex items-center justify-between gap-4 rounded-2xl bg-wc-red px-5 py-4 text-white shadow-gold transition-smooth hover:scale-[1.01] active:scale-95 panini-stripes"
           >
             <div>

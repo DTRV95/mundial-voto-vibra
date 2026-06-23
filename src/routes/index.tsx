@@ -570,25 +570,49 @@ function Home() {
         </div>
       )}
 
-      {/* ===================== BANNER PROGNÓSTICOS — visitantes ===================== */}
-      {!user && (
-        <div className="mx-5 mt-3 md:mx-8">
-          <Link to="/noticias" search={{ prog: true } as any}
-            className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl border border-border bg-card/70 px-4 py-3.5 transition-smooth hover:border-wc-blue/40"
-            style={{ background: "linear-gradient(135deg, oklch(0.20 0.04 250 / 0.6) 0%, oklch(0.16 0.03 260 / 0.4) 100%)" }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/10">
-                <Target className="h-4.5 w-4.5 text-white/80" />
+      {/* ===================== BANNER PROGNÓSTICOS — todos os utilizadores ===================== */}
+      <div className="mx-5 mt-4 md:mx-8">
+        <div
+          className="relative overflow-hidden rounded-2xl"
+          style={{
+            background: "linear-gradient(135deg, oklch(0.18 0.06 260) 0%, oklch(0.22 0.08 280) 50%, oklch(0.18 0.05 250) 100%)",
+            boxShadow: "0 6px 28px -4px oklch(0.22 0.10 265 / 0.55)",
+          }}
+        >
+          {/* dot grid */}
+          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
+          {/* glow accent */}
+          <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-gold/20 blur-2xl pointer-events-none" />
+
+          <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold/20 border border-gold/30">
+                <Target className="h-5 w-5 text-gold" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 leading-none mb-1">Análise antes de votar</p>
-                <p className="text-sm font-bold text-white leading-none">Ver prognósticos dos jogos →</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40 mb-1">Antes de votares</p>
+                <p className="font-display text-lg leading-tight text-white">Lê os prognósticos dos jogos</p>
+                <p className="text-xs text-white/55 mt-0.5">Análise de cada jogo para votares com mais confiança.</p>
               </div>
             </div>
-          </Link>
+            <div className="flex items-center gap-2 sm:shrink-0">
+              <Link
+                to="/noticias"
+                search={{ prog: true } as any}
+                className="flex-1 sm:flex-none rounded-xl border border-white/20 px-4 py-2.5 text-center text-sm font-bold text-white/80 transition-smooth hover:border-white/40 hover:text-white"
+              >
+                Ver análises
+              </Link>
+              <Link
+                to="/jogos"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95"
+              >
+                Votar agora <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
 
       {/* ===================== BANNER TORNEIO — logado sem liga ===================== */}
       {user && myPools.length === 0 && (

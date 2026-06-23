@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
-import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target, CalendarClock, CheckCircle2 } from "lucide-react";
+import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target, CalendarClock } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { TeamBadge } from "@/lib/teamColors.tsx";
+import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 
 export const Route = createFileRoute("/jogo/$id")({
   head: () => ({
@@ -72,14 +73,16 @@ function JogoPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("matches")
-        .select("id,kickoff_at,phase,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .select("id,kickoff_at,phase,status,voting_open,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code),predictions(count)")
         .eq("voting_open", true)
         .neq("id", id)
         .order("kickoff_at")
         .limit(4);
-      return ((data as any) ?? []).filter((m: any) => m.home && m.away);
+      return ((data as any) ?? [])
+        .filter((m: any) => m.home && m.away)
+        .map((m: any) => ({ ...m, votes_count: m.predictions?.[0]?.count ?? 0 }));
     },
-  });
+  }) as { data: MatchCardData[] };
 
   const { data: nextVotedIds = new Set<string>() } = useQuery({
     queryKey: ["next-voted-ids", user?.id, id],
@@ -514,87 +517,20 @@ function JogoPage() {
       {/* Próximos jogos a votar */}
       {nextMatches.length > 0 && (
         <aside className="mt-8 pt-6 border-t border-border">
-          <div className="mb-4 flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-muted-foreground" />
-            <h3 className="font-display text-lg">Próximos jogos</h3>
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CalendarClock className="h-4 w-4 text-muted-foreground" />
+              <h3 className="font-display text-lg">Próximos jogos</h3>
+            </div>
+            <Link to="/jogos" className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">
+              Ver todos →
+            </Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {nextMatches.map((m: any) => {
-              const mHome = m.home as any;
-              const mAway = m.away as any;
-              const alreadyVoted = nextVotedIds.has(m.id);
-              const kickoff = new Date(m.kickoff_at);
-              const timeStr = kickoff.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
-              const dateStr = kickoff.toLocaleDateString("pt-PT", { weekday: "short", day: "numeric", month: "short" });
-              return (
-                <Link
-                  key={m.id}
-                  to="/jogo/$id"
-                  params={{ id: m.id }}
-                  className="group relative overflow-hidden rounded-2xl border border-border transition-smooth"
-                  style={{ transition: "transform 220ms cubic-bezier(0.16,1,0.3,1), box-shadow 220ms ease" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 32px -6px oklch(0.47 0.22 27 / 0.25)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
-                >
-                  {/* split background — red left, blue right, diagonal cut */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(115deg, oklch(0.45 0.22 27 / 0.12) 0%, oklch(0.45 0.22 27 / 0.08) 45%, transparent 50%)" }} />
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(115deg, transparent 50%, oklch(0.42 0.20 250 / 0.08) 55%, oklch(0.42 0.20 250 / 0.13) 100%)" }} />
-                  </div>
-
-                  {/* header strip */}
-                  <div className="relative flex items-center justify-between px-3 py-2 border-b border-border/40"
-                    style={{ background: "linear-gradient(90deg, oklch(0.45 0.22 27 / 0.07) 0%, transparent 40%, oklch(0.42 0.20 250 / 0.07) 100%)" }}>
-                    <div className="flex items-center gap-1.5">
-                      <div className="h-1.5 w-1.5 rounded-full bg-wc-red" />
-                      <span className="font-display text-sm font-bold text-foreground">{timeStr}</span>
-                      <span className="text-[11px] text-muted-foreground capitalize">{dateStr}</span>
-                    </div>
-                    {alreadyVoted ? (
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-primary">
-                        <CheckCircle2 className="h-3 w-3" /> Votado
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-bold text-wc-red uppercase tracking-wider group-hover:text-wc-red/70 transition-smooth">Votar →</span>
-                    )}
-                  </div>
-
-                  {/* match body */}
-                  <div className="relative flex items-stretch">
-                    {/* home */}
-                    <div className="flex flex-1 flex-col items-center gap-2 px-3 py-4">
-                      <span className="text-5xl leading-none drop-shadow">{mHome.flag}</span>
-                      <span className="text-[11px] font-bold text-center leading-tight text-foreground/80">{mHome.name}</span>
-                    </div>
-
-                    {/* vs divider */}
-                    <div className="flex flex-col items-center justify-center gap-1 shrink-0 py-4">
-                      <div className="w-px flex-1 bg-gradient-to-b from-transparent via-wc-red/40 to-transparent" />
-                      <span className="text-[10px] font-black tracking-widest text-muted-foreground/40 px-1">vs</span>
-                      <div className="w-px flex-1 bg-gradient-to-b from-transparent via-wc-blue/40 to-transparent" />
-                    </div>
-
-                    {/* away */}
-                    <div className="flex flex-1 flex-col items-center gap-2 px-3 py-4">
-                      <span className="text-5xl leading-none drop-shadow">{mAway.flag}</span>
-                      <span className="text-[11px] font-bold text-center leading-tight text-foreground/80">{mAway.name}</span>
-                    </div>
-                  </div>
-
-                  {/* bottom red/blue corners */}
-                  <div className="absolute bottom-0 left-0 h-6 w-6 rounded-br-xl" style={{ background: "oklch(0.45 0.22 27 / 0.15)" }} />
-                  <div className="absolute bottom-0 right-0 h-6 w-6 rounded-bl-xl" style={{ background: "oklch(0.42 0.20 250 / 0.15)" }} />
-                </Link>
-              );
-            })}
+            {nextMatches.map((m: MatchCardData) => (
+              <MatchCard key={m.id} match={{ ...m, already_voted: nextVotedIds.has(m.id) }} />
+            ))}
           </div>
-          <Link
-            to="/jogos"
-           
-            className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-smooth"
-          >
-            Ver todos os jogos →
-          </Link>
         </aside>
       )}
     </div>

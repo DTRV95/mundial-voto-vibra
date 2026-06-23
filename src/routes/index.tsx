@@ -188,6 +188,40 @@ function Home() {
     },
   });
 
+  // Personal prediction results on finished matches
+  const { data: myResults = [] } = useQuery({
+    queryKey: ["my-results", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: finished } = await supabase
+        .from("matches")
+        .select("id,kickoff_at,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .not("home_score", "is", null)
+        .gte("kickoff_at", fourteenDaysAgo)
+        .order("kickoff_at", { ascending: false })
+        .limit(15);
+      if (!finished?.length) return [];
+      const { data: preds } = await supabase
+        .from("predictions")
+        .select("match_id,points,exact_home,exact_away,result_90")
+        .eq("user_id", user!.id)
+        .in("match_id", (finished as any[]).map(m => m.id));
+      if (!preds?.length) return [];
+      const predMap = Object.fromEntries((preds as any[]).map(p => [p.match_id, p]));
+      return (finished as any[])
+        .filter(m => predMap[m.id])
+        .map(m => {
+          const pred = predMap[m.id];
+          const isExact = pred.exact_home === m.home_score && pred.exact_away === m.away_score;
+          const isCorrect = (pred.points ?? 0) > 0;
+          return { ...m, pred, isExact, isCorrect };
+        })
+        .slice(0, 6);
+    },
+    staleTime: 120_000,
+  });
+
   const [feedShown, setFeedShown] = useState(6);
   const feedSentinelRef = useRef<HTMLButtonElement>(null);
   const { data: following } = useFollowing();
@@ -656,6 +690,26 @@ function Home() {
       {/* ===================== NOTIFICAÇÕES PUSH ===================== */}
       <PushNotificationPrompt />
 
+
+      {/* ===================== OS TEUS RESULTADOS ===================== */}
+      {user && myResults.length > 0 && (
+        <section className="px-5 pt-6 md:px-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-xl">Os teus resultados</h2>
+            <Link to="/jogos" search={{ filter: "votados" } as any} className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">Ver todos →</Link>
+          </div>
+
+          {/* Mobile: horizontal scroll / Desktop: grid */}
+          <div className="md:hidden -mx-5 px-5 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+            <div className="flex gap-3 pb-2" style={{ scrollSnapType: "x mandatory" }}>
+              {myResults.map((r: any) => <ResultCard key={r.id} r={r} mobile />)}
+            </div>
+          </div>
+          <div className="hidden md:grid md:grid-cols-3 gap-3">
+            {myResults.map((r: any) => <ResultCard key={r.id} r={r} />)}
+          </div>
+        </section>
+      )}
 
       {/* ===================== FEED DA COMUNIDADE ===================== */}
       {activityFeed.length > 0 && (
@@ -1133,6 +1187,71 @@ function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
       <p className="font-display text-lg">{title}</p>
       <p className="text-sm text-muted-foreground">{subtitle}</p>
     </div>
+  );
+}
+
+function ResultCard({ r, mobile = false }: { r: any; mobile?: boolean }) {
+  const isExact = r.isExact;
+  const isCorrect = r.isCorrect;
+  const datePart = new Date(r.kickoff_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" });
+
+  return (
+    <Link
+      to="/jogo/$id"
+      params={{ id: r.id }}
+      style={mobile ? { scrollSnapAlign: "start", minWidth: "72vw", maxWidth: "72vw" } : undefined}
+      className={`group relative shrink-0 md:shrink flex flex-col overflow-hidden rounded-2xl border px-4 py-4 transition-smooth hover:scale-[1.01] ${
+        isExact
+          ? "border-gold/50 bg-gradient-to-br from-gold/15 via-gold/5 to-transparent"
+          : isCorrect
+            ? "border-wc-green/40 bg-gradient-to-br from-wc-green/12 via-wc-green/4 to-transparent"
+            : "border-border bg-card/60"
+      }`}
+    >
+      {/* Top: badge + date */}
+      <div className="flex items-center justify-between mb-3">
+        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+          isExact
+            ? "bg-gold/20 text-gold border border-gold/30"
+            : isCorrect
+              ? "bg-wc-green/20 text-wc-green border border-wc-green/30"
+              : "bg-muted text-muted-foreground border border-border"
+        }`}>
+          {isExact ? <Zap className="h-2.5 w-2.5" /> : isCorrect ? <CheckCircle2 className="h-2.5 w-2.5" /> : <XCircle className="h-2.5 w-2.5" />}
+          {isExact ? "Placard exato" : isCorrect ? "Acertei" : "Errei"}
+        </span>
+        <span className="text-[10px] text-muted-foreground">{datePart}</span>
+      </div>
+
+      {/* Teams row */}
+      <div className="flex items-center gap-2 mb-3">
+        <div className="flex flex-1 items-center gap-2 min-w-0">
+          <span className="text-2xl leading-none shrink-0">{r.home?.flag ?? "🏳️"}</span>
+          <span className="text-sm font-semibold truncate text-foreground">{r.home?.name}</span>
+        </div>
+        <div className={`shrink-0 rounded-xl px-3 py-1 font-display text-xl text-foreground ${
+          isExact ? "bg-gold/15" : isCorrect ? "bg-wc-green/15" : "bg-muted"
+        }`}>
+          {r.home_score}–{r.away_score}
+        </div>
+        <div className="flex flex-1 items-center gap-2 min-w-0 justify-end">
+          <span className="text-sm font-semibold truncate text-foreground text-right">{r.away?.name}</span>
+          <span className="text-2xl leading-none shrink-0">{r.away?.flag ?? "🏳️"}</span>
+        </div>
+      </div>
+
+      {/* Points / Ver jogo */}
+      <div className="flex items-center justify-between mt-auto">
+        {(r.pred.points ?? 0) > 0 ? (
+          <span className={`text-sm font-bold ${isExact ? "text-gold" : "text-wc-green"}`}>
+            +{r.pred.points} pts
+          </span>
+        ) : (
+          <span className="text-xs text-muted-foreground">0 pts</span>
+        )}
+        <span className="text-xs font-semibold text-muted-foreground group-hover:text-foreground transition-smooth">Ver jogo →</span>
+      </div>
+    </Link>
   );
 }
 

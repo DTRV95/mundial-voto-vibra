@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
@@ -51,11 +51,17 @@ function writeSession(key: string, value: string) {
 }
 
 function Jogos() {
-  const savedFilter = readSession<Filter>("jogos_filter", "hoje");
-  const savedPhase  = readSession<PhaseFilter>("jogos_phase", "todas");
-  const [filter, setFilterRaw] = useState<Filter>(VALID_FILTERS.includes(savedFilter) ? savedFilter : "hoje");
-  const [phase,  setPhaseRaw]  = useState<PhaseFilter>(VALID_PHASES.includes(savedPhase) ? savedPhase : "todas");
+  const [filter, setFilterRaw] = useState<Filter>("hoje");
+  const [phase,  setPhaseRaw]  = useState<PhaseFilter>("todas");
   const { user } = useAuth();
+
+  // Read persisted filter after hydration (sessionStorage unavailable during SSR)
+  useEffect(() => {
+    const f = readSession<Filter>("jogos_filter", "hoje");
+    const p = readSession<PhaseFilter>("jogos_phase", "todas");
+    if (VALID_FILTERS.includes(f)) setFilterRaw(f);
+    if (VALID_PHASES.includes(p)) setPhaseRaw(p);
+  }, []);
 
   function setFilter(f: Filter) { setFilterRaw(f); writeSession("jogos_filter", f); }
   function setPhase(p: PhaseFilter) { setPhaseRaw(p); writeSession("jogos_phase", p); }

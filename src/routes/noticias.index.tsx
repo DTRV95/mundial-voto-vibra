@@ -2,7 +2,9 @@ import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, Newspaper, Clock, Target, CalendarClock } from "lucide-react";
+import { TrendingUp, Newspaper, Clock, Target } from "lucide-react";
+import { TeamBadge } from "@/lib/teamColors.tsx";
+import { formatTime, PHASE_LABEL } from "@/lib/format";
 
 function readingTime(content?: string | null): number {
   if (!content) return 1;
@@ -200,59 +202,92 @@ function Noticias() {
 
 function PrognosticoCard({ article }: { article: any }) {
   const match = article.match as any;
+
   const inner = (
     <>
-      <div className="h-0.5 w-full bg-gradient-to-r from-wc-blue via-wc-green to-gold" />
-      <div className="flex flex-1 flex-col p-4">
-        {match?.home && match?.away && (
-          <div className="mb-3 overflow-hidden rounded-xl bg-secondary/60">
-            <div className="flex items-center justify-between px-3 py-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold">
-                <span>{match.home.flag}</span>
-                <span className="text-foreground">{match.home.name}</span>
-              </div>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase">vs</span>
-              <div className="flex items-center gap-1.5 text-xs font-bold">
-                <span className="text-foreground">{match.away.name}</span>
-                <span>{match.away.flag}</span>
-              </div>
-            </div>
-            {match.kickoff_at && (
-              <div className="flex items-center gap-1 border-t border-border/30 px-3 py-1.5">
-                <CalendarClock className="h-3 w-3 text-muted-foreground shrink-0" />
-                <span className="text-[11px] text-muted-foreground capitalize">
-                  {new Date(match.kickoff_at).toLocaleDateString("pt-PT", { weekday: "short", day: "numeric", month: "short" })}
-                  {" · "}
-                  {new Date(match.kickoff_at).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })}
-                </span>
-              </div>
-            )}
+      {/* Stripe tricolor — mesmo que MatchCard */}
+      <div className="card-stripe" />
+
+      {/* Top bar: fase + badge prognóstico */}
+      <div className="flex items-center justify-between px-4 pt-3 pb-0">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          {match?.phase ? (PHASE_LABEL[match.phase] ?? match.phase) : "Prognóstico"}
+        </span>
+        <span className="rounded-full border border-gold/40 bg-gold/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold flex items-center gap-1">
+          <Target className="h-2.5 w-2.5" /> Análise
+        </span>
+      </div>
+
+      {/* Teams — layout idêntico ao MatchCard */}
+      {match?.home && match?.away ? (
+        <div className="flex items-center justify-between gap-2 px-4 py-4">
+          <div className="flex flex-1 flex-col items-center gap-2">
+            <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} size="md" />
+            <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">{match.home.name}</span>
           </div>
-        )}
-        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Sugestão</p>
-        <p className="font-display text-base leading-tight flex-1">{article.suggestion}</p>
-        {article.summary && <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2">{article.summary}</p>}
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-[11px] text-muted-foreground">{formatArticleDate(article.created_at)}</span>
-          <span className="text-[11px] font-bold text-wc-blue group-hover:underline">Ver jogo →</span>
+          <div className="flex flex-col items-center gap-1 px-2">
+            <div className="flex items-center gap-1 text-wc-red">
+              <Clock className="h-3.5 w-3.5" />
+              <span className="font-display text-2xl tabular-nums md:text-3xl">
+                {match.kickoff_at ? formatTime(match.kickoff_at) : "–:––"}
+              </span>
+            </div>
+            <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">vs</span>
+          </div>
+          <div className="flex flex-1 flex-col items-center gap-2">
+            <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} size="md" />
+            <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">{match.away.name}</span>
+          </div>
         </div>
+      ) : (
+        <div className="px-4 py-4">
+          <p className="font-display text-lg leading-tight">{article.title}</p>
+        </div>
+      )}
+
+      {/* Sugestão */}
+      <div className="mx-4 mb-3 rounded-xl border border-gold/20 bg-gold/8 px-3 py-2.5">
+        <p className="text-[9px] font-bold uppercase tracking-widest text-gold/70 mb-0.5">Sugestão</p>
+        <p className="text-sm font-semibold text-foreground leading-snug">{article.suggestion}</p>
+      </div>
+
+      {/* Bottom bar — estilo MatchCard */}
+      <div className="flex items-center justify-between border-t border-border bg-muted/50 px-4 py-2.5">
+        <span className="text-xs text-muted-foreground">
+          {match?.kickoff_at
+            ? new Date(match.kickoff_at).toLocaleDateString("pt-PT", { weekday: "short", day: "numeric", month: "short" })
+            : formatArticleDate(article.created_at)}
+        </span>
+        <span className="text-xs font-bold text-wc-red group-hover:underline transition-smooth">
+          Ver análise →
+        </span>
       </div>
     </>
   );
 
-  const cls = "group flex flex-col overflow-hidden rounded-2xl border border-border bg-card/70 transition-smooth hover:border-wc-blue/40";
-  const style = { transition: "transform 260ms cubic-bezier(0.16,1,0.3,1), box-shadow 260ms ease" };
-  const hoverIn = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 32px -6px oklch(0.55 0.20 250 / 0.2)"; };
-  const hoverOut = (e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.transform = ""; (e.currentTarget as HTMLElement).style.boxShadow = ""; };
+  const cls = "group block overflow-hidden rounded-2xl bg-card transition-smooth";
+  const shadowBase = "0 2px 12px oklch(0 0 0 / 0.30), 0 0 0 1px oklch(1 0 0 / 0.06)";
+  const shadowHover = "0 16px 40px oklch(0.54 0.24 27 / 0.25), 0 0 0 1.5px oklch(0.54 0.24 27 / 0.40)";
 
   if (match?.id) {
     return (
-      <Link to="/jogo/$id" params={{ id: match.id }} className={cls} style={style} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+      <Link
+        to="/jogo/$id"
+        params={{ id: match.id }}
+        className={cls}
+        style={{ boxShadow: shadowBase, transition: "transform 240ms cubic-bezier(0.16,1,0.3,1), box-shadow 240ms ease" }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLElement).style.boxShadow = shadowHover; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLElement).style.boxShadow = shadowBase; }}
+      >
         {inner}
       </Link>
     );
   }
-  return <div className={cls} style={style}>{inner}</div>;
+  return (
+    <div className={cls} style={{ boxShadow: shadowBase }}>
+      {inner}
+    </div>
+  );
 }
 
 function CategoryBadge({ category, className = "", small = false }: { category: string; className?: string; small?: boolean }) {

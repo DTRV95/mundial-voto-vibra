@@ -1304,14 +1304,14 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
                   { v: mins, label: "min" },
                 ].map(({ v, label }, i) => (
                   <div key={label} className="flex items-end gap-2">
-                    {i > 0 && <span className="font-display text-3xl text-wc-blue/30 mb-1">:</span>}
+                    {i > 0 && <span className="font-display text-3xl text-wc-green/30 mb-1">:</span>}
                     <div className="text-center">
                       <div
                         className="font-display text-4xl md:text-5xl leading-none tabular-nums px-3 py-1 rounded-xl"
                         style={{
-                          color: "oklch(0.40 0.18 265)",
-                          background: "oklch(0.40 0.18 265 / 0.08)",
-                          border: "1px solid oklch(0.40 0.18 265 / 0.20)",
+                          color: "oklch(0.55 0.20 142)",
+                          background: "oklch(0.55 0.20 142 / 0.08)",
+                          border: "1px solid oklch(0.55 0.20 142 / 0.20)",
                         }}
                       >
                         {String(v).padStart(2, "0")}
@@ -1334,7 +1334,7 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
               <Link
                 to="/jogos"
                 className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-smooth hover:scale-[1.02] active:scale-95"
-                style={{ background: "oklch(0.40 0.18 265)", boxShadow: "0 4px 16px -4px oklch(0.40 0.18 265 / 0.4)" }}
+                style={{ background: "oklch(0.55 0.20 142)", boxShadow: "0 4px 16px -4px oklch(0.55 0.20 142 / 0.4)" }}
               >
                 Votar agora <ArrowRight className="h-3.5 w-3.5" />
               </Link>

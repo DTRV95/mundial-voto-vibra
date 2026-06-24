@@ -486,7 +486,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      match_phase: "grupos" | "oitavos" | "quartos" | "meias" | "final"
+      match_phase: "grupos" | "ronda32" | "oitavos" | "quartos" | "meias" | "final"
       match_status: "scheduled" | "live" | "finished"
     }
     CompositeTypes: {
@@ -616,7 +616,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      match_phase: ["grupos", "oitavos", "quartos", "meias", "final"],
+      match_phase: ["grupos", "ronda32", "oitavos", "quartos", "meias", "final"],
       match_status: ["scheduled", "live", "finished"],
     },
   },

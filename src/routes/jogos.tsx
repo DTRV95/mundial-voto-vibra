@@ -30,10 +30,11 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "todos",   label: "Todos" },
 ];
 
-type PhaseFilter = "todas" | "grupos" | "oitavos" | "quartos" | "meias" | "final";
+type PhaseFilter = "todas" | "grupos" | "ronda32" | "oitavos" | "quartos" | "meias" | "final";
 const PHASE_FILTERS: { key: PhaseFilter; label: string }[] = [
   { key: "todas",    label: "Todas as fases" },
   { key: "grupos",   label: "Grupos" },
+  { key: "ronda32",  label: "16avos" },
   { key: "oitavos",  label: "Oitavos" },
   { key: "quartos",  label: "Quartos" },
   { key: "meias",    label: "Meias-Finais" },
@@ -41,7 +42,7 @@ const PHASE_FILTERS: { key: PhaseFilter; label: string }[] = [
 ];
 
 const VALID_FILTERS: Filter[] = ["hoje", "amanha", "semana", "votados", "todos"];
-const VALID_PHASES: PhaseFilter[] = ["todas", "grupos", "oitavos", "quartos", "meias", "final"];
+const VALID_PHASES: PhaseFilter[] = ["todas", "grupos", "ronda32", "oitavos", "quartos", "meias", "final"];
 
 function readSession<T>(key: string, fallback: T): T {
   try { const v = sessionStorage.getItem(key); return v ? (v as unknown as T) : fallback; } catch { return fallback; }

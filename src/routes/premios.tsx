@@ -23,7 +23,7 @@ function Premios() {
     },
   });
 
-  const phases: Array<keyof typeof PHASE_LABEL> = ["grupos", "oitavos", "quartos", "meias"];
+  const phases: Array<keyof typeof PHASE_LABEL> = ["grupos", "ronda32", "oitavos", "quartos", "meias"];
 
   return (
     <div className="px-5 pt-6">

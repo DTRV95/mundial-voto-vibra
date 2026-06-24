@@ -1240,19 +1240,19 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
       <div
         className="relative overflow-hidden rounded-3xl"
         style={{
-          background: "linear-gradient(135deg, oklch(0.97 0.008 27) 0%, oklch(0.97 0.006 142) 50%, oklch(0.96 0.010 250) 100%)",
-          border: "1px solid oklch(0.90 0.01 27)",
-          boxShadow: "0 4px 32px -8px oklch(0.54 0.24 27 / 0.15), 0 1px 0 oklch(1 0 0 / 0.8) inset",
+          background: "linear-gradient(135deg, oklch(0.97 0.010 142) 0%, oklch(0.97 0.012 250) 50%, oklch(0.97 0.014 95) 100%)",
+          border: "1px solid oklch(0.88 0.03 142)",
+          boxShadow: "0 4px 32px -8px oklch(0.55 0.20 142 / 0.18), 0 1px 0 oklch(1 0 0 / 0.8) inset",
         }}
       >
-        {/* Tricolor gradient top bar */}
-        <div className="h-1.5 w-full" style={{ background: "linear-gradient(90deg, oklch(0.54 0.24 27) 0%, oklch(0.55 0.20 142) 50%, oklch(0.40 0.18 265) 100%)" }} />
+        {/* Green → Blue → Gold top bar */}
+        <div className="h-1.5 w-full" style={{ background: "linear-gradient(90deg, oklch(0.55 0.20 142) 0%, oklch(0.40 0.18 265) 50%, oklch(0.75 0.18 85) 100%)" }} />
 
         {/* Soft color washes */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-12 -left-12 h-56 w-56 rounded-full opacity-[0.12]" style={{ background: "radial-gradient(circle, oklch(0.54 0.24 27) 0%, transparent 70%)" }} />
-          <div className="absolute -bottom-16 left-1/3 h-64 w-64 rounded-full opacity-[0.08]" style={{ background: "radial-gradient(circle, oklch(0.55 0.20 142) 0%, transparent 70%)" }} />
-          <div className="absolute -top-6 right-4 h-44 w-44 rounded-full opacity-[0.10]" style={{ background: "radial-gradient(circle, oklch(0.40 0.18 265) 0%, transparent 70%)" }} />
+          <div className="absolute -top-12 -left-12 h-56 w-56 rounded-full opacity-[0.12]" style={{ background: "radial-gradient(circle, oklch(0.55 0.20 142) 0%, transparent 70%)" }} />
+          <div className="absolute -bottom-16 left-1/3 h-64 w-64 rounded-full opacity-[0.08]" style={{ background: "radial-gradient(circle, oklch(0.40 0.18 265) 0%, transparent 70%)" }} />
+          <div className="absolute -top-6 right-4 h-44 w-44 rounded-full opacity-[0.10]" style={{ background: "radial-gradient(circle, oklch(0.75 0.18 85) 0%, transparent 70%)" }} />
         </div>
 
         <div className="relative grid md:grid-cols-[1fr_auto] gap-0">
@@ -1261,9 +1261,9 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
           <div className="p-6 md:p-8">
 
             {/* Label */}
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-wc-red/40 bg-wc-red/15 px-3 py-1">
-              <Trophy className="h-3.5 w-3.5 text-wc-red" />
-              <span className="text-[11px] font-bold uppercase tracking-widest text-wc-red">Prémio — Fase de Grupos</span>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-wc-green/40 bg-wc-green/12 px-3 py-1">
+              <Trophy className="h-3.5 w-3.5 text-wc-green" />
+              <span className="text-[11px] font-bold uppercase tracking-widest text-wc-green">Prémio — Fase de Grupos</span>
             </div>
 
             {/* Texto de agradecimento */}
@@ -1302,14 +1302,14 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
                   { v: mins, label: "min" },
                 ].map(({ v, label }, i) => (
                   <div key={label} className="flex items-end gap-2">
-                    {i > 0 && <span className="font-display text-3xl text-wc-red/30 mb-1">:</span>}
+                    {i > 0 && <span className="font-display text-3xl text-wc-blue/30 mb-1">:</span>}
                     <div className="text-center">
                       <div
                         className="font-display text-4xl md:text-5xl leading-none tabular-nums px-3 py-1 rounded-xl"
                         style={{
-                          color: "oklch(0.54 0.24 27)",
-                          background: "oklch(0.54 0.24 27 / 0.08)",
-                          border: "1px solid oklch(0.54 0.24 27 / 0.20)",
+                          color: "oklch(0.40 0.18 265)",
+                          background: "oklch(0.40 0.18 265 / 0.08)",
+                          border: "1px solid oklch(0.40 0.18 265 / 0.20)",
                         }}
                       >
                         {String(v).padStart(2, "0")}
@@ -1325,14 +1325,14 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
             <div className="flex flex-wrap gap-2">
               <Link
                 to="/rankings"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-white/60 px-4 py-2.5 text-sm font-bold text-muted-foreground transition-smooth hover:border-wc-red/30 hover:text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-white/60 px-4 py-2.5 text-sm font-bold text-muted-foreground transition-smooth hover:border-wc-blue/30 hover:text-foreground"
               >
                 Ver ranking →
               </Link>
               <Link
                 to="/jogos"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-wc-red px-4 py-2.5 text-sm font-bold text-white transition-smooth hover:scale-[1.02] active:scale-95"
-                style={{ boxShadow: "0 4px 16px -4px oklch(0.54 0.24 27 / 0.4)" }}
+                className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-smooth hover:scale-[1.02] active:scale-95"
+                style={{ background: "oklch(0.40 0.18 265)", boxShadow: "0 4px 16px -4px oklch(0.40 0.18 265 / 0.4)" }}
               >
                 Votar agora <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -1346,18 +1346,18 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
           >
             <div className="text-center mb-4">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Prémio para o</p>
-              <p className="font-display text-2xl text-wc-red leading-none">1º Classificado</p>
+              <p className="font-display text-2xl text-wc-blue leading-none">1º Classificado</p>
               <p className="text-xs text-muted-foreground mt-0.5">Ranking Geral · Fase de Grupos</p>
             </div>
 
             {/* Imagem da camisola */}
             <div className="relative my-2">
-              <div className="absolute inset-0 rounded-full opacity-30 blur-2xl" style={{ background: "radial-gradient(circle, oklch(0.54 0.24 27 / 0.4) 0%, oklch(0.55 0.20 142 / 0.2) 60%, transparent 100%)" }} />
+              <div className="absolute inset-0 rounded-full opacity-30 blur-2xl" style={{ background: "radial-gradient(circle, oklch(0.75 0.18 85 / 0.5) 0%, oklch(0.55 0.20 142 / 0.3) 60%, transparent 100%)" }} />
               <img
                 src={premioCamisola}
                 alt="Camisola de Portugal — prémio"
                 className="relative h-48 w-48 object-contain"
-                style={{ filter: "drop-shadow(0 4px 16px oklch(0.54 0.24 27 / 0.25)) drop-shadow(0 8px 24px oklch(0 0 0 / 0.12))" }}
+                style={{ filter: "drop-shadow(0 4px 16px oklch(0.75 0.18 85 / 0.30)) drop-shadow(0 8px 24px oklch(0 0 0 / 0.10))" }}
               />
             </div>
 

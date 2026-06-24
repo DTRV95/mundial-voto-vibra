@@ -12,7 +12,7 @@ function readingTime(content?: string | null): number {
 }
 
 export const Route = createFileRoute("/noticias/")({
-  validateSearch: (s: Record<string, unknown>) => ({ prog: s.prog === "1" || s.prog === true }),
+  validateSearch: (s: Record<string, unknown>) => ({ prog: s.prog === "1" || s.prog === true || s.prog === "true" }),
   head: () => ({
     meta: [
       { title: "Notícias — Uma Geração" },

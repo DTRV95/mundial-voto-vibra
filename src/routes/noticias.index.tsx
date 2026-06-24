@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TrendingUp, Newspaper, Clock, Target } from "lucide-react";
@@ -57,6 +57,7 @@ function shortDayLabel(iso: string) {
 function Noticias() {
   const { prog } = useSearch({ from: "/noticias/" });
   const [showPrognosticos, setShowPrognosticos] = useState(prog ?? false);
+  useEffect(() => { if (prog) setShowPrognosticos(true); }, [prog]);
   const todayKey = dayKey(new Date().toISOString());
   const [dayFilter, setDayFilter] = useState<string>(todayKey);
 

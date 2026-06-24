@@ -1267,13 +1267,15 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
             </div>
 
             {/* Texto de agradecimento */}
-            <p className="text-muted-foreground text-[11px] font-bold uppercase tracking-widest mb-2">Uma mensagem da equipa</p>
-            <p className="text-foreground text-sm leading-relaxed mb-1">
-              <span className="font-bold">A fase de grupos está a chegar ao fim...</span> e queremos agradecer a todos os que fizeram parte desta caminhada.
-            </p>
-            <p className="text-muted-foreground text-sm leading-relaxed mb-5">
-              Cada voto, cada previsão e cada visita ajudaram a transformar esta comunidade em algo muito maior do que imaginávamos.
-            </p>
+            <div className="mb-5 rounded-2xl border border-wc-green/25 bg-wc-green/6 px-5 py-4" style={{ borderLeft: "3px solid oklch(0.55 0.20 142)" }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-wc-green mb-2">Uma mensagem da equipa</p>
+              <p className="text-foreground text-sm leading-relaxed font-medium mb-1.5">
+                <span className="font-bold">A fase de grupos está a chegar ao fim...</span> e queremos agradecer a todos os que fizeram parte desta caminhada.
+              </p>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Cada voto, cada previsão e cada visita ajudaram a transformar esta comunidade em algo muito maior do que imaginávamos.
+              </p>
+            </div>
 
             {/* Aviso reset */}
             <div className="mb-5 rounded-2xl border border-amber-500/30 bg-amber-50/60 px-4 py-3.5 space-y-2">

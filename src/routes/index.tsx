@@ -1238,17 +1238,14 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
   return (
     <div className="mx-5 mt-5 md:mx-8">
       <div
-        className="relative overflow-hidden rounded-3xl"
-        style={{ boxShadow: "0 12px 48px -8px oklch(0.54 0.24 27 / 0.40)" }}
+        className="relative overflow-hidden rounded-3xl border border-border bg-card"
+        style={{ boxShadow: "0 8px 40px -8px oklch(0.54 0.24 27 / 0.20)" }}
       >
-        {/* fundo gradiente */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(145deg, oklch(0.16 0.04 25) 0%, oklch(0.13 0.03 260) 60%, oklch(0.16 0.04 25) 100%)" }} />
-        {/* textura */}
-        <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
-        {/* brilho vermelho canto */}
-        <div className="absolute -top-16 -left-16 h-48 w-48 rounded-full bg-wc-red/20 blur-3xl pointer-events-none" />
-        {/* brilho verde canto */}
-        <div className="absolute -bottom-16 -right-16 h-48 w-48 rounded-full bg-wc-green/15 blur-3xl pointer-events-none" />
+        {/* stripe tricolor no topo */}
+        <div className="card-stripe" />
+
+        {/* faixa vermelha decorativa no topo */}
+        <div className="h-1.5 w-full bg-wc-red" />
 
         <div className="relative grid md:grid-cols-[1fr_auto] gap-0">
 
@@ -1256,40 +1253,40 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
           <div className="p-6 md:p-8">
 
             {/* Label */}
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-wc-red/40 bg-wc-red/15 px-3 py-1">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-wc-red/30 bg-wc-red/8 px-3 py-1">
               <Trophy className="h-3.5 w-3.5 text-wc-red" />
               <span className="text-[11px] font-bold uppercase tracking-widest text-wc-red">Prémio — Fase de Grupos</span>
             </div>
 
             {/* Texto de agradecimento */}
-            <p className="text-white/50 text-[11px] font-bold uppercase tracking-widest mb-2">Uma mensagem da equipa</p>
-            <p className="text-white/90 text-sm leading-relaxed mb-1">
-              <span className="font-bold text-white">A fase de grupos está a chegar ao fim...</span> e queremos agradecer a todos os que fizeram parte desta caminhada.
+            <p className="text-muted-foreground text-[11px] font-bold uppercase tracking-widest mb-2">Uma mensagem da equipa</p>
+            <p className="text-foreground text-sm leading-relaxed mb-1">
+              <span className="font-bold">A fase de grupos está a chegar ao fim...</span> e queremos agradecer a todos os que fizeram parte desta caminhada.
             </p>
-            <p className="text-white/65 text-sm leading-relaxed mb-5">
+            <p className="text-muted-foreground text-sm leading-relaxed mb-5">
               Cada voto, cada previsão e cada visita ajudaram a transformar esta comunidade em algo muito maior do que imaginávamos.
             </p>
 
             {/* Aviso reset */}
-            <div className="mb-5 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3.5 space-y-2">
+            <div className="mb-5 rounded-2xl border border-amber-500/25 bg-amber-50/5 px-4 py-3.5 space-y-2">
               <div className="flex items-center gap-2 mb-1">
-                <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0" />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-amber-400">O que muda no Mata-Mata</span>
+                <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+                <span className="text-[11px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">O que muda no Mata-Mata</span>
               </div>
-              <p className="text-xs text-white/70 leading-relaxed">
-                🔄 <span className="text-white/90 font-semibold">Os pontos voltam a zero</span> — todos os utilizadores começam de novo na fase a eliminar.
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                🔄 <span className="text-foreground font-semibold">Os pontos voltam a zero</span> — todos começam de novo na fase a eliminar.
               </p>
-              <p className="text-xs text-white/70 leading-relaxed">
-                🏆 <span className="text-white/90 font-semibold">Os torneios privados também fazem reset</span> — poderás escolher a duração do teu torneio antes de começar.
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                🏆 <span className="text-foreground font-semibold">Os torneios privados também fazem reset</span> — poderás escolher a duração antes de começar.
               </p>
-              <p className="text-xs text-white/70 leading-relaxed">
-                ⚡ <span className="text-white/90 font-semibold">O mata-mata começa a 29 de junho</span> — prepara-te para uma nova corrida!
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                ⚡ <span className="text-foreground font-semibold">O mata-mata começa a 29 de junho</span> — prepara-te para uma nova corrida!
               </p>
             </div>
 
             {/* Countdown */}
             <div className="mb-5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Fase de grupos termina em</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Fase de grupos termina em</p>
               <div className="flex items-end gap-3">
                 {[
                   { v: days, label: days === 1 ? "dia" : "dias" },
@@ -1297,13 +1294,10 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
                   { v: mins, label: "min" },
                 ].map(({ v, label }) => (
                   <div key={label} className="text-center">
-                    <div
-                      className="font-display text-4xl md:text-5xl leading-none tabular-nums"
-                      style={{ background: "linear-gradient(180deg, oklch(0.90 0.12 92), oklch(0.72 0.16 75))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
-                    >
+                    <div className="font-display text-4xl md:text-5xl leading-none tabular-nums text-wc-red">
                       {String(v).padStart(2, "0")}
                     </div>
-                    <div className="text-[9px] uppercase tracking-widest text-white/30 mt-0.5">{label}</div>
+                    <div className="text-[9px] uppercase tracking-widest text-muted-foreground mt-0.5">{label}</div>
                   </div>
                 ))}
               </div>
@@ -1313,7 +1307,7 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
             <div className="flex flex-wrap gap-2">
               <Link
                 to="/rankings"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-bold text-white/80 transition-smooth hover:border-white/30 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border px-4 py-2.5 text-sm font-bold text-muted-foreground transition-smooth hover:border-wc-red/40 hover:text-foreground"
               >
                 Ver ranking →
               </Link>
@@ -1327,41 +1321,41 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
           </div>
 
           {/* ── Coluna direita: prémio ── */}
-          <div className="relative flex flex-col items-center justify-between border-t border-white/10 md:border-t-0 md:border-l p-6 md:p-8 md:min-w-[260px]">
+          <div className="relative flex flex-col items-center justify-between border-t border-border md:border-t-0 md:border-l bg-secondary/30 p-6 md:p-8 md:min-w-[260px]">
             <div className="text-center mb-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1">Prémio para o</p>
-              <p className="font-display text-2xl text-gold leading-none">1º Classificado</p>
-              <p className="text-xs text-white/50 mt-0.5">Ranking Geral · Fase de Grupos</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Prémio para o</p>
+              <p className="font-display text-2xl text-wc-red leading-none">1º Classificado</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Ranking Geral · Fase de Grupos</p>
             </div>
 
             {/* Imagem da camisola */}
             <div className="relative my-2">
-              <div className="absolute inset-0 rounded-2xl bg-wc-green/10 blur-xl" />
+              <div className="absolute inset-0 rounded-2xl bg-wc-green/15 blur-2xl" />
               <img
                 src={premioCamisola}
                 alt="Camisola de Portugal — prémio"
-                className="relative h-48 w-48 object-contain drop-shadow-2xl"
-                style={{ filter: "drop-shadow(0 8px 24px oklch(0.55 0.20 142 / 0.35))" }}
+                className="relative h-48 w-48 object-contain"
+                style={{ filter: "drop-shadow(0 8px 24px oklch(0.55 0.20 142 / 0.30))" }}
               />
             </div>
 
             <div className="text-center mt-2">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1">Camisola de Portugal</p>
-              <p className="text-xs text-white/60">Não oficial · Edição especial</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Camisola de Portugal</p>
+              <p className="text-xs text-muted-foreground">Não oficial · Edição especial</p>
             </div>
 
             {/* Líder atual */}
             {leader && (
-              <div className="mt-4 w-full rounded-2xl border border-gold/25 bg-gold/10 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70 mb-1 text-center">Atualmente em 1º</p>
+              <div className="mt-4 w-full rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gold/80 mb-1 text-center">Atualmente em 1º</p>
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gold font-display text-background text-xs font-bold">1</div>
-                    <Link to="/adepto/$id" params={{ id: leader.id }} className="text-sm font-bold text-white truncate hover:underline">
+                    <Link to="/adepto/$id" params={{ id: leader.id }} className="text-sm font-bold text-foreground truncate hover:underline">
                       {leader.display_name ?? "Adepto"}
                     </Link>
                   </div>
-                  <span className="font-display text-lg text-gold shrink-0">{leader.total_points}<span className="text-xs font-sans text-white/40 ml-0.5">pts</span></span>
+                  <span className="font-display text-lg text-gold shrink-0">{leader.total_points}<span className="text-xs font-sans text-muted-foreground ml-0.5">pts</span></span>
                 </div>
               </div>
             )}

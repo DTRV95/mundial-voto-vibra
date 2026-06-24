@@ -602,7 +602,7 @@ function Home() {
             </div>
             <div className="flex items-center gap-2 sm:shrink-0">
               <Link
-                to="/noticias"
+                to="/noticias/"
                 search={{ prog: true } as any}
                 className="flex-1 sm:flex-none rounded-xl border border-white/20 px-4 py-2.5 text-center text-sm font-bold text-white/80 transition-smooth hover:border-white/40 hover:text-white"
               >

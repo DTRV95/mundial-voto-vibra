@@ -1238,20 +1238,21 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
   return (
     <div className="mx-5 mt-5 md:mx-8">
       <div
-        className="relative overflow-hidden rounded-3xl border border-wc-red/20"
+        className="relative overflow-hidden rounded-3xl"
         style={{
-          background: "linear-gradient(135deg, oklch(0.14 0.03 27 / 0.95) 0%, oklch(0.16 0.04 250 / 0.90) 50%, oklch(0.13 0.03 142 / 0.90) 100%)",
-          boxShadow: "0 8px 48px -8px oklch(0.54 0.24 27 / 0.35), 0 0 0 1px oklch(0.54 0.24 27 / 0.12) inset",
+          background: "linear-gradient(135deg, oklch(0.97 0.008 27) 0%, oklch(0.97 0.006 142) 50%, oklch(0.96 0.010 250) 100%)",
+          border: "1px solid oklch(0.90 0.01 27)",
+          boxShadow: "0 4px 32px -8px oklch(0.54 0.24 27 / 0.15), 0 1px 0 oklch(1 0 0 / 0.8) inset",
         }}
       >
         {/* Tricolor gradient top bar */}
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, oklch(0.54 0.24 27) 0%, oklch(0.55 0.20 142) 50%, oklch(0.40 0.18 265) 100%)" }} />
+        <div className="h-1.5 w-full" style={{ background: "linear-gradient(90deg, oklch(0.54 0.24 27) 0%, oklch(0.55 0.20 142) 50%, oklch(0.40 0.18 265) 100%)" }} />
 
-        {/* Glowing orbs background */}
+        {/* Soft color washes */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full opacity-[0.07]" style={{ background: "radial-gradient(circle, oklch(0.54 0.24 27) 0%, transparent 70%)" }} />
-          <div className="absolute -bottom-20 left-1/3 h-72 w-72 rounded-full opacity-[0.05]" style={{ background: "radial-gradient(circle, oklch(0.55 0.20 142) 0%, transparent 70%)" }} />
-          <div className="absolute -top-8 right-0 h-48 w-48 rounded-full opacity-[0.06]" style={{ background: "radial-gradient(circle, oklch(0.40 0.18 265) 0%, transparent 70%)" }} />
+          <div className="absolute -top-12 -left-12 h-56 w-56 rounded-full opacity-[0.12]" style={{ background: "radial-gradient(circle, oklch(0.54 0.24 27) 0%, transparent 70%)" }} />
+          <div className="absolute -bottom-16 left-1/3 h-64 w-64 rounded-full opacity-[0.08]" style={{ background: "radial-gradient(circle, oklch(0.55 0.20 142) 0%, transparent 70%)" }} />
+          <div className="absolute -top-6 right-4 h-44 w-44 rounded-full opacity-[0.10]" style={{ background: "radial-gradient(circle, oklch(0.40 0.18 265) 0%, transparent 70%)" }} />
         </div>
 
         <div className="relative grid md:grid-cols-[1fr_auto] gap-0">
@@ -1266,34 +1267,34 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
             </div>
 
             {/* Texto de agradecimento */}
-            <p className="text-white/40 text-[11px] font-bold uppercase tracking-widest mb-2">Uma mensagem da equipa</p>
-            <p className="text-white/90 text-sm leading-relaxed mb-1">
-              <span className="font-bold text-white">A fase de grupos está a chegar ao fim...</span> e queremos agradecer a todos os que fizeram parte desta caminhada.
+            <p className="text-muted-foreground text-[11px] font-bold uppercase tracking-widest mb-2">Uma mensagem da equipa</p>
+            <p className="text-foreground text-sm leading-relaxed mb-1">
+              <span className="font-bold">A fase de grupos está a chegar ao fim...</span> e queremos agradecer a todos os que fizeram parte desta caminhada.
             </p>
-            <p className="text-white/50 text-sm leading-relaxed mb-5">
+            <p className="text-muted-foreground text-sm leading-relaxed mb-5">
               Cada voto, cada previsão e cada visita ajudaram a transformar esta comunidade em algo muito maior do que imaginávamos.
             </p>
 
             {/* Aviso reset */}
-            <div className="mb-5 rounded-2xl border border-amber-400/20 bg-amber-400/8 px-4 py-3.5 space-y-2">
+            <div className="mb-5 rounded-2xl border border-amber-500/30 bg-amber-50/60 px-4 py-3.5 space-y-2">
               <div className="flex items-center gap-2 mb-1">
-                <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0" />
-                <span className="text-[11px] font-bold uppercase tracking-widest text-amber-400">O que muda no Mata-Mata</span>
+                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                <span className="text-[11px] font-bold uppercase tracking-widest text-amber-700">O que muda no Mata-Mata</span>
               </div>
-              <p className="text-xs text-white/50 leading-relaxed">
-                🔄 <span className="text-white/80 font-semibold">Os pontos voltam a zero</span> — todos começam de novo na fase a eliminar.
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                🔄 <span className="text-foreground font-semibold">Os pontos voltam a zero</span> — todos começam de novo na fase a eliminar.
               </p>
-              <p className="text-xs text-white/50 leading-relaxed">
-                🏆 <span className="text-white/80 font-semibold">Os torneios privados também fazem reset</span> — poderás escolher a duração antes de começar.
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                🏆 <span className="text-foreground font-semibold">Os torneios privados também fazem reset</span> — poderás escolher a duração antes de começar.
               </p>
-              <p className="text-xs text-white/50 leading-relaxed">
-                ⚡ <span className="text-white/80 font-semibold">O mata-mata começa a 29 de junho</span> — prepara-te para uma nova corrida!
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                ⚡ <span className="text-foreground font-semibold">O mata-mata começa a 29 de junho</span> — prepara-te para uma nova corrida!
               </p>
             </div>
 
             {/* Countdown */}
             <div className="mb-6">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3">Fase de grupos termina em</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Fase de grupos termina em</p>
               <div className="flex items-end gap-2">
                 {[
                   { v: days, label: days === 1 ? "dia" : "dias" },
@@ -1301,20 +1302,19 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
                   { v: mins, label: "min" },
                 ].map(({ v, label }, i) => (
                   <div key={label} className="flex items-end gap-2">
-                    {i > 0 && <span className="font-display text-3xl text-white/20 mb-1">:</span>}
+                    {i > 0 && <span className="font-display text-3xl text-wc-red/30 mb-1">:</span>}
                     <div className="text-center">
                       <div
                         className="font-display text-4xl md:text-5xl leading-none tabular-nums px-3 py-1 rounded-xl"
                         style={{
                           color: "oklch(0.54 0.24 27)",
-                          background: "oklch(0.54 0.24 27 / 0.12)",
-                          border: "1px solid oklch(0.54 0.24 27 / 0.25)",
-                          textShadow: "0 0 20px oklch(0.54 0.24 27 / 0.6)",
+                          background: "oklch(0.54 0.24 27 / 0.08)",
+                          border: "1px solid oklch(0.54 0.24 27 / 0.20)",
                         }}
                       >
                         {String(v).padStart(2, "0")}
                       </div>
-                      <div className="text-[9px] uppercase tracking-widest text-white/30 mt-1">{label}</div>
+                      <div className="text-[9px] uppercase tracking-widest text-muted-foreground mt-1">{label}</div>
                     </div>
                   </div>
                 ))}
@@ -1325,14 +1325,14 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
             <div className="flex flex-wrap gap-2">
               <Link
                 to="/rankings"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/8 px-4 py-2.5 text-sm font-bold text-white/70 transition-smooth hover:border-white/30 hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-white/60 px-4 py-2.5 text-sm font-bold text-muted-foreground transition-smooth hover:border-wc-red/30 hover:text-foreground"
               >
                 Ver ranking →
               </Link>
               <Link
                 to="/jogos"
                 className="inline-flex items-center gap-1.5 rounded-xl bg-wc-red px-4 py-2.5 text-sm font-bold text-white transition-smooth hover:scale-[1.02] active:scale-95"
-                style={{ boxShadow: "0 4px 16px -4px oklch(0.54 0.24 27 / 0.5)" }}
+                style={{ boxShadow: "0 4px 16px -4px oklch(0.54 0.24 27 / 0.4)" }}
               >
                 Votar agora <ArrowRight className="h-3.5 w-3.5" />
               </Link>
@@ -1341,43 +1341,43 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
 
           {/* ── Coluna direita: prémio ── */}
           <div
-            className="relative flex flex-col items-center justify-between border-t border-white/8 md:border-t-0 md:border-l p-6 md:p-8 md:min-w-[260px]"
-            style={{ borderColor: "oklch(1 0 0 / 0.07)" }}
+            className="relative flex flex-col items-center justify-between border-t border-border md:border-t-0 md:border-l p-6 md:p-8 md:min-w-[260px]"
+            style={{ background: "oklch(0.55 0.20 142 / 0.04)" }}
           >
             <div className="text-center mb-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Prémio para o</p>
-              <p className="font-display text-2xl text-wc-red leading-none" style={{ textShadow: "0 0 24px oklch(0.54 0.24 27 / 0.5)" }}>1º Classificado</p>
-              <p className="text-xs text-white/40 mt-0.5">Ranking Geral · Fase de Grupos</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Prémio para o</p>
+              <p className="font-display text-2xl text-wc-red leading-none">1º Classificado</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Ranking Geral · Fase de Grupos</p>
             </div>
 
             {/* Imagem da camisola */}
             <div className="relative my-2">
-              <div className="absolute inset-0 rounded-full bg-wc-red/20 blur-3xl scale-110" />
+              <div className="absolute inset-0 rounded-full opacity-30 blur-2xl" style={{ background: "radial-gradient(circle, oklch(0.54 0.24 27 / 0.4) 0%, oklch(0.55 0.20 142 / 0.2) 60%, transparent 100%)" }} />
               <img
                 src={premioCamisola}
                 alt="Camisola de Portugal — prémio"
                 className="relative h-48 w-48 object-contain"
-                style={{ filter: "drop-shadow(0 0 32px oklch(0.54 0.24 27 / 0.40)) drop-shadow(0 8px 16px oklch(0 0 0 / 0.4))" }}
+                style={{ filter: "drop-shadow(0 4px 16px oklch(0.54 0.24 27 / 0.25)) drop-shadow(0 8px 24px oklch(0 0 0 / 0.12))" }}
               />
             </div>
 
             <div className="text-center mt-2">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Camisola de Portugal</p>
-              <p className="text-xs text-white/30">Não oficial · Edição especial</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Camisola de Portugal</p>
+              <p className="text-xs text-muted-foreground">Não oficial · Edição especial</p>
             </div>
 
             {/* Líder atual */}
             {leader && (
               <div className="mt-4 w-full rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gold/80 mb-1 text-center">Atualmente em 1º</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70 mb-1 text-center">Atualmente em 1º</p>
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gold font-display text-background text-xs font-bold">1</div>
-                    <Link to="/adepto/$id" params={{ id: leader.id }} className="text-sm font-bold text-white/90 truncate hover:text-white">
+                    <Link to="/adepto/$id" params={{ id: leader.id }} className="text-sm font-bold text-foreground truncate hover:underline">
                       {leader.display_name ?? "Adepto"}
                     </Link>
                   </div>
-                  <span className="font-display text-lg text-gold shrink-0">{leader.total_points}<span className="text-xs font-sans text-white/30 ml-0.5">pts</span></span>
+                  <span className="font-display text-lg text-gold shrink-0">{leader.total_points}<span className="text-xs font-sans text-muted-foreground ml-0.5">pts</span></span>
                 </div>
               </div>
             )}

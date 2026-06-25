@@ -158,7 +158,7 @@ function Jogos() {
       </header>
 
       {/* Banner prognósticos */}
-      <Link to="/noticias" search={{ prog: true } as any}
+      <Link to="/noticias/" search={{ prog: true } as any}
         className="group mb-4 flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border px-4 py-3 transition-smooth hover:border-wc-blue/40"
         style={{ background: "linear-gradient(135deg, oklch(0.20 0.04 250 / 0.5) 0%, oklch(0.16 0.02 260 / 0.3) 100%)" }}
       >

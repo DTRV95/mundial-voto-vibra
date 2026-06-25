@@ -34,16 +34,6 @@ function dayKey(iso: string) {
   return new Date(iso).toDateString();
 }
 
-function dayLabel(iso: string) {
-  const d = new Date(iso);
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-  const ds = new Date(d); ds.setHours(0, 0, 0, 0);
-  if (ds.getTime() === today.getTime()) return "Hoje";
-  if (ds.getTime() === tomorrow.getTime()) return "Amanhã";
-  return d.toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long" });
-}
-
 function shortDayLabel(iso: string) {
   const d = new Date(iso);
   const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -90,7 +80,6 @@ function Noticias() {
     },
   });
 
-  // Unique days from today onwards, in order
   const progDays = useMemo(() => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const seen = new Set<string>();
@@ -98,14 +87,13 @@ function Noticias() {
     for (const p of prognosticos as any[]) {
       if (!p.match?.kickoff_at) continue;
       const d = new Date(p.match.kickoff_at); d.setHours(0, 0, 0, 0);
-      if (d < today) continue; // skip past days
+      if (d < today) continue;
       const k = dayKey(p.match.kickoff_at);
       if (!seen.has(k)) { seen.add(k); days.push({ key: k, iso: p.match.kickoff_at }); }
     }
     return days;
   }, [prognosticos]);
 
-  // Prognósticos filtered by selected day
   const filteredProg = useMemo(() => {
     return (prognosticos as any[]).filter(p => p.match?.kickoff_at && dayKey(p.match.kickoff_at) === dayFilter);
   }, [prognosticos, dayFilter]);
@@ -123,7 +111,7 @@ function Noticias() {
           <p className="text-sm text-muted-foreground mt-0.5">Antevisões, análises e as últimas do Mundial 2026.</p>
         </div>
         <button
-          onClick={() => { setShowPrognosticos(v => !v); setDayFilter("todos"); }}
+          onClick={() => { setShowPrognosticos(v => !v); setDayFilter(todayKey); }}
           className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth ${
             showPrognosticos
               ? "border-wc-red bg-wc-red text-white"
@@ -144,17 +132,14 @@ function Noticias() {
         </div>
       )}
 
-      {!isLoading && filtered.length === 0 && (
+      {!isLoading && filtered.length === 0 && !showPrognosticos && (
         <div className="rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center">
           <Newspaper className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" />
-          <p className="font-display text-lg">
-            {showPrognosticos ? "Sem prognósticos publicados" : "Sem artigos publicados"}
-          </p>
+          <p className="font-display text-lg">Sem artigos publicados</p>
           <p className="text-sm text-muted-foreground mt-1">Volta em breve.</p>
         </div>
       )}
 
-      {/* Prognósticos — filtros por dia + grid */}
       {showPrognosticos && progDays.length > 0 && (
         <div className="-mx-4 md:mx-0 mb-5 overflow-x-auto px-4 md:px-0">
           <div className="flex gap-2 w-max">
@@ -196,7 +181,13 @@ function Noticias() {
         </div>
       )}
 
-      {/* Outras categorias — layout normal com featured */}
+      {showPrognosticos && !isLoading && prognosticos.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center">
+          <p className="font-display text-lg">Sem prognósticos publicados</p>
+          <p className="text-sm text-muted-foreground mt-1">Volta em breve.</p>
+        </div>
+      )}
+
       {!showPrognosticos && (
         <>
           {featured && (
@@ -285,10 +276,7 @@ function PrognosticoCard({ article }: { article: any }) {
 
   const inner = (
     <>
-      {/* Stripe tricolor — mesmo que MatchCard */}
       <div className="card-stripe" />
-
-      {/* Top bar: fase + badge prognóstico */}
       <div className="flex items-center justify-between px-4 pt-3 pb-0">
         <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
           {match?.phase ? (PHASE_LABEL[match.phase] ?? match.phase) : "Prognóstico"}
@@ -298,7 +286,6 @@ function PrognosticoCard({ article }: { article: any }) {
         </span>
       </div>
 
-      {/* Teams — layout idêntico ao MatchCard */}
       {match?.home && match?.away ? (
         <div className="flex items-center justify-between gap-2 px-4 py-4">
           <div className="flex flex-1 flex-col items-center gap-2">
@@ -325,22 +312,18 @@ function PrognosticoCard({ article }: { article: any }) {
         </div>
       )}
 
-      {/* Sugestão */}
       <div className="mx-4 mb-3 rounded-xl border border-gold/20 bg-gold/8 px-3 py-2.5">
         <p className="text-[9px] font-bold uppercase tracking-widest text-gold/70 mb-0.5">Sugestão</p>
         <p className="text-sm font-semibold text-foreground leading-snug">{article.suggestion}</p>
       </div>
 
-      {/* Bottom bar — estilo MatchCard */}
       <div className="flex items-center justify-between border-t border-border bg-muted/50 px-4 py-2.5">
         <span className="text-xs text-muted-foreground">
           {match?.kickoff_at
             ? new Date(match.kickoff_at).toLocaleDateString("pt-PT", { weekday: "short", day: "numeric", month: "short" })
             : formatArticleDate(article.created_at)}
         </span>
-        <span className="text-xs font-bold text-wc-red group-hover:underline transition-smooth">
-          Ver análise →
-        </span>
+        <span className="text-xs font-bold text-wc-red group-hover:underline transition-smooth">Ver análise →</span>
       </div>
     </>
   );
@@ -363,11 +346,7 @@ function PrognosticoCard({ article }: { article: any }) {
       </Link>
     );
   }
-  return (
-    <div className={cls} style={{ boxShadow: shadowBase }}>
-      {inner}
-    </div>
-  );
+  return <div className={cls} style={{ boxShadow: shadowBase }}>{inner}</div>;
 }
 
 function CategoryBadge({ category, className = "", small = false }: { category: string; className?: string; small?: boolean }) {

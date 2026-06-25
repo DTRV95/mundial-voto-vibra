@@ -45,6 +45,7 @@ function getDivision(rank: number) {
 function Rankings() {
   const search = useSearch({ from: "/rankings" });
   const [tab, setTab] = useState<"ligas" | "jogos" | "divisoes">(search.tab as any ?? "divisoes");
+  const [expandedDivs, setExpandedDivs] = useState<Record<string, boolean>>({});
   const { user } = useAuth();
 
   // Ranking de ligas
@@ -324,7 +325,7 @@ function Rankings() {
                 </div>
                 {/* Membros */}
                 <div className="divide-y divide-border/50">
-                  {members.map((u, i) => {
+                  {(expandedDivs[div.key] ? members : members.slice(0, 25)).map((u, i) => {
                     const isMe = u.id === user?.id;
                     const isTop3 = i < 3;
                     const isBottom3 = i >= members.length - 3 && members.length > 3;
@@ -355,7 +356,16 @@ function Rankings() {
                     );
                   })}
                 </div>
-                {/* Zona de subida/descida */}
+                {members.length > 25 && (
+                  <button
+                    onClick={() => setExpandedDivs(prev => ({ ...prev, [div.key]: !prev[div.key] }))}
+                    className="w-full py-3 text-sm font-semibold text-muted-foreground hover:text-foreground transition-smooth bg-card/40 hover:bg-card/70"
+                  >
+                    {expandedDivs[div.key]
+                      ? "Mostrar menos"
+                      : `Ver mais ${members.length - 25} adepto${members.length - 25 === 1 ? "" : "s"}`}
+                  </button>
+                )}
               </div>
             );
           })}

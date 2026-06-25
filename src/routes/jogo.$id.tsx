@@ -158,7 +158,8 @@ function JogoPage() {
     }
   }
 
-  useEffect(() => { if (myPrediction) setPred(myPrediction); }, [myPrediction]);
+  useEffect(() => { setPred({}); }, [id]);
+  useEffect(() => { setPred(myPrediction ?? {}); }, [myPrediction]);
 
   const status = match ? votingStatus(match) : null;
   const closed = !status || status.label === "Fechada";

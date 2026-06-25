@@ -64,6 +64,7 @@ function LigaPage() {
   const [addSearch, setAddSearch] = useState("");
   const [addTarget, setAddTarget] = useState<{ id: string; display_name: string; total_points: number; avatar_url: string | null } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showAllMembers, setShowAllMembers] = useState(false);
 
   const EMOJIS = ["⚽", "🍺", "👨‍👩‍👧", "💼", "🏆", "🎮", "🎓", "🏋️", "🎉", "🔥", "💪", "🤝", "🦁", "🐉", "🌍"];
 
@@ -564,7 +565,7 @@ function copyLink() {
           </div>
         ) : (
           <div className="space-y-2">
-            {ranking.map((r: any, i: number) => {
+            {(showAllMembers ? ranking : ranking.slice(0, 25)).map((r: any, i: number) => {
               const isMe = r.id === user?.id;
               const pct = topPoints > 0 ? Math.round((r.total_points / topPoints) * 100) : 0;
               const acc = r.predictions_made > 0
@@ -653,6 +654,17 @@ function copyLink() {
                 </div>
               );
             })}
+
+            {ranking.length > 25 && (
+              <button
+                onClick={() => setShowAllMembers(v => !v)}
+                className="w-full mt-1 rounded-2xl border border-dashed border-border bg-card/40 py-3 text-sm font-semibold text-muted-foreground hover:border-gold/40 hover:text-foreground transition-smooth"
+              >
+                {showAllMembers
+                  ? "Mostrar menos"
+                  : `Ver mais ${ranking.length - 25} membro${ranking.length - 25 === 1 ? "" : "s"}`}
+              </button>
+            )}
           </div>
         )}
       </div>

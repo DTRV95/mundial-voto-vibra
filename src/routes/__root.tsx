@@ -197,6 +197,46 @@ function RootShell({ children }: { children: ReactNode }) {
 
 const MAINTENANCE = import.meta.env.VITE_MAINTENANCE === "true";
 
+const MAINTENANCE_NOTICE_START = new Date("2026-06-27T00:00:00");
+const MAINTENANCE_NOTICE_END   = new Date("2026-06-28T16:00:00");
+
+function MaintenanceNotice() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const now = new Date();
+    if (now < MAINTENANCE_NOTICE_START || now > MAINTENANCE_NOTICE_END) return;
+    const dismissed = sessionStorage.getItem("maintenance_notice_dismissed");
+    if (!dismissed) setVisible(true);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div className="fixed bottom-20 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+      <div
+        className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl border border-amber-500/30 bg-background/95 px-4 py-3.5 shadow-elegant backdrop-blur-md"
+        style={{ boxShadow: "0 8px 32px oklch(0 0 0 / 0.4), 0 0 0 1px oklch(0.75 0.18 85 / 0.15) inset" }}
+      >
+        <span className="text-xl shrink-0 mt-0.5">🔧</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-foreground">Manutenção programada</p>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+            O site estará em manutenção no dia <span className="text-foreground font-semibold">28 de junho, das 14h às 16h</span>. Estamos a preparar o mata-mata!
+          </p>
+        </div>
+        <button
+          onClick={() => { sessionStorage.setItem("maintenance_notice_dismissed", "1"); setVisible(false); }}
+          className="shrink-0 rounded-lg p-1 text-muted-foreground hover:text-foreground transition-smooth"
+          aria-label="Fechar"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function MaintenancePage() {
   const [dots, setDots] = useState(".");
   useEffect(() => {
@@ -266,6 +306,7 @@ function RootComponent() {
             <Outlet />
           </AppShell>
           <Toaster theme="dark" position="top-center" richColors />
+          <MaintenanceNotice />
         </MaintenanceGuard>
       </AuthProvider>
     </QueryClientProvider>

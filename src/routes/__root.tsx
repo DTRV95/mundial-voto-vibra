@@ -5,7 +5,9 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useAuth } from "../lib/useAuth";
+import { supabase } from "../integrations/supabase/client";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -193,6 +195,52 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+const MAINTENANCE = import.meta.env.VITE_MAINTENANCE === "true";
+
+function MaintenancePage() {
+  const [dots, setDots] = useState(".");
+  useEffect(() => {
+    const t = setInterval(() => setDots(d => d.length >= 3 ? "." : d + "."), 600);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center"
+      style={{ background: "linear-gradient(135deg, oklch(0.13 0.03 142) 0%, oklch(0.12 0.04 250) 50%, oklch(0.14 0.03 27) 100%)" }}>
+      {/* Tricolor top bar */}
+      <div className="fixed top-0 left-0 right-0 h-1" style={{ background: "linear-gradient(90deg, oklch(0.54 0.24 27) 0%, oklch(0.55 0.20 142) 50%, oklch(0.40 0.18 265) 100%)" }} />
+
+      {/* Glow orbs */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full opacity-[0.06]" style={{ background: "radial-gradient(circle, oklch(0.55 0.20 142) 0%, transparent 70%)" }} />
+        <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full opacity-[0.06]" style={{ background: "radial-gradient(circle, oklch(0.40 0.18 265) 0%, transparent 70%)" }} />
+      </div>
+
+      <div className="relative max-w-sm">
+        {/* Logo / ícone */}
+        <div className="mb-8 grid h-20 w-20 mx-auto place-items-center rounded-full border border-white/10"
+          style={{ background: "oklch(0.55 0.20 142 / 0.15)" }}>
+          <span className="text-4xl">⚽</span>
+        </div>
+
+        <h1 className="font-display text-4xl text-white mb-2">Uma Geração</h1>
+        <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-8">Mundial 2026</p>
+
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-6">
+          <p className="text-white/90 font-semibold text-lg mb-2">
+            Estamos a preparar o mata-mata{dots}
+          </p>
+          <p className="text-white/50 text-sm leading-relaxed">
+            A nova fase está quase pronta. Voltamos em breve com os 16 avos de final e pontos a zero para todos!
+          </p>
+        </div>
+
+        <p className="text-white/25 text-xs">Obrigado pela paciência 🙏</p>
+      </div>
+    </div>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -213,11 +261,37 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <AppShell>
-          <Outlet />
-        </AppShell>
-        <Toaster theme="dark" position="top-center" richColors />
+        <MaintenanceGuard>
+          <AppShell>
+            <Outlet />
+          </AppShell>
+          <Toaster theme="dark" position="top-center" richColors />
+        </MaintenanceGuard>
       </AuthProvider>
     </QueryClientProvider>
   );
+}
+
+function MaintenanceGuard({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checking, setChecking] = useState(MAINTENANCE);
+
+  useEffect(() => {
+    if (!MAINTENANCE) return;
+    if (loading) return;
+    if (!user) { setChecking(false); return; }
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle()
+      .then(({ data }) => { setIsAdmin(!!data); setChecking(false); });
+  }, [user, loading]);
+
+  if (!MAINTENANCE) return <>{children}</>;
+  if (checking) return null;
+  if (isAdmin) return <>{children}</>;
+  return <MaintenancePage />;
 }

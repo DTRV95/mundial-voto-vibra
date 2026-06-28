@@ -56,7 +56,9 @@ function Home() {
         .lte("kickoff_at", end.toISOString())
         .order("kickoff_at")
         .limit(4);
-      return ((data as any) ?? []).map((m: any) => ({ ...m, votes_count: m.predictions?.[0]?.count ?? 0 }));
+      return ((data as any) ?? [])
+        .filter((m: any) => m.phase !== "grupos")
+        .map((m: any) => ({ ...m, votes_count: m.predictions?.[0]?.count ?? 0 }));
     },
   });
 
@@ -233,7 +235,7 @@ function Home() {
         .in("match_id", matches.map((m: any) => m.id));
 
       const votedIds = new Set((voted ?? []).map((p: any) => p.match_id));
-      return (matches as any[]).filter(m => !votedIds.has(m.id));
+      return (matches as any[]).filter(m => !votedIds.has(m.id) && m.phase !== "grupos");
     },
   });
 

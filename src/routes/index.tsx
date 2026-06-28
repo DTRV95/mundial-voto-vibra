@@ -834,25 +834,6 @@ function Home() {
       <PushNotificationPrompt />
 
 
-      {/* ===================== OS TEUS RESULTADOS ===================== */}
-      {user && myResults.length > 0 && (
-        <section className="px-5 pt-6 md:px-8">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-xl">Os teus resultados</h2>
-            <Link to="/jogos" search={{ filter: "votados" } as any} className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">Ver todos →</Link>
-          </div>
-
-          {/* Mobile: horizontal scroll / Desktop: grid */}
-          <div className="md:hidden -mx-5 px-5 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
-            <div className="flex gap-3 pb-2" style={{ scrollSnapType: "x mandatory" }}>
-              {myResults.map((r: any) => <ResultCard key={r.id} r={r} mobile />)}
-            </div>
-          </div>
-          <div className="hidden md:grid md:grid-cols-3 gap-3">
-            {myResults.map((r: any) => <ResultCard key={r.id} r={r} />)}
-          </div>
-        </section>
-      )}
 
       {/* ===================== FEED DA COMUNIDADE ===================== */}
       {activityFeed.length > 0 && (

@@ -23,6 +23,7 @@ declare
   v_double_1x    bool;
   v_double_x2    bool;
   v_total_goals  int;
+  v_qualifier    text; -- 'home' | 'away' | null
 begin
   -- Buscar o jogo e validar resultado
   select * into v_match from matches where id = p_match_id;
@@ -142,6 +143,14 @@ begin
           v_pts     := v_pts + 5;
         end if;
       end;
+    end if;
+
+    -- Qualificado (só mata-mata): 3 pts
+    if v_match.qualifier is not null and v_pred.qualifier is not null then
+      if v_pred.qualifier = v_match.qualifier then
+        v_correct := v_correct + 1;
+        v_pts     := v_pts + 3;
+      end if;
     end if;
 
     -- Atualizar previsão com pontos

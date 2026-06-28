@@ -380,7 +380,7 @@ function MatchesAdmin() {
   const { data: matches = [] } = useQuery({
     queryKey: ["admin", "matches"],
     queryFn: async () => (await supabase.from("matches")
-      .select("id,kickoff_at,phase,voting_open,home_score,away_score,home:home_team_id(name),away:away_team_id(name)")
+      .select("id,kickoff_at,phase,voting_open,home_score,away_score,qualifier,home:home_team_id(name),away:away_team_id(name)")
       .order("kickoff_at")).data ?? [],
   });
   async function add() {
@@ -397,23 +397,24 @@ function MatchesAdmin() {
   }
   const [pending, setPending] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{ kickoff_at: string; phase: string; home_score: string; away_score: string }>({ kickoff_at: "", phase: "grupos", home_score: "", away_score: "" });
+  const [editForm, setEditForm] = useState<{ kickoff_at: string; phase: string; home_score: string; away_score: string; qualifier: string }>({ kickoff_at: "", phase: "grupos", home_score: "", away_score: "", qualifier: "" });
   const [calcAllState, setCalcAllState] = useState<{ loading: boolean; result: string | null }>({ loading: false, result: null });
 
   function startEdit(m: any) {
     const dt = new Date(m.kickoff_at);
     const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     setEditId(m.id);
-    setEditForm({ kickoff_at: local, phase: m.phase, home_score: m.home_score ?? "", away_score: m.away_score ?? "" });
+    setEditForm({ kickoff_at: local, phase: m.phase, home_score: m.home_score ?? "", away_score: m.away_score ?? "", qualifier: m.qualifier ?? "" });
   }
 
   async function saveEdit(id: string) {
     setPending(`edit-${id}`);
-    const { error } = await supabase.from("matches").update({
+    const { error } = await (supabase as any).from("matches").update({
       kickoff_at: new Date(editForm.kickoff_at).toISOString(),
       phase: editForm.phase as any,
       home_score: editForm.home_score !== "" ? Number(editForm.home_score) : null,
       away_score: editForm.away_score !== "" ? Number(editForm.away_score) : null,
+      qualifier: editForm.qualifier || null,
     }).eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success("Jogo actualizado!"); setEditId(null); qc.invalidateQueries({ queryKey: ["admin", "matches"] }); }
@@ -438,9 +439,9 @@ function MatchesAdmin() {
     qc.invalidateQueries({ queryKey: ["admin", "matches"] });
     setPending(null);
   }
-  async function setScore(id: string, h: number, a: number) {
+  async function setScore(id: string, h: number, a: number, qualifier?: string) {
     setPending(`score-${id}`);
-    await supabase.from("matches").update({ home_score: h, away_score: a, status: "finished" }).eq("id", id);
+    await (supabase as any).from("matches").update({ home_score: h, away_score: a, status: "finished", qualifier: qualifier || null }).eq("id", id);
     toast.success("Resultado registado");
     qc.invalidateQueries({ queryKey: ["admin", "matches"] });
     setPending(null);
@@ -518,6 +519,16 @@ function MatchesAdmin() {
                     <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Golos Fora</label>
                     <input type="number" min={0} value={editForm.away_score} onChange={e => setEditForm(f => ({ ...f, away_score: e.target.value }))} className={inputCls} />
                   </div>
+                  {editForm.phase !== "grupos" && (
+                    <div className="col-span-2 flex flex-col gap-1">
+                      <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Equipa qualificada (só em caso de empate 90 min)</label>
+                      <select value={editForm.qualifier} onChange={e => setEditForm(f => ({ ...f, qualifier: e.target.value }))} className={inputCls}>
+                        <option value="">— Sem empate / não aplica —</option>
+                        <option value="home">{m.home?.name ?? "Casa"} (home)</option>
+                        <option value="away">{m.away?.name ?? "Fora"} (away)</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => saveEdit(m.id)} disabled={pending === `edit-${m.id}`} className={`${btnCls} flex-1 justify-center`}>
@@ -535,7 +546,7 @@ function MatchesAdmin() {
                 className={`rounded-full px-2 py-0.5 font-semibold disabled:opacity-50 ${m.voting_open ? "bg-primary/20 text-primary" : "bg-destructive/20 text-destructive"}`}>
                 {pending === `vote-${m.id}` ? "…" : m.voting_open ? "Votação aberta" : "Votação fechada"}
               </button>
-              <ScoreSet match={m} onSubmit={(h, a) => setScore(m.id, h, a)} disabled={!!pending} />
+              <ScoreSet match={m} onSubmit={(h, a, q) => setScore(m.id, h, a, q)} disabled={!!pending} />
               {m.home_score != null && m.away_score != null && (
                 <button
                   onClick={() => calcPoints(m.id)}
@@ -553,15 +564,25 @@ function MatchesAdmin() {
   );
 }
 
-function ScoreSet({ match, onSubmit, disabled }: { match: any; onSubmit: (h: number, a: number) => void; disabled?: boolean }) {
+function ScoreSet({ match, onSubmit, disabled }: { match: any; onSubmit: (h: number, a: number, qualifier?: string) => void; disabled?: boolean }) {
   const [h, setH] = useState<number>(match.home_score ?? 0);
   const [a, setA] = useState<number>(match.away_score ?? 0);
+  const [q, setQ] = useState<string>(match.qualifier ?? "");
+  const isKnockout = match.phase !== "grupos";
+  const isDraw = h === a;
   return (
-    <span className="flex items-center gap-1">
+    <span className="flex flex-wrap items-center gap-1">
       <input type="number" min={0} value={h} onChange={(e) => setH(Number(e.target.value))} disabled={disabled} className="w-12 rounded-md border border-border bg-input px-2 py-0.5 text-center disabled:opacity-50" />
       <span>:</span>
       <input type="number" min={0} value={a} onChange={(e) => setA(Number(e.target.value))} disabled={disabled} className="w-12 rounded-md border border-border bg-input px-2 py-0.5 text-center disabled:opacity-50" />
-      <button onClick={() => onSubmit(h, a)} disabled={disabled} className="rounded-full bg-gold px-2 py-0.5 font-semibold text-background disabled:opacity-50">OK</button>
+      {isKnockout && isDraw && (
+        <select value={q} onChange={e => setQ(e.target.value)} disabled={disabled} className="rounded-md border border-wc-red/40 bg-wc-red/10 px-2 py-0.5 text-xs text-wc-red disabled:opacity-50">
+          <option value="">Qualificado?</option>
+          <option value="home">{match.home?.name ?? "Casa"}</option>
+          <option value="away">{match.away?.name ?? "Fora"}</option>
+        </select>
+      )}
+      <button onClick={() => onSubmit(h, a, isKnockout && isDraw ? q : undefined)} disabled={disabled} className="rounded-full bg-gold px-2 py-0.5 font-semibold text-background disabled:opacity-50">OK</button>
     </span>
   );
 }

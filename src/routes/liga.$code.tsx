@@ -644,6 +644,11 @@ function copyLink() {
         </div>
       )}
 
+      {/* ── SONDAGEM ─────────────────────────────────────────── */}
+      {user && isMember && pool && (
+        <PollSection poolCode={pool.code} userId={user.id} ranking={ranking} />
+      )}
+
       {/* ── PÓDIO ────────────────────────────────────────────── */}
       {ranking.length >= 2 && (
         <div className="mx-5 mt-8 md:mx-8">
@@ -1157,6 +1162,269 @@ function LeagueChat({ poolCode, userId, ranking }: { poolCode: string; userId: s
           >
             <Send className="h-3.5 w-3.5" />
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── POLL ──────────────────────────────────────────────────────────────────────
+
+const PRIZE_OPTIONS = [
+  "🍽️ Jantar", "🍺 Grade de cerveja", "🥃 Borracheira", "🍩 Caixinha de bolos",
+  "☕ Pequeno-almoço", "🎳 Bowling", "🎬 Cinema", "💆 Massagem",
+  "🏊 Piscina", "🧃 Sumos (o pobre paga)", "🍕 Pizza", "🎲 Noite de jogos",
+];
+
+function PollSection({ poolCode, userId, ranking }: { poolCode: string; userId: string; ranking: any[] }) {
+  const qc = useQueryClient();
+  const [pendingVoto, setPendingVoto] = useState<"sim" | "nao" | null>(null);
+  const [selectedPremio, setSelectedPremio] = useState<string>("");
+  const [customPremio, setCustomPremio] = useState<string>("");
+
+  const { data: pollVotes = [] } = useQuery({
+    queryKey: ["poll-votes", poolCode],
+    enabled: !!poolCode,
+    staleTime: 30_000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("league_messages")
+        .select("user_id, body, created_at")
+        .eq("pool_code", poolCode)
+        .like("body", "POLL_VOTE:%")
+        .order("created_at", { ascending: true });
+      return data ?? [];
+    },
+  });
+
+  // Deduplicate: latest vote per user wins
+  const latestVotes = Object.values(
+    (pollVotes as any[]).reduce((acc: Record<string, any>, v: any) => {
+      acc[v.user_id] = v;
+      return acc;
+    }, {} as Record<string, any>)
+  ) as any[];
+
+  const myVote = latestVotes.find((v: any) => v.user_id === userId);
+  const myVotoParsed = myVote ? (myVote.body as string).split(":") : null;
+  const myVotoChoice = myVotoParsed ? myVotoParsed[1] as "sim" | "nao" : null;
+  const myVotoPremio = myVotoParsed ? myVotoParsed.slice(2).join(":") : "";
+
+  const simVotes = latestVotes.filter((v: any) => v.body.startsWith("POLL_VOTE:sim:"));
+  const naoVotes = latestVotes.filter((v: any) => v.body.startsWith("POLL_VOTE:nao:"));
+  const total = latestVotes.length;
+  const simPct = total > 0 ? Math.round((simVotes.length / total) * 100) : 0;
+  const naoPct = total > 0 ? Math.round((naoVotes.length / total) * 100) : 0;
+
+  // Most voted prize among "sim" voters
+  const premioCount: Record<string, number> = {};
+  simVotes.forEach((v: any) => {
+    const p = (v.body as string).split(":").slice(2).join(":").trim();
+    if (p) premioCount[p] = (premioCount[p] ?? 0) + 1;
+  });
+  const topPremio = Object.entries(premioCount).sort((a, b) => b[1] - a[1])[0]?.[0];
+
+  const memberMap = Object.fromEntries(ranking.map((r: any) => [r.id, r]));
+
+  const submitVote = useMutation({
+    mutationFn: async ({ voto, premio }: { voto: "sim" | "nao"; premio: string }) => {
+      const { error } = await supabase.from("league_messages").insert({
+        pool_code: poolCode,
+        user_id: userId,
+        body: `POLL_VOTE:${voto}:${premio}`,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["poll-votes", poolCode] });
+      setPendingVoto(null);
+      setSelectedPremio("");
+      setCustomPremio("");
+      toast.success("Voto registado!");
+    },
+    onError: () => toast.error("Erro ao votar. Tenta novamente."),
+  });
+
+  function handleConfirm() {
+    if (!pendingVoto) return;
+    const premio = pendingVoto === "sim" ? (customPremio.trim() || selectedPremio) : "";
+    submitVote.mutate({ voto: pendingVoto, premio });
+  }
+
+  const hasVoted = !!myVotoChoice;
+  const isChanging = pendingVoto !== null;
+
+  return (
+    <div className="mx-5 mt-6 md:mx-8">
+      <div className="overflow-hidden rounded-2xl border border-gold/30 bg-card" style={{ boxShadow: "0 2px 16px rgba(200,150,12,0.10)" }}>
+        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, #c8960c 50%, transparent 100%)" }} />
+        <div className="p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl">🗳️</span>
+            <h2 className="font-display text-lg leading-tight">Querem continuar o torneio?</h2>
+          </div>
+
+          {/* Voting buttons — always visible unless currently in change flow */}
+          {(!hasVoted || isChanging) && (
+            <div className="space-y-3">
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setPendingVoto("sim")}
+                  className={`flex-1 rounded-2xl border-2 px-4 py-3 text-sm font-bold transition-all ${
+                    pendingVoto === "sim"
+                      ? "border-wc-green bg-wc-green/20 text-wc-green scale-[1.02]"
+                      : "border-border bg-card hover:border-wc-green/60 hover:bg-wc-green/10"
+                  }`}
+                >
+                  ✅ Sim, continuar!
+                </button>
+                <button
+                  onClick={() => { setPendingVoto("nao"); setSelectedPremio(""); setCustomPremio(""); }}
+                  className={`flex-1 rounded-2xl border-2 px-4 py-3 text-sm font-bold transition-all ${
+                    pendingVoto === "nao"
+                      ? "border-wc-red bg-wc-red/20 text-wc-red scale-[1.02]"
+                      : "border-border bg-card hover:border-wc-red/60 hover:bg-wc-red/10"
+                  }`}
+                >
+                  ❌ Não, chega!
+                </button>
+              </div>
+
+              {/* Prize picker for "sim" */}
+              {pendingVoto === "sim" && (
+                <div className="mt-3 space-y-3">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Sugere um prémio</p>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {PRIZE_OPTIONS.map(opt => (
+                      <button
+                        key={opt}
+                        onClick={() => { setSelectedPremio(opt); setCustomPremio(""); }}
+                        className={`rounded-xl border px-3 py-2 text-xs font-semibold text-left transition-all ${
+                          selectedPremio === opt
+                            ? "border-gold bg-gold/20 text-gold"
+                            : "border-border bg-secondary/50 hover:border-gold/50 hover:bg-gold/10"
+                        }`}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Outro prémio…"
+                    value={customPremio}
+                    onChange={e => { setCustomPremio(e.target.value); setSelectedPremio(""); }}
+                    className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40"
+                  />
+                </div>
+              )}
+
+              {pendingVoto && (
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={handleConfirm}
+                    disabled={submitVote.isPending}
+                    className="flex-1 rounded-2xl bg-gold text-black font-bold py-2.5 text-sm disabled:opacity-50 hover:bg-gold/80 transition-smooth active:scale-95"
+                  >
+                    {submitVote.isPending ? "A votar…" : hasVoted ? "Alterar voto" : "Confirmar voto"}
+                  </button>
+                  <button
+                    onClick={() => { setPendingVoto(null); setSelectedPremio(""); setCustomPremio(""); }}
+                    className="rounded-2xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-accent transition-smooth"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Results — shown after voting */}
+          {hasVoted && !isChanging && (
+            <div className="space-y-4">
+              {/* My vote pill */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
+                  myVotoChoice === "sim" ? "bg-wc-green/20 text-wc-green" : "bg-wc-red/20 text-wc-red"
+                }`}>
+                  {myVotoChoice === "sim" ? "✅" : "❌"} O teu voto: {myVotoChoice === "sim" ? "Sim" : "Não"}
+                  {myVotoPremio && ` — ${myVotoPremio}`}
+                </span>
+                <button
+                  onClick={() => setPendingVoto(myVotoChoice)}
+                  className="text-[11px] text-muted-foreground underline hover:text-foreground transition-smooth"
+                >
+                  Alterar
+                </button>
+              </div>
+
+              {/* Progress bars */}
+              {total > 0 && (
+                <div className="space-y-2">
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold mb-1">
+                      <span className="text-wc-green">✅ Sim</span>
+                      <span className="text-wc-green">{simPct}% ({simVotes.length})</span>
+                    </div>
+                    <div className="h-2.5 w-full rounded-full bg-secondary overflow-hidden">
+                      <div className="h-full rounded-full bg-wc-green transition-all duration-700" style={{ width: `${simPct}%` }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold mb-1">
+                      <span className="text-wc-red">❌ Não</span>
+                      <span className="text-wc-red">{naoPct}% ({naoVotes.length})</span>
+                    </div>
+                    <div className="h-2.5 w-full rounded-full bg-secondary overflow-hidden">
+                      <div className="h-full rounded-full bg-wc-red transition-all duration-700" style={{ width: `${naoPct}%` }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Top prize */}
+              {topPremio && (
+                <div className="flex items-center gap-2 rounded-xl bg-gold/10 border border-gold/30 px-3 py-2.5">
+                  <Gift className="h-4 w-4 text-gold shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70">Prémio mais votado</p>
+                    <p className="text-sm font-bold text-foreground truncate">{topPremio}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Avatars by choice */}
+              {total > 0 && (
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: "✅ Sim", votes: simVotes, color: "text-wc-green" },
+                    { label: "❌ Não", votes: naoVotes, color: "text-wc-red" },
+                  ].map(({ label, votes, color }) => (
+                    <div key={label}>
+                      <p className={`text-[11px] font-bold mb-1.5 ${color}`}>{label}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {votes.length === 0 ? (
+                          <span className="text-[10px] text-muted-foreground/60">—</span>
+                        ) : votes.map((v: any) => {
+                          const m = memberMap[v.user_id];
+                          return m ? (
+                            <div key={v.user_id} title={m.display_name}>
+                              <UserAvatar avatarUrl={m.avatar_url} name={m.display_name} size={7} className="rounded-full" />
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* No votes yet and not voting */}
+          {!hasVoted && !pendingVoto && total > 0 && (
+            <p className="mt-3 text-xs text-muted-foreground">{total} voto{total !== 1 ? "s" : ""} até agora</p>
+          )}
         </div>
       </div>
     </div>

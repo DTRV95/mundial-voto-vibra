@@ -396,53 +396,6 @@ function Rankings() {
             );
           })()}
 
-          {/* Pódio global top 3 */}
-          {allUsers.length >= 3 && (() => {
-            const [p1, p2, p3] = allUsers;
-            const podiumOrder = [p2, p1, p3];
-            const podiumH = ["h-16", "h-24", "h-12"];
-            const avatarSz = ["h-10 w-10", "h-14 w-14", "h-9 w-9"];
-            const medals = ["🥈", "🥇", "🥉"];
-            const podiumBg = [
-              "from-[#C0C0C0] to-[#8a8a8a]",
-              "from-[#FFD700] to-[#B8860B]",
-              "from-[#CD7F32] to-[#7a4a1e]",
-            ];
-            const ringColor = ["ring-[#C0C0C0]/60", "ring-[#FFD700]/80", "ring-[#CD7F32]/50"];
-            return (
-              <div className="overflow-hidden rounded-2xl border border-gold/20"
-                style={{ background: "linear-gradient(160deg,oklch(0.14 0.04 85) 0%,oklch(0.13 0.03 260) 60%,oklch(0.14 0.04 85) 100%)" }}>
-                <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,transparent,oklch(0.75 0.18 85),transparent)" }} />
-                <div className="px-4 pt-4 pb-0">
-                  <p className="text-center text-[10px] font-bold uppercase tracking-widest text-gold/70 mb-4">Top 3 Global</p>
-                  <div className="flex items-end justify-center gap-2">
-                    {podiumOrder.map((u, vi) => {
-                      const isMe = u?.id === user?.id;
-                      return (
-                        <div key={vi} className="flex flex-col items-center flex-1 max-w-[120px]">
-                          <Link to="/adepto/$id" params={{ id: u.id }} className="flex flex-col items-center gap-1 mb-1.5 group">
-                            <div className={`relative ${vi === 1 ? "scale-110" : ""}`}>
-                              <UserAvatar avatarUrl={(u as any).avatar_url} name={u.display_name} size={vi === 1 ? 14 : 10}
-                                className={`rounded-full ring-2 ${ringColor[vi]} ${isMe ? "ring-offset-2 ring-offset-background" : ""}`} />
-                              <span className="absolute -bottom-1 -right-1 text-sm leading-none">{medals[vi]}</span>
-                            </div>
-                            <p className={`text-center text-[10px] font-bold leading-snug mt-1 group-hover:underline ${vi === 1 ? "text-gold" : "text-white/80"}`}>
-                              {u.display_name}{isMe && " 👈"}
-                            </p>
-                            <p className="text-center text-[9px] text-white/50"><span className="font-bold text-white/80">{u.total_points}</span> pts</p>
-                          </Link>
-                          <div className={`w-full rounded-t-xl bg-gradient-to-b ${podiumBg[vi]} ${podiumH[vi]} flex items-center justify-center`}>
-                            <span className="font-display font-bold text-white text-xl drop-shadow">{vi === 1 ? 1 : vi === 0 ? 2 : 3}º</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-
           {/* Todas as divisões */}
           {DIVISIONS.map(div => {
             const members = allUsers.filter(u => u.rank >= div.min && u.rank <= div.max);

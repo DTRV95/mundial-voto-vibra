@@ -663,18 +663,14 @@ function Home() {
       <div className="animate-enter delay-200">
       {user && (
         <div className="mx-5 mt-4 md:mx-8">
-          <div className="relative overflow-hidden rounded-2xl border border-gold/30"
-            style={{ background: "linear-gradient(135deg,oklch(0.14 0.04 85) 0%,oklch(0.12 0.03 260) 60%,oklch(0.13 0.04 85) 100%)" }}>
-            <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg,oklch(0.55 0.20 142),oklch(0.40 0.18 265) 50%,oklch(0.75 0.18 85))" }} />
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute -top-6 right-8 h-24 w-24 rounded-full blur-2xl opacity-25" style={{ background: "oklch(0.75 0.18 85)" }} />
-            </div>
-            <div className="relative flex items-center gap-4 px-4 py-4">
-              <span className="text-3xl shrink-0">⚔️</span>
+          <div className="relative overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-r from-gold/8 via-gold/4 to-transparent">
+            <div className="h-1 w-full wc-tricolor rounded-t-2xl" />
+            <div className="flex items-center gap-4 px-4 py-3.5">
+              <span className="text-2xl shrink-0">⚔️</span>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70">A decorrer agora</p>
-                <p className="font-display text-base text-white leading-tight">16 Avos de Final · Mata-Mata</p>
-                <p className="text-xs text-white/50 mt-0.5">Nova corrida — pontos reiniciados. Há um novo mercado: <span className="text-gold font-semibold">Quem se apura? (4 pts)</span></p>
+                <p className="font-display text-base leading-tight">16 Avos de Final · Mata-Mata</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Nova corrida — pontos reiniciados. Novo mercado: <span className="font-semibold text-gold">Quem se apura? (4 pts)</span></p>
               </div>
               <Link to="/como-funciona"
                 className="shrink-0 rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-xs font-bold text-gold transition-smooth hover:bg-gold/20 whitespace-nowrap">

@@ -67,14 +67,13 @@ function ComoFunciona() {
       </header>
 
       {/* Alerta mata-mata */}
-      <div className="rounded-2xl border border-gold/40 overflow-hidden"
-        style={{ background: "linear-gradient(135deg,oklch(0.14 0.04 85) 0%,oklch(0.13 0.03 260) 100%)" }}>
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,transparent,oklch(0.75 0.18 85),transparent)" }} />
+      <div className="rounded-2xl border border-gold/25 overflow-hidden bg-gradient-to-r from-gold/8 via-gold/4 to-transparent">
+        <div className="h-1 w-full wc-tricolor rounded-t-2xl" />
         <div className="p-4 flex items-start gap-3">
           <span className="text-2xl shrink-0">⚔️</span>
           <div>
             <p className="text-sm font-bold text-gold">Estamos no Mata-Mata!</p>
-            <p className="text-xs text-white/70 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               A fase de grupos terminou. Os pontos foram reiniciados e começa uma nova corrida a partir dos 16 Avos de Final.
               Há um novo mercado e as regras são as mesmas — mas cada jogo vale mais.
             </p>

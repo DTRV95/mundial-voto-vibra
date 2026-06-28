@@ -474,14 +474,13 @@ function JogoPage() {
         const majorityPct = Math.round((majorityOption[1] / votes.length) * 100);
         if (majorityOption[0] === myResult || majorityPct < 60) return null;
         return (
-          <div className="mb-4 animate-scale-in overflow-hidden rounded-2xl border border-gold/40"
-            style={{ background: "linear-gradient(135deg,oklch(0.14 0.04 85) 0%,oklch(0.12 0.03 260) 100%)" }}>
-            <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg,transparent,oklch(0.75 0.18 85),transparent)" }} />
+          <div className="mb-4 animate-scale-in overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-r from-gold/8 via-gold/4 to-transparent">
+            <div className="h-1 w-full wc-tricolor rounded-t-2xl" />
             <div className="flex items-center gap-3 px-4 py-3">
               <span className="text-2xl shrink-0">🦁</span>
               <div>
                 <p className="text-xs font-bold text-gold uppercase tracking-widest">Contra a Corrente!</p>
-                <p className="text-xs text-white/70 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {majorityPct}% da comunidade votou diferente — e tu acertaste. Isso é intuição!
                 </p>
               </div>

@@ -113,6 +113,7 @@ function Rankings() {
   // Ranking de ligas
   const { data: leagueRanking = [] } = useQuery({
     queryKey: ["league-ranking"],
+    staleTime: 60_000,
     enabled: tab === "ligas",
     queryFn: async () => {
       const { data: pools } = await supabase
@@ -154,6 +155,7 @@ function Rankings() {
   // Ranking por jogo
   const { data: matchRanking = [] } = useQuery({
     queryKey: ["match-ranking"],
+    staleTime: 60_000,
     enabled: tab === "jogos",
     queryFn: async () => {
       const { data: matches } = await supabase
@@ -189,6 +191,7 @@ function Rankings() {
   // Hall of Fame
   const { data: hofData = [] } = useQuery({
     queryKey: ["hall-of-fame"],
+    staleTime: 60_000,
     enabled: tab === "hof",
     queryFn: async () => {
       const { data: hof } = await (supabase as any)
@@ -207,6 +210,7 @@ function Rankings() {
   // Query para divisões — todos os utilizadores ordenados por pontos
   const { data: allUsers = [], isLoading: loadingUsers } = useQuery({
     queryKey: ["all-users-ranking"],
+    staleTime: 60_000,
     enabled: tab === "divisoes",
     queryFn: async () => {
       const { data } = await supabase
@@ -403,8 +407,8 @@ function Rankings() {
             return (
               <div key={div.key} className={`overflow-hidden rounded-2xl border ${div.border}`}>
                 {/* Header da divisão */}
-                <div className={`flex items-center gap-3 px-4 py-3 bg-gradient-to-r ${div.color} bg-opacity-10`}
-                  style={{ background: `linear-gradient(90deg, var(--card) 0%, oklch(from ${div.key === "primeira" ? "0.7 0.15 220" : div.key === "segunda" ? "0.8 0.15 85" : div.key === "distrital" ? "0.7 0.05 220" : "0.5 0.15 145"} l c h) 100%)` }}>
+                <div className={`flex items-center gap-3 px-4 py-3`}
+                  style={{ background: div.key === "primeira" ? "linear-gradient(90deg,#0d1a2e,#0a1f3a)" : div.key === "segunda" ? "linear-gradient(90deg,#1a1500,#2a1f00)" : div.key === "distrital" ? "linear-gradient(90deg,#111,#1a1a1a)" : "linear-gradient(90deg,#0a1a0d,#0d1f10)" }}>
                   <span className="text-2xl">{div.emoji}</span>
                   <div className="flex-1">
                     <p className={`font-display text-lg ${div.text}`}>{div.label}</p>

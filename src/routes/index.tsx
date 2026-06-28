@@ -88,6 +88,23 @@ function Home() {
     },
   });
 
+  const { data: grupHof = [] } = useQuery({
+    queryKey: ["hof", "grupos"],
+    queryFn: async () => {
+      const { data: hof } = await (supabase as any)
+        .from("hall_of_fame")
+        .select("rank,total_points,user_id")
+        .eq("phase", "grupos")
+        .order("rank");
+      if (!hof || hof.length === 0) return [];
+      const userIds = hof.map((h: any) => h.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles").select("id,display_name,avatar_url").in("id", userIds);
+      const pm = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
+      return hof.map((h: any) => ({ ...h, profile: pm[h.user_id] }));
+    },
+  });
+
   const { data: topPools = [] } = useQuery({
     queryKey: ["pools", "ranking"],
     queryFn: async () => {
@@ -572,8 +589,8 @@ function Home() {
         </div>
       )}
 
-      {/* ===================== PRÉMIO FASE DE GRUPOS ===================== */}
-      <PremioFaseGrupos leader={topLeaders[0] as any} />
+      {/* ===================== PÓDIO FASE DE GRUPOS ===================== */}
+      <PodioFaseGrupos hof={grupHof} />
 
       {/* ===================== BANNER PROGNÓSTICOS — todos os utilizadores ===================== */}
       <div className="mx-5 mt-4 md:mx-8">
@@ -1215,6 +1232,86 @@ function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
     <div className="rounded-2xl border border-dashed border-border bg-card/40 p-8 text-center">
       <p className="font-display text-lg">{title}</p>
       <p className="text-sm text-muted-foreground">{subtitle}</p>
+    </div>
+  );
+}
+
+function PodioFaseGrupos({ hof }: { hof: any[] }) {
+  if (!hof || hof.length === 0) return null;
+  const [first, second, third] = hof;
+  const medal = ["🥇", "🥈", "🥉"];
+  const sizes = ["text-4xl", "text-3xl", "text-3xl"];
+  const heights = ["h-24", "h-16", "h-12"];
+  const bgColors = [
+    "from-gold/20 to-gold/5 border-gold/40",
+    "from-white/10 to-white/5 border-white/20",
+    "from-orange-800/20 to-orange-800/5 border-orange-700/30",
+  ];
+  const textColors = ["text-gold", "text-white/80", "text-orange-400"];
+  const entries = [second, first, third]; // visual order: 2nd left, 1st center, 3rd right
+  const visualMedals = [1, 0, 2]; // indexes into hof
+
+  return (
+    <div className="mx-5 mt-5 md:mx-8">
+      <div
+        className="relative overflow-hidden rounded-3xl border border-gold/20"
+        style={{
+          background: "linear-gradient(135deg, oklch(0.14 0.04 85) 0%, oklch(0.12 0.03 260) 60%, oklch(0.13 0.04 85) 100%)",
+          boxShadow: "0 4px 32px -8px oklch(0.75 0.18 85 / 0.25)",
+        }}
+      >
+        {/* gold shimmer top bar */}
+        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
+
+        {/* subtle glow */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-64 rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, oklch(0.75 0.18 85) 0%, transparent 70%)" }} />
+        </div>
+
+        <div className="relative p-6">
+          {/* Header */}
+          <div className="text-center mb-6">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70 mb-1">Fase de Grupos · Final</p>
+            <h2 className="font-display text-xl leading-tight">Pódio da Fase de Grupos</h2>
+            {first?.profile && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                Parabéns ao campeão <span className="font-bold text-gold">{first.profile.display_name}</span>! 🎉
+              </p>
+            )}
+          </div>
+
+          {/* Podium */}
+          <div className="flex items-end justify-center gap-3">
+            {entries.map((entry, vi) => {
+              if (!entry) return <div key={vi} className="flex-1 max-w-[120px]" />;
+              const hi = visualMedals[vi];
+              return (
+                <div key={vi} className={`flex-1 max-w-[140px] flex flex-col items-center gap-2 ${vi === 1 ? "mb-0" : "mb-0"}`}>
+                  {/* Avatar */}
+                  <div className={`relative ${vi === 1 ? "scale-110" : ""}`}>
+                    {entry.profile?.avatar_url ? (
+                      <img src={entry.profile.avatar_url} alt="" className="h-12 w-12 rounded-full border-2 border-gold/40 object-cover" />
+                    ) : (
+                      <div className="h-12 w-12 rounded-full border-2 border-gold/30 bg-card flex items-center justify-center font-display text-lg">
+                        {entry.profile?.display_name?.[0] ?? "?"}
+                      </div>
+                    )}
+                    <span className="absolute -bottom-1 -right-1 text-base">{medal[hi]}</span>
+                  </div>
+                  {/* Name */}
+                  <p className={`text-center text-xs font-bold leading-tight ${textColors[hi]}`}>{entry.profile?.display_name ?? "—"}</p>
+                  {/* Points */}
+                  <p className="text-center text-[10px] text-muted-foreground"><span className="font-bold text-foreground">{entry.total_points}</span> pts</p>
+                  {/* Podium block */}
+                  <div className={`w-full rounded-t-xl border bg-gradient-to-b ${bgColors[hi]} ${heights[hi]} flex items-center justify-center`}>
+                    <span className={`font-display font-bold ${sizes[hi]} ${textColors[hi]}`}>{hi + 1}º</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

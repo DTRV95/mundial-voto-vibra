@@ -32,6 +32,7 @@ function JogoPage() {
 
   const { data: match, isLoading } = useQuery({
     queryKey: ["match", id],
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await supabase
         .from("matches")
@@ -43,6 +44,7 @@ function JogoPage() {
 
   const { data: analysis } = useQuery({
     queryKey: ["analysis", id],
+    staleTime: 300_000,
     queryFn: async () => {
       const { data } = await supabase.from("match_analysis").select("*").eq("match_id", id).maybeSingle();
       return data;
@@ -60,6 +62,7 @@ function JogoPage() {
 
   const { data: community = [] } = useQuery({
     queryKey: ["community", id],
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await supabase.from("predictions")
         .select("result_90,btts,total_25,double_chance,combo_15,exact_home,exact_away,qualifier")
@@ -70,6 +73,7 @@ function JogoPage() {
 
   const { data: nextMatches = [] } = useQuery({
     queryKey: ["next-open-matches", id],
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await supabase
         .from("matches")
@@ -100,6 +104,7 @@ function JogoPage() {
 
   const { data: prognostico } = useQuery({
     queryKey: ["prognostico", id],
+    staleTime: 300_000,
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("prognosticos")
@@ -115,6 +120,7 @@ function JogoPage() {
 
   const { data: topScorers = [] } = useQuery({
     queryKey: ["match-top-scorers", id],
+    staleTime: 120_000,
     enabled: !!match && (match as any).status === "finished",
     queryFn: async () => {
       const { data: preds } = await supabase

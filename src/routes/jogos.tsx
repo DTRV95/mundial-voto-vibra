@@ -75,6 +75,7 @@ function Jogos() {
 
   const { data: all = [], isLoading } = useQuery({
     queryKey: ["matches", "all"],
+    staleTime: 60_000,
     queryFn: async (): Promise<MatchCardData[]> => {
       const { data } = await supabase
         .from("matches")
@@ -93,6 +94,7 @@ function Jogos() {
   const { data: votedIds = new Set<string>() } = useQuery({
     queryKey: ["voted-match-ids", user?.id],
     enabled: !!user?.id,
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await supabase
         .from("predictions")

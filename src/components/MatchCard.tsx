@@ -216,14 +216,14 @@ export function MatchCard({ match }: { match: MatchCardData }) {
 
       <div className={`flex items-center justify-between border-t px-4 py-2.5 ${
         match.already_voted
-          ? "border-gold/20 bg-gold/5"
+          ? "border-wc-green/20 bg-wc-green/5"
           : "border-gold/10 bg-muted/30"
       }`}>
         <div className="flex items-center gap-1.5">
           {match.already_voted ? (
             <>
-              <CheckCircle2 className="h-3.5 w-3.5 text-gold" />
-              <span className="text-xs font-bold text-gold">Previsão feita</span>
+              <CheckCircle2 className="h-3.5 w-3.5 text-wc-green" />
+              <span className="text-xs font-bold text-wc-green">Previsão feita</span>
             </>
           ) : (
             <>
@@ -241,7 +241,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
             </>
           )}
         </div>
-        <span className="text-xs font-bold text-gold transition-smooth group-hover:underline">
+        <span className={`text-xs font-bold transition-smooth group-hover:underline ${match.already_voted ? "text-wc-green" : "text-gold"}`}>
           {match.already_voted ? "Ver Comunidade →" : "Dar Previsão →"}
         </span>
       </div>

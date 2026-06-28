@@ -474,17 +474,64 @@ function Perfil() {
           <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
             <BarChart2 className="h-4 w-4" /> Estatísticas Gerais
           </h2>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-wc-green/25 bg-wc-green/5 p-4 text-center">
-              <div className="font-display text-3xl text-wc-green">{correctGames}</div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Acertos</div>
-              <div className="text-xs text-muted-foreground mt-1">{acc}% de taxa de acerto</div>
+          <div className="rounded-2xl border border-border bg-card/60 overflow-hidden divide-y divide-border/40">
+            {/* Acertos row */}
+            <div className="flex items-center justify-between px-4 py-3.5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-wc-green/10 border border-wc-green/20">
+                  <CheckCircle2 className="h-4 w-4 text-wc-green" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold leading-none">Resultados acertados</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">em {finishedGames.filter((h: any) => h.result_90).length} jogos votados</p>
+                </div>
+              </div>
+              <div className="text-right shrink-0">
+                <span className="font-display text-2xl text-wc-green">{correctGames}</span>
+                <span className="text-xs text-muted-foreground ml-1">{acc > 0 ? `(${acc}%)` : ""}</span>
+              </div>
             </div>
-            <div className="rounded-2xl border border-wc-blue/25 bg-wc-blue/5 p-4 text-center">
-              <div className="font-display text-3xl text-wc-blue">{exactScores}</div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Placares Exatos</div>
-              <div className="text-xs text-muted-foreground mt-1">em {finishedGames.length} jogos terminados</div>
+            {/* Erros row */}
+            <div className="flex items-center justify-between px-4 py-3.5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-wc-red/10 border border-wc-red/20">
+                  <XCircle className="h-4 w-4 text-wc-red" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold leading-none">Resultados errados</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">previsões com resultado final</p>
+                </div>
+              </div>
+              <span className="font-display text-2xl text-wc-red shrink-0">{errorGames}</span>
             </div>
+            {/* Placares exatos row */}
+            <div className="flex items-center justify-between px-4 py-3.5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gold/10 border border-gold/25">
+                  <Target className="h-4 w-4 text-gold" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold leading-none">Placares exatos</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">em {finishedGames.length} jogos terminados</p>
+                </div>
+              </div>
+              <span className="font-display text-2xl text-gold shrink-0">{exactScores}</span>
+            </div>
+            {/* Melhor série row */}
+            {bestCorrectStreak > 0 && (
+              <div className="flex items-center justify-between px-4 py-3.5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 border border-orange-500/20">
+                    <Zap className="h-4 w-4 text-orange-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-none">Melhor série de acertos</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">acertos consecutivos</p>
+                  </div>
+                </div>
+                <span className="font-display text-2xl text-orange-400 shrink-0">{bestCorrectStreak}</span>
+              </div>
+            )}
           </div>
         </section>
       )}

@@ -1367,7 +1367,17 @@ function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
 }
 
 function PodioFaseGrupos({ hof }: { hof: any[] }) {
-  if (!hof || hof.length === 0) return null;
+  const [dismissed, setDismissed] = useState(() => {
+    try { return localStorage.getItem("podio_grupos_dismissed") === "1"; } catch { return false; }
+  });
+
+  if (!hof || hof.length === 0 || dismissed) return null;
+
+  function dismiss() {
+    try { localStorage.setItem("podio_grupos_dismissed", "1"); } catch {}
+    setDismissed(true);
+  }
+
   const [first, second, third] = hof;
 
   // visual order: 2nd left · 1st center · 3rd right
@@ -1407,6 +1417,15 @@ function PodioFaseGrupos({ hof }: { hof: any[] }) {
       >
         {/* top colour bar: WC green → WC blue → gold */}
         <div className="h-1.5 w-full rounded-t-3xl" style={{ background: "linear-gradient(90deg, #3a7d44 0%, #1a3580 50%, #c8960c 100%)" }} />
+
+        {/* Dismiss button */}
+        <button
+          onClick={dismiss}
+          className="absolute top-3 right-3 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/10 text-foreground/40 hover:bg-black/20 hover:text-foreground/70 transition-smooth"
+          title="Esconder pódio"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
 
         {/* confetti-style scattered dots */}
         <div

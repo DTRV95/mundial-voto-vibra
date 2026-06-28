@@ -62,7 +62,7 @@ function JogoPage() {
     queryKey: ["community", id],
     queryFn: async () => {
       const { data } = await supabase.from("predictions")
-        .select("result_90,btts,total_25,total_35,double_chance,combo_15,combo_35,exact_home,exact_away")
+        .select("result_90,btts,total_25,double_chance,combo_15,exact_home,exact_away,qualifier")
         .eq("match_id", id);
       return data ?? [];
     },
@@ -255,11 +255,12 @@ function JogoPage() {
     const payload = {
       user_id: user.id, match_id: id,
       result_90: pred.result_90 ?? null, btts: pred.btts ?? null,
-      total_25: pred.total_25 ?? null, total_35: pred.total_35 ?? null,
+      total_25: pred.total_25 ?? null,
       double_chance: pred.double_chance ?? null,
       exact_home: pred.exact_home ?? null, exact_away: pred.exact_away ?? null,
-      combo_15: pred.combo_15 ?? null, combo_35: pred.combo_35 ?? null,
-    };
+      combo_15: pred.combo_15 ?? null,
+      qualifier: pred.qualifier ?? null,
+    } as any;
     const { error } = await supabase.from("predictions").upsert(payload, { onConflict: "user_id,match_id" });
     if (error) { toast.error(error.message); return; }
     toast.success("Previsão guardada!");
@@ -414,32 +415,29 @@ function JogoPage() {
             labels={{ yes: "Sim", no: "Não" }} total={community.length} />}
         </MarketCard>
 
-        <MarketCard title="Total de golos" closed={closed} pts="2–3 pts">
-          <div className="space-y-3">
-            <div>
-              <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">2.5 golos <span className="text-gold font-semibold">2 pts</span></p>
-              <VoteOptions value={pred.total_25} disabled={closed}
-                options={[
-                  { v: "over", label: "Mais de 2.5", pct: analysis?.prob_over25 },
-                  { v: "under", label: "Menos de 2.5", pct: analysis?.prob_under25 },
-                ]}
-                onChange={(v) => set("total_25", v)} />
-              {showCommunity && <CommunityLine votes={community.map(c => c.total_25)}
-                labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
-            </div>
-            <div className="border-t border-border/50 pt-3">
-              <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">3.5 golos <span className="text-gold font-semibold">3 pts</span></p>
-              <VoteOptions value={pred.total_35} disabled={closed}
-                options={[
-                  { v: "over", label: "Mais de 3.5", pct: analysis?.prob_over35 },
-                  { v: "under", label: "Menos de 3.5", pct: analysis?.prob_under35 },
-                ]}
-                onChange={(v) => set("total_35", v)} />
-              {showCommunity && <CommunityLine votes={community.map(c => c.total_35)}
-                labels={{ over: "Mais", under: "Menos" }} total={community.length} />}
-            </div>
-          </div>
+        <MarketCard title="Total de golos" closed={closed} pts="2 pts">
+          <VoteOptions value={pred.total_25} disabled={closed}
+            options={[
+              { v: "over", label: "Mais de 2.5", pct: analysis?.prob_over25 },
+              { v: "under", label: "Menos de 2.5", pct: analysis?.prob_under25 },
+            ]}
+            onChange={(v) => set("total_25", v)} />
+          {showCommunity && <CommunityLine votes={community.map(c => c.total_25)}
+            labels={{ over: "Mais de 2.5", under: "Menos de 2.5" }} total={community.length} />}
         </MarketCard>
+
+        {match.phase !== "grupos" && (
+          <MarketCard title="Quem se apura?" closed={closed} pts="4 pts">
+            <VoteOptions value={pred.qualifier} disabled={closed}
+              options={[
+                { v: "home", label: home.name },
+                { v: "away", label: away.name },
+              ]}
+              onChange={(v) => set("qualifier", v)} />
+            {showCommunity && <CommunityLine votes={community.map((c: any) => c.qualifier)}
+              labels={{ home: home.name, away: away.name }} total={community.length} />}
+          </MarketCard>
+        )}
 
         <MarketCard title="Resultado correto" closed={closed} pts="10 pts 🔥">
           {showCommunity && community.filter(c => c.exact_home != null).length > 0 && (

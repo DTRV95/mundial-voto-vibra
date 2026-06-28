@@ -257,15 +257,33 @@ function Ligas() {
               maxLength={40}
               className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold/40 transition-all"
             />
-            <div className="relative">
-              <Gift className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div>
+              <p className="mb-2 text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                <Gift className="h-3.5 w-3.5" /> Prémio do vencedor
+              </p>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {["🍽️ Jantar", "🍺 Grade de cerveja", "🥃 Borracheira", "🍩 Caixinha de bolos", "☕ Pequeno-almoço", "🎳 Bowling", "🎬 Cinema", "💆 Massagem", "🍕 Pizza", "🎲 Noite de jogos", "🧃 Sumos (o pobre paga)", "🏊 Piscina"].map(s => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setNewPrize(p => p === s ? "" : s)}
+                    className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${
+                      newPrize === s
+                        ? "border-gold bg-gold/15 text-gold"
+                        : "border-border bg-secondary/50 text-muted-foreground hover:border-gold/30 hover:text-foreground"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
               <input
                 type="text"
-                placeholder="Prémio do vencedor (ex: Jantar pago, Camisola...)"
+                placeholder="Ou escreve outro prémio..."
                 value={newPrize}
                 onChange={e => setNewPrize(e.target.value)}
                 maxLength={80}
-                className="w-full rounded-xl border border-border bg-background pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold/40 transition-all"
+                className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold/40 transition-all"
               />
             </div>
 

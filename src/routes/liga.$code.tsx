@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX, UserPlus, Search, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX, UserPlus, Search, ArrowUp, ArrowDown, Minus, Layers, CalendarDays } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
@@ -75,7 +75,7 @@ function LigaPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pools")
-        .select("id, name, code, created_by, prize, created_at, emoji")
+        .select("id, name, code, created_by, prize, created_at, emoji, duration_type, duration_value")
         .eq("code", code.toUpperCase())
         .maybeSingle();
       if (error) throw error;
@@ -475,6 +475,22 @@ function copyLink() {
                 <Gift className="h-3 w-3" /> {pool.prize}
               </div>
             )}
+            {(pool as any).duration_type && (pool as any).duration_type !== "ongoing" && (() => {
+              const PHASE_LABELS: Record<string,string> = { ronda32: "16 Avos", oitavos: "Oitavos", quartos: "Quartos", meias: "Meias-Finais", final: "Final" };
+              const dt = (pool as any).duration_type;
+              const dv = (pool as any).duration_value;
+              const isDate = dt === "date" && dv;
+              const endDate = isDate ? new Date(dv) : null;
+              const daysLeft = endDate ? Math.ceil((endDate.getTime() - Date.now()) / 86400000) : null;
+              return (
+                <div className="flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white">
+                  {dt === "phase" && <><Layers className="h-3.5 w-3.5" /> {PHASE_LABELS[dv] ?? dv}</>}
+                  {dt === "date" && <><CalendarDays className="h-3.5 w-3.5" />
+                    {daysLeft !== null && daysLeft > 0 ? `${daysLeft}d restantes` : daysLeft === 0 ? "Termina hoje" : "Terminado"}
+                  </>}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Botões de partilha */}

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Users, Plus, LogIn, Copy, Check, Trash2, Gift, HelpCircle } from "lucide-react";
+import { Users, Plus, LogIn, Copy, Check, Trash2, Gift, HelpCircle, Clock, CalendarDays, Layers } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/ligas")({
@@ -27,8 +27,19 @@ function Ligas() {
   const [newName, setNewName] = useState("");
   const [newPrize, setNewPrize] = useState("");
   const [newEmoji, setNewEmoji] = useState("⚽");
+  const [newDurationType, setNewDurationType] = useState<"ongoing" | "phase" | "date">("ongoing");
+  const [newDurationPhase, setNewDurationPhase] = useState("ronda32");
+  const [newDurationDate, setNewDurationDate] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const PHASES = [
+    { value: "ronda32", label: "16 Avos de Final" },
+    { value: "oitavos", label: "Oitavos de Final" },
+    { value: "quartos", label: "Quartos de Final" },
+    { value: "meias", label: "Meias-Finais" },
+    { value: "final", label: "Final" },
+  ];
 
   const EMOJIS = ["⚽", "🍺", "👨‍👩‍👧", "💼", "🏆", "🎮", "🎓", "🏋️", "🎉", "🔥", "💪", "🤝", "🦁", "🐉", "🌍"];
 
@@ -39,7 +50,7 @@ function Ligas() {
     queryFn: async () => {
       const { data } = await supabase
         .from("pool_members")
-        .select("pool:pool_id(id, name, code, created_by, prize, emoji)")
+        .select("pool:pool_id(id, name, code, created_by, prize, emoji, duration_type, duration_value)")
         .eq("user_id", user!.id);
       return (data ?? []).map((r: any) => r.pool).filter(Boolean);
     },
@@ -64,15 +75,14 @@ function Ligas() {
   });
 
   const createPool = useMutation({
-    mutationFn: async ({ name, prize, emoji }: { name: string; prize: string; emoji: string }) => {
+    mutationFn: async ({ name, prize, emoji, duration_type, duration_value }: { name: string; prize: string; emoji: string; duration_type: string; duration_value: string | null }) => {
       let code = genCode();
-      // garantir código único (retry simples)
       const { data: existing } = await supabase.from("pools").select("id").eq("code", code).maybeSingle();
       if (existing) code = genCode();
 
-      const { data: pool, error } = await supabase
+      const { data: pool, error } = await (supabase as any)
         .from("pools")
-        .insert({ name, code, created_by: user!.id, prize: prize || null, emoji })
+        .insert({ name, code, created_by: user!.id, prize: prize || null, emoji, duration_type, duration_value })
         .select()
         .single();
       if (error) throw error;
@@ -87,6 +97,9 @@ function Ligas() {
       setNewName("");
       setNewPrize("");
       setNewEmoji("⚽");
+      setNewDurationType("ongoing");
+      setNewDurationPhase("ronda32");
+      setNewDurationDate("");
       qc.invalidateQueries({ queryKey: ["my-pools"] });
       toast.success("Torneio criado!");
       navigate({ to: "/liga/$code", params: { code: pool.code } });
@@ -255,8 +268,64 @@ function Ligas() {
                 className="w-full rounded-xl border border-border bg-background pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold/40 transition-all"
               />
             </div>
+
+            {/* ── Duração do torneio ── */}
+            <div>
+              <p className="mb-2 text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" /> Duração do torneio
+              </p>
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {[
+                  { value: "ongoing", label: "Sem limite", icon: "♾️" },
+                  { value: "phase",   label: "Por fase",   icon: "🏟️" },
+                  { value: "date",    label: "Por data",   icon: "📅" },
+                ].map(opt => (
+                  <button key={opt.value} type="button"
+                    onClick={() => setNewDurationType(opt.value as any)}
+                    className={`flex flex-col items-center gap-1 rounded-xl border py-2.5 text-xs font-bold transition-all ${
+                      newDurationType === opt.value
+                        ? "border-gold bg-gold/10 text-gold"
+                        : "border-border bg-secondary/50 text-muted-foreground hover:border-gold/30"
+                    }`}>
+                    <span className="text-lg leading-none">{opt.icon}</span>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {newDurationType === "phase" && (
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-gold shrink-0" />
+                  <select
+                    value={newDurationPhase}
+                    onChange={e => setNewDurationPhase(e.target.value)}
+                    className="flex-1 rounded-xl border border-gold/30 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40"
+                  >
+                    {PHASES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                  </select>
+                </div>
+              )}
+
+              {newDurationType === "date" && (
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-gold shrink-0" />
+                  <input
+                    type="date"
+                    value={newDurationDate}
+                    onChange={e => setNewDurationDate(e.target.value)}
+                    min={new Date().toISOString().split("T")[0]}
+                    className="flex-1 rounded-xl border border-gold/30 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40"
+                  />
+                </div>
+              )}
+            </div>
+
             <button
-              onClick={() => newName.trim() && createPool.mutate({ name: newName.trim(), prize: newPrize.trim(), emoji: newEmoji })}
+              onClick={() => newName.trim() && createPool.mutate({
+                name: newName.trim(), prize: newPrize.trim(), emoji: newEmoji,
+                duration_type: newDurationType,
+                duration_value: newDurationType === "phase" ? newDurationPhase : newDurationType === "date" ? newDurationDate : null,
+              })}
               disabled={!newName.trim() || createPool.isPending}
               className="w-full rounded-xl bg-wc-red py-2.5 text-sm font-bold text-white shadow-gold disabled:opacity-50 transition-all hover:scale-[1.01] active:scale-95"
             >
@@ -368,6 +437,16 @@ function Ligas() {
                           {pool.prize && (
                             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-wc-red">
                               <Gift className="h-3 w-3" /> {pool.prize}
+                            </span>
+                          )}
+                          {pool.duration_type && pool.duration_type !== "ongoing" && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gold/10 border border-gold/25 px-2.5 py-0.5 text-[11px] font-semibold text-gold">
+                              {pool.duration_type === "phase" && (
+                                <>{PHASES.find(p => p.value === pool.duration_value)?.label ?? pool.duration_value}</>
+                              )}
+                              {pool.duration_type === "date" && pool.duration_value && (
+                                <>📅 até {new Date(pool.duration_value).toLocaleDateString("pt-PT", { day: "numeric", month: "short" })}</>
+                              )}
                             </span>
                           )}
                         </div>

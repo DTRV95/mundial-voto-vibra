@@ -364,7 +364,7 @@ function LigaPage() {
   });
 
 function copyLink() {
-    const url = window.location.href;
+    const url = "https://geracao2026.com" + window.location.pathname;
     if (navigator.share) {
       navigator.share({ title: `Liga "${pool?.name}"`, text: "Junta-te ao meu torneio no Uma Geração 🏆", url });
     } else {
@@ -376,7 +376,7 @@ function copyLink() {
   }
 
   function shareWhatsApp() {
-    const url = `${window.location.origin}/entrar/${pool?.code}`;
+    const url = `${"https://geracao2026.com"}/entrar/${pool?.code}`;
     const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${pool?.name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }

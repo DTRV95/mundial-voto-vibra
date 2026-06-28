@@ -155,7 +155,7 @@ function JogoPage() {
     const text = hasVoted
       ? `Já dei a minha previsão em ${home} vs ${away}! E tu? 🏆`
       : `${home} vs ${away} — dá a tua previsão! 🏆`;
-    const url = window.location.href;
+    const url = "https://geracao2026.com" + window.location.pathname;
     if (navigator.share) {
       await navigator.share({ title: `${home} vs ${away} — Voz do Mundial`, text, url }).catch(() => {});
     } else {

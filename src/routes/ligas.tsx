@@ -157,7 +157,7 @@ function Ligas() {
   });
 
   function copyLink(code: string, poolId: string) {
-    const url = `${window.location.origin}/liga/${code}`;
+    const url = `${"https://geracao2026.com"}/liga/${code}`;
     if (navigator.share) {
       navigator.share({ title: "Junta-te ao meu torneio!", text: "Vota comigo no Mundial 2026 🏆", url });
     } else {
@@ -169,7 +169,7 @@ function Ligas() {
   }
 
   function shareWhatsApp(code: string, name: string) {
-    const url = `${window.location.origin}/liga/${code}`;
+    const url = `${"https://geracao2026.com"}/liga/${code}`;
     const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }

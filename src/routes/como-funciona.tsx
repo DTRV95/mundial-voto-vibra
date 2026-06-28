@@ -186,10 +186,10 @@ function ComoFunciona() {
         </p>
         <div className="divide-y divide-border rounded-xl border border-border bg-background/40 overflow-hidden mb-4">
           {[
-            { emoji: "🏆", label: "1ª Liga", desc: "Top 5 jogadores" },
-            { emoji: "⚽", label: "2ª Liga", desc: "Posições 6 a 15" },
-            { emoji: "🟡", label: "Distrital", desc: "Posições 16 a 30" },
-            { emoji: "🟢", label: "Liga do Zé Povinho", desc: "A partir da posição 31" },
+            { emoji: "🏆", label: "1ª Liga", desc: "Top 10 jogadores" },
+            { emoji: "⚽", label: "2ª Liga", desc: "Posições 11 a 25" },
+            { emoji: "🟡", label: "Distrital", desc: "Posições 26 a 50" },
+            { emoji: "🟢", label: "Liga do Zé Povinho", desc: "A partir da posição 51" },
           ].map(({ emoji, label, desc }) => (
             <div key={label} className="flex items-center gap-3 px-3 py-2.5">
               <span className="text-lg">{emoji}</span>

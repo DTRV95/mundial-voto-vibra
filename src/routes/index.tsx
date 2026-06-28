@@ -198,10 +198,10 @@ function Home() {
         .gt("total_points", me.total_points ?? 0);
       const rank = (count ?? 0) + 1;
       const DIVISIONS = [
-        { label: "1ª Liga",            emoji: "🏆", min: 1,  max: 5,   border: "border-cyan-400/40",    bg: "bg-cyan-400/10",    text: "text-cyan-400" },
-        { label: "2ª Liga",            emoji: "⚽", min: 6,  max: 15,  border: "border-yellow-400/40",  bg: "bg-yellow-400/10",  text: "text-yellow-400" },
-        { label: "Distrital",          emoji: "🟡", min: 16, max: 30,  border: "border-slate-400/40",   bg: "bg-slate-400/10",   text: "text-slate-400" },
-        { label: "Liga do Zé Povinho", emoji: "🟢", min: 31, max: Infinity, border: "border-green-700/40", bg: "bg-green-700/10", text: "text-green-600" },
+        { label: "1ª Liga",            emoji: "🏆", min: 1,  max: 10,  border: "border-cyan-400/40",    bg: "bg-cyan-400/10",    text: "text-cyan-400" },
+        { label: "2ª Liga",            emoji: "⚽", min: 11, max: 25,  border: "border-yellow-400/40",  bg: "bg-yellow-400/10",  text: "text-yellow-400" },
+        { label: "Distrital",          emoji: "🟡", min: 26, max: 50,  border: "border-slate-400/40",   bg: "bg-slate-400/10",   text: "text-slate-400" },
+        { label: "Liga do Zé Povinho", emoji: "🟢", min: 51, max: Infinity, border: "border-green-700/40", bg: "bg-green-700/10", text: "text-green-600" },
       ];
       const div = DIVISIONS.find(d => rank >= d.min && rank <= d.max) ?? DIVISIONS[3];
       return { rank, points: me.total_points ?? 0, streak: (me as any).vote_streak ?? 0, maxStreak: (me as any).max_vote_streak ?? 0, ...div };

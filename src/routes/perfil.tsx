@@ -645,6 +645,22 @@ function Perfil() {
                 </div>
               );
 
+              if (notif.type === "poll") return (
+                <Link
+                  key={`poll-${notif.poolCode}`}
+                  to="/liga/$code"
+                  params={{ code: notif.poolCode }}
+                  className="flex items-center gap-3 overflow-hidden rounded-2xl border border-gold/30 bg-gold/5 hover:bg-gold/10 transition-smooth px-4 py-3"
+                >
+                  <span className="text-xl shrink-0">🗳️</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{notif.poolName}</p>
+                    <p className="text-sm font-semibold">Votação pendente — querem continuar o torneio?</p>
+                  </div>
+                  <span className="shrink-0 text-xs font-bold text-gold">Votar →</span>
+                </Link>
+              );
+
               return null;
             })}
           </div>

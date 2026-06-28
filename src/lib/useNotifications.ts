@@ -71,7 +71,13 @@ export interface FollowNotif {
   createdAt: string;
 }
 
-export type Notification = ChatNotif | ResultNotif | RankNotif | FollowNotif;
+export interface PollNotif {
+  type: "poll";
+  poolCode: string;
+  poolName: string;
+}
+
+export type Notification = ChatNotif | ResultNotif | RankNotif | FollowNotif | PollNotif;
 
 const FOLLOW_KEY = "notif_follow_seen"; // Record<notifId, true>
 
@@ -131,7 +137,28 @@ export function useNotifications() {
         });
       }
 
-      // ── 2. Ultrapassado no ranking global ──────────────────────────────────
+      // ── 2. Sondagens pendentes nos torneios ───────────────────────────────
+      for (const m of (memberships ?? [])) {
+        const pool = m.pool as any;
+        if (!pool?.code) continue;
+
+        // Check if there's any poll vote in this pool
+        const { data: pollMsgs } = await supabase
+          .from("league_messages")
+          .select("user_id, body")
+          .eq("pool_code", pool.code)
+          .like("body", "POLL_VOTE:%");
+
+        if (!pollMsgs || pollMsgs.length === 0) continue;
+
+        // Check if current user has voted
+        const myVote = pollMsgs.find((msg: any) => msg.user_id === user!.id);
+        if (!myVote) {
+          notifications.push({ type: "poll", poolCode: pool.code, poolName: pool.name });
+        }
+      }
+
+      // ── 3. Ultrapassado no ranking global ──────────────────────────────────
       const { data: myProfile } = await supabase
         .from("profiles").select("total_points").eq("id", user!.id).maybeSingle();
 

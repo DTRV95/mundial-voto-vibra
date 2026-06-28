@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX, UserPlus, Search, ArrowUp, ArrowDown, Minus, Layers, CalendarDays } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
 
@@ -66,6 +66,7 @@ function LigaPage() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showAllMembers, setShowAllMembers] = useState(false);
   const [showPhaseHistory, setShowPhaseHistory] = useState(false);
+  const pollRef = useRef<HTMLDivElement>(null);
 
   const EMOJIS = ["⚽", "🍺", "👨‍👩‍👧", "💼", "🏆", "🎮", "🎓", "🏋️", "🎉", "🔥", "💪", "🤝", "🦁", "🐉", "🌍"];
 
@@ -646,7 +647,13 @@ function copyLink() {
 
       {/* ── SONDAGEM ─────────────────────────────────────────── */}
       {user && isMember && pool && (
-        <PollSection poolCode={pool.code} userId={user.id} ranking={ranking} />
+        <div ref={pollRef}>
+          <PollSection poolCode={pool.code} userId={user.id} ranking={ranking} onLoaded={(hasVoted) => {
+            if (!hasVoted && pollRef.current) {
+              setTimeout(() => pollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+            }
+          }} />
+        </div>
       )}
 
       {/* ── PÓDIO ────────────────────────────────────────────── */}
@@ -1176,11 +1183,12 @@ const PRIZE_OPTIONS = [
   "🏊 Piscina", "🧃 Sumos (o pobre paga)", "🍕 Pizza", "🎲 Noite de jogos",
 ];
 
-function PollSection({ poolCode, userId, ranking }: { poolCode: string; userId: string; ranking: any[] }) {
+function PollSection({ poolCode, userId, ranking, onLoaded }: { poolCode: string; userId: string; ranking: any[]; onLoaded?: (hasVoted: boolean) => void }) {
   const qc = useQueryClient();
   const [pendingVoto, setPendingVoto] = useState<"sim" | "nao" | null>(null);
   const [selectedPremio, setSelectedPremio] = useState<string>("");
   const [customPremio, setCustomPremio] = useState<string>("");
+  const notifiedRef = useRef(false);
 
   const { data: pollVotes = [] } = useQuery({
     queryKey: ["poll-votes", poolCode],
@@ -1253,6 +1261,14 @@ function PollSection({ poolCode, userId, ranking }: { poolCode: string; userId: 
 
   const hasVoted = !!myVotoChoice;
   const isChanging = pendingVoto !== null;
+
+  // Notify parent once votes are loaded
+  useEffect(() => {
+    if (pollVotes.length >= 0 && !notifiedRef.current && onLoaded) {
+      notifiedRef.current = true;
+      onLoaded(hasVoted);
+    }
+  }, [pollVotes, hasVoted, onLoaded]);
 
   return (
     <div className="mx-5 mt-6 md:mx-8">

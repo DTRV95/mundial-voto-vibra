@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, CheckCircle2, XCircle, Zap, ChevronRight, Target, AlertTriangle, Trophy } from "lucide-react";
+import { ArrowRight, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, CheckCircle2, XCircle, Zap, ChevronRight, Target, AlertTriangle, Trophy, Share2 } from "lucide-react";
+import { ShareButton, usePodiumShare, useRankShare } from "@/components/ShareCard";
 
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { supabase } from "@/integrations/supabase/client";
@@ -498,8 +499,18 @@ function Home() {
     },
   });
 
+  const { share: shareRank, Portal: RankSharePortal } = useRankShare({
+    displayName: myLeaderRank?.display_name ?? myLeaderEntry?.display_name ?? "Tu",
+    rank: myLeaderEntry ? (topLeaders as any[]).indexOf(myLeaderEntry) + 1 : myLeaderRank?.rank ?? 1,
+    totalPoints: myLeaderEntry?.total_points ?? myLeaderRank?.total_points ?? 0,
+    totalUsers: communityPulse?.totalUsers ?? 0,
+    division: myDivision?.label ?? "1ª Liga",
+    phase: "Mata-Mata",
+  });
+
   return (
     <div className="pb-10">
+      {RankSharePortal}
 
       {/* ===================== HERO ===================== */}
       <section className="relative px-4 pt-4 md:px-6 md:pt-5 animate-fade-in">
@@ -1111,7 +1122,12 @@ function Home() {
                         </span>
                         <span className="font-semibold text-sm">{myLeaderEntry?.display_name ?? myLeaderRank?.display_name ?? "Tu"} <span className="text-[10px] text-gold font-bold">Tu</span></span>
                       </span>
-                      <span className="font-display text-lg">{myLeaderEntry?.total_points ?? myLeaderRank?.total_points ?? 0} <span className="text-xs font-sans opacity-70">pts</span></span>
+                      <span className="flex items-center gap-2">
+                        <button onClick={shareRank} title="Partilhar classificação" className="grid h-7 w-7 place-items-center rounded-full bg-white/15 text-white hover:bg-white/30 transition-smooth">
+                          <Share2 className="h-3.5 w-3.5" />
+                        </button>
+                        <span className="font-display text-lg">{myLeaderEntry?.total_points ?? myLeaderRank?.total_points ?? 0} <span className="text-xs font-sans opacity-70">pts</span></span>
+                      </span>
                     </li>
                   </>
                 )}
@@ -1371,14 +1387,21 @@ function PodioFaseGrupos({ hof }: { hof: any[] }) {
     try { return localStorage.getItem("podio_grupos_dismissed") === "1"; } catch { return false; }
   });
 
+  const [first, second, third] = hof ?? [];
+
+  const { share: sharePodium, Portal: SharePortal } = usePodiumShare({
+    first: first ? { display_name: first.profile?.display_name, avatar_url: first.profile?.avatar_url, total_points: first.total_points } : { display_name: "—", total_points: 0 },
+    second: second ? { display_name: second.profile?.display_name, avatar_url: second.profile?.avatar_url, total_points: second.total_points } : null,
+    third: third ? { display_name: third.profile?.display_name, avatar_url: third.profile?.avatar_url, total_points: third.total_points } : null,
+    phase: "Fase de Grupos",
+  });
+
   if (!hof || hof.length === 0 || dismissed) return null;
 
   function dismiss() {
     try { localStorage.setItem("podio_grupos_dismissed", "1"); } catch {}
     setDismissed(true);
   }
-
-  const [first, second, third] = hof;
 
   // visual order: 2nd left · 1st center · 3rd right
   const entries  = [second, first, third];
@@ -1406,6 +1429,8 @@ function PodioFaseGrupos({ hof }: { hof: any[] }) {
   const nameFg = ["text-foreground", "text-[#7a5500]", "text-foreground"];
 
   return (
+    <>
+    {SharePortal}
     <div className="mx-5 mt-5 md:mx-8">
       <div
         className="relative overflow-hidden rounded-3xl"
@@ -1496,9 +1521,15 @@ function PodioFaseGrupos({ hof }: { hof: any[] }) {
               );
             })}
           </div>
+
+          {/* Share button */}
+          <div className="flex justify-center pb-5 pt-3">
+            <ShareButton onShare={sharePodium} label="Partilhar Pódio" />
+          </div>
         </div>
       </div>
     </div>
+    </>
   );
 }
 

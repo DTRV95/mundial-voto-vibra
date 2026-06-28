@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Flame, Star, Calendar, ImageIcon, Bell, BarChart2, Zap, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+import { LogOut, Trophy, Target, Percent, Pencil, CheckCircle2, XCircle, Loader2, X, Flame, Star, Calendar, ImageIcon, Bell, BarChart2, Zap, TrendingUp, ChevronDown, ChevronUp, Share2 } from "lucide-react";
+import { ShareButton, useRankShare } from "@/components/ShareCard";
 import { AvatarPicker, UserAvatar } from "@/components/AvatarPicker";
 import { toast } from "sonner";
 import { TeamBadge } from "@/lib/teamColors.tsx";
@@ -77,6 +78,34 @@ function Perfil() {
         .order("created_at", { ascending: false });
       return data ?? [];
     },
+  });
+
+  const { data: myGlobalRank } = useQuery({
+    queryKey: ["global-rank", user?.id], enabled: !!user?.id && !!profile,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gt("total_points", profile!.total_points ?? 0);
+      return (count ?? 0) + 1;
+    },
+  });
+
+  const DIVISIONS = [
+    { label: "1ª Liga", min: 1, max: 10 },
+    { label: "2ª Liga", min: 11, max: 25 },
+    { label: "Distrital", min: 26, max: 50 },
+    { label: "Liga do Zé Povinho", min: 51, max: Infinity },
+  ];
+  const myRankDivision = DIVISIONS.find(d => (myGlobalRank ?? 999) >= d.min && (myGlobalRank ?? 999) <= d.max)?.label ?? "Liga do Zé Povinho";
+
+  const { share: shareMyRank, Portal: RankSharePortal } = useRankShare({
+    displayName: profile?.display_name ?? "Adepto",
+    rank: myGlobalRank ?? 1,
+    totalPoints: profile?.total_points ?? 0,
+    totalUsers: 0,
+    division: myRankDivision,
+    phase: "Mata-Mata",
   });
 
   // Edição de nome
@@ -254,6 +283,7 @@ function Perfil() {
 
   return (
     <div className="px-5 pt-6 pb-24 md:pb-10 md:px-8 max-w-2xl mx-auto">
+      {RankSharePortal}
 
       {avatarOpen && (
         <AvatarPicker
@@ -324,10 +354,19 @@ function Perfil() {
                 <p className="text-xs text-white/50 mt-0.5">{user.email}</p>
               </div>
             </div>
-            <button onClick={signOut}
-              className="rounded-full border border-white/20 bg-white/10 p-2.5 text-white/60 hover:text-white hover:border-white/40 transition-smooth">
-              <LogOut className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={shareMyRank}
+                title="Partilhar classificação"
+                className="rounded-full border border-white/20 bg-white/10 p-2.5 text-white/60 hover:text-gold hover:border-gold/40 transition-smooth"
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+              <button onClick={signOut}
+                className="rounded-full border border-white/20 bg-white/10 p-2.5 text-white/60 hover:text-white hover:border-white/40 transition-smooth">
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* Stats row */}

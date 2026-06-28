@@ -83,9 +83,9 @@ export const Route = createFileRoute("/rankings")({
       { name: "description", content: "Ranking dos adeptos por fase do Mundial 2026 — Grupos, Oitavos, Quartos, Meias-finais e Final. Vê quem lidera a classificação." },
       { property: "og:title", content: "Rankings — Uma Geração | Mundial 2026" },
       { property: "og:description", content: "Descobre quem lidera o ranking de previsões do Mundial 2026." },
-      { property: "og:url", content: "https://mundial-voto-vibra.davidvilaverde.workers.dev/rankings" },
+      { property: "og:url", content: "https://umageracao.pt/rankings" },
     ],
-    links: [{ rel: "canonical", href: "https://mundial-voto-vibra.davidvilaverde.workers.dev/rankings" }],
+    links: [{ rel: "canonical", href: "https://umageracao.pt/rankings" }],
   }),
   validateSearch: (search: Record<string, unknown>) => ({
     tab: ["ligas", "jogos", "divisoes", "hof"].includes(search.tab as string) ? (search.tab as string) : "divisoes",

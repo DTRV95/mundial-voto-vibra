@@ -9,9 +9,9 @@ export const Route = createFileRoute("/como-funciona")({
       { name: "description", content: "Aprende como funciona o sistema de previsões, pontuações e torneios privados do Uma Geração para o Mundial 2026." },
       { property: "og:title", content: "Como Funciona — Uma Geração" },
       { property: "og:description", content: "Guia completo sobre previsões, pontos e torneios privados do Mundial 2026." },
-      { property: "og:url", content: "https://mundial-voto-vibra.davidvilaverde.workers.dev/como-funciona" },
+      { property: "og:url", content: "https://umageracao.pt/como-funciona" },
     ],
-    links: [{ rel: "canonical", href: "https://mundial-voto-vibra.davidvilaverde.workers.dev/como-funciona" }],
+    links: [{ rel: "canonical", href: "https://umageracao.pt/como-funciona" }],
   }),
   component: ComoFunciona,
 });

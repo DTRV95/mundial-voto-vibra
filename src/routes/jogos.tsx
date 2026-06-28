@@ -14,9 +14,9 @@ export const Route = createFileRoute("/jogos")({
       { name: "description", content: "Calendário completo dos jogos do Mundial 2026. Filtra por dia ou fase e deixa as tuas previsões antes do apito inicial." },
       { property: "og:title", content: "Jogos do Mundial 2026 — Uma Geração" },
       { property: "og:description", content: "Todos os jogos do Mundial 2026. Vota nas tuas previsões e compara com a comunidade." },
-      { property: "og:url", content: "https://mundial-voto-vibra.davidvilaverde.workers.dev/jogos" },
+      { property: "og:url", content: "https://umageracao.pt/jogos" },
     ],
-    links: [{ rel: "canonical", href: "https://mundial-voto-vibra.davidvilaverde.workers.dev/jogos" }],
+    links: [{ rel: "canonical", href: "https://umageracao.pt/jogos" }],
   }),
   component: Jogos,
 });

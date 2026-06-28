@@ -86,21 +86,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Faz as tuas previsões para o Mundial 2026, compara com a comunidade e compete nos rankings por fase." },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "pt_PT" },
-      { property: "og:url", content: "https://mundial-voto-vibra.davidvilaverde.workers.dev/" },
-      { property: "og:image", content: "https://mundial-voto-vibra.davidvilaverde.workers.dev/og-image.png" },
+      { property: "og:url", content: "https://umageracao.pt/" },
+      { property: "og:image", content: "https://umageracao.pt/og-image.png" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Uma Geração — Mundial 2026" },
       { name: "twitter:description", content: "Vota, compara e vibra com a comunidade de adeptos do Mundial 2026." },
-      { name: "twitter:image", content: "https://mundial-voto-vibra.davidvilaverde.workers.dev/og-image.png" },
+      { name: "twitter:image", content: "https://umageracao.pt/og-image.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.json" },
       { rel: "icon", type: "image/svg+xml", href: "/icon.svg" },
       { rel: "apple-touch-icon", href: "/icon-192.png" },
-      { rel: "canonical", href: "https://mundial-voto-vibra.davidvilaverde.workers.dev/" },
+      { rel: "canonical", href: "https://umageracao.pt/" },
     ],
     scripts: [
       {
@@ -109,12 +109,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "WebSite",
           "name": "Uma Geração",
-          "url": "https://mundial-voto-vibra.davidvilaverde.workers.dev",
+          "url": "https://umageracao.pt",
           "description": "A comunidade onde os adeptos fazem previsões, acompanham os jogos e competem nos rankings do Mundial 2026.",
           "inLanguage": "pt-PT",
           "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://mundial-voto-vibra.davidvilaverde.workers.dev/rankings",
+            "target": "https://umageracao.pt/rankings",
             "query-input": "required name=search_term_string"
           }
         }),

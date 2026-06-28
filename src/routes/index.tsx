@@ -14,7 +14,7 @@ import trophyImg from "@/assets/trophy-hero.jpg";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
 import premioCamisola from "@/assets/premio-camisola.jpg";
 
-const SITE = "https://mundial-voto-vibra.davidvilaverde.workers.dev";
+const SITE = "https://umageracao.pt";
 
 export const Route = createFileRoute("/")({
   head: () => ({

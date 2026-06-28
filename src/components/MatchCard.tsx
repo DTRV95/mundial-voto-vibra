@@ -37,41 +37,40 @@ export function MatchCard({ match }: { match: MatchCardData }) {
         to="/jogo/$id"
         params={{ id: match.id }}
         onClick={() => { try { sessionStorage.setItem("jogos_return", "1"); } catch {} }}
-        className="group block overflow-hidden rounded-2xl transition-smooth"
+        className="group block overflow-hidden rounded-2xl bg-card border border-gold/30 transition-smooth"
         style={{
-          background: "linear-gradient(160deg, oklch(0.16 0.05 85) 0%, oklch(0.13 0.03 260) 60%, oklch(0.15 0.04 85) 100%)",
-          boxShadow: "0 4px 24px oklch(0.75 0.18 85 / 0.20), 0 0 0 1px oklch(0.75 0.18 85 / 0.30)",
+          boxShadow: "0 2px 16px oklch(0.75 0.18 85 / 0.10), 0 0 0 1px oklch(0.75 0.18 85 / 0.20)",
           transition: "transform 240ms cubic-bezier(0.16,1,0.3,1), box-shadow 240ms ease",
         }}
         onMouseEnter={e => {
           (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 20px 50px oklch(0.75 0.18 85 / 0.35), 0 0 0 1.5px oklch(0.75 0.18 85 / 0.60)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 40px oklch(0.75 0.18 85 / 0.22), 0 0 0 1.5px oklch(0.75 0.18 85 / 0.45)";
         }}
         onMouseLeave={e => {
           (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 24px oklch(0.75 0.18 85 / 0.20), 0 0 0 1px oklch(0.75 0.18 85 / 0.30)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 16px oklch(0.75 0.18 85 / 0.10), 0 0 0 1px oklch(0.75 0.18 85 / 0.20)";
         }}
       >
-        {/* Gold shimmer stripe */}
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
+        {/* Gold accent stripe */}
+        <div className="h-1 w-full rounded-t-2xl" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
 
         {/* Top bar */}
         <div className="flex items-center justify-between px-4 pt-3 pb-0">
           <div className="flex items-center gap-1.5">
-            <Swords className="h-3 w-3 text-gold/80" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-gold/80">
+            <Swords className="h-3 w-3 text-gold" />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-gold">
               {PHASE_LABEL[match.phase] ?? match.phase}
             </span>
           </div>
           <div className="flex items-center gap-2">
             {match.status === "live" && (
               <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gold" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-red opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-wc-red" />
               </span>
             )}
             <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-              match.status === "live" ? "bg-gold/20 text-gold border-gold/40" : statusCls
+              match.status === "live" ? "bg-wc-red/10 text-wc-red border-wc-red/30" : statusCls
             }`}>
               {match.status === "live" ? "Ao Vivo" : status.label}
             </span>
@@ -82,26 +81,26 @@ export function MatchCard({ match }: { match: MatchCardData }) {
         <div className="flex items-center justify-between gap-2 px-4 py-4">
           <div className="flex flex-1 flex-col items-center gap-2">
             <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} size="md" />
-            <span className="text-center text-xs font-bold leading-tight text-white md:text-sm">
+            <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
               {match.home.name}
             </span>
           </div>
 
           <div className="flex flex-col items-center gap-1 px-2">
-            <div className="flex items-center gap-1" style={{ color: "oklch(0.75 0.18 85)" }}>
+            <div className="flex items-center gap-1 text-gold">
               <Clock className="h-3.5 w-3.5" />
               <span className="font-display text-2xl tabular-nums md:text-3xl">
                 {formatTime(match.kickoff_at)}
               </span>
             </div>
-            <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest" style={{ background: "oklch(0.75 0.18 85 / 0.15)", color: "oklch(0.75 0.18 85)" }}>
+            <span className="rounded-full bg-gold/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-gold">
               vs
             </span>
           </div>
 
           <div className="flex flex-1 flex-col items-center gap-2">
             <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} size="md" />
-            <span className="text-center text-xs font-bold leading-tight text-white md:text-sm">
+            <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
               {match.away.name}
             </span>
           </div>
@@ -111,7 +110,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
         <div className={`flex items-center justify-between border-t px-4 py-2.5 ${
           match.already_voted
             ? "border-gold/20 bg-gold/5"
-            : "border-white/8 bg-white/4"
+            : "border-border bg-muted/40"
         }`}>
           <div className="flex items-center gap-1.5">
             {match.already_voted ? (
@@ -121,9 +120,9 @@ export function MatchCard({ match }: { match: MatchCardData }) {
               </>
             ) : (
               <>
-                <Users2 className="h-3.5 w-3.5 text-white/40" />
-                <span className="text-xs text-white/50">
-                  <span className="font-bold tabular-nums text-white/80">{(match.votes_count ?? 0).toLocaleString("pt-PT")}</span>
+                <Users2 className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  <span className="font-bold tabular-nums text-foreground">{(match.votes_count ?? 0).toLocaleString("pt-PT")}</span>
                   {" "}previsões
                 </span>
                 {(match.votes_count ?? 0) > 0 && (
@@ -136,7 +135,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
             )}
           </div>
           <span className={`text-xs font-bold transition-smooth group-hover:underline ${
-            match.already_voted ? "text-gold" : "text-gold/70"
+            match.already_voted ? "text-gold" : "text-gold"
           }`}>
             {match.already_voted ? "Ver Comunidade →" : "Dar Previsão →"}
           </span>

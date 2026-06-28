@@ -406,8 +406,9 @@ function Ligas() {
             {myPools.map((pool: any) => {
               const memberCount = memberCounts[pool.id] ?? 1;
               return (
-                <div key={pool.id} className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                  <div className="card-stripe" />
+                <div key={pool.id} className="overflow-hidden rounded-2xl border border-gold/30 bg-card"
+                  style={{ boxShadow: "0 2px 16px rgba(200,150,12,0.10), 0 0 0 1px rgba(200,150,12,0.20)" }}>
+                  <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, #c8960c 50%, transparent 100%)" }} />
                   <div className="p-4">
                     <div className="flex items-start gap-3">
                       {/* Big emoji on left */}

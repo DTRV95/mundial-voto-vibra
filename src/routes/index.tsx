@@ -508,8 +508,8 @@ function Home() {
         <div
           className="relative overflow-hidden rounded-3xl"
           style={{
-            background: "linear-gradient(135deg, oklch(0.14 0.04 260) 0%, oklch(0.10 0.02 260) 55%, oklch(0.12 0.06 30) 100%)",
-            boxShadow: "0 24px 64px oklch(0 0 0 / 0.50), 0 0 0 1px oklch(1 0 0 / 0.07)",
+            background: "linear-gradient(135deg, oklch(0.38 0.18 27) 0%, oklch(0.30 0.14 27) 50%, oklch(0.26 0.10 280) 100%)",
+            boxShadow: "0 16px 48px oklch(0.54 0.24 27 / 0.35), 0 0 0 1px oklch(1 0 0 / 0.08)",
             minHeight: "220px",
           }}
         >

@@ -308,101 +308,116 @@ function Perfil() {
 
       {/* Hero card */}
       <div className="relative overflow-hidden rounded-3xl mb-8"
-        style={{ background: "linear-gradient(160deg, oklch(0.22 0.09 155) 0%, oklch(0.16 0.06 165) 100%)" }}>
+        style={{ background: "linear-gradient(160deg,#0d2a12 0%,#0a1a2e 60%,#1a1000 100%)" }}>
         {/* WC tricolor stripe */}
         <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,#E61D25 0%,#3CAC3B 50%,#2A398D 100%)" }} />
         {/* Pitch grid overlay */}
-        <div className="pointer-events-none absolute inset-0 opacity-[0.04] select-none"
-          style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 24px,white 24px,white 25px),repeating-linear-gradient(90deg,transparent,transparent 24px,white 24px,white 25px)" }} />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.035] select-none"
+          style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 28px,white 28px,white 29px),repeating-linear-gradient(90deg,transparent,transparent 28px,white 28px,white 29px)" }} />
+        {/* Radial glow behind avatar */}
+        <div className="pointer-events-none absolute -top-12 -left-12 h-64 w-64 rounded-full opacity-20"
+          style={{ background: "radial-gradient(circle,#c8960c 0%,transparent 70%)" }} />
 
-        <div className="relative px-5 pt-5 pb-0">
-          {/* Top row: avatar + name + action buttons */}
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-4">
-              {/* Avatar */}
-              <button
-                onClick={() => setAvatarOpen(true)}
-                className="relative shrink-0 group"
-                title="Alterar avatar"
-              >
+        <div className="relative px-5 pt-6 pb-0">
+          {/* Action buttons top-right */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <button
+              onClick={shareMyRank}
+              title="Partilhar classificação"
+              className="rounded-full border border-white/15 bg-white/8 p-2 text-white/50 hover:text-gold hover:border-gold/40 transition-smooth"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+            </button>
+            <button onClick={signOut}
+              className="rounded-full border border-white/15 bg-white/8 p-2 text-white/50 hover:text-white/80 transition-smooth">
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {/* Avatar + name block */}
+          <div className="flex items-end gap-4 mb-4">
+            <button
+              onClick={() => setAvatarOpen(true)}
+              className="relative shrink-0 group"
+              title="Alterar avatar"
+            >
+              {/* Gold ring for top 10 */}
+              <div className={`absolute -inset-1 rounded-2xl ${(myGlobalRank ?? 999) <= 10 ? "bg-gradient-to-br from-gold/60 to-gold/20" : "bg-white/10"}`} />
+              <div className="relative">
                 <UserAvatar avatarUrl={profile?.avatar_url} name={profile?.display_name ?? user.email} size={20} />
-                <div className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-smooth flex items-center justify-center">
-                  <ImageIcon className="h-5 w-5 text-white" />
-                </div>
-              </button>
-              <div>
-                {editing ? (
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <input
-                          autoFocus
-                          value={newName}
-                          onChange={e => checkName(e.target.value)}
-                          maxLength={30}
-                          className="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white outline-none focus:border-white/50 pr-8 w-40 placeholder:text-white/40"
-                          placeholder="Novo nome"
-                        />
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                          {nameStatus === "checking"  && <Loader2 className="h-3.5 w-3.5 animate-spin text-white/60" />}
-                          {nameStatus === "available" && <CheckCircle2 className="h-3.5 w-3.5 text-green-400" />}
-                          {nameStatus === "taken"     && <XCircle className="h-3.5 w-3.5 text-red-400" />}
-                        </div>
+              </div>
+              <div className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-smooth flex items-center justify-center">
+                <ImageIcon className="h-5 w-5 text-white" />
+              </div>
+            </button>
+
+            <div className="pb-0.5 min-w-0">
+              {editing ? (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="relative">
+                      <input
+                        autoFocus
+                        value={newName}
+                        onChange={e => checkName(e.target.value)}
+                        maxLength={30}
+                        className="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white outline-none focus:border-white/50 pr-8 w-40 placeholder:text-white/40"
+                        placeholder="Novo nome"
+                      />
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                        {nameStatus === "checking"  && <Loader2 className="h-3.5 w-3.5 animate-spin text-white/60" />}
+                        {nameStatus === "available" && <CheckCircle2 className="h-3.5 w-3.5 text-green-400" />}
+                        {nameStatus === "taken"     && <XCircle className="h-3.5 w-3.5 text-red-400" />}
                       </div>
-                      <button onClick={saveName} disabled={savingName || nameStatus === "taken"}
-                        className="rounded-lg bg-gold px-2.5 py-1.5 text-xs font-bold text-background disabled:opacity-50">
-                        {savingName ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Guardar"}
-                      </button>
-                      <button onClick={() => setEditing(false)} className="text-white/50 hover:text-white">
-                        <X className="h-4 w-4" />
-                      </button>
                     </div>
-                    {nameStatus === "taken" && <p className="text-xs text-red-400">Nome já em uso.</p>}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <h1 className="font-display text-2xl text-white leading-tight">{profile?.display_name ?? "Adepto"}</h1>
-                    <button onClick={startEdit} className="text-white/40 hover:text-gold transition-smooth">
-                      <Pencil className="h-3.5 w-3.5" />
+                    <button onClick={saveName} disabled={savingName || nameStatus === "taken"}
+                      className="rounded-lg bg-gold px-2.5 py-1.5 text-xs font-bold text-background disabled:opacity-50">
+                      {savingName ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Guardar"}
+                    </button>
+                    <button onClick={() => setEditing(false)} className="text-white/50 hover:text-white">
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
-                )}
-                <p className="text-xs text-white/40 mt-0.5">{user.email}</p>
+                  {nameStatus === "taken" && <p className="text-xs text-red-400">Nome já em uso.</p>}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 min-w-0">
+                  <h1 className="font-display text-2xl text-white leading-tight truncate">{profile?.display_name ?? "Adepto"}</h1>
+                  <button onClick={startEdit} className="text-white/30 hover:text-gold transition-smooth shrink-0">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {/* Rank + division pills */}
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                 {myGlobalRank != null && (
-                  <div className="mt-2 flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gold/20 border border-gold/40 px-2.5 py-0.5 text-xs font-bold text-gold">
-                      #{myGlobalRank}º global
-                    </span>
-                    <span className="text-xs text-white/40">{myRankDivision}</span>
-                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gold/20 border border-gold/35 px-2.5 py-0.5 text-[11px] font-bold text-gold">
+                    🏆 #{myGlobalRank}º global
+                  </span>
+                )}
+                <span className="rounded-full bg-white/8 border border-white/12 px-2 py-0.5 text-[11px] text-white/50 font-medium">
+                  {myRankDivision}
+                </span>
+                {currentStreak > 1 && (
+                  <span className="rounded-full bg-orange-500/15 border border-orange-500/25 px-2 py-0.5 text-[11px] font-bold text-orange-400">
+                    🔥 {currentStreak} seguidos
+                  </span>
                 )}
               </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0 pt-1">
-              <button
-                onClick={shareMyRank}
-                title="Partilhar classificação"
-                className="rounded-full border border-white/20 bg-white/10 p-2.5 text-white/60 hover:text-gold hover:border-gold/40 transition-smooth"
-              >
-                <Share2 className="h-4 w-4" />
-              </button>
-              <button onClick={signOut}
-                className="rounded-full border border-white/20 bg-white/10 p-2.5 text-white/60 hover:text-white hover:border-white/40 transition-smooth">
-                <LogOut className="h-4 w-4" />
-              </button>
             </div>
           </div>
 
           {/* Stats strip */}
-          <div className="grid grid-cols-3 border-t border-white/10 mt-5">
+          <div className="grid grid-cols-3 border-t border-white/8 mt-2">
             {[
-              { label: "Pontos", value: profile?.total_points ?? 0 },
-              { label: "Previsões", value: profile?.predictions_made ?? 0 },
-              { label: "Acerto", value: `${acc}%` },
+              { label: "Pontos", value: profile?.total_points ?? 0, color: "text-gold" },
+              { label: "Previsões", value: profile?.predictions_made ?? 0, color: "text-white" },
+              { label: "Acerto", value: `${acc}%`, color: acc >= 50 ? "text-wc-green" : "text-white/70" },
             ].map((s, i) => (
-              <div key={i} className={`py-3 text-center ${i > 0 ? "border-l border-white/10" : ""}`}>
-                <div className="font-display text-xl text-white leading-none">{s.value}</div>
-                <div className="text-[10px] uppercase tracking-widest text-white/40 mt-1">{s.label}</div>
+              <div key={i} className={`py-3.5 text-center ${i > 0 ? "border-l border-white/8" : ""}`}>
+                <div className={`font-display text-2xl leading-none ${s.color}`}>{s.value}</div>
+                <div className="text-[10px] uppercase tracking-widest text-white/35 mt-1.5">{s.label}</div>
               </div>
             ))}
           </div>
@@ -451,7 +466,7 @@ function Perfil() {
       )}
 
       {/* Gráfico de evolução de pontos */}
-      <PointsEvolutionChart history={history as any[]} phaseResults={phaseResults as any[]} />
+      <PointsEvolutionChart history={history as any[]} />
 
       {/* Estatísticas gerais */}
       {finishedGames.length > 0 && (
@@ -463,12 +478,12 @@ function Perfil() {
             <div className="rounded-2xl border border-wc-green/25 bg-wc-green/5 p-4 text-center">
               <div className="font-display text-3xl text-wc-green">{correctGames}</div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Acertos</div>
-              <div className="text-xs text-muted-foreground mt-1">em {finishedGames.filter((h: any) => h.result_90).length} com voto</div>
+              <div className="text-xs text-muted-foreground mt-1">{acc}% de taxa de acerto</div>
             </div>
             <div className="rounded-2xl border border-wc-blue/25 bg-wc-blue/5 p-4 text-center">
               <div className="font-display text-3xl text-wc-blue">{exactScores}</div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Placares Exatos</div>
-              <div className="text-xs text-muted-foreground mt-1">em {finishedGames.length} jogos</div>
+              <div className="text-xs text-muted-foreground mt-1">em {finishedGames.length} jogos terminados</div>
             </div>
           </div>
         </section>
@@ -714,103 +729,102 @@ function Perfil() {
   );
 }
 
-const PHASE_ORDER = ["grupos", "ronda32", "oitavos", "quartos", "meias", "final"];
-const PHASE_SHORT: Record<string, string> = {
-  grupos: "Grupos", ronda32: "16avos", oitavos: "Oitavos",
-  quartos: "Quartos", meias: "Meias", final: "Final",
-};
+function isCorrectResultLocal(h: any): boolean {
+  if (!h.result_90) return false;
+  const hs = h.match?.home_score; const as_ = h.match?.away_score;
+  if (hs == null || as_ == null) return false;
+  const actual = hs > as_ ? "home" : hs < as_ ? "away" : "draw";
+  return h.result_90 === actual;
+}
 
-function PointsEvolutionChart({ history, phaseResults }: { history: any[]; phaseResults: any[] }) {
-  // Determine current phase: the first phase not yet in phaseResults (completed phases)
-  const completedPhases = new Set(phaseResults.map((r: any) => r.phase));
-  const currentPhase = PHASE_ORDER.find(p => !completedPhases.has(p)) ?? PHASE_ORDER[PHASE_ORDER.length - 1];
-  const currentPhaseLabel = PHASE_SHORT[currentPhase] ?? currentPhase;
+function PointsEvolutionChart({ history }: { history: any[] }) {
+  // All finished games where the user voted on result_90, ordered by date
+  const votedGames = [...history]
+    .filter(h => h.match?.home_score != null && h.result_90 && h.match?.kickoff_at)
+    .sort((a, b) => new Date(a.match.kickoff_at).getTime() - new Date(b.match.kickoff_at).getTime())
+    .slice(-40);
 
-  // Only show predictions for the current phase, scored (points != null)
-  const scoredPreds = [...history]
-    .filter(h => h.match?.kickoff_at && h.match?.phase === currentPhase && h.points != null)
-    .sort((a, b) => new Date(a.match.kickoff_at).getTime() - new Date(b.match.kickoff_at).getTime());
+  const totalVoted = votedGames.length;
+  const totalCorrect = votedGames.filter(isCorrectResultLocal).length;
+  const accPct = totalVoted > 0 ? Math.round((totalCorrect / totalVoted) * 100) : 0;
 
-  const W = 300;
-  const H = 80;
-  const pad = 4;
-
-  // No scored predictions yet in this phase — show 0 pts placeholder
-  if (scoredPreds.length === 0) {
+  if (totalVoted === 0) {
     return (
       <section className="mb-8">
         <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-          <TrendingUp className="h-4 w-4" /> Evolução de Pontos
-          <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{currentPhaseLabel}</span>
+          <TrendingUp className="h-4 w-4" /> Historial de Resultados
         </h2>
-        <div className="rounded-2xl border border-border bg-card/60 p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-muted-foreground">0 jogos pontuados</span>
-            <span className="font-display text-lg text-gold leading-none">0 pts</span>
-          </div>
-          <div className="h-[80px] flex items-end">
-            <div className="w-full h-px bg-border/50" />
-          </div>
-          <p className="text-center text-[10px] text-muted-foreground mt-2">O gráfico sobe assim que os resultados forem apurados.</p>
+        <div className="rounded-2xl border border-border/60 bg-card/60 p-6 text-center">
+          <p className="text-sm text-muted-foreground">Ainda sem jogos terminados para mostrar.</p>
         </div>
       </section>
     );
   }
 
+  // Cumulative correct line
   let cum = 0;
-  const data = scoredPreds.map(h => {
-    cum += h.points ?? 0;
-    return { pts: h.points ?? 0, cum, label: `${h.match?.home?.name ?? "?"} vs ${h.match?.away?.name ?? "?"}` };
+  const lineData = votedGames.map(h => {
+    if (isCorrectResultLocal(h)) cum++;
+    return cum;
   });
 
-  const isPhaseMode = false;
-  const max = Math.max(...data.map(d => d.cum), 1);
-  const step = data.length > 1 ? (W - pad * 2) / (data.length - 1) : 0;
-
-  const pts = data.map((d, i) => {
-    const x = data.length > 1 ? pad + i * step : W / 2;
-    const y = H - pad - ((d.cum / max) * (H - pad * 2));
-    return { x, y, ...d };
-  });
-
-  const pathD = pts.length === 1
-    ? `M ${pts[0].x - 1} ${pts[0].y} L ${pts[0].x + 1} ${pts[0].y}`
-    : pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-  const areaD = pts.length === 1
-    ? `M ${pts[0].x - 1} ${pts[0].y} L ${pts[0].x + 1} ${pts[0].y} L ${pts[0].x + 1} ${H} L ${pts[0].x - 1} ${H} Z`
-    : `${pathD} L ${pts[pts.length - 1].x} ${H} L ${pad} ${H} Z`;
+  const W = 300; const H = 72; const pad = 6;
+  const max = Math.max(...lineData, 1);
+  const step = lineData.length > 1 ? (W - pad * 2) / (lineData.length - 1) : 0;
+  const svgPts = lineData.map((v, i) => ({
+    x: lineData.length > 1 ? pad + i * step : W / 2,
+    y: H - pad - ((v / max) * (H - pad * 2)),
+  }));
+  const pathD = svgPts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+  const areaD = `${pathD} L ${svgPts[svgPts.length - 1].x.toFixed(1)} ${H} L ${pad} ${H} Z`;
 
   return (
     <section className="mb-8">
       <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-        <TrendingUp className="h-4 w-4" /> Evolução de Pontos
-        <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{currentPhaseLabel}</span>
+        <TrendingUp className="h-4 w-4" /> Historial de Resultados
       </h2>
       <div className="rounded-2xl border border-border bg-card/60 p-4">
+        {/* Summary row */}
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-muted-foreground">{data.length} jogo{data.length !== 1 ? "s" : ""} pontuado{data.length !== 1 ? "s" : ""}</span>
-          <span className="font-display text-lg text-gold leading-none">{data[data.length - 1].cum} pts</span>
+          <span className="text-xs text-muted-foreground">{totalCorrect} acertos em {totalVoted} jogos</span>
+          <span className={`font-display text-lg leading-none ${accPct >= 50 ? "text-wc-green" : "text-wc-red"}`}>{accPct}%</span>
         </div>
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full overflow-visible" style={{ height: 80 }}>
+
+        {/* Cumulative line chart */}
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 72, display: "block" }}>
           <defs>
-            <linearGradient id="ptsFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="oklch(0.75 0.18 85)" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="oklch(0.75 0.18 85)" stopOpacity="0.02" />
+            <linearGradient id="correctFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3CAC3B" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#3CAC3B" stopOpacity="0.02" />
             </linearGradient>
           </defs>
-          {[0.25, 0.5, 0.75, 1].map(t => (
-            <line key={t} x1={pad} x2={W - pad} y1={H - pad - t * (H - pad * 2)} y2={H - pad - t * (H - pad * 2)}
-              stroke="currentColor" strokeOpacity="0.06" strokeWidth="1" />
+          {[0.33, 0.66, 1].map(t => (
+            <line key={t} x1={pad} x2={W - pad}
+              y1={H - pad - t * (H - pad * 2)} y2={H - pad - t * (H - pad * 2)}
+              stroke="white" strokeOpacity="0.05" strokeWidth="1" />
           ))}
-          <path d={areaD} fill="url(#ptsFill)" />
-          <path d={pathD} fill="none" stroke="oklch(0.75 0.18 85)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          {[pts[0], pts[pts.length - 1]].map((p, i) => (
-            <circle key={i} cx={p.x} cy={p.y} r="3.5" fill="oklch(0.75 0.18 85)" stroke="var(--background)" strokeWidth="1.5" />
-          ))}
+          <path d={areaD} fill="url(#correctFill)" />
+          <path d={pathD} fill="none" stroke="#3CAC3B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx={svgPts[svgPts.length - 1].x} cy={svgPts[svgPts.length - 1].y}
+            r="3.5" fill="#3CAC3B" stroke="#0d1a0f" strokeWidth="1.5" />
         </svg>
-        <div className="flex justify-between mt-1">
-          <span className="text-[9px] text-muted-foreground">Jogo 1</span>
-          <span className="text-[9px] text-muted-foreground">Jogo {data.length}</span>
+
+        {/* Per-game dots grid */}
+        <div className="flex flex-wrap gap-1 mt-3">
+          {votedGames.map((h, i) => {
+            const ok = isCorrectResultLocal(h);
+            return (
+              <div
+                key={i}
+                title={`${h.match?.home?.name ?? "?"} vs ${h.match?.away?.name ?? "?"} — ${ok ? "Acerto ✓" : "Erro ✗"}`}
+                className={`h-3 w-3 rounded-sm transition-opacity ${ok ? "bg-wc-green/70" : "bg-wc-red/50"}`}
+              />
+            );
+          })}
+        </div>
+        <div className="flex justify-between mt-1.5">
+          <span className="text-[9px] text-muted-foreground">Mais antigo</span>
+          <span className="text-[9px] text-muted-foreground">Mais recente</span>
         </div>
       </div>
     </section>

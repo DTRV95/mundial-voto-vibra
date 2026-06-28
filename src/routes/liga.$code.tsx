@@ -1062,6 +1062,7 @@ function LeagueChat({ poolCode, userId, ranking }: { poolCode: string; userId: s
       .from("league_messages")
       .select("id,user_id,body,created_at")
       .eq("pool_code", poolCode)
+      .not("body", "like", "POLL_VOTE:%")
       .order("created_at", { ascending: true })
       .limit(50)
       .then(({ data }) => {
@@ -1075,6 +1076,7 @@ function LeagueChat({ poolCode, userId, ranking }: { poolCode: string; userId: s
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "league_messages", filter: `pool_code=eq.${poolCode}` },
         (payload) => {
+          if ((payload.new as any).body?.startsWith("POLL_VOTE:")) return;
           setMessages(prev => {
             if (prev.some(m => m.id === payload.new.id)) return prev;
             return [...prev, payload.new as ChatMessage];

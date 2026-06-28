@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
-import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target, CalendarClock, Wand2 } from "lucide-react";
+import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target, CalendarClock, Wand2, X } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
@@ -136,6 +136,7 @@ function JogoPage() {
   });
 
   const [scorelabOpen, setScorelabOpen] = useState(false);
+  const [autoFillInfoOpen, setAutoFillInfoOpen] = useState(false);
   const [pred, setPred] = useState<Record<string, any>>({});
   const [shared, setShared] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -528,9 +529,66 @@ function JogoPage() {
                 {autoFilling ? "A preencher…" : "Auto-fill"}
               </button>
             )}
-            <Link to="/como-funciona" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-gold transition-smooth">
+            <button
+              onClick={() => setAutoFillInfoOpen(true)}
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-gold transition-smooth"
+            >
               <Info className="h-3.5 w-3.5" /> Como funciona?
-            </Link>
+            </button>
+
+            {/* Auto-fill info popup */}
+            {autoFillInfoOpen && (
+              <div
+                className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                onClick={() => setAutoFillInfoOpen(false)}
+              >
+                <div
+                  className="relative w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-2xl"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => setAutoFillInfoOpen(false)}
+                    className="absolute right-4 top-4 text-muted-foreground hover:text-foreground transition-smooth"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="rounded-full bg-gold/15 border border-gold/30 p-2">
+                      <Wand2 className="h-4 w-4 text-gold" />
+                    </span>
+                    <h2 className="font-display text-lg text-foreground">Auto-fill</h2>
+                  </div>
+                  <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+                    <p>
+                      O <span className="font-semibold text-foreground">Auto-fill</span> preenche automaticamente todos os mercados do jogo com base em dados reais.
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <span className="mt-0.5 shrink-0 text-gold">①</span>
+                        <p><span className="font-semibold text-foreground">Votos da comunidade</span> — se já existirem 3 ou mais votos, escolhe a opção mais votada.</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="mt-0.5 shrink-0 text-gold">②</span>
+                        <p><span className="font-semibold text-foreground">Probabilidades ScoreLab</span> — em alternativa, usa as probabilidades reais do jogo como pesos para a escolha.</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="mt-0.5 shrink-0 text-gold">③</span>
+                        <p><span className="font-semibold text-foreground">Resultado coerente</span> — o placar exato é gerado de forma realista e consistente com o resultado e BTTS selecionados.</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground/60 pt-1">
+                      Podes sempre editar qualquer campo depois do preenchimento automático.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setAutoFillInfoOpen(false)}
+                    className="mt-5 w-full rounded-xl bg-gold/15 border border-gold/30 py-2 text-sm font-semibold text-gold hover:bg-gold/25 transition-smooth"
+                  >
+                    Percebido!
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

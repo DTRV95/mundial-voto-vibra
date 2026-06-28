@@ -96,6 +96,26 @@ function LigaPage() {
     },
   });
 
+  const { data: memberPhaseResults = {} } = useQuery({
+    queryKey: ["pool-member-phase-results", pool?.id],
+    enabled: !!pool,
+    queryFn: async () => {
+      const { data: members } = await supabase.from("pool_members").select("user_id").eq("pool_id", pool!.id);
+      if (!members || members.length === 0) return {};
+      const userIds = members.map((m: any) => m.user_id);
+      const { data } = await (supabase as any)
+        .from("phase_results")
+        .select("user_id,phase,rank,total_points")
+        .in("user_id", userIds);
+      const map: Record<string, Record<string, { rank: number; total_points: number }>> = {};
+      for (const r of data ?? []) {
+        if (!map[r.user_id]) map[r.user_id] = {};
+        map[r.user_id][r.phase] = { rank: r.rank, total_points: r.total_points };
+      }
+      return map;
+    },
+  });
+
   const { data: phaseWinner } = useQuery({
     queryKey: ["pool-phase-winner", pool?.id],
     enabled: !!pool,
@@ -656,6 +676,11 @@ function copyLink() {
                         {globalRanks[r.id] && (
                           <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-gold/15 px-1.5 py-0.5 text-[9px] font-bold text-gold">
                             #{globalRanks[r.id]}º global
+                          </span>
+                        )}
+                        {(memberPhaseResults as any)[r.id]?.["grupos"] && (
+                          <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-wc-blue/15 px-1.5 py-0.5 text-[9px] font-bold text-wc-blue">
+                            GR #{(memberPhaseResults as any)[r.id]["grupos"].rank}º
                           </span>
                         )}
                         {votedTodayIds.has(r.id) && (

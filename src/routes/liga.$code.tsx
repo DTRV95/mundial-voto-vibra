@@ -416,28 +416,27 @@ function copyLink() {
       {/* ── HERO ─────────────────────────────────────────────── */}
       <div className="px-5 pt-5 md:px-8">
       <div
-        className="relative overflow-hidden rounded-3xl panini-stripes"
+        className="relative overflow-hidden rounded-3xl"
         style={{
-          background: "linear-gradient(145deg, oklch(0.54 0.24 27) 0%, oklch(0.40 0.20 15) 55%, oklch(0.28 0.14 270) 100%)",
+          background: "linear-gradient(135deg, oklch(0.30 0.12 142) 0%, oklch(0.18 0.06 165) 100%)",
           minHeight: "220px",
-          boxShadow: "0 12px 40px oklch(0.54 0.24 27 / 0.35)",
         }}
       >
-        {/* Tricolor strip no fundo */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 wc-tricolor" />
-
-        {/* Troféu decorativo */}
+        {/* Trophy watermark */}
         <div className="absolute right-0 top-0 bottom-0 flex items-center justify-end pr-6 opacity-10 pointer-events-none select-none">
           <Trophy className="h-48 w-48 text-white" />
         </div>
 
-        <div className="relative px-5 pt-5 pb-6 md:px-8">
+        {/* Gold shimmer line at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 wc-tricolor" />
+
+        <div className="relative px-5 pt-5 pb-7 md:px-8">
           <Link to="/ligas" className="mb-5 inline-flex items-center gap-1.5 text-xs font-semibold text-white/60 hover:text-white/90 transition-smooth">
             <ArrowLeft className="h-3.5 w-3.5" /> Torneios
           </Link>
 
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Torneio Privado · {pool.code}</p>
-          <h1 className="font-display text-[clamp(2rem,8vw,3.5rem)] leading-none text-white flex items-center gap-3">
+          <h1 className="font-display text-[clamp(2rem,8vw,3.5rem)] leading-none text-gold-metallic flex items-center gap-3">
             <button
               onClick={() => isCreator && setShowEmojiPicker(p => !p)}
               className={`text-[clamp(1.8rem,7vw,3rem)] leading-none ${isCreator ? "cursor-pointer hover:scale-110 transition-transform" : "cursor-default"}`}
@@ -461,18 +460,18 @@ function copyLink() {
             </div>
           )}
 
-          {/* Stats strip */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
-            <div className="flex items-center gap-1.5 text-xs text-white/70">
+          {/* Stats pills */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white">
               <Users className="h-3.5 w-3.5" />
-              <span><strong className="text-white">{ranking.length}</strong> membro{ranking.length !== 1 ? "s" : ""}</span>
+              <span><strong>{ranking.length}</strong> membro{ranking.length !== 1 ? "s" : ""}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-white/70">
+            <div className="flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white">
               <Zap className="h-3.5 w-3.5" />
-              <span><strong className="text-white">{totalPoints}</strong> pontos totais</span>
+              <span><strong>{totalPoints}</strong> pts totais</span>
             </div>
             {pool.prize && (
-              <div className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white">
+              <div className="flex items-center gap-1.5 rounded-full bg-gold/20 backdrop-blur-sm border border-gold/30 px-3 py-1 text-xs font-bold text-gold">
                 <Gift className="h-3 w-3" /> {pool.prize}
               </div>
             )}
@@ -482,14 +481,14 @@ function copyLink() {
           <div className="mt-5 flex flex-wrap gap-2">
             <button
               onClick={shareWhatsApp}
-              className="flex items-center gap-1.5 rounded-xl bg-[#25D366] px-4 py-2 text-xs font-bold text-white shadow-md transition-smooth hover:scale-[1.02] active:scale-95"
+              className="flex items-center gap-1.5 rounded-xl bg-white/15 border border-white/20 px-4 py-2 text-xs font-bold text-white shadow-md transition-smooth hover:bg-white/25 hover:scale-[1.02] active:scale-95"
             >
               <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.524 5.851L0 24l6.336-1.498A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.373l-.36-.214-3.727.881.933-3.625-.235-.372A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
               WhatsApp
             </button>
             <button
               onClick={copyLink}
-              className="flex items-center gap-1.5 rounded-xl bg-white/15 px-4 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth active:scale-95"
+              className="flex items-center gap-1.5 rounded-xl bg-white/15 border border-white/20 px-4 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth active:scale-95"
             >
               {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? "Copiado!" : "Copiar link"}
@@ -637,55 +636,80 @@ function copyLink() {
             <h2 className="font-display text-xl">Pódio</h2>
           </div>
 
-          <div className="flex items-end justify-center gap-3 px-4 pb-2">
-            {/* 2º lugar */}
-            {podium[1] && (
-              <div className="flex flex-1 flex-col items-center gap-2">
-                <UserAvatar avatarUrl={(podium[1] as any).avatar_url} name={(podium[1] as any).display_name} size={10} className="rounded-full" />
-                <div className="text-center">
-                  <p className="text-xs font-semibold leading-tight line-clamp-1 max-w-[80px]">{(podium[1] as any).display_name}</p>
-                  {votedTodayIds.has((podium[1] as any).id) && <p className="text-[9px] text-wc-green font-bold">✓ votou hoje</p>}
+          <div
+            className="rounded-3xl overflow-hidden"
+            style={{ background: "linear-gradient(135deg, oklch(0.30 0.12 142) 0%, oklch(0.18 0.06 165) 100%)" }}
+          >
+            {/* Gold shimmer stripe at top */}
+            <div className="wc-tricolor h-1 w-full" />
+
+            <div className="flex items-end justify-center gap-3 px-4 pt-5 pb-4">
+              {/* 2º lugar */}
+              {podium[1] && (
+                <div className="flex flex-1 flex-col items-center gap-2">
+                  <UserAvatar avatarUrl={(podium[1] as any).avatar_url} name={(podium[1] as any).display_name} size={10} className="rounded-full" />
+                  <div className="text-center">
+                    <p className="text-xs font-semibold leading-tight line-clamp-1 max-w-[80px] text-white/90">{(podium[1] as any).display_name}</p>
+                    {votedTodayIds.has((podium[1] as any).id) && (
+                      <p className="text-[9px] font-bold flex items-center justify-center gap-0.5 text-wc-green">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-wc-green" /> votou hoje
+                      </p>
+                    )}
+                  </div>
+                  <p className="font-display text-sm text-white/60">{(podium[1] as any).total_points} pts</p>
+                  <div className={`w-full ${PODIUM_H[1]} ${PODIUM_BG[1]} rounded-t-2xl flex items-start justify-center pt-2`}
+                    style={{ boxShadow: "inset 0 2px 8px rgba(255,255,255,0.08)" }}
+                  >
+                    <span className="text-xl">🥈</span>
+                  </div>
                 </div>
-                <p className="font-display text-sm text-muted-foreground">{(podium[1] as any).total_points} pts</p>
-                <div className={`w-full ${PODIUM_H[1]} ${PODIUM_BG[1]} rounded-t-xl flex items-start justify-center pt-2`}>
-                  <span className="text-xl">🥈</span>
+              )}
+              {/* 1º lugar */}
+              {podium[0] && (
+                <div className="flex flex-1 flex-col items-center gap-2">
+                  <div className="relative">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl z-10">👑</span>
+                    <UserAvatar avatarUrl={(podium[0] as any).avatar_url} name={(podium[0] as any).display_name} size={14} className="rounded-full ring-2 ring-gold/60" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs font-bold leading-tight line-clamp-1 max-w-[80px] text-white">
+                      {(podium[0] as any).display_name}
+                    </p>
+                    {votedTodayIds.has((podium[0] as any).id) && (
+                      <p className="text-[9px] font-bold flex items-center justify-center gap-0.5 text-wc-green">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-wc-green" /> votou hoje
+                      </p>
+                    )}
+                  </div>
+                  <p className="font-display text-base text-gold font-bold">{(podium[0] as any).total_points} pts</p>
+                  <div className={`w-full ${PODIUM_H[0]} ${PODIUM_BG[0]} rounded-t-2xl flex items-start justify-center pt-2 trophy-shine`}
+                    style={{ boxShadow: "inset 0 2px 12px rgba(255,255,255,0.12)" }}
+                  >
+                    <span className="text-2xl">🥇</span>
+                  </div>
                 </div>
-              </div>
-            )}
-            {/* 1º lugar */}
-            {podium[0] && (
-              <div className="flex flex-1 flex-col items-center gap-2">
-                <div className="relative">
-                  <UserAvatar avatarUrl={(podium[0] as any).avatar_url} name={(podium[0] as any).display_name} size={14} className="rounded-full" />
-                  <span className="absolute -top-2 -right-1 text-lg">👑</span>
+              )}
+              {/* 3º lugar */}
+              {podium[2] && (
+                <div className="flex flex-1 flex-col items-center gap-2">
+                  <UserAvatar avatarUrl={(podium[2] as any).avatar_url} name={(podium[2] as any).display_name} size={10} className="rounded-full" />
+                  <div className="text-center">
+                    <p className="text-xs font-semibold leading-tight line-clamp-1 max-w-[80px] text-white/90">{(podium[2] as any).display_name}</p>
+                    {votedTodayIds.has((podium[2] as any).id) && (
+                      <p className="text-[9px] font-bold flex items-center justify-center gap-0.5 text-wc-green">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-wc-green" /> votou hoje
+                      </p>
+                    )}
+                  </div>
+                  <p className="font-display text-sm text-white/60">{(podium[2] as any).total_points} pts</p>
+                  <div className={`w-full ${PODIUM_H[2]} ${PODIUM_BG[2]} rounded-t-2xl flex items-start justify-center pt-2`}
+                    style={{ boxShadow: "inset 0 2px 8px rgba(255,255,255,0.08)" }}
+                  >
+                    <span className="text-xl">🥉</span>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-xs font-bold leading-tight line-clamp-1 max-w-[80px]">
-                    {(podium[0] as any).display_name}
-                    {(podium[0] as any).id === pool?.created_by && " 👑"}
-                  </p>
-                  {votedTodayIds.has((podium[0] as any).id) && <p className="text-[9px] text-wc-green font-bold">✓ votou hoje</p>}
-                </div>
-                <p className="font-display text-base text-gold font-bold">{(podium[0] as any).total_points} pts</p>
-                <div className={`w-full ${PODIUM_H[0]} ${PODIUM_BG[0]} rounded-t-xl flex items-start justify-center pt-2 trophy-shine`}>
-                  <span className="text-2xl">🥇</span>
-                </div>
-              </div>
-            )}
-            {/* 3º lugar */}
-            {podium[2] && (
-              <div className="flex flex-1 flex-col items-center gap-2">
-                <UserAvatar avatarUrl={(podium[2] as any).avatar_url} name={(podium[2] as any).display_name} size={10} className="rounded-full" />
-                <div className="text-center">
-                  <p className="text-xs font-semibold leading-tight line-clamp-1 max-w-[80px]">{(podium[2] as any).display_name}</p>
-                  {votedTodayIds.has((podium[2] as any).id) && <p className="text-[9px] text-wc-green font-bold">✓ votou hoje</p>}
-                </div>
-                <p className="font-display text-sm text-muted-foreground">{(podium[2] as any).total_points} pts</p>
-                <div className={`w-full ${PODIUM_H[2]} ${PODIUM_BG[2]} rounded-t-xl flex items-start justify-center pt-2`}>
-                  <span className="text-xl">🥉</span>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}

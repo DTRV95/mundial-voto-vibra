@@ -316,23 +316,19 @@ function RootComponent() {
 function MaintenanceGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [checking, setChecking] = useState(MAINTENANCE);
 
   useEffect(() => {
-    if (!MAINTENANCE) return;
-    if (loading) return;
-    if (!user) { setChecking(false); return; }
+    if (!MAINTENANCE || loading || !user) return;
     supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .eq("role", "admin")
       .maybeSingle()
-      .then(({ data }) => { setIsAdmin(!!data); setChecking(false); });
+      .then(({ data }) => setIsAdmin(!!data));
   }, [user, loading]);
 
   if (!MAINTENANCE) return <>{children}</>;
-  if (checking) return null;
   if (isAdmin) return <>{children}</>;
   return <MaintenancePage />;
 }

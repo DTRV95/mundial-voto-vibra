@@ -96,6 +96,24 @@ function LigaPage() {
     },
   });
 
+  const { data: phaseWinner } = useQuery({
+    queryKey: ["pool-phase-winner", pool?.id],
+    enabled: !!pool,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("pool_phase_winners")
+        .select("phase,pool_points,user_id")
+        .eq("pool_id", pool!.id)
+        .order("created_at", { ascending: false });
+      if (!data || data.length === 0) return null;
+      const userIds = data.map((d: any) => d.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles").select("id,display_name,avatar_url").in("id", userIds);
+      const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
+      return data.map((d: any) => ({ ...d, profile: profileMap[d.user_id] }));
+    },
+  });
+
   const { data: ranking = [] } = useQuery({
     queryKey: ["pool-ranking", pool?.id],
     enabled: !!pool,
@@ -459,6 +477,31 @@ function copyLink() {
         </div>
       </div>
       </div>
+
+      {/* ── CAMPEÕES POR FASE ────────────────────────────────── */}
+      {phaseWinner && phaseWinner.length > 0 && (
+        <div className="mx-5 mt-5 md:mx-8 space-y-2">
+          {phaseWinner.map((w: any) => {
+            const PHASE_LABEL: Record<string, string> = {
+              grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos",
+              quartos: "Quartos", meias: "Meias-Finais", final: "Final",
+            };
+            return (
+              <div key={w.phase} className="flex items-center gap-3 rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3">
+                <span className="text-2xl">🏆</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70">{PHASE_LABEL[w.phase] ?? w.phase} · Campeão</p>
+                  <p className="text-sm font-bold text-foreground truncate">{w.profile?.display_name ?? "—"}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-display text-lg text-gold leading-none">{w.pool_points}</p>
+                  <p className="text-[10px] text-muted-foreground">pts</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* ── CONVITE (não autenticado) ─────────────────────────── */}
       {!user && !loading && (

@@ -7,6 +7,59 @@ import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 import { FollowButton } from "@/components/FollowButton";
 
+const HOF_PHASE_LABEL: Record<string, string> = {
+  grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos",
+  quartos: "Quartos", meias: "Meias-Finais", final: "Final",
+};
+const MEDALS = ["🥇", "🥈", "🥉"];
+const MEDAL_STYLES = [
+  "border-gold/40 bg-gold/10",
+  "border-slate-300/40 bg-slate-300/10",
+  "border-amber-700/40 bg-amber-700/10",
+];
+
+function HallOfFame({ data }: { data: any[] }) {
+  if (data.length === 0) return (
+    <div className="rounded-2xl border border-border bg-card/70 p-10 text-center">
+      <Star className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
+      <p className="font-display text-lg">Ainda sem dados</p>
+      <p className="text-sm text-muted-foreground">O Hall of Fame será preenchido no final de cada fase.</p>
+    </div>
+  );
+
+  const phases = [...new Set(data.map((h: any) => h.phase as string))];
+
+  return (
+    <div className="space-y-6">
+      {phases.map(phase => {
+        const entries = data.filter((h: any) => h.phase === phase).sort((a: any, b: any) => a.rank - b.rank);
+        return (
+          <div key={phase}>
+            <div className="mb-3 flex items-center gap-2">
+              <Star className="h-4 w-4 text-gold" />
+              <h3 className="font-display text-lg">{HOF_PHASE_LABEL[phase] ?? phase}</h3>
+            </div>
+            <div className="space-y-2">
+              {entries.map((e: any) => (
+                <Link key={e.user_id} to="/adepto/$id" params={{ id: e.user_id }}
+                  className={`flex items-center gap-3 rounded-2xl border px-4 py-3 hover:brightness-110 transition-smooth ${MEDAL_STYLES[e.rank - 1] ?? "border-border bg-card/60"}`}>
+                  <span className="text-2xl">{MEDALS[e.rank - 1] ?? `#${e.rank}`}</span>
+                  <UserAvatar avatarUrl={e.profile?.avatar_url} name={e.profile?.display_name} size={8} className="rounded-full shrink-0" />
+                  <span className="flex-1 font-semibold truncate">{e.profile?.display_name ?? "—"}</span>
+                  <div className="text-right">
+                    <p className="font-display text-xl text-gold leading-none">{e.total_points}</p>
+                    <p className="text-[10px] text-muted-foreground">pontos</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function RankTrend({ currentRank, previousRank }: { currentRank: number; previousRank: number | null }) {
   if (!previousRank || previousRank === currentRank) return <Minus className="h-3 w-3 text-muted-foreground/30" />;
   if (currentRank < previousRank) return <ArrowUp className="h-3 w-3 text-green-400" />;
@@ -401,51 +454,7 @@ function Rankings() {
       )}
 
       {/* ── HALL OF FAME ─────────────────────────────────── */}
-      {tab === "hof" && (() => {
-        const PHASE_LABEL: Record<string, string> = {
-          grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos",
-          quartos: "Quartos", meias: "Meias-Finais", final: "Final",
-        };
-        const phases = [...new Set(hofData.map((h: any) => h.phase))];
-        if (phases.length === 0) return (
-          <div className="rounded-2xl border border-border bg-card/70 p-10 text-center">
-            <Star className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
-            <p className="font-display text-lg">Ainda sem dados</p>
-            <p className="text-sm text-muted-foreground">O Hall of Fame será preenchido no final de cada fase.</p>
-          </div>
-        );
-        return (
-          <div className="space-y-6">
-            {phases.map((phase: any) => {
-              const entries = hofData.filter((h: any) => h.phase === phase).sort((a: any, b: any) => a.rank - b.rank);
-              const medals = ["🥇", "🥈", "🥉"];
-              const medalColors = ["border-gold/40 bg-gold/10", "border-slate-300/40 bg-slate-300/10", "border-amber-700/40 bg-amber-700/10"];
-              return (
-                <div key={phase}>
-                  <div className="mb-3 flex items-center gap-2">
-                    <Star className="h-4 w-4 text-gold" />
-                    <h3 className="font-display text-lg">{PHASE_LABEL[phase] ?? phase}</h3>
-                  </div>
-                  <div className="space-y-2">
-                    {entries.map((e: any) => (
-                      <Link key={e.user_id} to="/adepto/$id" params={{ id: e.user_id }}
-                        className={`flex items-center gap-3 rounded-2xl border px-4 py-3 hover:brightness-110 transition-smooth ${medalColors[e.rank - 1] ?? "border-border bg-card/60"}`}>
-                        <span className="text-2xl">{medals[e.rank - 1] ?? e.rank}</span>
-                        <UserAvatar avatarUrl={e.profile?.avatar_url} name={e.profile?.display_name} size={8} className="rounded-full shrink-0" />
-                        <span className="flex-1 font-semibold truncate">{e.profile?.display_name ?? "—"}</span>
-                        <div className="text-right">
-                          <p className="font-display text-xl text-gold leading-none">{e.total_points}</p>
-                          <p className="text-[10px] text-muted-foreground">pontos</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        );
-      })()}
+      {tab === "hof" && <HallOfFame data={hofData} />}
 
       <div className="mt-6 rounded-2xl border border-border bg-card/50 p-5 text-xs text-muted-foreground">
         <h3 className="mb-2 font-display text-base text-foreground">Critérios de desempate</h3>

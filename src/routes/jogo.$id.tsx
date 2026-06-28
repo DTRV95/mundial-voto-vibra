@@ -565,7 +565,7 @@ function JogoPage() {
           </MarketCard>
         )}
 
-        <MarketCard title="Resultado correto" closed={closed} pts="10 pts 🔥">
+        <MarketCard title="Resultado correto" subtitle="Ao fim dos 90 minutos" closed={closed} pts="10 pts 🔥">
           {showCommunity && community.filter(c => c.exact_home != null).length > 0 && (
             <ExactScoreCommunity votes={community} />
           )}
@@ -777,14 +777,17 @@ function TeamBlock({ flag, name, code }: { flag: string | null; name: string; co
   );
 }
 
-function MarketCard({ title, closed, pts, children, communityCount = 0, showCommunity = false }: {
-  title: string; closed: boolean; pts?: string; children: React.ReactNode;
+function MarketCard({ title, subtitle, closed, pts, children, communityCount = 0, showCommunity = false }: {
+  title: string; subtitle?: string; closed: boolean; pts?: string; children: React.ReactNode;
   communityCount?: number; showCommunity?: boolean;
 }) {
   return (
     <div className="rounded-2xl border border-border bg-card/70 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
-        <h3 className="font-display text-base">{title}</h3>
+        <div>
+          <h3 className="font-display text-base">{title}</h3>
+          {subtitle && <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-wider font-semibold">{subtitle}</p>}
+        </div>
         <div className="flex items-center gap-2">
           {pts && <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-bold text-gold">{pts}</span>}
           {closed && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}

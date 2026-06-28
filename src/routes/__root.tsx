@@ -307,9 +307,116 @@ function RootComponent() {
           </AppShell>
           <Toaster theme="dark" position="top-center" richColors />
           <MaintenanceNotice />
+          <Ronda32WelcomeModal />
         </MaintenanceGuard>
       </AuthProvider>
     </QueryClientProvider>
+  );
+}
+
+function Ronda32WelcomeModal() {
+  const { user, loading } = useAuth();
+  const [visible, setVisible] = useState(false);
+  const [phaseResult, setPhaseResult] = useState<{ rank: number; total_points: number } | null>(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  useEffect(() => {
+    if (loading) return;
+    const key = "ronda32_welcome_v1";
+    try {
+      if (localStorage.getItem(key)) return;
+    } catch { return; }
+
+    if (!user) {
+      setDataLoaded(true);
+      setVisible(true);
+      return;
+    }
+
+    supabase
+      .from("phase_results" as any)
+      .select("rank,total_points")
+      .eq("user_id", user.id)
+      .eq("phase", "grupos")
+      .maybeSingle()
+      .then(({ data }: any) => {
+        if (data) setPhaseResult({ rank: data.rank, total_points: data.total_points });
+        setDataLoaded(true);
+        setVisible(true);
+      });
+  }, [user, loading]);
+
+  function dismiss() {
+    try { localStorage.setItem("ronda32_welcome_v1", "1"); } catch { /* noop */ }
+    setVisible(false);
+  }
+
+  if (!visible || !dataLoaded) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      style={{ background: "oklch(0 0 0 / 0.7)" }}
+      onClick={dismiss}>
+      <div
+        className="relative w-full max-w-sm overflow-hidden rounded-3xl"
+        style={{ background: "linear-gradient(160deg, oklch(0.18 0.04 250) 0%, oklch(0.14 0.03 142) 100%)" }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Tricolor bar */}
+        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, oklch(0.54 0.24 27) 0%, oklch(0.55 0.20 142) 50%, oklch(0.40 0.18 265) 100%)" }} />
+
+        <div className="px-6 py-7">
+          {/* Badge nova fase */}
+          <div className="mb-5 flex items-center gap-3">
+            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/10"
+              style={{ background: "oklch(0.55 0.20 142 / 0.2)" }}>
+              <span className="text-2xl">⚽</span>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/40">Uma Geração · Mundial 2026</p>
+              <p className="font-display text-xl text-white leading-tight">16 Avos de Final</p>
+            </div>
+          </div>
+
+          {/* Resultado fase de grupos (utilizadores existentes) */}
+          {phaseResult ? (
+            <div className="mb-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+              <p className="text-xs text-white/50 mb-2 font-semibold uppercase tracking-wider">O teu resultado — Fase de Grupos</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{phaseResult.rank <= 3 ? ["🥇","🥈","🥉"][phaseResult.rank - 1] : "🏅"}</span>
+                  <div>
+                    <p className="font-display text-3xl text-white leading-none">#{phaseResult.rank}º</p>
+                    <p className="text-xs text-white/40">lugar final</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-3xl text-gold leading-none">{phaseResult.total_points}</p>
+                  <p className="text-xs text-white/40">pontos</p>
+                </div>
+              </div>
+            </div>
+          ) : user ? null : (
+            <div className="mb-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <p className="text-sm text-white/70 leading-relaxed">Cria conta para entrar no mata-mata e competir pelos 16 avos de final!</p>
+            </div>
+          )}
+
+          {/* Mensagem */}
+          <p className="text-sm text-white/70 leading-relaxed mb-6">
+            A fase de grupos terminou. Os pontos foram a zero e começa uma nova competição — os 16 avos de final já estão disponíveis para votar!
+          </p>
+
+          <button
+            onClick={dismiss}
+            className="w-full rounded-2xl py-3.5 font-bold text-background transition-smooth hover:brightness-110"
+            style={{ background: "linear-gradient(90deg, oklch(0.55 0.20 142) 0%, oklch(0.40 0.18 265) 100%)" }}
+          >
+            Vamos lá! →
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -592,7 +592,7 @@ function copyLink() {
                             return (
                               <div key={entry.id} className={`flex items-center gap-3 px-4 py-2.5 ${isMe ? "bg-wc-red/5" : ""}`}>
                                 <span className={`w-6 shrink-0 text-center text-xs font-bold ${isMe ? "text-wc-red" : "text-muted-foreground"}`}>
-                                  {medal ?? `${entry.phaseRank}º`}
+                                  {medal ?? `${i + 1}º`}
                                 </span>
                                 <UserAvatar avatarUrl={entry.avatar_url} name={entry.display_name} size={7} className="rounded-full shrink-0" />
                                 <span className={`flex-1 truncate text-sm ${isMe ? "font-bold text-wc-red" : "font-medium"}`}>

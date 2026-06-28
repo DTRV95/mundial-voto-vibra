@@ -76,7 +76,7 @@ function Stat({ label, value, icon }: { label: string; value: number; icon?: Rea
 }
 
 function Tabs() {
-  const [tab, setTab] = useState<"matches" | "analysis" | "news" | "prognosticos" | "teams" | "groups" | "prizes" | "suporte">("matches");
+  const [tab, setTab] = useState<"matches" | "analysis" | "news" | "prognosticos" | "teams" | "groups" | "prizes" | "suporte" | "fase">("matches");
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["admin", "support-unread"],
@@ -99,6 +99,7 @@ function Tabs() {
     { k: "groups",   label: "Grupos" },
     { k: "prizes",   label: "Prémios" },
     { k: "suporte",  label: "Suporte", badge: unreadCount },
+    { k: "fase",     label: "⚙️ Fase" },
   ] as const;
   return (
     <>
@@ -125,7 +126,123 @@ function Tabs() {
       {tab === "teams"    && <TeamsAdmin />}
       {tab === "prizes"   && <PrizesAdmin />}
       {tab === "suporte"  && <SuporteAdmin />}
+      {tab === "fase"     && <FaseAdmin />}
     </>
+  );
+}
+
+function FaseAdmin() {
+  const [phase, setPhase] = useState("grupos");
+  const [step, setStep] = useState<"idle" | "confirm" | "running" | "done" | "error">("idle");
+  const [log, setLog] = useState<string[]>([]);
+  const [error, setError] = useState("");
+
+  const PHASES = [
+    { v: "grupos",  label: "Fase de Grupos" },
+    { v: "ronda32", label: "16 Avos de Final" },
+    { v: "oitavos", label: "Oitavos de Final" },
+    { v: "quartos", label: "Quartos de Final" },
+    { v: "meias",   label: "Meias-Finais" },
+    { v: "final",   label: "Final" },
+  ];
+
+  async function runReset() {
+    setStep("running");
+    setLog([]);
+    setError("");
+    const addLog = (msg: string) => setLog(l => [...l, msg]);
+
+    try {
+      addLog(`📸 A gravar resultados da fase "${phase}"...`);
+      const { error: e1 } = await (supabase as any).rpc("save_phase_results", { p_phase: phase });
+      if (e1) throw new Error(`save_phase_results: ${e1.message}`);
+      addLog("✅ Resultados gravados em phase_results");
+
+      addLog("🔄 A repor pontos de todos os utilizadores a 0...");
+      const { error: e2 } = await (supabase as any).rpc("reset_all_points");
+      if (e2) throw new Error(`reset_all_points: ${e2.message}`);
+      addLog("✅ Pontos resetados");
+
+      addLog("🏆 A registar vencedores nos torneios privados...");
+      const { error: e3 } = await (supabase as any).rpc("save_pool_phase_winners", { p_phase: phase });
+      if (e3) {
+        addLog(`⚠️ save_pool_phase_winners: ${e3.message} (pode não existir ainda — ignorado)`);
+      } else {
+        addLog("✅ Vencedores dos torneios registados");
+      }
+
+      addLog("🎉 Reset completo!");
+      setStep("done");
+    } catch (err: any) {
+      setError(err.message ?? "Erro desconhecido");
+      setStep("error");
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-wc-red/30 bg-wc-red/5 p-4">
+        <p className="text-sm font-bold text-wc-red mb-1">⚠️ Zona de perigo</p>
+        <p className="text-xs text-muted-foreground">Estas ações são irreversíveis. Usa apenas no fim de uma fase.</p>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card/70 p-5 space-y-4">
+        <h3 className="font-display text-lg">Reset de Fase</h3>
+        <p className="text-sm text-muted-foreground">
+          Grava os resultados da fase selecionada, depois repõe todos os pontos a zero. Usa no final de cada fase antes de iniciar a próxima.
+        </p>
+
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Fase a terminar</label>
+          <select value={phase} onChange={e => { setPhase(e.target.value); setStep("idle"); }}
+            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
+            {PHASES.map(p => <option key={p.v} value={p.v}>{p.label}</option>)}
+          </select>
+        </div>
+
+        {step === "idle" && (
+          <button onClick={() => setStep("confirm")}
+            className="w-full rounded-xl bg-wc-red px-4 py-3 text-sm font-bold text-white transition-smooth hover:opacity-90">
+            Iniciar reset da {PHASES.find(p => p.v === phase)?.label}
+          </button>
+        )}
+
+        {step === "confirm" && (
+          <div className="space-y-3 rounded-xl border border-wc-red/40 bg-wc-red/8 p-4">
+            <p className="text-sm font-semibold">Tens a certeza? Esta ação vai:</p>
+            <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+              <li>Gravar posições e pontos de todos na tabela <code>phase_results</code></li>
+              <li>Repor os pontos de todos a <strong>0</strong></li>
+              <li>Registar o vencedor de cada torneio privado</li>
+            </ul>
+            <div className="flex gap-2 pt-1">
+              <button onClick={() => setStep("idle")}
+                className="flex-1 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted-foreground">
+                Cancelar
+              </button>
+              <button onClick={runReset}
+                className="flex-1 rounded-xl bg-wc-red px-4 py-2 text-sm font-bold text-white">
+                Confirmar reset
+              </button>
+            </div>
+          </div>
+        )}
+
+        {(step === "running" || step === "done" || step === "error") && (
+          <div className="rounded-xl border border-border bg-background p-4 space-y-1 font-mono text-xs">
+            {log.map((l, i) => <p key={i}>{l}</p>)}
+            {step === "running" && <p className="animate-pulse text-muted-foreground">A processar...</p>}
+            {step === "error" && <p className="text-wc-red font-bold">❌ {error}</p>}
+            {step === "done" && (
+              <button onClick={() => { setStep("idle"); setLog([]); }}
+                className="mt-2 rounded-xl border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                Fechar
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

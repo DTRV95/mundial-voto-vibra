@@ -388,6 +388,9 @@ function Perfil() {
         </section>
       )}
 
+      {/* Gráfico de evolução de pontos */}
+      <PointsEvolutionChart history={history as any[]} />
+
       {/* Estatísticas gerais */}
       {finishedGames.length > 0 && (
         <section className="mb-6">
@@ -649,6 +652,75 @@ function Perfil() {
         </button>
       </div>
     </div>
+  );
+}
+
+function PointsEvolutionChart({ history }: { history: any[] }) {
+  const finished = [...history]
+    .filter(h => h.match?.kickoff_at && h.points != null)
+    .sort((a, b) => new Date(a.match.kickoff_at).getTime() - new Date(b.match.kickoff_at).getTime());
+
+  if (finished.length < 2) return null;
+
+  // build cumulative points
+  let cum = 0;
+  const data = finished.map(h => {
+    cum += h.points ?? 0;
+    return { pts: h.points ?? 0, cum, label: `${h.match?.home?.name ?? "?"} vs ${h.match?.away?.name ?? "?"}` };
+  });
+
+  const max = Math.max(...data.map(d => d.cum), 1);
+  const W = 300;
+  const H = 80;
+  const pad = 4;
+  const step = (W - pad * 2) / (data.length - 1);
+
+  const points = data.map((d, i) => {
+    const x = pad + i * step;
+    const y = H - pad - ((d.cum / max) * (H - pad * 2));
+    return { x, y, ...d };
+  });
+
+  const pathD = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  const areaD = `${pathD} L ${points[points.length - 1].x} ${H} L ${pad} ${H} Z`;
+
+  return (
+    <section className="mb-6">
+      <h2 className="mb-3 font-display text-lg flex items-center gap-2">
+        <TrendingUp className="h-4 w-4 text-wc-green" /> Evolução de Pontos
+      </h2>
+      <div className="rounded-2xl border border-border bg-card/60 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs text-muted-foreground">{data.length} jogos pontuados</span>
+          <span className="font-display text-lg text-gold leading-none">{data[data.length - 1].cum} pts</span>
+        </div>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full overflow-visible" style={{ height: 80 }}>
+          <defs>
+            <linearGradient id="ptsFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="oklch(0.75 0.18 85)" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="oklch(0.75 0.18 85)" stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          {/* grid lines */}
+          {[0.25, 0.5, 0.75, 1].map(t => (
+            <line key={t} x1={pad} x2={W - pad} y1={H - pad - t * (H - pad * 2)} y2={H - pad - t * (H - pad * 2)}
+              stroke="currentColor" strokeOpacity="0.06" strokeWidth="1" />
+          ))}
+          {/* area fill */}
+          <path d={areaD} fill="url(#ptsFill)" />
+          {/* line */}
+          <path d={pathD} fill="none" stroke="oklch(0.75 0.18 85)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {/* dots — only first and last */}
+          {[points[0], points[points.length - 1]].map((p, i) => (
+            <circle key={i} cx={p.x} cy={p.y} r="3.5" fill="oklch(0.75 0.18 85)" stroke="var(--background)" strokeWidth="1.5" />
+          ))}
+        </svg>
+        <div className="flex justify-between mt-1">
+          <span className="text-[9px] text-muted-foreground">Jogo 1</span>
+          <span className="text-[9px] text-muted-foreground">Jogo {data.length}</span>
+        </div>
+      </div>
+    </section>
   );
 }
 

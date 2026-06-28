@@ -506,8 +506,8 @@ function Home() {
         <div
           className="relative overflow-hidden rounded-3xl"
           style={{
-            background: "linear-gradient(135deg, oklch(0.38 0.18 27) 0%, oklch(0.30 0.14 27) 50%, oklch(0.26 0.10 280) 100%)",
-            boxShadow: "0 16px 48px oklch(0.54 0.24 27 / 0.35), 0 0 0 1px oklch(1 0 0 / 0.08)",
+            background: "linear-gradient(135deg, oklch(0.30 0.12 142) 0%, oklch(0.22 0.10 142) 55%, oklch(0.18 0.06 165) 100%)",
+            boxShadow: "0 16px 48px oklch(0.55 0.20 142 / 0.35), 0 0 0 1px oklch(1 0 0 / 0.08)",
             minHeight: "220px",
           }}
         >
@@ -526,10 +526,10 @@ function Home() {
 
           {/* Red glow behind trophy */}
           <div className="absolute right-[10%] top-1/2 -translate-y-1/2 h-48 w-48 rounded-full pointer-events-none"
-            style={{ background: "oklch(0.54 0.24 27 / 0.25)", filter: "blur(48px)" }} />
+            style={{ background: "oklch(0.75 0.18 85 / 0.20)", filter: "blur(48px)" }} />
 
           {/* Green corner accent */}
-          <div className="absolute bottom-0 left-0 h-14 w-14 md:h-18 md:w-18 bg-wc-green" style={{ borderTopRightRadius: "36px" }} />
+          <div className="absolute bottom-0 left-0 h-14 w-14 md:h-18 md:w-18 bg-gold/60" style={{ borderTopRightRadius: "36px" }} />
 
           {/* Content */}
           <div className="relative px-5 py-5 md:px-10 md:py-7 pr-[46%] md:pr-[42%]">

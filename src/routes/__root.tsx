@@ -195,7 +195,7 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-const MAINTENANCE = true;
+const MAINTENANCE = false;
 
 const MAINTENANCE_NOTICE_START = new Date("2026-06-27T00:00:00");
 const MAINTENANCE_NOTICE_END   = new Date("2026-06-28T16:00:00");

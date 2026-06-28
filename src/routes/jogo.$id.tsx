@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
@@ -137,9 +137,10 @@ function JogoPage() {
 
   const [scorelabOpen, setScorelabOpen] = useState(false);
   const [pred, setPred] = useState<Record<string, any>>({});
-
   const [shared, setShared] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [justVoted, setJustVoted] = useState(false);
+  const firedWinConfetti = useRef(false);
 
   async function share() {
     const home = (match?.home as any)?.name ?? "Casa";
@@ -158,8 +159,15 @@ function JogoPage() {
     }
   }
 
-  useEffect(() => { setPred({}); }, [id]);
+  useEffect(() => { setPred({}); firedWinConfetti.current = false; }, [id]);
   useEffect(() => { setPred(myPrediction ?? {}); }, [myPrediction]);
+
+  // Fire confetti when opening a match you scored on
+  useEffect(() => {
+    if (!myPrediction || firedWinConfetti.current) return;
+    const pts = (myPrediction as any).points ?? 0;
+    if (pts > 0) { firedWinConfetti.current = true; setTimeout(fireConfetti, 400); }
+  }, [myPrediction]);
 
   const status = match ? votingStatus(match) : null;
   const closed = !status || status.label === "Fechada";
@@ -266,6 +274,7 @@ function JogoPage() {
     toast.success("Previsão guardada!");
     fireConfetti();
     setSaved(true);
+    setJustVoted(true);
     setTimeout(() => setSaved(false), 2000);
     qc.invalidateQueries({ queryKey: ["prediction", id] });
     qc.invalidateQueries({ queryKey: ["community", id] });
@@ -392,7 +401,8 @@ function JogoPage() {
           </Link>
         </div>
 
-        <MarketCard title="Resultado em 90 minutos" closed={closed} pts="3–4 pts">
+        <MarketCard title="Resultado em 90 minutos" closed={closed} pts="3–4 pts"
+          communityCount={community.length} showCommunity={showCommunity}>
           <VoteOptions value={pred.result_90} disabled={closed}
             options={[
               { v: "home", label: home.name, pct: analysis?.prob_home },
@@ -401,10 +411,11 @@ function JogoPage() {
             ]}
             onChange={(v) => set("result_90", v)} />
           {showCommunity && <CommunityLine votes={community.map(c => c.result_90)}
-            labels={{ home: home.name, draw: "Empate", away: away.name }} total={community.length} />}
+            labels={{ home: home.name, draw: "Empate", away: away.name }} total={community.length} animate={justVoted} />}
         </MarketCard>
 
-        <MarketCard title="Ambas as equipas marcam" closed={closed} pts="2 pts">
+        <MarketCard title="Ambas as equipas marcam" closed={closed} pts="2 pts"
+          communityCount={community.length} showCommunity={showCommunity}>
           <VoteOptions value={pred.btts} disabled={closed}
             options={[
               { v: "yes", label: "Sim", pct: analysis?.prob_btts_yes },
@@ -412,10 +423,11 @@ function JogoPage() {
             ]}
             onChange={(v) => set("btts", v)} />
           {showCommunity && <CommunityLine votes={community.map(c => c.btts)}
-            labels={{ yes: "Sim", no: "Não" }} total={community.length} />}
+            labels={{ yes: "Sim", no: "Não" }} total={community.length} animate={justVoted} />}
         </MarketCard>
 
-        <MarketCard title="Total de golos" closed={closed} pts="2 pts">
+        <MarketCard title="Total de golos" closed={closed} pts="2 pts"
+          communityCount={community.length} showCommunity={showCommunity}>
           <VoteOptions value={pred.total_25} disabled={closed}
             options={[
               { v: "over", label: "Mais de 2.5", pct: analysis?.prob_over25 },
@@ -423,11 +435,12 @@ function JogoPage() {
             ]}
             onChange={(v) => set("total_25", v)} />
           {showCommunity && <CommunityLine votes={community.map(c => c.total_25)}
-            labels={{ over: "Mais de 2.5", under: "Menos de 2.5" }} total={community.length} />}
+            labels={{ over: "Mais de 2.5", under: "Menos de 2.5" }} total={community.length} animate={justVoted} />}
         </MarketCard>
 
         {match.phase !== "grupos" && (
-          <MarketCard title="Quem se apura?" closed={closed} pts="4 pts">
+          <MarketCard title="Quem se apura?" closed={closed} pts="4 pts"
+            communityCount={community.length} showCommunity={showCommunity}>
             <VoteOptions value={pred.qualifier} disabled={closed}
               options={[
                 { v: "home", label: home.name },
@@ -435,7 +448,7 @@ function JogoPage() {
               ]}
               onChange={(v) => set("qualifier", v)} />
             {showCommunity && <CommunityLine votes={community.map((c: any) => c.qualifier)}
-              labels={{ home: home.name, away: away.name }} total={community.length} />}
+              labels={{ home: home.name, away: away.name }} total={community.length} animate={justVoted} />}
           </MarketCard>
         )}
 
@@ -651,7 +664,10 @@ function TeamBlock({ flag, name, code }: { flag: string | null; name: string; co
   );
 }
 
-function MarketCard({ title, closed, pts, children }: { title: string; closed: boolean; pts?: string; children: React.ReactNode }) {
+function MarketCard({ title, closed, pts, children, communityCount = 0, showCommunity = false }: {
+  title: string; closed: boolean; pts?: string; children: React.ReactNode;
+  communityCount?: number; showCommunity?: boolean;
+}) {
   return (
     <div className="rounded-2xl border border-border bg-card/70 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
@@ -661,7 +677,34 @@ function MarketCard({ title, closed, pts, children }: { title: string; closed: b
           {closed && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
         </div>
       </div>
-      <div className="p-4 space-y-3">{children}</div>
+      <div className="p-4 space-y-3">
+        {children}
+        {/* Pre-vote teaser — locked community preview */}
+        {!showCommunity && communityCount > 0 && (
+          <div className="rounded-xl border border-border/50 bg-secondary/20 px-3 py-2.5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <Users2 className="h-3 w-3 text-muted-foreground" />
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Comunidade</span>
+              </div>
+              <span className="text-[11px] font-bold text-gold">{communityCount} {communityCount === 1 ? "voto" : "votos"}</span>
+            </div>
+            <div className="space-y-1.5 blur-[3px] pointer-events-none select-none">
+              <div className="flex items-center gap-2">
+                <div className="w-16 h-1.5 rounded-full bg-border/50 shrink-0" />
+                <div className="flex-1 h-1.5 rounded-full bg-border/50"><div className="h-full w-[62%] rounded-full bg-gold/50" /></div>
+                <div className="w-7 h-1.5 rounded-full bg-border/40 shrink-0" />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-16 h-1.5 rounded-full bg-border/50 shrink-0" />
+                <div className="flex-1 h-1.5 rounded-full bg-border/50"><div className="h-full w-[23%] rounded-full bg-muted-foreground/35" /></div>
+                <div className="w-7 h-1.5 rounded-full bg-border/40 shrink-0" />
+              </div>
+            </div>
+            <p className="text-center text-[10px] text-muted-foreground mt-2">🔒 Vota para revelar</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -691,16 +734,22 @@ function VoteOptions({ value, options, onChange, disabled, grid = 0 }: {
   grid?: number;
 }) {
   const cols = grid === 2 ? "grid-cols-2" : options.length === 3 ? "grid-cols-3" : "grid-cols-2";
+  const hasPcts = options.some(o => o.pct != null && o.pct > 0);
   return (
     <div className={`grid gap-2 ${cols}`}>
       {options.map((o) => {
         const active = value === o.v;
         return (
           <button key={o.v} type="button" disabled={disabled} onClick={() => onChange(o.v)}
-            className={`rounded-xl border px-3 py-2.5 text-xs font-bold transition-smooth active:scale-95 disabled:opacity-50 ${
+            className={`relative flex flex-col items-center justify-center gap-0.5 rounded-xl border px-3 py-2.5 transition-smooth active:scale-95 disabled:opacity-50 ${
               active ? "border-gold bg-gold text-background shadow-gold" : "border-border bg-secondary/50 hover:border-gold/40"
             }`}>
-            {o.label}
+            <span className="text-xs font-bold leading-tight">{o.label}</span>
+            {hasPcts && o.pct != null && o.pct > 0 && (
+              <span className={`text-[10px] font-semibold leading-none mt-0.5 ${active ? "text-background/70" : "text-muted-foreground"}`}>
+                {o.pct}%
+              </span>
+            )}
           </button>
         );
       })}
@@ -708,7 +757,9 @@ function VoteOptions({ value, options, onChange, disabled, grid = 0 }: {
   );
 }
 
-function CommunityLine({ votes, labels, total }: { votes: (string | null)[]; labels: Record<string, string>; total: number }) {
+function CommunityLine({ votes, labels, total, animate = false }: {
+  votes: (string | null)[]; labels: Record<string, string>; total: number; animate?: boolean;
+}) {
   const filtered = votes.filter(Boolean) as string[];
   const n = filtered.length || 1;
   const counts: Record<string, number> = {};
@@ -720,10 +771,17 @@ function CommunityLine({ votes, labels, total }: { votes: (string | null)[]; lab
   });
 
   const maxPct = Math.max(...parts.map(p => p.pct));
+  const [revealed, setRevealed] = useState(!animate);
+
+  useEffect(() => {
+    if (!animate) return;
+    const t = setTimeout(() => setRevealed(true), 80);
+    return () => clearTimeout(t);
+  }, [animate]);
 
   return (
-    <div className="rounded-xl border border-border/50 bg-secondary/20 px-3 py-2.5">
-      <div className="flex items-center justify-between mb-2">
+    <div className={`rounded-xl border px-3 py-2.5 transition-all duration-300 ${animate ? "border-gold/30 bg-gold/5" : "border-border/50 bg-secondary/20"}`}>
+      <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-1.5">
           <Users2 className="h-3 w-3 text-muted-foreground shrink-0" />
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -732,21 +790,27 @@ function CommunityLine({ votes, labels, total }: { votes: (string | null)[]; lab
         </div>
         <span className="text-[11px] font-bold text-gold">{total} {total === 1 ? "voto" : "votos"}</span>
       </div>
-      <div className="space-y-1.5">
-        {parts.map(({ label, pct }) => (
-          <div key={label} className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground w-16 shrink-0 truncate">{label}</span>
-            <div className="flex-1 h-1.5 rounded-full bg-border/50 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${pct === maxPct && pct > 0 ? "bg-gold" : "bg-muted-foreground/40"}`}
-                style={{ width: `${pct}%` }}
-              />
+      <div className="space-y-2">
+        {parts.map(({ label, pct }, i) => {
+          const isTop = pct === maxPct && pct > 0;
+          return (
+            <div key={label} className="flex items-center gap-2">
+              <span className="text-[11px] text-muted-foreground w-16 shrink-0 truncate">{label}</span>
+              <div className="flex-1 h-2 rounded-full bg-border/50 overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${isTop ? "bg-gold" : "bg-muted-foreground/40"}`}
+                  style={{
+                    width: revealed ? `${pct}%` : "0%",
+                    transition: `width ${500 + i * 120}ms cubic-bezier(0.16,1,0.3,1)`,
+                  }}
+                />
+              </div>
+              <span className={`text-xs font-bold w-9 text-right tabular-nums ${isTop ? "text-gold" : "text-muted-foreground"}`}>
+                {pct}%
+              </span>
             </div>
-            <span className={`text-xs font-bold w-8 text-right ${pct === maxPct && pct > 0 ? "text-gold" : "text-muted-foreground"}`}>
-              {pct}%
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

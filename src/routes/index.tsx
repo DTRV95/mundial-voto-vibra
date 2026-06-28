@@ -519,9 +519,20 @@ function Home() {
             <h1 className="font-display text-[clamp(3rem,10vw,6rem)] leading-none text-gold-metallic">
               UMA<br />GERAÇÃO
             </h1>
-            <p className="mt-3 text-sm md:text-base font-semibold text-white/90 max-w-xs">
-              {user ? "Vota, compara e vibra com a comunidade." : "O jogo de previsões do Mundial. Gratuito. Sem complicações."}
-            </p>
+            {user && myDivision ? (
+              <div className="mt-3 flex items-center gap-2.5 flex-wrap">
+                <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${myDivision.border} ${myDivision.bg} ${myDivision.text}`}>
+                  {myDivision.emoji} {myDivision.label}
+                </span>
+                <span className="text-sm text-white/80 font-semibold">
+                  #{myDivision.rank}º · <span className="text-gold font-bold">{myDivision.points} pts</span>
+                </span>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm md:text-base font-semibold text-white/90 max-w-xs">
+                {user ? "Vota, compara e vibra com a comunidade." : "O jogo de previsões do Mundial. Gratuito. Sem complicações."}
+              </p>
+            )}
             <div className="hidden md:flex items-center gap-3 mt-6">
               {user ? (
                 <Link to="/jogos" className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">

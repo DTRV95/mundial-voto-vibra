@@ -1192,8 +1192,8 @@ function Home() {
         </div>
       </section>
 
-      {/* ===================== COMO FUNCIONA ===================== */}
-      <section id="como-funciona" className="px-5 pt-12 md:px-8">
+      {/* ===================== COMO FUNCIONA — apenas para visitantes ===================== */}
+      {!user && <section id="como-funciona" className="px-5 pt-12 md:px-8">
         <div className="mb-5 flex items-end justify-between">
           <h2 className="font-display text-2xl md:text-3xl">Como funciona</h2>
           <Link to="/como-funciona" className="text-xs font-semibold text-gold hover:text-gold/70 transition-smooth">
@@ -1239,7 +1239,7 @@ function Home() {
           </div>
         )}
 
-      </section>
+      </section>}
 
       {/* ===================== NOTÍCIAS EM DESTAQUE ===================== */}
       {featuredNewsList.length > 0 && (

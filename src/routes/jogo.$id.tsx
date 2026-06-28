@@ -384,66 +384,81 @@ function JogoPage() {
 
   return (
     <div className="px-4 pt-4 pb-10 md:px-8">
-      <div className="flex items-center justify-between">
-        <Link to="/jogos" className="text-xs text-muted-foreground">← Jogos</Link>
-        <button
-          onClick={share}
-          className="flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-smooth hover:border-gold/40 hover:text-gold"
-        >
-          {shared ? <Check className="h-3.5 w-3.5 text-primary" /> : <Share2 className="h-3.5 w-3.5" />}
+
+      {/* Nav bar */}
+      <div className="flex items-center justify-between mb-3">
+        <Link to="/jogos" className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-smooth">
+          ← Jogos
+        </Link>
+        <button onClick={share} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:border-gold/40 hover:text-gold transition-smooth">
+          {shared ? <Check className="h-3.5 w-3.5 text-wc-green" /> : <Share2 className="h-3.5 w-3.5" />}
           {shared ? "Copiado!" : "Partilhar"}
         </button>
       </div>
 
       {/* Match header */}
-      <header className="mt-3 overflow-hidden rounded-2xl border border-border bg-card/70 pitch-lines">
-        <div className="bg-gradient-to-b from-[oklch(0.30_0.10_155/0.4)] to-transparent p-5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold uppercase tracking-wider text-gold">{PHASE_LABEL[match.phase] ?? match.phase}</span>
-            <span className={`rounded-full border px-2.5 py-0.5 font-semibold uppercase tracking-wider text-xs ${
-              status?.tone === "primary" ? "border-primary/40 bg-primary/15 text-primary"
-                : status?.tone === "gold" ? "border-gold/40 bg-gold/15 text-gold"
-                : "border-destructive/40 bg-destructive/15 text-destructive"
+      <header className="mt-3 overflow-hidden rounded-3xl relative">
+        {/* tricolor bar */}
+        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,#E61D25 0%,#3CAC3B 50%,#2A398D 100%)" }} />
+        {/* dark pitch bg */}
+        <div className="relative px-5 pt-5 pb-0" style={{ background: "linear-gradient(160deg, oklch(0.22 0.09 155) 0%, oklch(0.16 0.06 165) 100%)" }}>
+          {/* subtle pitch grid */}
+          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 29px,rgba(255,255,255,1) 29px,rgba(255,255,255,1) 30px),repeating-linear-gradient(90deg,transparent,transparent 29px,rgba(255,255,255,1) 29px,rgba(255,255,255,1) 30px)" }} />
+
+          {/* Phase + status row */}
+          <div className="relative flex items-center justify-between mb-5">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-white/40">{PHASE_LABEL[match.phase] ?? match.phase}</span>
+            <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+              status?.tone === "primary" ? "border-wc-green/50 bg-wc-green/15 text-wc-green"
+                : status?.tone === "gold" ? "border-gold/50 bg-gold/15 text-gold"
+                : "border-red-500/50 bg-red-500/15 text-red-400"
             }`}>{status?.label}</span>
           </div>
-          <div className="mt-5 flex items-center justify-around text-center">
+
+          {/* Teams + score */}
+          <div className="relative flex items-center justify-between gap-2 pb-6">
             <TeamBlock flag={home.flag} name={home.name} code={home.code} />
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1 shrink-0">
               {match.home_score != null && match.away_score != null ? (
                 <>
-                  <div className="font-display text-5xl leading-none text-foreground">
-                    {match.home_score} <span className="text-muted-foreground">:</span> {match.away_score}
+                  <div className="font-display text-5xl leading-none text-white tabular-nums">
+                    {match.home_score} <span className="text-white/30">:</span> {match.away_score}
                   </div>
-                  <div className="mt-1 text-[10px] uppercase tracking-widest text-gold font-semibold">Resultado Final</div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{formatDate(match.kickoff_at)}</div>
+                  <div className="text-[9px] uppercase tracking-[0.18em] text-gold font-bold mt-1">Resultado Final</div>
+                  <div className="text-[9px] uppercase tracking-widest text-white/30 mt-0.5">{formatDate(match.kickoff_at)}</div>
                 </>
               ) : (
                 <>
-                  <div className="font-display text-3xl text-gold">{formatTime(match.kickoff_at)}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{formatDate(match.kickoff_at)}</div>
+                  <div className="font-display text-4xl text-gold leading-none">{formatTime(match.kickoff_at)}</div>
+                  <div className="text-[9px] uppercase tracking-widest text-white/40 mt-1">{formatDate(match.kickoff_at)}</div>
                 </>
               )}
             </div>
             <TeamBlock flag={away.flag} name={away.name} code={away.code} />
           </div>
         </div>
-        <div className="flex items-center gap-2 border-t border-border bg-background/30 px-4 py-2 text-[11px] text-muted-foreground">
+        {/* bottom info bar */}
+        <div className="flex items-center gap-2 bg-muted/40 border-t border-border/50 px-4 py-2 text-[11px] text-muted-foreground">
           <Info className="h-3.5 w-3.5 text-gold shrink-0" />
-          Todas as previsões são consideradas no tempo regulamentar (90 minutos).
+          Todas as previsões são para o tempo regulamentar (90 minutos).
         </div>
       </header>
 
       {/* Auth prompt */}
       {!authLoading && !user && (
-        <div className="mt-4 flex items-center justify-between rounded-2xl border border-gold/40 bg-gold/10 p-4">
-          <div>
-            <p className="font-display text-base text-gold">Cria conta para votar</p>
-            <p className="text-xs text-muted-foreground">Desbloqueia a opinião da comunidade.</p>
+        <div className="mt-4 overflow-hidden rounded-2xl border border-gold/35 bg-gradient-to-r from-gold/8 to-transparent">
+          <div className="h-1 w-full wc-tricolor" />
+          <div className="flex items-center justify-between p-4">
+            <div>
+              <p className="font-bold text-sm text-foreground">Entra para votar</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Desbloqueia a opinião da comunidade.</p>
+            </div>
+            <Link to="/auth" search={{ redirect: `/jogo/${id}` }} className="rounded-xl bg-gold px-4 py-2 text-xs font-bold text-background shrink-0">
+              Entrar →
+            </Link>
           </div>
-          <Link to="/auth" search={{ redirect: `/jogo/${id}` }} className="rounded-full bg-gold px-4 py-2 text-xs font-semibold text-background">Entrar</Link>
         </div>
       )}
-
 
       {/* ── Previsão ScoreLab colapsável ── */}
       {analysis && (
@@ -490,8 +505,11 @@ function JogoPage() {
 
       {/* ── Markets ── */}
       <section className="mt-4 space-y-3">
-        <div className="flex items-center justify-between mb-1">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Os teus votos</p>
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <p className="text-sm font-bold text-foreground">A tua previsão</p>
+            <p className="text-[10px] text-muted-foreground">Selecciona uma opção em cada mercado</p>
+          </div>
           <div className="flex items-center gap-2">
             {!hasVoted && (
               <button
@@ -572,26 +590,49 @@ function JogoPage() {
             <ExactScoreCommunity votes={community} />
           )}
           <div className="flex items-center justify-center gap-4 py-2">
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1.5">
               <span className="text-xs font-semibold text-muted-foreground">{home.name}</span>
-              <ScoreInput value={pred.exact_home} onChange={(v) => set("exact_home", v)} disabled={closed} />
+              <ScoreInput value={pred.exact_home} onChange={(v) => setPred(p => ({ ...p, exact_home: v }))} disabled={closed} />
             </div>
-            <span className="font-display text-3xl text-muted-foreground mt-4">:</span>
-            <div className="flex flex-col items-center gap-1">
+            <span className="font-display text-3xl text-muted-foreground mt-5">:</span>
+            <div className="flex flex-col items-center gap-1.5">
               <span className="text-xs font-semibold text-muted-foreground">{away.name}</span>
-              <ScoreInput value={pred.exact_away} onChange={(v) => set("exact_away", v)} disabled={closed} />
+              <ScoreInput value={pred.exact_away} onChange={(v) => setPred(p => ({ ...p, exact_away: v }))} disabled={closed} />
             </div>
           </div>
         </MarketCard>
 
       </section>
 
+      {/* After voting — prediction summary */}
+      {hasVoted && justVoted && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-wc-green/30 bg-wc-green/5 animate-scale-in">
+          <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,#E61D25,#3CAC3B,#2A398D)" }} />
+          <div className="px-4 py-3">
+            <p className="text-xs font-bold text-wc-green uppercase tracking-widest mb-2">✓ A tua previsão</p>
+            <div className="flex flex-wrap gap-2">
+              {pred.result_90 && <span className="rounded-full bg-gold/10 border border-gold/25 px-2.5 py-0.5 text-xs font-semibold text-gold">
+                ⚽ {pred.result_90 === "home" ? home.name : pred.result_90 === "away" ? away.name : "Empate"}
+              </span>}
+              {pred.btts && <span className="rounded-full bg-secondary/60 border border-border/50 px-2.5 py-0.5 text-xs font-semibold text-foreground/70">
+                {pred.btts === "yes" ? "Ambas marcam" : "Não ambas marcam"}
+              </span>}
+              {pred.total_25 && <span className="rounded-full bg-secondary/60 border border-border/50 px-2.5 py-0.5 text-xs font-semibold text-foreground/70">
+                {pred.total_25 === "over" ? "+2.5 golos" : "-2.5 golos"}
+              </span>}
+              {pred.exact_home != null && pred.exact_away != null && <span className="rounded-full bg-wc-red/10 border border-wc-red/25 px-2.5 py-0.5 text-xs font-bold text-wc-red">
+                🎯 {pred.exact_home}:{pred.exact_away}
+              </span>}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Contra a corrente */}
       {(() => {
         if (!myPrediction || !match || match.home_score == null) return null;
         const myPts = (myPrediction as any).points ?? 0;
         if (myPts === 0) return null;
-        // check if voted against community majority on result_90
         const myResult = (myPrediction as any).result_90;
         if (!myResult || community.length < 5) return null;
         const votes = community.map((c: any) => c.result_90).filter(Boolean);
@@ -602,7 +643,7 @@ function JogoPage() {
         const majorityPct = Math.round((majorityOption[1] / votes.length) * 100);
         if (majorityOption[0] === myResult || majorityPct < 60) return null;
         return (
-          <div className="mb-4 animate-scale-in overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-r from-gold/8 via-gold/4 to-transparent">
+          <div className="mt-4 mb-4 animate-scale-in overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-r from-gold/8 via-gold/4 to-transparent">
             <div className="h-1 w-full wc-tricolor rounded-t-2xl" />
             <div className="flex items-center gap-3 px-4 py-3">
               <span className="text-2xl shrink-0">🦁</span>
@@ -644,20 +685,26 @@ function JogoPage() {
       )}
 
       {/* Save */}
-      <div className="sticky bottom-20 md:bottom-6 mt-6">
-        <button data-save-btn onClick={save} disabled={closed || saved}
-          className={`w-full rounded-2xl py-4 font-bold shadow-gold transition-smooth hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50 ${
-            saved ? "bg-green-500 text-white" : "bg-gold text-background"
-          }`}>
-          {saved ? "✓ Guardado!" : closed ? "Votação fechada" : hasVoted ? "Atualizar Previsão" : "Guardar Previsão"}
-        </button>
+      <div className="sticky bottom-20 md:bottom-6 mt-6 px-0">
+        <div className="rounded-2xl overflow-hidden shadow-[0_8px_32px_oklch(0_0_0_/0.3)]">
+          <button data-save-btn onClick={save} disabled={closed || saved}
+            className={`w-full py-4 font-bold text-base transition-all duration-200 ${
+              saved
+                ? "bg-wc-green text-white"
+                : closed
+                ? "bg-secondary text-muted-foreground cursor-not-allowed"
+                : "bg-gold text-background hover:brightness-110 active:scale-[0.99]"
+            }`}>
+            {saved ? "✓ Previsão Guardada!" : closed ? "🔒 Votação Fechada" : hasVoted ? "Atualizar Previsão" : "Guardar Previsão →"}
+          </button>
+        </div>
       </div>
 
       {hasVoted && (
         <div className="mt-3 flex justify-center">
           <button
             onClick={sharePrediction}
-            className="flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-smooth hover:bg-primary/20"
+            className="flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-5 py-2.5 text-sm font-semibold text-gold transition-smooth hover:bg-gold/20"
           >
             <Share2 className="h-4 w-4" />
             Partilhar previsão
@@ -666,7 +713,7 @@ function JogoPage() {
       )}
 
       {!showCommunity && (
-        <div className="mt-4 rounded-2xl border border-border bg-card/40 p-4 text-center">
+        <div className="mt-4 rounded-2xl border border-border/50 bg-secondary/20 p-4 text-center">
           <Lock className="mx-auto mb-1.5 h-4 w-4 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">Vota para desbloquear a opinião da comunidade.</p>
         </div>
@@ -772,9 +819,9 @@ function PrognosticoCard({ prog }: { prog: any }) {
 
 function TeamBlock({ flag, name, code }: { flag: string | null; name: string; code?: string | null }) {
   return (
-    <div className="flex flex-1 flex-col items-center gap-2">
+    <div className="flex flex-1 flex-col items-center gap-2 min-w-0">
       <TeamBadge code={code ?? null} flag={flag} name={name} size="lg" />
-      <span className="text-sm font-bold text-center leading-tight">{name}</span>
+      <span className="text-xs font-bold text-center text-white leading-tight line-clamp-2 px-1">{name}</span>
     </div>
   );
 }
@@ -784,40 +831,33 @@ function MarketCard({ title, subtitle, closed, pts, children, communityCount = 0
   communityCount?: number; showCommunity?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card/70 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+      {/* header row */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-secondary/20">
         <div>
-          <h3 className="font-display text-base">{title}</h3>
-          {subtitle && <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-wider font-semibold">{subtitle}</p>}
+          <h3 className="font-semibold text-sm text-foreground">{title}</h3>
+          {subtitle && <p className="text-[10px] text-muted-foreground/70 mt-0.5 uppercase tracking-wider">{subtitle}</p>}
         </div>
-        <div className="flex items-center gap-2">
-          {pts && <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-bold text-gold">{pts}</span>}
-          {closed && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+        <div className="flex items-center gap-1.5">
+          {pts && <span className="rounded-full bg-gold/15 border border-gold/25 px-2 py-0.5 text-[10px] font-bold text-gold">{pts}</span>}
+          {closed && <Lock className="h-3 w-3 text-muted-foreground/60" />}
         </div>
       </div>
       <div className="p-4 space-y-3">
         {children}
-        {/* Pre-vote teaser — locked community preview */}
+        {/* teaser when not yet voted */}
         {!showCommunity && communityCount > 0 && (
-          <div className="rounded-xl border border-border/50 bg-secondary/20 px-3 py-2.5">
+          <div className="rounded-xl border border-border/40 bg-secondary/30 px-3 py-2.5">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Users2 className="h-3 w-3 text-muted-foreground" />
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Comunidade</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Comunidade</span>
               </div>
-              <span className="text-[11px] font-bold text-gold">{communityCount} {communityCount === 1 ? "voto" : "votos"}</span>
+              <span className="text-[10px] font-bold text-gold">{communityCount} votos</span>
             </div>
-            <div className="space-y-1.5 blur-[3px] pointer-events-none select-none">
-              <div className="flex items-center gap-2">
-                <div className="w-16 h-1.5 rounded-full bg-border/50 shrink-0" />
-                <div className="flex-1 h-1.5 rounded-full bg-border/50"><div className="h-full w-[62%] rounded-full bg-gold/50" /></div>
-                <div className="w-7 h-1.5 rounded-full bg-border/40 shrink-0" />
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-16 h-1.5 rounded-full bg-border/50 shrink-0" />
-                <div className="flex-1 h-1.5 rounded-full bg-border/50"><div className="h-full w-[23%] rounded-full bg-muted-foreground/35" /></div>
-                <div className="w-7 h-1.5 rounded-full bg-border/40 shrink-0" />
-              </div>
+            <div className="space-y-1.5 blur-sm pointer-events-none select-none">
+              <div className="flex items-center gap-2"><div className="w-14 h-1.5 rounded-full bg-border/50 shrink-0" /><div className="flex-1 h-1.5 rounded-full bg-border/50"><div className="h-full w-[58%] rounded-full bg-gold/40" /></div><div className="w-6 h-1.5 rounded-full bg-border/40" /></div>
+              <div className="flex items-center gap-2"><div className="w-14 h-1.5 rounded-full bg-border/50 shrink-0" /><div className="flex-1 h-1.5 rounded-full bg-border/50"><div className="h-full w-[28%] rounded-full bg-border/60" /></div><div className="w-6 h-1.5 rounded-full bg-border/40" /></div>
             </div>
             <p className="text-center text-[10px] text-muted-foreground mt-2">🔒 Vota para revelar</p>
           </div>
@@ -859,12 +899,15 @@ function VoteOptions({ value, options, onChange, disabled, grid = 0 }: {
         const active = value === o.v;
         return (
           <button key={o.v} type="button" disabled={disabled} onClick={() => onChange(o.v)}
-            className={`relative flex flex-col items-center justify-center gap-0.5 rounded-xl border px-3 py-2.5 transition-smooth active:scale-95 disabled:opacity-50 ${
-              active ? "border-gold bg-gold text-background shadow-gold" : "border-border bg-secondary/50 hover:border-gold/40"
+            className={`relative flex flex-col items-center justify-center gap-1 rounded-xl border py-3.5 px-2 transition-all duration-150 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
+              active
+                ? "border-gold bg-gold text-background shadow-[0_0_12px_oklch(0.75_0.18_85_/_0.35)]"
+                : "border-border/60 bg-secondary/40 hover:border-gold/40 hover:bg-secondary/60"
             }`}>
-            <span className="text-xs font-bold leading-tight">{o.label}</span>
+            {active && <span className="absolute top-1.5 right-1.5 text-[8px]">✓</span>}
+            <span className={`text-xs font-bold leading-tight text-center ${active ? "text-background" : "text-foreground"}`}>{o.label}</span>
             {hasPcts && o.pct != null && o.pct > 0 && (
-              <span className={`text-[10px] font-semibold leading-none mt-0.5 ${active ? "text-background/70" : "text-muted-foreground"}`}>
+              <span className={`text-[10px] font-semibold ${active ? "text-background/65" : "text-muted-foreground"}`}>
                 {o.pct}%
               </span>
             )}
@@ -913,7 +956,9 @@ function CommunityLine({ votes, labels, total, animate = false }: {
           const isTop = pct === maxPct && pct > 0;
           return (
             <div key={label} className="flex items-center gap-2">
-              <span className="text-[11px] text-muted-foreground w-16 shrink-0 truncate">{label}</span>
+              <span className="text-[11px] text-muted-foreground w-20 shrink-0 truncate">
+                {isTop && <span className="mr-0.5">🏆</span>}{label}
+              </span>
               <div className="flex-1 h-2 rounded-full bg-border/50 overflow-hidden">
                 <div
                   className={`h-full rounded-full ${isTop ? "bg-gold" : "bg-muted-foreground/40"}`}
@@ -934,12 +979,25 @@ function CommunityLine({ votes, labels, total, animate = false }: {
   );
 }
 
-function ScoreInput({ value, onChange, disabled }: { value: any; onChange: (v: number) => void; disabled?: boolean }) {
+function ScoreInput({ value, onChange, disabled }: { value: any; onChange: (v: number | null) => void; disabled?: boolean }) {
+  const hasValue = value != null;
+  const num = value ?? 0;
   return (
-    <input type="number" min={0} max={20} disabled={disabled}
-      value={value ?? ""} onChange={(e) => onChange(Number(e.target.value))}
-      className="h-16 w-20 rounded-xl border border-border bg-input text-center font-display text-3xl outline-none focus:border-gold/60 disabled:opacity-50"
-    />
+    <div className="flex items-center gap-1.5">
+      <button type="button" disabled={disabled || !hasValue}
+        onClick={() => num <= 0 ? onChange(null) : onChange(num - 1)}
+        className="h-9 w-9 rounded-xl border border-border bg-secondary/50 text-base font-bold text-muted-foreground hover:border-gold/40 hover:text-gold active:scale-90 disabled:opacity-25 transition-smooth">
+        −
+      </button>
+      <div className="h-14 w-12 rounded-xl border border-border bg-input/60 flex items-center justify-center font-display text-2xl">
+        {hasValue ? num : <span className="text-muted-foreground/30 text-lg">—</span>}
+      </div>
+      <button type="button" disabled={disabled || num >= 20}
+        onClick={() => onChange(num + 1)}
+        className="h-9 w-9 rounded-xl border border-border bg-secondary/50 text-base font-bold text-muted-foreground hover:border-gold/40 hover:text-gold active:scale-90 disabled:opacity-25 transition-smooth">
+        +
+      </button>
+    </div>
   );
 }
 
@@ -951,16 +1009,25 @@ function ExactScoreCommunity({ votes }: { votes: any[] }) {
       counts[key] = (counts[key] ?? 0) + 1;
     }
   });
-  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
   return (
-    <div className="flex flex-wrap gap-3 pb-2">
-      {sorted.map(([score, n]) => (
-        <span key={score} className="text-xs text-muted-foreground">
-          <span className="font-display text-sm text-foreground">{score.replace("-", " : ")}</span>
-          {" "}{Math.round((n / total) * 100)}%
-        </span>
-      ))}
+    <div className="flex flex-wrap gap-2 pb-2">
+      {sorted.map(([score, n], i) => {
+        const isTop = i === 0;
+        return (
+          <span key={score} className={`rounded-full border px-3 py-1 text-xs font-bold ${
+            isTop
+              ? "border-gold/40 bg-gold/10 text-gold"
+              : "border-border/50 bg-secondary/40 text-muted-foreground"
+          }`}>
+            {score.replace("-", " : ")}
+            <span className={`ml-1 text-[10px] font-semibold ${isTop ? "text-gold/70" : "text-muted-foreground/60"}`}>
+              {Math.round((n / total) * 100)}%
+            </span>
+          </span>
+        );
+      })}
     </div>
   );
 }

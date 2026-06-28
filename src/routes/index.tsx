@@ -1239,72 +1239,109 @@ function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
 function PodioFaseGrupos({ hof }: { hof: any[] }) {
   if (!hof || hof.length === 0) return null;
   const [first, second, third] = hof;
-  const medal = ["🥇", "🥈", "🥉"];
-  const sizes = ["text-4xl", "text-3xl", "text-3xl"];
-  const heights = ["h-24", "h-16", "h-12"];
-  const bgColors = [
-    "from-gold/20 to-gold/5 border-gold/40",
-    "from-white/10 to-white/5 border-white/20",
-    "from-orange-800/20 to-orange-800/5 border-orange-700/30",
+
+  // visual order: 2nd left · 1st center · 3rd right
+  const entries  = [second, first, third];
+  const hofIdx   = [1, 0, 2];
+
+  const podiumH  = ["h-20", "h-28", "h-14"];
+  const avatarSz = ["h-12 w-12", "h-16 w-16", "h-10 w-10"];
+  const medals   = ["🥈", "🥇", "🥉"];
+
+  const podiumBg = [
+    // silver
+    "from-[#C0C0C0] to-[#8a8a8a]",
+    // gold
+    "from-[#FFD700] to-[#B8860B]",
+    // bronze
+    "from-[#CD7F32] to-[#7a4a1e]",
   ];
-  const textColors = ["text-gold", "text-white/80", "text-orange-400"];
-  const entries = [second, first, third]; // visual order: 2nd left, 1st center, 3rd right
-  const visualMedals = [1, 0, 2]; // indexes into hof
+
+  const borderColor = [
+    "border-[#C0C0C0]/60",
+    "border-[#FFD700]/80",
+    "border-[#CD7F32]/50",
+  ];
+
+  const nameFg = ["text-foreground", "text-[#7a5500]", "text-foreground"];
 
   return (
     <div className="mx-5 mt-5 md:mx-8">
       <div
-        className="relative overflow-hidden rounded-3xl border border-gold/20"
+        className="relative overflow-hidden rounded-3xl"
         style={{
-          background: "linear-gradient(135deg, oklch(0.14 0.04 85) 0%, oklch(0.12 0.03 260) 60%, oklch(0.13 0.04 85) 100%)",
-          boxShadow: "0 4px 32px -8px oklch(0.75 0.18 85 / 0.25)",
+          background: "linear-gradient(160deg, #e8f4e8 0%, #dceeff 50%, #fff8e1 100%)",
+          border: "1px solid rgba(255,215,0,0.35)",
+          boxShadow: "0 6px 36px -8px rgba(180,130,0,0.22), 0 1px 0 rgba(255,255,255,0.9) inset",
         }}
       >
-        {/* gold shimmer top bar */}
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
+        {/* top colour bar: WC green → WC blue → gold */}
+        <div className="h-1.5 w-full rounded-t-3xl" style={{ background: "linear-gradient(90deg, #3a7d44 0%, #1a3580 50%, #c8960c 100%)" }} />
 
-        {/* subtle glow */}
+        {/* confetti-style scattered dots */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: "radial-gradient(circle, #1a3580 1px, transparent 1px)", backgroundSize: "22px 22px" }}
+        />
+
+        {/* soft glow behind the 1st-place column */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-64 rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, oklch(0.75 0.18 85) 0%, transparent 70%)" }} />
+          <div className="absolute left-1/2 -translate-x-1/2 -top-6 h-40 w-56 rounded-full blur-3xl opacity-30" style={{ background: "radial-gradient(circle, #FFD700 0%, transparent 70%)" }} />
         </div>
 
-        <div className="relative p-6">
+        <div className="relative px-5 pt-5 pb-0">
           {/* Header */}
-          <div className="text-center mb-6">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70 mb-1">Fase de Grupos · Final</p>
-            <h2 className="font-display text-xl leading-tight">Pódio da Fase de Grupos</h2>
+          <div className="text-center mb-5">
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "#3a7d44" }}>Fase de Grupos · Resultado Final</p>
+            <h2 className="font-display text-2xl leading-tight text-[#0d1a3a]">Pódio da Fase de Grupos</h2>
             {first?.profile && (
-              <p className="mt-1 text-sm text-muted-foreground">
-                Parabéns ao campeão <span className="font-bold text-gold">{first.profile.display_name}</span>! 🎉
+              <p className="mt-1.5 text-sm text-[#333]">
+                Parabéns ao campeão{" "}
+                <span className="font-bold" style={{ color: "#c8960c" }}>{first.profile.display_name}</span>! 🎉
               </p>
             )}
           </div>
 
-          {/* Podium */}
-          <div className="flex items-end justify-center gap-3">
+          {/* Podium columns */}
+          <div className="flex items-end justify-center gap-2">
             {entries.map((entry, vi) => {
               if (!entry) return <div key={vi} className="flex-1 max-w-[120px]" />;
-              const hi = visualMedals[vi];
+              const hi = hofIdx[vi];
+              const isWinner = hi === 0;
               return (
-                <div key={vi} className={`flex-1 max-w-[140px] flex flex-col items-center gap-2 ${vi === 1 ? "mb-0" : "mb-0"}`}>
+                <div key={vi} className="flex-1 max-w-[140px] flex flex-col items-center">
                   {/* Avatar */}
-                  <div className={`relative ${vi === 1 ? "scale-110" : ""}`}>
+                  <div className={`relative mb-2 ${isWinner ? "drop-shadow-lg" : ""}`}>
                     {entry.profile?.avatar_url ? (
-                      <img src={entry.profile.avatar_url} alt="" className="h-12 w-12 rounded-full border-2 border-gold/40 object-cover" />
+                      <img
+                        src={entry.profile.avatar_url}
+                        alt=""
+                        className={`${avatarSz[vi]} rounded-full object-cover border-2 ${isWinner ? "border-[#FFD700]" : "border-white/60"} shadow-md`}
+                      />
                     ) : (
-                      <div className="h-12 w-12 rounded-full border-2 border-gold/30 bg-card flex items-center justify-center font-display text-lg">
-                        {entry.profile?.display_name?.[0] ?? "?"}
+                      <div
+                        className={`${avatarSz[vi]} rounded-full border-2 ${isWinner ? "border-[#FFD700]" : "border-white/60"} shadow-md flex items-center justify-center font-display text-lg`}
+                        style={{ background: isWinner ? "linear-gradient(135deg,#3a7d44,#1a3580)" : "linear-gradient(135deg,#ccc,#888)" }}
+                      >
+                        <span className="text-white">{entry.profile?.display_name?.[0] ?? "?"}</span>
                       </div>
                     )}
-                    <span className="absolute -bottom-1 -right-1 text-base">{medal[hi]}</span>
+                    <span className="absolute -bottom-1 -right-1 text-lg leading-none">{medals[vi]}</span>
                   </div>
+
                   {/* Name */}
-                  <p className={`text-center text-xs font-bold leading-tight ${textColors[hi]}`}>{entry.profile?.display_name ?? "—"}</p>
+                  <p className={`text-center text-[11px] font-bold leading-tight mb-0.5 ${nameFg[vi]}`}>{entry.profile?.display_name ?? "—"}</p>
+
                   {/* Points */}
-                  <p className="text-center text-[10px] text-muted-foreground"><span className="font-bold text-foreground">{entry.total_points}</span> pts</p>
+                  <p className="text-center text-[10px] text-[#555] mb-2">
+                    <span className="font-bold text-[#0d1a3a]">{entry.total_points}</span> pts
+                  </p>
+
                   {/* Podium block */}
-                  <div className={`w-full rounded-t-xl border bg-gradient-to-b ${bgColors[hi]} ${heights[hi]} flex items-center justify-center`}>
-                    <span className={`font-display font-bold ${sizes[hi]} ${textColors[hi]}`}>{hi + 1}º</span>
+                  <div
+                    className={`w-full ${podiumH[vi]} rounded-t-xl border-t-2 border-x-2 ${borderColor[vi]} bg-gradient-to-b ${podiumBg[vi]} flex items-center justify-center shadow-inner`}
+                  >
+                    <span className="font-display font-bold text-white text-2xl drop-shadow">{hi + 1}º</span>
                   </div>
                 </div>
               );

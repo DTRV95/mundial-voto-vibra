@@ -501,82 +501,123 @@ function Home() {
   return (
     <div className="pb-10">
 
-      {/* ===================== HERO — Panini WC2026 (mobile + desktop) ===================== */}
+      {/* ===================== HERO ===================== */}
       <section className="relative px-4 pt-4 md:px-6 md:pt-5 animate-fade-in">
         <div
-          className="relative overflow-hidden rounded-3xl bg-wc-red panini-stripes"
-          style={{ boxShadow: "0 12px 48px oklch(0.54 0.24 27 / 0.35)", minHeight: "200px" }}
+          className="relative overflow-hidden rounded-3xl"
+          style={{
+            background: "linear-gradient(135deg, oklch(0.14 0.04 260) 0%, oklch(0.10 0.02 260) 55%, oklch(0.12 0.06 30) 100%)",
+            boxShadow: "0 24px 64px oklch(0 0 0 / 0.50), 0 0 0 1px oklch(1 0 0 / 0.07)",
+            minHeight: "220px",
+          }}
         >
-          <div className="absolute top-0 right-0 h-[75%] w-[38%] md:h-full md:w-[36%] overflow-hidden"
-            style={{ borderBottomLeftRadius: "48px" }}>
-            <img src={trophyImg} alt="Troféu do Mundial" className="h-full w-full object-cover object-center trophy-shine" />
+          {/* Shimmer sweep */}
+          <div className="hero-shimmer rounded-3xl" />
+
+          {/* Pitch grid subtle overlay */}
+          <div className="absolute inset-0 opacity-[0.04]"
+            style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 39px, oklch(1 0 0) 39px, oklch(1 0 0) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, oklch(1 0 0) 39px, oklch(1 0 0) 40px)" }} />
+
+          {/* Trophy — right side, bleeds off */}
+          <div className="absolute right-0 top-0 h-full w-[44%] md:w-[38%] pointer-events-none select-none"
+            style={{ maskImage: "linear-gradient(to left, black 40%, transparent 100%)" }}>
+            <img src={trophyImg} alt="" className="h-full w-full object-cover object-center scale-110 trophy-shine" />
           </div>
-          <div className="absolute bottom-0 left-0 h-16 w-16 md:h-20 md:w-20 bg-wc-green" style={{ borderTopRightRadius: "40px" }} />
-          <div className="relative px-5 py-4 md:px-10 md:py-6 pr-[42%] md:pr-[40%]">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 mb-2 flex items-center gap-1.5">
-              <Sparkles className="h-3 w-3" /> Mundial 2026
-            </p>
-            <h1 className="font-display text-[clamp(3rem,10vw,6rem)] leading-none text-gold-metallic">
+
+          {/* Red glow behind trophy */}
+          <div className="absolute right-[10%] top-1/2 -translate-y-1/2 h-48 w-48 rounded-full pointer-events-none"
+            style={{ background: "oklch(0.54 0.24 27 / 0.25)", filter: "blur(48px)" }} />
+
+          {/* Green corner accent */}
+          <div className="absolute bottom-0 left-0 h-14 w-14 md:h-18 md:w-18 bg-wc-green" style={{ borderTopRightRadius: "36px" }} />
+
+          {/* Content */}
+          <div className="relative px-5 py-5 md:px-10 md:py-7 pr-[46%] md:pr-[42%]">
+            {/* Live badge */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-red opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-wc-red" />
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Mundial 2026 · Ao Vivo</span>
+            </div>
+
+            {/* Title */}
+            <h1 className="font-display leading-none text-gold-metallic" style={{ fontSize: "clamp(2.8rem,9vw,5.5rem)" }}>
               UMA<br />GERAÇÃO
             </h1>
+
+            {/* Personal stat or tagline */}
             {user && myDivision ? (
-              <div className="mt-3 flex items-center gap-2.5 flex-wrap">
-                <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${myDivision.border} ${myDivision.bg} ${myDivision.text}`}>
-                  {myDivision.emoji} {myDivision.label}
-                </span>
-                <span className="text-sm text-white/80 font-semibold">
-                  #{myDivision.rank}º · <span className="text-gold font-bold">{myDivision.points} pts</span>
-                </span>
+              <div className="mt-4 flex flex-col gap-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold backdrop-blur-sm ${myDivision.border} ${myDivision.bg} ${myDivision.text}`}>
+                    {myDivision.emoji} {myDivision.label}
+                  </span>
+                  <span className="text-xs font-bold text-white/60">
+                    #{myDivision.rank}º global
+                  </span>
+                </div>
+                <p className="font-display text-2xl text-white leading-none">
+                  {myDivision.points} <span className="text-sm font-sans text-white/50 font-semibold">pontos</span>
+                </p>
               </div>
             ) : (
-              <p className="mt-3 text-sm md:text-base font-semibold text-white/90 max-w-xs">
-                {user ? "Vota, compara e vibra com a comunidade." : "O jogo de previsões do Mundial. Gratuito. Sem complicações."}
+              <p className="mt-3 text-sm font-semibold text-white/70 max-w-[220px] leading-snug">
+                {user ? "Vota, compara e vibra." : "Previsões grátis. Sem apostas."}
               </p>
             )}
-            <div className="hidden md:flex items-center gap-3 mt-6">
+
+            {/* CTA */}
+            <div className="mt-5 flex items-center gap-2.5">
               {user ? (
-                <Link to="/jogos" className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
-                  Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
+                <Link to="/jogos"
+                  className="inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth hover:scale-[1.03] active:scale-95">
+                  Votar agora <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               ) : (
                 <>
-                  <Link to="/auth" className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-wc-red shadow-elegant transition-smooth hover:scale-[1.02]">
-                    Entrar grátis <ArrowRight className="h-4 w-4" />
+                  <Link to="/auth"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth hover:scale-[1.03] active:scale-95">
+                    Entrar grátis <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
-                  <a href="#como-funciona" className="rounded-2xl border-2 border-white/40 px-5 py-3 text-sm font-bold text-white transition-smooth hover:bg-white/10">
+                  <Link to="/como-funciona"
+                    className="rounded-xl border border-white/20 px-4 py-2.5 text-xs font-bold text-white/70 transition-smooth hover:bg-white/8">
                     Como funciona
-                  </a>
+                  </Link>
                 </>
               )}
             </div>
           </div>
-          <div className="relative grid grid-cols-3 gap-px border-t border-white/20 bg-white/20">
-            {[{ label: "Equipas", value: "48" }, { label: "Jogos", value: "104" }, { label: "Países", value: "3" }].map((s) => (
-              <div key={s.label} className="bg-white/10 py-3 text-center text-white">
-                <div className="font-display text-2xl md:text-3xl leading-none">{s.value}</div>
-                <div className="text-[10px] uppercase tracking-wider opacity-70 mt-0.5">{s.label}</div>
+
+          {/* Stats bar — real data */}
+          <div className="relative grid grid-cols-3 border-t border-white/8"
+            style={{ background: "oklch(1 0 0 / 0.04)" }}>
+            {[
+              { label: "Equipas", value: "48" },
+              { label: "Jogos", value: "104" },
+              { label: communityPulse ? "Adeptos" : "Países", value: communityPulse ? communityPulse.totalUsers.toString() : "3" },
+            ].map((s, i) => (
+              <div key={s.label} className={`py-3 text-center text-white animate-stat-pop ${i === 1 ? "border-x border-white/8" : ""}`}
+                style={{ animationDelay: `${i * 80}ms` }}>
+                <div className="font-display text-xl md:text-2xl leading-none">{s.value}</div>
+                <div className="text-[9px] uppercase tracking-widest opacity-40 mt-0.5">{s.label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* CTAs mobile */}
-        <div className="flex gap-3 pt-4 md:hidden">
-          {user ? (
-            <Link to="/jogos" className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
-              Ver Jogos de Hoje <ArrowRight className="h-4 w-4" />
+        {/* Mobile CTA only for guests */}
+        {!user && (
+          <div className="flex gap-3 pt-4 md:hidden">
+            <Link to="/auth" className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
+              Entrar grátis <ArrowRight className="h-4 w-4" />
             </Link>
-          ) : (
-            <>
-              <Link to="/auth" className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
-                Entrar grátis <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a href="#como-funciona" className="inline-flex items-center justify-center rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 transition-smooth">
-                Como?
-              </a>
-            </>
-          )}
-        </div>
+            <Link to="/como-funciona" className="inline-flex items-center justify-center rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 transition-smooth">
+              Como?
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* ===================== PREDICTIONS WIDGET ===================== */}

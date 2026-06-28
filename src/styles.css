@@ -343,3 +343,48 @@
   100% { box-shadow: 0 0 0 0 oklch(0.75 0.18 85 / 0); }
 }
 .animate-glow { animation: glow-ring 1.8s ease-out infinite; }
+
+/* ── Page transitions ────────────────────────────────────── */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.995); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.page-enter {
+  animation: pageIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Hero shimmer sweep ──────────────────────────────────── */
+@keyframes hero-shimmer {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(300%)  skewX(-15deg); }
+}
+.hero-shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.hero-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 35%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.06) 50%, transparent 100%);
+  animation: hero-shimmer 3.5s ease-in-out infinite;
+  animation-delay: 1.2s;
+}
+
+/* ── Gold pulse ring for live dot ───────────────────────── */
+@keyframes live-ring {
+  0%   { box-shadow: 0 0 0 0   oklch(0.54 0.24 27 / 0.6); }
+  70%  { box-shadow: 0 0 0 8px oklch(0.54 0.24 27 / 0); }
+  100% { box-shadow: 0 0 0 0   oklch(0.54 0.24 27 / 0); }
+}
+.animate-live-ring { animation: live-ring 1.6s ease-out infinite; }
+
+/* ── Hero stat count-up shimmer ─────────────────────────── */
+@keyframes stat-pop {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0)   scale(1); }
+}
+.animate-stat-pop { animation: stat-pop 0.5s cubic-bezier(0.16,1,0.3,1) both; }

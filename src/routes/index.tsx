@@ -56,7 +56,10 @@ function Home() {
         .lte("kickoff_at", end.toISOString())
         .order("kickoff_at")
         .limit(4);
-      return ((data as any) ?? []).map((m: any) => ({ ...m, votes_count: m.predictions?.[0]?.count ?? 0 }));
+      const KNOCKOUT = new Set(["ronda32","oitavos","quartos","meias","final"]);
+      return ((data as any) ?? [])
+        .filter((m: any) => KNOCKOUT.has(m.phase))
+        .map((m: any) => ({ ...m, votes_count: m.predictions?.[0]?.count ?? 0 }));
     },
   });
 
@@ -233,7 +236,8 @@ function Home() {
         .in("match_id", matches.map((m: any) => m.id));
 
       const votedIds = new Set((voted ?? []).map((p: any) => p.match_id));
-      return (matches as any[]).filter(m => !votedIds.has(m.id));
+      const KNOCKOUT = new Set(["ronda32","oitavos","quartos","meias","final"]);
+      return (matches as any[]).filter(m => !votedIds.has(m.id) && KNOCKOUT.has(m.phase));
     },
   });
 

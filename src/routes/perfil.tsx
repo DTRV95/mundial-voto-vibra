@@ -49,7 +49,7 @@ function Perfil() {
     queryFn: async () => {
       const { data } = await supabase
         .from("predictions")
-        .select("id,points,result_90,btts,total_25,total_35,double_chance,exact_home,exact_away,created_at,match:match_id(id,kickoff_at,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
+        .select("id,points,result_90,btts,total_25,total_35,double_chance,exact_home,exact_away,created_at,match:match_id(id,kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(200);
@@ -180,14 +180,27 @@ function Perfil() {
     : null;
 
   const finishedGames = history.filter((h: any) => h.match?.home_score != null);
+
+  // Compute correctness from actual match result (not from points column which may be null)
+  function isCorrectResult(h: any): boolean {
+    if (!h.result_90) return false;
+    const hs = h.match?.home_score; const as_ = h.match?.away_score;
+    if (hs == null || as_ == null) return false;
+    const actual = hs > as_ ? "home" : hs < as_ ? "away" : "draw";
+    return h.result_90 === actual;
+  }
+
   const exactScores = finishedGames.filter((h: any) =>
     h.exact_home != null && h.exact_away != null &&
     h.exact_home === h.match?.home_score && h.exact_away === h.match?.away_score
   ).length;
-  const correctGames = finishedGames.filter((h: any) => (h.points ?? 0) > 0).length;
-  const errorGames = finishedGames.filter((h: any) => (h.points ?? 0) === 0).length;
-  const totalPoints = finishedGames.reduce((sum: number, h: any) => sum + (h.points ?? 0), 0);
-  const avgPoints = finishedGames.length > 0 ? (totalPoints / finishedGames.length).toFixed(1) : "—";
+  const correctGames = finishedGames.filter(isCorrectResult).length;
+  const errorGames = finishedGames.filter((h: any) => !isCorrectResult(h) && h.result_90).length;
+  // totalPoints: prefer sum from phase_results (scored by backend), fall back to predictions.points
+  const totalPointsFromPhases = phaseResults.reduce((s: number, r: any) => s + (r.total_points ?? 0), 0);
+  const totalPointsFromPreds  = finishedGames.reduce((s: number, h: any) => s + (h.points ?? 0), 0);
+  const totalPoints = totalPointsFromPhases > 0 ? totalPointsFromPhases : totalPointsFromPreds;
+  const avgPoints = correctGames > 0 ? (totalPoints / correctGames).toFixed(1) : "—";
   const currentStreak = (profile as any)?.vote_streak ?? 0;
   const maxStreak = (profile as any)?.max_vote_streak ?? 0;
 
@@ -701,49 +714,49 @@ const PHASE_SHORT: Record<string, string> = {
 };
 
 function PointsEvolutionChart({ history, phaseResults }: { history: any[]; phaseResults: any[] }) {
-  // Primary: use per-prediction points if available
-  const scoredPreds = [...history]
-    .filter(h => h.match?.kickoff_at && h.points != null)
-    .sort((a, b) => new Date(a.match.kickoff_at).getTime() - new Date(b.match.kickoff_at).getTime());
+  // Determine current phase: the first phase not yet in phaseResults (completed phases)
+  const completedPhases = new Set(phaseResults.map((r: any) => r.phase));
+  const currentPhase = PHASE_ORDER.find(p => !completedPhases.has(p)) ?? PHASE_ORDER[PHASE_ORDER.length - 1];
+  const currentPhaseLabel = PHASE_SHORT[currentPhase] ?? currentPhase;
 
-  // Fallback: use phase_results (guaranteed to have data when phases are closed)
-  const phaseData = [...phaseResults]
-    .filter(r => r.total_points != null && r.total_points > 0)
-    .sort((a, b) => PHASE_ORDER.indexOf(a.phase) - PHASE_ORDER.indexOf(b.phase));
+  // Only show predictions for the current phase, scored (points != null)
+  const scoredPreds = [...history]
+    .filter(h => h.match?.kickoff_at && h.match?.phase === currentPhase && h.points != null)
+    .sort((a, b) => new Date(a.match.kickoff_at).getTime() - new Date(b.match.kickoff_at).getTime());
 
   const W = 300;
   const H = 80;
   const pad = 4;
 
-  // Build data points — prefer per-prediction, fall back to per-phase
-  let data: { label: string; pts: number; cum: number }[];
-
-  if (scoredPreds.length >= 2) {
-    let cum = 0;
-    data = scoredPreds.map(h => {
-      cum += h.points ?? 0;
-      return { pts: h.points ?? 0, cum, label: `${h.match?.home?.name ?? "?"} vs ${h.match?.away?.name ?? "?"}` };
-    });
-  } else if (phaseData.length >= 1) {
-    let cum = 0;
-    data = phaseData.map(r => {
-      cum += r.total_points ?? 0;
-      return { pts: r.total_points ?? 0, cum, label: PHASE_SHORT[r.phase] ?? r.phase };
-    });
-  } else {
+  // No scored predictions yet in this phase — show 0 pts placeholder
+  if (scoredPreds.length === 0) {
     return (
       <section className="mb-6">
         <h2 className="mb-3 font-display text-lg flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-wc-green" /> Evolução de Pontos
+          <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{currentPhaseLabel}</span>
         </h2>
-        <div className="rounded-2xl border border-border bg-card/60 p-6 text-center text-sm text-muted-foreground">
-          Os pontos aparecerão aqui assim que os primeiros resultados forem apurados.
+        <div className="rounded-2xl border border-border bg-card/60 p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-muted-foreground">0 jogos pontuados</span>
+            <span className="font-display text-lg text-gold leading-none">0 pts</span>
+          </div>
+          <div className="h-[80px] flex items-end">
+            <div className="w-full h-px bg-border/50" />
+          </div>
+          <p className="text-center text-[10px] text-muted-foreground mt-2">O gráfico sobe assim que os resultados forem apurados.</p>
         </div>
       </section>
     );
   }
 
-  const isPhaseMode = scoredPreds.length < 2 && phaseData.length >= 1;
+  let cum = 0;
+  const data = scoredPreds.map(h => {
+    cum += h.points ?? 0;
+    return { pts: h.points ?? 0, cum, label: `${h.match?.home?.name ?? "?"} vs ${h.match?.away?.name ?? "?"}` };
+  });
+
+  const isPhaseMode = false;
   const max = Math.max(...data.map(d => d.cum), 1);
   const step = data.length > 1 ? (W - pad * 2) / (data.length - 1) : 0;
 
@@ -764,12 +777,11 @@ function PointsEvolutionChart({ history, phaseResults }: { history: any[]; phase
     <section className="mb-6">
       <h2 className="mb-3 font-display text-lg flex items-center gap-2">
         <TrendingUp className="h-4 w-4 text-wc-green" /> Evolução de Pontos
+        <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{currentPhaseLabel}</span>
       </h2>
       <div className="rounded-2xl border border-border bg-card/60 p-4">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-muted-foreground">
-            {isPhaseMode ? `${data.length} fase${data.length > 1 ? "s" : ""} concluída${data.length > 1 ? "s" : ""}` : `${data.length} jogos pontuados`}
-          </span>
+          <span className="text-xs text-muted-foreground">{data.length} jogo{data.length !== 1 ? "s" : ""} pontuado{data.length !== 1 ? "s" : ""}</span>
           <span className="font-display text-lg text-gold leading-none">{data[data.length - 1].cum} pts</span>
         </div>
         <svg viewBox={`0 0 ${W} ${H}`} className="w-full overflow-visible" style={{ height: 80 }}>
@@ -788,14 +800,10 @@ function PointsEvolutionChart({ history, phaseResults }: { history: any[]; phase
           {[pts[0], pts[pts.length - 1]].map((p, i) => (
             <circle key={i} cx={p.x} cy={p.y} r="3.5" fill="oklch(0.75 0.18 85)" stroke="var(--background)" strokeWidth="1.5" />
           ))}
-          {/* Phase labels on x-axis when in phase mode */}
-          {isPhaseMode && pts.map((p, i) => (
-            <text key={i} x={p.x} y={H} textAnchor="middle" fontSize="7" fill="currentColor" opacity="0.4">{data[i].label}</text>
-          ))}
         </svg>
         <div className="flex justify-between mt-1">
-          <span className="text-[9px] text-muted-foreground">{isPhaseMode ? data[0].label : "Jogo 1"}</span>
-          <span className="text-[9px] text-muted-foreground">{isPhaseMode ? data[data.length - 1].label : `Jogo ${data.length}`}</span>
+          <span className="text-[9px] text-muted-foreground">Jogo 1</span>
+          <span className="text-[9px] text-muted-foreground">Jogo {data.length}</span>
         </div>
       </div>
     </section>
@@ -827,7 +835,7 @@ function BadgesSection({
   if (exactScores >= 1)  badges.push({ emoji: "🎯", label: "Atirador de Elite", desc: `${exactScores} placar${exactScores > 1 ? "es" : ""} exato${exactScores > 1 ? "s" : ""}`, color: "bg-wc-red/10 border-wc-red/25" });
   if (exactScores >= 5)  badges.push({ emoji: "🔥", label: "Francotirador", desc: "5+ placares exatos", color: "bg-wc-red/10 border-wc-red/25" });
   if (bestCorrectStreak >= 5) badges.push({ emoji: "⚡", label: "Série Imparável", desc: `${bestCorrectStreak} previsões certas seguidas`, color: "bg-wc-green/10 border-wc-green/25" });
-  if (maxStreak >= 7)    badges.push({ emoji: "📅", label: "Viciado", desc: `${maxStreak} dias seguidos a votar`, color: "bg-wc-blue/10 border-wc-blue/25" });
+  if (totalPredictions >= 20) badges.push({ emoji: "📅", label: "Viciado", desc: `${totalPredictions} previsões feitas`, color: "bg-wc-blue/10 border-wc-blue/25" });
   if (totalPredictions >= 50) badges.push({ emoji: "📊", label: "Analista", desc: "50+ previsões feitas", color: "bg-wc-blue/10 border-wc-blue/25" });
   if (acc >= 70 && totalPredictions >= 10) badges.push({ emoji: "🧠", label: "Génio Tático", desc: `${acc}% de acerto geral`, color: "bg-wc-green/10 border-wc-green/25" });
 

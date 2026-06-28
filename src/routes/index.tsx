@@ -92,9 +92,9 @@ function Home() {
     queryKey: ["my-streak", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("profiles")
-        .select("vote_streak,max_vote_streak,display_name")
+        .select("predictions_made,predictions_correct")
         .eq("id", user!.id)
         .maybeSingle();
       return data;
@@ -568,23 +568,26 @@ function Home() {
         </div>
       </section>
 
-      {/* ===================== STREAK WIDGET ===================== */}
-      {user && myStreak && (myStreak.vote_streak ?? 0) >= 2 && (
+      {/* ===================== PREDICTIONS WIDGET ===================== */}
+      {user && myStreak && (myStreak.predictions_made ?? 0) >= 1 && (
         <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">
-          <div className="relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-950/60 via-orange-900/30 to-transparent px-4 py-3 flex items-center gap-3">
+          <div className="relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-500/8 via-orange-500/4 to-transparent px-4 py-3 flex items-center gap-3">
             <span className="text-2xl animate-fire shrink-0">🔥</span>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-orange-400 uppercase tracking-widest leading-none mb-0.5">Sequência de votos</p>
+              <p className="text-xs font-bold text-orange-500 uppercase tracking-widest leading-none mb-0.5">Os teus palpites</p>
               <p className="text-sm font-semibold text-foreground">
-                {myStreak.vote_streak} dias seguidos a votar
-                {myStreak.vote_streak >= myStreak.max_vote_streak && myStreak.vote_streak >= 5 && (
-                  <span className="ml-1.5 text-[10px] rounded-full bg-orange-500/20 text-orange-400 px-1.5 py-0.5 font-bold">Recorde pessoal!</span>
+                {myStreak.predictions_made} jogos votados
+                {(myStreak.predictions_made ?? 0) >= 50 && (
+                  <span className="ml-1.5 text-[10px] rounded-full bg-orange-500/20 text-orange-500 px-1.5 py-0.5 font-bold">Top votante!</span>
+                )}
+                {(myStreak.predictions_made ?? 0) >= 20 && (myStreak.predictions_made ?? 0) < 50 && (
+                  <span className="ml-1.5 text-[10px] rounded-full bg-orange-500/20 text-orange-500 px-1.5 py-0.5 font-bold">Ativo!</span>
                 )}
               </p>
             </div>
             <div className="shrink-0 text-right">
-              <p className="font-display text-2xl text-orange-400 leading-none">{myStreak.vote_streak}</p>
-              <p className="text-[10px] text-muted-foreground">dias</p>
+              <p className="font-display text-2xl text-orange-500 leading-none">{myStreak.predictions_made}</p>
+              <p className="text-[10px] text-muted-foreground">palpites</p>
             </div>
           </div>
         </div>

@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
-import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target, CalendarClock } from "lucide-react";
+import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target, CalendarClock, Wand2 } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
@@ -174,8 +174,104 @@ function JogoPage() {
   const hasVoted = !!myPrediction;
   const showCommunity = hasVoted || closed;
 
+  const [autoFilling, setAutoFilling] = useState(false);
+
   function set(key: string, value: any) {
     setPred((p) => ({ ...p, [key]: p[key] === value ? null : value }));
+  }
+
+  /** Pick the most voted option in the community, or fallback to weighted random */
+  function pickFromCommunity<T extends string>(
+    votes: (T | null | undefined)[],
+    options: T[],
+    weights?: number[]  // same order as options, used if no community data
+  ): T {
+    const counts: Record<string, number> = {};
+    for (const v of votes) if (v) counts[v] = (counts[v] ?? 0) + 1;
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    if (total >= 3) {
+      // pick the most voted option
+      return options.reduce((best, opt) =>
+        (counts[opt] ?? 0) > (counts[best] ?? 0) ? opt : best
+      , options[0]);
+    }
+    // fallback: weighted random using analysis probs or supplied weights
+    const w = weights ?? options.map(() => 1);
+    const sum = w.reduce((a, b) => a + b, 0);
+    let r = Math.random() * sum;
+    for (let i = 0; i < options.length; i++) {
+      r -= w[i];
+      if (r <= 0) return options[i];
+    }
+    return options[0];
+  }
+
+  // Realistic scores by result, respecting btts
+  const SCORES_HOME: [number, number][] = [[1,0],[2,0],[2,1],[3,1],[3,0],[1,0],[2,0]];
+  const SCORES_DRAW: [number, number][] = [[1,1],[1,1],[0,0],[2,2],[1,1]];
+  const SCORES_AWAY: [number, number][] = [[0,1],[0,2],[1,2],[0,1],[1,3]];
+  const SCORES_HOME_BTTS: [number, number][] = [[2,1],[3,1],[3,2],[2,1]];
+  const SCORES_AWAY_BTTS: [number, number][] = [[1,2],[1,3],[2,3],[1,2]];
+  const SCORES_HOME_NO_BTTS: [number, number][] = [[1,0],[2,0],[3,0],[1,0]];
+  const SCORES_AWAY_NO_BTTS: [number, number][] = [[0,1],[0,2],[0,3],[0,1]];
+
+  function pickScore(result: "home" | "draw" | "away", btts: "yes" | "no" | null): [number, number] {
+    const pick = (arr: [number, number][]) => arr[Math.floor(Math.random() * arr.length)];
+    if (result === "draw") return pick(SCORES_DRAW);
+    if (result === "home") {
+      if (btts === "yes") return pick(SCORES_HOME_BTTS);
+      if (btts === "no")  return pick(SCORES_HOME_NO_BTTS);
+      return pick(SCORES_HOME);
+    }
+    if (btts === "yes") return pick(SCORES_AWAY_BTTS);
+    if (btts === "no")  return pick(SCORES_AWAY_NO_BTTS);
+    return pick(SCORES_AWAY);
+  }
+
+  async function autoFill() {
+    if (autoFilling || closed) return;
+    setAutoFilling(true);
+
+    const commResult90  = community.map((c: any) => c.result_90);
+    const commBtts      = community.map((c: any) => c.btts);
+    const commTotal25   = community.map((c: any) => c.total_25);
+    const commQualifier = community.map((c: any) => c.qualifier);
+
+    // Weights from ScoreLab or sensible defaults
+    const wHome = analysis?.prob_home ?? 42;
+    const wDraw = analysis?.prob_draw ?? 26;
+    const wAway = analysis?.prob_away ?? 32;
+    const wBttsY = analysis?.prob_btts_yes ?? 50;
+    const wBttsN = analysis?.prob_btts_no  ?? 50;
+    const wO25   = analysis?.prob_over25 ?? 55;
+    const wU25   = analysis?.prob_under25 ?? 45;
+
+    const result90  = pickFromCommunity(commResult90,  ["home","draw","away"] as const, [wHome, wDraw, wAway]);
+    const btts      = pickFromCommunity(commBtts,      ["yes","no"]           as const, [wBttsY, wBttsN]);
+    const total25   = pickFromCommunity(commTotal25,   ["over","under"]       as const, [wO25, wU25]);
+    const qualifier = match?.phase !== "grupos"
+      ? pickFromCommunity(commQualifier, ["home","away"] as const, result90 === "draw" ? [50,50] : result90 === "home" ? [70,30] : [30,70])
+      : null;
+    const [exactHome, exactAway] = pickScore(result90 as "home"|"draw"|"away", btts as "yes"|"no");
+
+    // Animate — fill each field sequentially
+    const steps: [string, any][] = [
+      ["result_90", result90],
+      ["btts", btts],
+      ["total_25", total25],
+      ...(qualifier ? [["qualifier", qualifier] as [string, any]] : []),
+      ["exact_home", exactHome],
+      ["exact_away", exactAway],
+    ];
+
+    for (let i = 0; i < steps.length; i++) {
+      await new Promise(r => setTimeout(r, i === 0 ? 0 : 180));
+      const [key, val] = steps[i];
+      setPred(p => ({ ...p, [key]: val }));
+    }
+
+    setAutoFilling(false);
+    toast.success("Previsão preenchida! Revê e guarda quando quiseres.", { duration: 3000 });
   }
 
   function fireConfetti() {
@@ -396,9 +492,26 @@ function JogoPage() {
       <section className="mt-4 space-y-3">
         <div className="flex items-center justify-between mb-1">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Os teus votos</p>
-          <Link to="/como-funciona" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-gold transition-smooth">
-            <Info className="h-3.5 w-3.5" /> Como funciona?
-          </Link>
+          <div className="flex items-center gap-2">
+            {!closed && (
+              <button
+                onClick={autoFill}
+                disabled={autoFilling}
+                title="Preencher automaticamente com base na comunidade"
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-all active:scale-95 ${
+                  autoFilling
+                    ? "border-gold/30 bg-gold/8 text-gold/50 cursor-wait"
+                    : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/20 hover:border-gold/60"
+                }`}
+              >
+                <Wand2 className={`h-3 w-3 ${autoFilling ? "animate-spin" : ""}`} />
+                {autoFilling ? "A preencher…" : "Auto-fill"}
+              </button>
+            )}
+            <Link to="/como-funciona" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-gold transition-smooth">
+              <Info className="h-3.5 w-3.5" /> Como funciona?
+            </Link>
+          </div>
         </div>
 
         <MarketCard title="Resultado em 90 minutos" closed={closed} pts="3–4 pts"

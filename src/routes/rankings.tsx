@@ -2,7 +2,7 @@ import { createFileRoute, Link, useSearch, useNavigate } from "@tanstack/react-r
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Trophy, ArrowUp, ArrowDown, Minus, Shield, Users2, Crown } from "lucide-react";
+import { Trophy, ArrowUp, ArrowDown, Minus, Shield, Users2, Crown, Star } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 import { FollowButton } from "@/components/FollowButton";
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/rankings")({
     links: [{ rel: "canonical", href: "https://mundial-voto-vibra.davidvilaverde.workers.dev/rankings" }],
   }),
   validateSearch: (search: Record<string, unknown>) => ({
-    tab: ["ligas", "jogos", "divisoes"].includes(search.tab as string) ? (search.tab as string) : "divisoes",
+    tab: ["ligas", "jogos", "divisoes", "hof"].includes(search.tab as string) ? (search.tab as string) : "divisoes",
   }),
   component: Rankings,
 });
@@ -44,7 +44,7 @@ function getDivision(rank: number) {
 
 function Rankings() {
   const search = useSearch({ from: "/rankings" });
-  const [tab, setTab] = useState<"ligas" | "jogos" | "divisoes">(search.tab as any ?? "divisoes");
+  const [tab, setTab] = useState<"ligas" | "jogos" | "divisoes" | "hof">(search.tab as any ?? "divisoes");
   const [expandedDivs, setExpandedDivs] = useState<Record<string, boolean>>({});
   const { user } = useAuth();
 
@@ -124,6 +124,24 @@ function Rankings() {
     },
   });
 
+  // Hall of Fame
+  const { data: hofData = [] } = useQuery({
+    queryKey: ["hall-of-fame"],
+    enabled: tab === "hof",
+    queryFn: async () => {
+      const { data: hof } = await (supabase as any)
+        .from("hall_of_fame")
+        .select("phase,rank,total_points,user_id")
+        .order("phase").order("rank");
+      if (!hof || hof.length === 0) return [];
+      const userIds = [...new Set(hof.map((h: any) => h.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles").select("id,display_name,avatar_url").in("id", userIds);
+      const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
+      return hof.map((h: any) => ({ ...h, profile: profileMap[h.user_id] }));
+    },
+  });
+
   // Query para divisões — todos os utilizadores ordenados por pontos
   const { data: allUsers = [], isLoading: loadingUsers } = useQuery({
     queryKey: ["all-users-ranking"],
@@ -179,6 +197,16 @@ function Rankings() {
           }`}
         >
           <Trophy className="h-3.5 w-3.5" /> Por Jogo
+        </button>
+        <button
+          onClick={() => setTab("hof")}
+          className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold transition-smooth ${
+            tab === "hof"
+              ? "border-gold bg-gold text-background"
+              : "border-border bg-card/60 text-muted-foreground hover:border-gold/40"
+          }`}
+        >
+          <Star className="h-3.5 w-3.5" /> Hall of Fame
         </button>
       </div>
 
@@ -371,6 +399,53 @@ function Rankings() {
           })}
         </div>
       )}
+
+      {/* ── HALL OF FAME ─────────────────────────────────── */}
+      {tab === "hof" && (() => {
+        const PHASE_LABEL: Record<string, string> = {
+          grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos",
+          quartos: "Quartos", meias: "Meias-Finais", final: "Final",
+        };
+        const phases = [...new Set(hofData.map((h: any) => h.phase))];
+        if (phases.length === 0) return (
+          <div className="rounded-2xl border border-border bg-card/70 p-10 text-center">
+            <Star className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
+            <p className="font-display text-lg">Ainda sem dados</p>
+            <p className="text-sm text-muted-foreground">O Hall of Fame será preenchido no final de cada fase.</p>
+          </div>
+        );
+        return (
+          <div className="space-y-6">
+            {phases.map((phase: any) => {
+              const entries = hofData.filter((h: any) => h.phase === phase).sort((a: any, b: any) => a.rank - b.rank);
+              const medals = ["🥇", "🥈", "🥉"];
+              const medalColors = ["border-gold/40 bg-gold/10", "border-slate-300/40 bg-slate-300/10", "border-amber-700/40 bg-amber-700/10"];
+              return (
+                <div key={phase}>
+                  <div className="mb-3 flex items-center gap-2">
+                    <Star className="h-4 w-4 text-gold" />
+                    <h3 className="font-display text-lg">{PHASE_LABEL[phase] ?? phase}</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {entries.map((e: any) => (
+                      <Link key={e.user_id} to="/adepto/$id" params={{ id: e.user_id }}
+                        className={`flex items-center gap-3 rounded-2xl border px-4 py-3 hover:brightness-110 transition-smooth ${medalColors[e.rank - 1] ?? "border-border bg-card/60"}`}>
+                        <span className="text-2xl">{medals[e.rank - 1] ?? e.rank}</span>
+                        <UserAvatar avatarUrl={e.profile?.avatar_url} name={e.profile?.display_name} size={8} className="rounded-full shrink-0" />
+                        <span className="flex-1 font-semibold truncate">{e.profile?.display_name ?? "—"}</span>
+                        <div className="text-right">
+                          <p className="font-display text-xl text-gold leading-none">{e.total_points}</p>
+                          <p className="text-[10px] text-muted-foreground">pontos</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       <div className="mt-6 rounded-2xl border border-border bg-card/50 p-5 text-xs text-muted-foreground">
         <h3 className="mb-2 font-display text-base text-foreground">Critérios de desempate</h3>

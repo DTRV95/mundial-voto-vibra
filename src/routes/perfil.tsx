@@ -67,6 +67,18 @@ function Perfil() {
     },
   });
 
+  const { data: phaseResults = [] } = useQuery({
+    queryKey: ["phase-results", user?.id], enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("phase_results")
+        .select("phase,rank,total_points,predictions_made")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
   // Edição de nome
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [historyExpanded, setHistoryExpanded] = useState(false);
@@ -340,6 +352,31 @@ function Perfil() {
           </div>
         </div>
       </div>
+
+      {/* Resultados por fase */}
+      {phaseResults.length > 0 && (
+        <section className="mb-6">
+          <h2 className="mb-3 font-display text-lg flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-gold" /> Resultados por Fase
+          </h2>
+          <div className="space-y-2">
+            {(phaseResults as any[]).map((r: any) => (
+              <div key={r.phase} className="flex items-center justify-between rounded-2xl border border-gold/20 bg-gold/5 px-4 py-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-gold/70">
+                    {{ grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos", quartos: "Quartos", meias: "Meias-Finais", final: "Final" }[r.phase as string] ?? r.phase}
+                  </p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">{r.predictions_made} previsões feitas</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-2xl text-gold leading-none">{r.total_points} <span className="text-xs font-sans text-muted-foreground">pts</span></p>
+                  <p className="text-xs text-muted-foreground mt-0.5">#{r.rank}º lugar</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Estatísticas gerais */}
       {finishedGames.length > 0 && (

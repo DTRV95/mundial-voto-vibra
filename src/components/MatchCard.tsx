@@ -144,30 +144,31 @@ export function MatchCard({ match }: { match: MatchCardData }) {
     );
   }
 
-  // ── Fase de Grupos (original card) ──────────────────────────────
+  // ── Fase de Grupos — mesmo estilo dourado ──────────────────────
   return (
     <Link
       to="/jogo/$id"
       params={{ id: match.id }}
       onClick={() => { try { sessionStorage.setItem("jogos_return", "1"); } catch {} }}
-      className="group block overflow-hidden rounded-2xl bg-card transition-smooth"
+      className="group block overflow-hidden rounded-2xl bg-card border border-gold/30 transition-smooth"
       style={{
-        boxShadow: "0 2px 12px oklch(0 0 0 / 0.30), 0 0 0 1px oklch(1 0 0 / 0.06)",
+        boxShadow: "0 2px 16px rgba(200,150,12,0.10), 0 0 0 1px rgba(200,150,12,0.20)",
         transition: "transform 240ms cubic-bezier(0.16,1,0.3,1), box-shadow 240ms ease",
       }}
       onMouseEnter={e => {
         (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 40px oklch(0.54 0.24 27 / 0.25), 0 0 0 1.5px oklch(0.54 0.24 27 / 0.40)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 40px rgba(200,150,12,0.22), 0 0 0 1.5px rgba(200,150,12,0.45)";
       }}
       onMouseLeave={e => {
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 12px oklch(0 0 0 / 0.30), 0 0 0 1px oklch(1 0 0 / 0.06)";
+        (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 16px rgba(200,150,12,0.10), 0 0 0 1px rgba(200,150,12,0.20)";
       }}
     >
-      <div className="card-stripe" />
+      {/* Gold accent stripe */}
+      <div className="h-1 w-full rounded-t-2xl" style={{ background: "linear-gradient(90deg, transparent 0%, #c8960c 50%, transparent 100%)" }} />
 
       <div className="flex items-center justify-between px-4 pt-3 pb-0">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-gold/80">
           {PHASE_LABEL[match.phase] ?? match.phase}
         </span>
         <div className="flex items-center gap-2">
@@ -194,13 +195,13 @@ export function MatchCard({ match }: { match: MatchCardData }) {
         </div>
 
         <div className="flex flex-col items-center gap-1 px-2">
-          <div className="flex items-center gap-1 text-wc-red">
+          <div className="flex items-center gap-1 text-gold">
             <Clock className="h-3.5 w-3.5" />
             <span className="font-display text-2xl tabular-nums md:text-3xl">
               {formatTime(match.kickoff_at)}
             </span>
           </div>
-          <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="rounded-full bg-gold/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-gold">
             vs
           </span>
         </div>
@@ -215,14 +216,14 @@ export function MatchCard({ match }: { match: MatchCardData }) {
 
       <div className={`flex items-center justify-between border-t px-4 py-2.5 ${
         match.already_voted
-          ? "border-wc-green/20 bg-wc-green/5"
-          : "border-border bg-muted/50"
+          ? "border-gold/20 bg-gold/5"
+          : "border-gold/10 bg-muted/30"
       }`}>
         <div className="flex items-center gap-1.5">
           {match.already_voted ? (
             <>
-              <CheckCircle2 className="h-3.5 w-3.5 text-wc-green" />
-              <span className="text-xs font-bold text-wc-green">Previsão feita</span>
+              <CheckCircle2 className="h-3.5 w-3.5 text-gold" />
+              <span className="text-xs font-bold text-gold">Previsão feita</span>
             </>
           ) : (
             <>
@@ -233,16 +234,14 @@ export function MatchCard({ match }: { match: MatchCardData }) {
               </span>
               {(match.votes_count ?? 0) > 0 && (
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-green opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-wc-green" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold" />
                 </span>
               )}
             </>
           )}
         </div>
-        <span className={`text-xs font-bold transition-smooth group-hover:underline ${
-          match.already_voted ? "text-wc-green" : "text-wc-red"
-        }`}>
+        <span className="text-xs font-bold text-gold transition-smooth group-hover:underline">
           {match.already_voted ? "Ver Comunidade →" : "Dar Previsão →"}
         </span>
       </div>

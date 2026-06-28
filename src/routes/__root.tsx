@@ -4,6 +4,7 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Scripts,
+  Link,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "../lib/useAuth";
@@ -403,17 +404,41 @@ function Ronda32WelcomeModal() {
           )}
 
           {/* Mensagem */}
-          <p className="text-sm text-white/70 leading-relaxed mb-6">
-            A fase de grupos terminou. Os pontos foram a zero e começa uma nova competição — os 16 avos de final já estão disponíveis para votar!
+          <p className="text-sm text-white/70 leading-relaxed mb-4">
+            A fase de grupos terminou. Os pontos foram a zero e começa uma nova corrida — os 16 avos de final já estão disponíveis!
           </p>
 
-          <button
-            onClick={dismiss}
-            className="w-full rounded-2xl py-3.5 font-bold text-background transition-smooth hover:brightness-110"
-            style={{ background: "linear-gradient(90deg, oklch(0.55 0.20 142) 0%, oklch(0.40 0.18 265) 100%)" }}
-          >
-            Vamos lá! →
-          </button>
+          {/* Novo mercado */}
+          <div className="mb-5 rounded-2xl border border-gold/30 bg-gold/8 px-4 py-3 space-y-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70">Novidade no mata-mata</p>
+            <div className="flex items-start gap-2.5">
+              <span className="text-xl shrink-0">⚔️</span>
+              <div>
+                <p className="text-sm font-bold text-white">Quem se apura? — 4 pts</p>
+                <p className="text-xs text-white/60 mt-0.5">Escolhe qual das equipas passa à próxima ronda. Conta mesmo que seja nos penáltis!</p>
+              </div>
+            </div>
+            <div className="pt-1 border-t border-white/10 grid grid-cols-2 gap-2 text-[10px] text-white/50">
+              <div className="flex items-center gap-1"><span className="text-gold">✓</span> Resultado (3–4 pts)</div>
+              <div className="flex items-center gap-1"><span className="text-gold">✓</span> BTTS (2 pts)</div>
+              <div className="flex items-center gap-1"><span className="text-gold">✓</span> +/- 2.5 golos (2 pts)</div>
+              <div className="flex items-center gap-1"><span className="text-gold">✓</span> Marcador exato (10 pts)</div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={dismiss}
+              className="w-full rounded-2xl py-3.5 font-bold text-background transition-smooth hover:brightness-110"
+              style={{ background: "linear-gradient(90deg, oklch(0.55 0.20 142) 0%, oklch(0.40 0.18 265) 100%)" }}
+            >
+              Vamos lá! →
+            </button>
+            <Link to="/como-funciona" onClick={dismiss}
+              className="w-full rounded-2xl border border-white/15 py-2.5 text-center text-xs font-semibold text-white/60 transition-smooth hover:border-white/30 hover:text-white/90">
+              Ver guia completo do mata-mata
+            </Link>
+          </div>
         </div>
       </div>
     </div>

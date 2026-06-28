@@ -18,7 +18,7 @@ export function isToday(iso: string): boolean {
 
 export const PHASE_LABEL: Record<string, string> = {
   grupos:   "Fase de Grupos",
-  ronda32:  "Ronda de 32",
+  ronda32:  "16 Avos de Final",
   oitavos:  "Oitavos de Final",
   quartos:  "Quartos de Final",
   meias:    "Meias-Finais",

@@ -397,6 +397,7 @@ function MatchesAdmin() {
   }
   const [pending, setPending] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
+  const [phaseFilter, setPhaseFilter] = useState<string>("ronda32");
   const [editForm, setEditForm] = useState<{ kickoff_at: string; phase: string; home_score: string; away_score: string; qualifier: string }>({ kickoff_at: "", phase: "grupos", home_score: "", away_score: "", qualifier: "" });
   const [calcAllState, setCalcAllState] = useState<{ loading: boolean; result: string | null }>({ loading: false, result: null });
 
@@ -486,8 +487,20 @@ function MatchesAdmin() {
         </button>
         {calcAllState.result && <span className="text-xs text-muted-foreground">{calcAllState.result}</span>}
       </div>
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {Object.entries(PHASE_LABEL).map(([k, v]) => (
+          <button key={k} onClick={() => setPhaseFilter(k)}
+            className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${phaseFilter === k ? "border-gold bg-gold text-background" : "border-border bg-card/40 text-muted-foreground hover:border-gold/40"}`}>
+            {v}
+          </button>
+        ))}
+        <button onClick={() => setPhaseFilter("")}
+          className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${phaseFilter === "" ? "border-primary bg-primary/20 text-primary" : "border-border bg-card/40 text-muted-foreground hover:border-primary/40"}`}>
+          Todos
+        </button>
+      </div>
       <ul className="mt-3 space-y-2">
-        {matches.map((m: any) => (
+        {(matches as any[]).filter((m: any) => !phaseFilter || m.phase === phaseFilter).map((m: any) => (
           <li key={m.id} className="rounded-xl border border-border bg-card/60 p-3">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">{m.home?.name ?? "?"} vs {m.away?.name ?? "?"}</span>

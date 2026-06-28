@@ -677,7 +677,7 @@ function Home() {
       {/* ===================== COUNTDOWN + CTA ===================== */}
       <div className={`mx-5 mt-4 md:mx-8 ${nextMatch && !user ? "grid gap-3 sm:grid-cols-2" : ""}`}>
         {nextMatch && (
-          <Countdown kickoff_at={nextMatch.kickoff_at} home={(nextMatch as any).home} away={(nextMatch as any).away} />
+          <Countdown id={nextMatch.id} kickoff_at={nextMatch.kickoff_at} home={(nextMatch as any).home} away={(nextMatch as any).away} />
         )}
         {!user && (
           <div className="relative overflow-hidden rounded-2xl"
@@ -1770,7 +1770,7 @@ function ResultCard({ r, mobile = false }: { r: any; mobile?: boolean }) {
   );
 }
 
-function Countdown({ kickoff_at, home, away }: { kickoff_at: string; home: any; away: any }) {
+function Countdown({ id, kickoff_at, home, away }: { id: string; kickoff_at: string; home: any; away: any }) {
   const [diff, setDiff] = useState(new Date(kickoff_at).getTime() - Date.now());
 
   useEffect(() => {
@@ -1796,7 +1796,7 @@ function Countdown({ kickoff_at, home, away }: { kickoff_at: string; home: any; 
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-r from-card/80 via-gold/5 to-card/80 px-4 py-3">
+    <Link to="/jogo/$id" params={{ id }} className="block overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-r from-card/80 via-gold/5 to-card/80 px-4 py-3 hover:border-gold/40 transition-smooth">
       {/* Linha superior — label + equipas */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
@@ -1830,6 +1830,6 @@ function Countdown({ kickoff_at, home, away }: { kickoff_at: string; home: any; 
           <div className="text-[8px] uppercase tracking-widest text-muted-foreground">seg</div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

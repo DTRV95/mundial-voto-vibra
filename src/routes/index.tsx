@@ -14,7 +14,7 @@ import trophyImg from "@/assets/trophy-hero.jpg";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
 import premioCamisola from "@/assets/premio-camisola.jpg";
 
-const SITE = "https://umageracao.pt";
+const SITE = "https://geracao2026.com";
 
 export const Route = createFileRoute("/")({
   head: () => ({

@@ -348,7 +348,7 @@ function JogoPage() {
     if (pred.exact_home != null && pred.exact_away != null) {
       lines.push(`🔢 Resultado exato: ${pred.exact_home}-${pred.exact_away}`);
     }
-    lines.push("Vota também no Uma Geração: https://umageracao.pt/jogos");
+    lines.push("Vota também no Uma Geração: https://geracao2026.com/jogos");
 
     const text = lines.join("\n");
 

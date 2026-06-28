@@ -108,7 +108,7 @@ export function usePodiumShare({ first, second, third, phase = "Fase de Grupos" 
     if (!cardRef.current) return;
     await captureAndShare(
       cardRef.current,
-      `🏆 Pódio ${phase} — Uma Geração · Mundial 2026\nJunta-te em https://umageracao.pt`,
+      `🏆 Pódio ${phase} — Uma Geração · Mundial 2026\nJunta-te em https://geracao2026.com`,
       "podio-umageracao.png"
     );
   }
@@ -207,7 +207,7 @@ export function usePodiumShare({ first, second, third, phase = "Fase de Grupos" 
 
       {/* footer brand */}
       <div style={{ textAlign: "center", marginTop: 18, fontSize: 10, color: "#4a6a50", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-        umageracao.pt · Mundial 2026
+        geracao2026.com · Mundial 2026
       </div>
     </div>
   );
@@ -238,7 +238,7 @@ export function useRankShare({ displayName, rank, totalPoints, totalUsers, divis
     if (!cardRef.current) return;
     await captureAndShare(
       cardRef.current,
-      `🏆 Estou em ${rank}º lugar no Mundial 2026 — Uma Geração!\nJunta-te em https://umageracao.pt`,
+      `🏆 Estou em ${rank}º lugar no Mundial 2026 — Uma Geração!\nJunta-te em https://geracao2026.com`,
       "rank-umageracao.png"
     );
   }
@@ -287,7 +287,7 @@ export function useRankShare({ displayName, rank, totalPoints, totalUsers, divis
         </div>
       </div>
       <div style={{ textAlign: "center", marginTop: 18, fontSize: 10, color: "#4a6a50", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-        umageracao.pt · Mundial 2026
+        geracao2026.com · Mundial 2026
       </div>
     </div>
   );

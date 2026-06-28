@@ -271,3 +271,75 @@
   font-weight: 900;
   letter-spacing: 0.05em;
 }
+
+/* ── Entrance animations ──────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.93); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-enter      { animation: fadeSlideUp 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-enter-fast { animation: fadeSlideUp 0.28s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-in    { animation: fadeIn 0.4s ease both; }
+.animate-scale-in   { animation: scaleIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* stagger helpers */
+.delay-50  { animation-delay: 50ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-250 { animation-delay: 250ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-350 { animation-delay: 350ms; }
+.delay-400 { animation-delay: 400ms; }
+
+/* ── Streak fire pulse ─────────────────────────────────── */
+@keyframes fire-pulse {
+  0%, 100% { transform: scale(1) rotate(-3deg); }
+  50%       { transform: scale(1.18) rotate(3deg); }
+}
+.animate-fire { animation: fire-pulse 1.2s ease-in-out infinite; }
+
+/* ── Nav bounce on active ──────────────────────────────── */
+@keyframes nav-pop {
+  0%   { transform: translateY(0)    scale(1); }
+  40%  { transform: translateY(-5px) scale(1.15); }
+  70%  { transform: translateY(1px)  scale(0.97); }
+  100% { transform: translateY(0)    scale(1); }
+}
+.animate-nav-pop { animation: nav-pop 0.38s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* ── Animated counter (CSS only) ──────────────────────── */
+@property --num {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: false;
+}
+.animate-count {
+  transition: --num 1.2s ease-out;
+  counter-reset: num var(--num);
+}
+.animate-count::after { content: counter(num); }
+
+/* ── Pulse dot (community alive) ──────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.5); }
+}
+.animate-pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+
+/* ── Glow ring on achievement ─────────────────────────── */
+@keyframes glow-ring {
+  0%   { box-shadow: 0 0 0 0 oklch(0.75 0.18 85 / 0.7); }
+  70%  { box-shadow: 0 0 0 10px oklch(0.75 0.18 85 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.75 0.18 85 / 0); }
+}
+.animate-glow { animation: glow-ring 1.8s ease-out infinite; }

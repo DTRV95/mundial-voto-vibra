@@ -88,6 +88,36 @@ function Home() {
     },
   });
 
+  const { data: myStreak } = useQuery({
+    queryKey: ["my-streak", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("profiles")
+        .select("vote_streak,max_vote_streak,display_name")
+        .eq("id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const { data: communityPulse } = useQuery({
+    queryKey: ["community-pulse"],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const { count: todayVotes } = await supabase
+        .from("predictions")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", today.toISOString());
+      const { count: totalUsers } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .gt("predictions_made", 0);
+      return { todayVotes: todayVotes ?? 0, totalUsers: totalUsers ?? 0 };
+    },
+  });
+
   const { data: grupHof = [] } = useQuery({
     queryKey: ["hof", "grupos"],
     queryFn: async () => {
@@ -472,7 +502,7 @@ function Home() {
     <div className="pb-10">
 
       {/* ===================== HERO — Panini WC2026 (mobile + desktop) ===================== */}
-      <section className="relative px-4 pt-4 md:px-6 md:pt-5">
+      <section className="relative px-4 pt-4 md:px-6 md:pt-5 animate-fade-in">
         <div
           className="relative overflow-hidden rounded-3xl bg-wc-red panini-stripes"
           style={{ boxShadow: "0 12px 48px oklch(0.54 0.24 27 / 0.35)", minHeight: "200px" }}
@@ -538,6 +568,46 @@ function Home() {
         </div>
       </section>
 
+      {/* ===================== STREAK WIDGET ===================== */}
+      {user && myStreak && (myStreak.vote_streak ?? 0) >= 2 && (
+        <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">
+          <div className="relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-950/60 via-orange-900/30 to-transparent px-4 py-3 flex items-center gap-3">
+            <span className="text-2xl animate-fire shrink-0">🔥</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-orange-400 uppercase tracking-widest leading-none mb-0.5">Sequência de votos</p>
+              <p className="text-sm font-semibold text-foreground">
+                {myStreak.vote_streak} dias seguidos a votar
+                {myStreak.vote_streak >= myStreak.max_vote_streak && myStreak.vote_streak >= 5 && (
+                  <span className="ml-1.5 text-[10px] rounded-full bg-orange-500/20 text-orange-400 px-1.5 py-0.5 font-bold">Recorde pessoal!</span>
+                )}
+              </p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="font-display text-2xl text-orange-400 leading-none">{myStreak.vote_streak}</p>
+              <p className="text-[10px] text-muted-foreground">dias</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== COMMUNITY PULSE ===================== */}
+      {communityPulse && communityPulse.todayVotes > 0 && (
+        <div className="mx-5 mt-3 md:mx-8 animate-enter delay-150">
+          <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card/50 px-3 py-2">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-green opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-wc-green" />
+            </span>
+            <p className="text-xs text-muted-foreground">
+              <span className="font-bold text-foreground">{communityPulse.todayVotes.toLocaleString("pt-PT")}</span> previsões feitas hoje
+              {communityPulse.totalUsers > 0 && (
+                <> · <span className="font-bold text-foreground">{communityPulse.totalUsers.toLocaleString("pt-PT")}</span> adeptos ativos</>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ===================== COUNTDOWN + CTA ===================== */}
       <div className={`mx-5 mt-4 md:mx-8 ${nextMatch && !user ? "grid gap-3 sm:grid-cols-2" : ""}`}>
         {nextMatch && (
@@ -590,6 +660,7 @@ function Home() {
       )}
 
       {/* ===================== BANNER MATA-MATA — utilizadores logados ===================== */}
+      <div className="animate-enter delay-200">
       {user && (
         <div className="mx-5 mt-4 md:mx-8">
           <div className="relative overflow-hidden rounded-2xl border border-gold/30"
@@ -613,6 +684,8 @@ function Home() {
           </div>
         </div>
       )}
+
+      </div>
 
       {/* ===================== PÓDIO FASE DE GRUPOS ===================== */}
       <PodioFaseGrupos hof={grupHof} />

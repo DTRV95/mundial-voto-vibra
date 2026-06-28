@@ -458,6 +458,38 @@ function JogoPage() {
 
       </section>
 
+      {/* Contra a corrente */}
+      {(() => {
+        if (!myPrediction || !match || match.home_score == null) return null;
+        const myPts = (myPrediction as any).points ?? 0;
+        if (myPts === 0) return null;
+        // check if voted against community majority on result_90
+        const myResult = (myPrediction as any).result_90;
+        if (!myResult || community.length < 5) return null;
+        const votes = community.map((c: any) => c.result_90).filter(Boolean);
+        if (votes.length === 0) return null;
+        const counts: Record<string, number> = {};
+        for (const v of votes) counts[v] = (counts[v] ?? 0) + 1;
+        const majorityOption = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+        const majorityPct = Math.round((majorityOption[1] / votes.length) * 100);
+        if (majorityOption[0] === myResult || majorityPct < 60) return null;
+        return (
+          <div className="mb-4 animate-scale-in overflow-hidden rounded-2xl border border-gold/40"
+            style={{ background: "linear-gradient(135deg,oklch(0.14 0.04 85) 0%,oklch(0.12 0.03 260) 100%)" }}>
+            <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg,transparent,oklch(0.75 0.18 85),transparent)" }} />
+            <div className="flex items-center gap-3 px-4 py-3">
+              <span className="text-2xl shrink-0">🦁</span>
+              <div>
+                <p className="text-xs font-bold text-gold uppercase tracking-widest">Contra a Corrente!</p>
+                <p className="text-xs text-white/70 mt-0.5">
+                  {majorityPct}% da comunidade votou diferente — e tu acertaste. Isso é intuição!
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Top pontuadores do jogo */}
       {topScorers.length > 0 && (
         <section className="mt-6">

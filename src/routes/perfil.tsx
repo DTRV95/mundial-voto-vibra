@@ -660,7 +660,22 @@ function PointsEvolutionChart({ history }: { history: any[] }) {
     .filter(h => h.match?.kickoff_at && h.points != null)
     .sort((a, b) => new Date(a.match.kickoff_at).getTime() - new Date(b.match.kickoff_at).getTime());
 
-  if (finished.length < 2) return null;
+  const W = 300;
+  const H = 80;
+  const pad = 4;
+
+  if (finished.length === 0) {
+    return (
+      <section className="mb-6">
+        <h2 className="mb-3 font-display text-lg flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-wc-green" /> Evolução de Pontos
+        </h2>
+        <div className="rounded-2xl border border-border bg-card/60 p-6 text-center text-sm text-muted-foreground">
+          Os pontos aparecerão aqui assim que os primeiros resultados forem apurados.
+        </div>
+      </section>
+    );
+  }
 
   // build cumulative points
   let cum = 0;
@@ -670,19 +685,20 @@ function PointsEvolutionChart({ history }: { history: any[] }) {
   });
 
   const max = Math.max(...data.map(d => d.cum), 1);
-  const W = 300;
-  const H = 80;
-  const pad = 4;
-  const step = (W - pad * 2) / (data.length - 1);
+  const step = data.length > 1 ? (W - pad * 2) / (data.length - 1) : 0;
 
   const points = data.map((d, i) => {
-    const x = pad + i * step;
+    const x = data.length > 1 ? pad + i * step : W / 2;
     const y = H - pad - ((d.cum / max) * (H - pad * 2));
     return { x, y, ...d };
   });
 
-  const pathD = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-  const areaD = `${pathD} L ${points[points.length - 1].x} ${H} L ${pad} ${H} Z`;
+  const pathD = points.length === 1
+    ? `M ${points[0].x - 1} ${points[0].y} L ${points[0].x + 1} ${points[0].y}`
+    : points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  const areaD = points.length === 1
+    ? `M ${points[0].x - 1} ${points[0].y} L ${points[0].x + 1} ${points[0].y} L ${points[0].x + 1} ${H} L ${points[0].x - 1} ${H} Z`
+    : `${pathD} L ${points[points.length - 1].x} ${H} L ${pad} ${H} Z`;
 
   return (
     <section className="mb-6">

@@ -353,6 +353,16 @@ function Perfil() {
         </div>
       </div>
 
+      {/* Badges */}
+      <BadgesSection
+        phaseResults={phaseResults as any[]}
+        exactScores={exactScores}
+        bestCorrectStreak={bestCorrectStreak}
+        maxStreak={maxStreak}
+        totalPredictions={profile?.predictions_made ?? 0}
+        acc={acc}
+      />
+
       {/* Resultados por fase */}
       {phaseResults.length > 0 && (
         <section className="mb-6">
@@ -639,6 +649,57 @@ function Perfil() {
         </button>
       </div>
     </div>
+  );
+}
+
+interface BadgeDef {
+  emoji: string;
+  label: string;
+  desc: string;
+  color: string; // tailwind bg class tint
+}
+
+function BadgesSection({
+  phaseResults, exactScores, bestCorrectStreak, maxStreak, totalPredictions, acc,
+}: {
+  phaseResults: any[]; exactScores: number; bestCorrectStreak: number;
+  maxStreak: number; totalPredictions: number; acc: number;
+}) {
+  const badges: BadgeDef[] = [];
+
+  const gruposResult = phaseResults.find((r: any) => r.phase === "grupos");
+  if (gruposResult) {
+    if (gruposResult.rank === 1)  badges.push({ emoji: "🥇", label: "Campeão da Fase de Grupos", desc: "1.º lugar no ranking global", color: "bg-gold/10 border-gold/30" });
+    else if (gruposResult.rank <= 3) badges.push({ emoji: "🥈", label: "Pódio da Fase de Grupos", desc: `Top 3 global — ${gruposResult.rank}º lugar`, color: "bg-gold/8 border-gold/20" });
+    else if (gruposResult.rank <= 10) badges.push({ emoji: "🏅", label: "Top 10 Fase de Grupos", desc: `${gruposResult.rank}º lugar no ranking global`, color: "bg-wc-blue/10 border-wc-blue/25" });
+  }
+
+  if (exactScores >= 1)  badges.push({ emoji: "🎯", label: "Atirador de Elite", desc: `${exactScores} placar${exactScores > 1 ? "es" : ""} exato${exactScores > 1 ? "s" : ""}`, color: "bg-wc-red/10 border-wc-red/25" });
+  if (exactScores >= 5)  badges.push({ emoji: "🔥", label: "Francotirador", desc: "5+ placares exatos", color: "bg-wc-red/10 border-wc-red/25" });
+  if (bestCorrectStreak >= 5) badges.push({ emoji: "⚡", label: "Série Imparável", desc: `${bestCorrectStreak} previsões certas seguidas`, color: "bg-wc-green/10 border-wc-green/25" });
+  if (maxStreak >= 7)    badges.push({ emoji: "📅", label: "Viciado", desc: `${maxStreak} dias seguidos a votar`, color: "bg-wc-blue/10 border-wc-blue/25" });
+  if (totalPredictions >= 50) badges.push({ emoji: "📊", label: "Analista", desc: "50+ previsões feitas", color: "bg-wc-blue/10 border-wc-blue/25" });
+  if (acc >= 70 && totalPredictions >= 10) badges.push({ emoji: "🧠", label: "Génio Tático", desc: `${acc}% de acerto geral`, color: "bg-wc-green/10 border-wc-green/25" });
+
+  if (badges.length === 0) return null;
+
+  return (
+    <section className="mb-6">
+      <h2 className="mb-3 font-display text-lg flex items-center gap-2">
+        <Star className="h-4 w-4 text-gold" /> Conquistas
+      </h2>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {badges.map((b, i) => (
+          <div key={i} className={`flex items-start gap-2.5 rounded-2xl border ${b.color} px-3 py-3`}>
+            <span className="text-2xl shrink-0 leading-none mt-0.5">{b.emoji}</span>
+            <div className="min-w-0">
+              <p className="text-xs font-bold leading-snug text-foreground">{b.label}</p>
+              <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">{b.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 

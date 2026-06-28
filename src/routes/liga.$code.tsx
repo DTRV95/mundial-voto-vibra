@@ -65,6 +65,7 @@ function LigaPage() {
   const [addTarget, setAddTarget] = useState<{ id: string; display_name: string; total_points: number; avatar_url: string | null } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showAllMembers, setShowAllMembers] = useState(false);
+  const [showPhaseHistory, setShowPhaseHistory] = useState(false);
 
   const EMOJIS = ["⚽", "🍺", "👨‍👩‍👧", "💼", "🏆", "🎮", "🎓", "🏋️", "🎉", "🔥", "💪", "🤝", "🦁", "🐉", "🌍"];
 
@@ -521,6 +522,82 @@ function copyLink() {
             );
           })}
         </div>
+      )}
+
+      {/* ── RESULTADOS FASE ANTERIOR ────────────────────────── */}
+      {isMember && Object.keys(memberPhaseResults).length > 0 && (
+        (() => {
+          const PHASE_LABELS: Record<string, string> = {
+            grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos",
+            quartos: "Quartos", meias: "Meias-Finais", final: "Final",
+          };
+          // collect all phases present
+          const phases = Array.from(
+            new Set(Object.values(memberPhaseResults as Record<string, any>).flatMap(p => Object.keys(p)))
+          ) as string[];
+          if (phases.length === 0) return null;
+
+          return (
+            <div className="mx-5 mt-4 md:mx-8">
+              <button
+                onClick={() => setShowPhaseHistory(v => !v)}
+                className="w-full flex items-center justify-between rounded-2xl border border-border bg-card/60 px-4 py-3 text-left transition-smooth hover:border-wc-blue/40"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-base">📊</span>
+                  <span className="text-sm font-semibold">Resultados por Fase</span>
+                  <span className="rounded-full bg-wc-blue/15 px-2 py-0.5 text-[9px] font-bold text-wc-blue">{phases.length} fase{phases.length > 1 ? "s" : ""}</span>
+                </div>
+                {showPhaseHistory ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+              </button>
+
+              {showPhaseHistory && (
+                <div className="mt-2 space-y-4">
+                  {phases.map(phase => {
+                    // build sorted list for this phase from members in this pool
+                    const entries = (ranking as any[])
+                      .map(r => {
+                        const pr = (memberPhaseResults as any)[r.id]?.[phase];
+                        return pr ? { ...r, phaseRank: pr.rank, phasePoints: pr.total_points } : null;
+                      })
+                      .filter(Boolean)
+                      .sort((a: any, b: any) => a.phaseRank - b.phaseRank);
+
+                    if (entries.length === 0) return null;
+
+                    return (
+                      <div key={phase} className="overflow-hidden rounded-2xl border border-border bg-card/50">
+                        <div className="flex items-center gap-2 border-b border-border px-4 py-2.5 bg-card/80">
+                          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{PHASE_LABELS[phase] ?? phase}</span>
+                        </div>
+                        <div className="divide-y divide-border/50">
+                          {entries.map((entry: any, i: number) => {
+                            const isMe = entry.id === user?.id;
+                            const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : null;
+                            return (
+                              <div key={entry.id} className={`flex items-center gap-3 px-4 py-2.5 ${isMe ? "bg-wc-red/5" : ""}`}>
+                                <span className={`w-6 shrink-0 text-center text-xs font-bold ${isMe ? "text-wc-red" : "text-muted-foreground"}`}>
+                                  {medal ?? `${entry.phaseRank}º`}
+                                </span>
+                                <UserAvatar avatarUrl={entry.avatar_url} name={entry.display_name} size={7} className="rounded-full shrink-0" />
+                                <span className={`flex-1 truncate text-sm ${isMe ? "font-bold text-wc-red" : "font-medium"}`}>
+                                  {entry.display_name}
+                                  {isMe && <span className="ml-1 text-[9px] font-bold uppercase tracking-wider text-wc-red">Tu</span>}
+                                </span>
+                                <span className="shrink-0 font-display text-base text-gold">{entry.phasePoints}</span>
+                                <span className="shrink-0 text-[10px] text-muted-foreground">pts</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()
       )}
 
       {/* ── CONVITE (não autenticado) ─────────────────────────── */}

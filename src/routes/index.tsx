@@ -600,7 +600,7 @@ function Home() {
             {[
               { label: "Equipas", value: "48" },
               { label: "Jogos", value: "104" },
-              { label: communityPulse ? "Adeptos" : "Países", value: communityPulse ? communityPulse.totalUsers.toString() : "3" },
+              { label: "Países", value: "3" },
             ].map((s, i) => (
               <div key={s.label} className={`py-3 text-center text-white animate-stat-pop ${i === 1 ? "border-x border-white/8" : ""}`}
                 style={{ animationDelay: `${i * 80}ms` }}>

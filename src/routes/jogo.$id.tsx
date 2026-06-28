@@ -229,7 +229,7 @@ function JogoPage() {
   }
 
   async function autoFill() {
-    if (autoFilling || closed) return;
+    if (autoFilling) return;
     setAutoFilling(true);
 
     const commResult90  = community.map((c: any) => c.result_90);
@@ -493,14 +493,16 @@ function JogoPage() {
         <div className="flex items-center justify-between mb-1">
           <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Os teus votos</p>
           <div className="flex items-center gap-2">
-            {!closed && (
+            {!hasVoted && (
               <button
                 onClick={autoFill}
-                disabled={autoFilling}
-                title="Preencher automaticamente com base na comunidade"
+                disabled={autoFilling || closed}
+                title={closed ? "Votação fechada" : "Preencher automaticamente com base na comunidade"}
                 className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-all active:scale-95 ${
                   autoFilling
                     ? "border-gold/30 bg-gold/8 text-gold/50 cursor-wait"
+                    : closed
+                    ? "border-border/40 bg-secondary/20 text-muted-foreground cursor-not-allowed opacity-50"
                     : "border-gold/40 bg-gold/10 text-gold hover:bg-gold/20 hover:border-gold/60"
                 }`}
               >

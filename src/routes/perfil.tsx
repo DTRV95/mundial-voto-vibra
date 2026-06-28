@@ -428,7 +428,7 @@ function Perfil() {
       )}
 
       {/* Gráfico de evolução de pontos */}
-      <PointsEvolutionChart history={history as any[]} />
+      <PointsEvolutionChart history={history as any[]} phaseResults={phaseResults as any[]} />
 
       {/* Estatísticas gerais */}
       {finishedGames.length > 0 && (
@@ -694,16 +694,43 @@ function Perfil() {
   );
 }
 
-function PointsEvolutionChart({ history }: { history: any[] }) {
-  const finished = [...history]
+const PHASE_ORDER = ["grupos", "ronda32", "oitavos", "quartos", "meias", "final"];
+const PHASE_SHORT: Record<string, string> = {
+  grupos: "Grupos", ronda32: "16avos", oitavos: "Oitavos",
+  quartos: "Quartos", meias: "Meias", final: "Final",
+};
+
+function PointsEvolutionChart({ history, phaseResults }: { history: any[]; phaseResults: any[] }) {
+  // Primary: use per-prediction points if available
+  const scoredPreds = [...history]
     .filter(h => h.match?.kickoff_at && h.points != null)
     .sort((a, b) => new Date(a.match.kickoff_at).getTime() - new Date(b.match.kickoff_at).getTime());
+
+  // Fallback: use phase_results (guaranteed to have data when phases are closed)
+  const phaseData = [...phaseResults]
+    .filter(r => r.total_points != null && r.total_points > 0)
+    .sort((a, b) => PHASE_ORDER.indexOf(a.phase) - PHASE_ORDER.indexOf(b.phase));
 
   const W = 300;
   const H = 80;
   const pad = 4;
 
-  if (finished.length === 0) {
+  // Build data points — prefer per-prediction, fall back to per-phase
+  let data: { label: string; pts: number; cum: number }[];
+
+  if (scoredPreds.length >= 2) {
+    let cum = 0;
+    data = scoredPreds.map(h => {
+      cum += h.points ?? 0;
+      return { pts: h.points ?? 0, cum, label: `${h.match?.home?.name ?? "?"} vs ${h.match?.away?.name ?? "?"}` };
+    });
+  } else if (phaseData.length >= 1) {
+    let cum = 0;
+    data = phaseData.map(r => {
+      cum += r.total_points ?? 0;
+      return { pts: r.total_points ?? 0, cum, label: PHASE_SHORT[r.phase] ?? r.phase };
+    });
+  } else {
     return (
       <section className="mb-6">
         <h2 className="mb-3 font-display text-lg flex items-center gap-2">
@@ -716,28 +743,22 @@ function PointsEvolutionChart({ history }: { history: any[] }) {
     );
   }
 
-  // build cumulative points
-  let cum = 0;
-  const data = finished.map(h => {
-    cum += h.points ?? 0;
-    return { pts: h.points ?? 0, cum, label: `${h.match?.home?.name ?? "?"} vs ${h.match?.away?.name ?? "?"}` };
-  });
-
+  const isPhaseMode = scoredPreds.length < 2 && phaseData.length >= 1;
   const max = Math.max(...data.map(d => d.cum), 1);
   const step = data.length > 1 ? (W - pad * 2) / (data.length - 1) : 0;
 
-  const points = data.map((d, i) => {
+  const pts = data.map((d, i) => {
     const x = data.length > 1 ? pad + i * step : W / 2;
     const y = H - pad - ((d.cum / max) * (H - pad * 2));
     return { x, y, ...d };
   });
 
-  const pathD = points.length === 1
-    ? `M ${points[0].x - 1} ${points[0].y} L ${points[0].x + 1} ${points[0].y}`
-    : points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-  const areaD = points.length === 1
-    ? `M ${points[0].x - 1} ${points[0].y} L ${points[0].x + 1} ${points[0].y} L ${points[0].x + 1} ${H} L ${points[0].x - 1} ${H} Z`
-    : `${pathD} L ${points[points.length - 1].x} ${H} L ${pad} ${H} Z`;
+  const pathD = pts.length === 1
+    ? `M ${pts[0].x - 1} ${pts[0].y} L ${pts[0].x + 1} ${pts[0].y}`
+    : pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  const areaD = pts.length === 1
+    ? `M ${pts[0].x - 1} ${pts[0].y} L ${pts[0].x + 1} ${pts[0].y} L ${pts[0].x + 1} ${H} L ${pts[0].x - 1} ${H} Z`
+    : `${pathD} L ${pts[pts.length - 1].x} ${H} L ${pad} ${H} Z`;
 
   return (
     <section className="mb-6">
@@ -746,7 +767,9 @@ function PointsEvolutionChart({ history }: { history: any[] }) {
       </h2>
       <div className="rounded-2xl border border-border bg-card/60 p-4">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-muted-foreground">{data.length} jogos pontuados</span>
+          <span className="text-xs text-muted-foreground">
+            {isPhaseMode ? `${data.length} fase${data.length > 1 ? "s" : ""} concluída${data.length > 1 ? "s" : ""}` : `${data.length} jogos pontuados`}
+          </span>
           <span className="font-display text-lg text-gold leading-none">{data[data.length - 1].cum} pts</span>
         </div>
         <svg viewBox={`0 0 ${W} ${H}`} className="w-full overflow-visible" style={{ height: 80 }}>
@@ -756,23 +779,23 @@ function PointsEvolutionChart({ history }: { history: any[] }) {
               <stop offset="100%" stopColor="oklch(0.75 0.18 85)" stopOpacity="0.02" />
             </linearGradient>
           </defs>
-          {/* grid lines */}
           {[0.25, 0.5, 0.75, 1].map(t => (
             <line key={t} x1={pad} x2={W - pad} y1={H - pad - t * (H - pad * 2)} y2={H - pad - t * (H - pad * 2)}
               stroke="currentColor" strokeOpacity="0.06" strokeWidth="1" />
           ))}
-          {/* area fill */}
           <path d={areaD} fill="url(#ptsFill)" />
-          {/* line */}
           <path d={pathD} fill="none" stroke="oklch(0.75 0.18 85)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          {/* dots — only first and last */}
-          {[points[0], points[points.length - 1]].map((p, i) => (
+          {[pts[0], pts[pts.length - 1]].map((p, i) => (
             <circle key={i} cx={p.x} cy={p.y} r="3.5" fill="oklch(0.75 0.18 85)" stroke="var(--background)" strokeWidth="1.5" />
+          ))}
+          {/* Phase labels on x-axis when in phase mode */}
+          {isPhaseMode && pts.map((p, i) => (
+            <text key={i} x={p.x} y={H} textAnchor="middle" fontSize="7" fill="currentColor" opacity="0.4">{data[i].label}</text>
           ))}
         </svg>
         <div className="flex justify-between mt-1">
-          <span className="text-[9px] text-muted-foreground">Jogo 1</span>
-          <span className="text-[9px] text-muted-foreground">Jogo {data.length}</span>
+          <span className="text-[9px] text-muted-foreground">{isPhaseMode ? data[0].label : "Jogo 1"}</span>
+          <span className="text-[9px] text-muted-foreground">{isPhaseMode ? data[data.length - 1].label : `Jogo ${data.length}`}</span>
         </div>
       </div>
     </section>

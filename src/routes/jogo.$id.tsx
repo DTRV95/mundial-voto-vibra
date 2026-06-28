@@ -529,13 +529,6 @@ function JogoPage() {
                 {autoFilling ? "A preencher…" : "Auto-fill"}
               </button>
             )}
-            <button
-              onClick={() => setAutoFillInfoOpen(true)}
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-gold transition-smooth"
-            >
-              <Info className="h-3.5 w-3.5" /> Como funciona?
-            </button>
-
             {/* Auto-fill info popup */}
             {autoFillInfoOpen && (
               <div

@@ -124,10 +124,10 @@ function ComoFunciona() {
               <PointRow label="Ambas as equipas marcam (BTTS)" pts="2 pts" note="Sim ou Não — baseado nos 90 minutos + prolongamento" />
               <PointRow label="Total de golos +/- 2.5" pts="2 pts" note="Total de golos nos 90 minutos + prolongamento" />
               <PointRow label="Marcador exato" pts="10 pts" note="Acertar o placard exacto ao fim do tempo regulamentar" />
-              <PointRow label="Quem se apura? 🆕" pts="4 pts" note="Escolhes qual das duas equipas passa à próxima ronda — vale mesmo se houver penáltis!" highlight />
+              <PointRow label="Qualifica-se? 🆕" pts="4 pts" note="Escolhes qual das duas equipas passa à próxima ronda — vale mesmo se houver penáltis!" highlight />
             </div>
             <div className="rounded-xl border border-wc-blue/30 bg-wc-blue/5 p-3 text-xs text-muted-foreground">
-              <p className="font-semibold text-foreground mb-1">ℹ️ Como funciona o «Quem se apura?»</p>
+              <p className="font-semibold text-foreground mb-1">ℹ️ Como funciona o «Qualifica-se?»</p>
               <p>É o único mercado que conta o resultado da eliminatória inteira — incluindo prolongamento e grandes penalidades. Não interessa como a equipa passa, o que importa é que passe.</p>
             </div>
           </div>
@@ -168,7 +168,7 @@ function ComoFunciona() {
             "Cada mercado é independente — podes acertar num e errar noutro.",
             "Quanto mais difícil a previsão, mais pontos vale.",
             "Não há penalização por errar — o pior que pode acontecer é ficares a 0.",
-            "No mata-mata, o mercado «Quem se apura?» é o único que conta o resultado final da eliminatória (incluindo penáltis).",
+            "No mata-mata, o mercado «Qualifica-se?» é o único que conta o resultado final da eliminatória (incluindo penáltis).",
             "Podes ver o detalhe dos pontos de cada previsão no histórico do teu perfil.",
           ].map((tip, i) => (
             <li key={i} className="flex items-start gap-2.5">
@@ -229,7 +229,7 @@ function ComoFunciona() {
       <Section icon={Swords} title="Estratégia para o Mata-Mata" accent="border-gold/30">
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {[
-            { tip: "Aposta no «Quem se apura?»", detail: "4 pts garantidos se acertares quem passa — e conta mesmo em penáltis. Não deixes passar." },
+            { tip: "Aposta no «Qualifica-se?»", detail: "4 pts garantidos se acertares quem passa — e conta mesmo em penáltis. Não deixes passar." },
             { tip: "Jogos de eliminação = menos golos", detail: "No mata-mata as equipas jogam mais fechadas. Pondera bem o +/- 2.5 golos." },
             { tip: "Arrisca no marcador exato", detail: "10 pts de uma vez — mesmo que só acertes 1 em 10, compensa muito." },
             { tip: "Submete cedo", detail: "Em caso de empate de pontos, quem votou primeiro leva a vantagem." },

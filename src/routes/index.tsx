@@ -732,7 +732,7 @@ function Home() {
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70">A decorrer agora</p>
                 <p className="font-display text-base leading-tight">16 Avos de Final · Mata-Mata</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Nova corrida — pontos reiniciados. Novo mercado: <span className="font-semibold text-gold">Quem se apura? (4 pts)</span></p>
+                <p className="text-xs text-muted-foreground mt-0.5">Nova corrida — pontos reiniciados. Novo mercado: <span className="font-semibold text-gold">Qualifica-se? (4 pts)</span></p>
               </div>
               <Link to="/como-funciona"
                 className="shrink-0 rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-xs font-bold text-gold transition-smooth hover:bg-gold/20 whitespace-nowrap">

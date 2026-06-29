@@ -414,7 +414,7 @@ function Ronda32WelcomeModal() {
             <div className="flex items-start gap-2.5">
               <span className="text-xl shrink-0">⚔️</span>
               <div>
-                <p className="text-sm font-bold text-white">Qualifica-se? — 4 pts</p>
+                <p className="text-sm font-bold text-white">Qualificar — 4 pts</p>
                 <p className="text-xs text-white/60 mt-0.5">Escolhe qual das equipas passa à próxima ronda. Conta mesmo que seja nos penáltis!</p>
               </div>
             </div>

@@ -629,7 +629,7 @@ function JogoPage() {
         </MarketCard>
 
         {match.phase !== "grupos" && (
-          <MarketCard title="Qualifica-se?" closed={closed} pts="4 pts"
+          <MarketCard title="Qualificar" closed={closed} pts="4 pts"
             communityCount={community.length} showCommunity={showCommunity}>
             <VoteOptions value={pred.qualifier} disabled={closed}
               options={[

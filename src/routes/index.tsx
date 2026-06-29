@@ -575,7 +575,7 @@ function Home() {
               </div>
             ) : (
               <p className="mt-3 text-sm font-semibold text-white/70 max-w-[220px] leading-snug">
-                {user ? "Vota, compara e vibra." : "Previsões grátis. Sem apostas."}
+                {user ? "Vota, compara e vibra." : "Cria o teu torneio, convida os teus amigos e vê quem manda."}
               </p>
             )}
 

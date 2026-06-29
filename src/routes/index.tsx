@@ -592,7 +592,6 @@ function Home() {
                     className="inline-flex w-fit items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth hover:scale-[1.03] active:scale-95">
                     Entrar grátis <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
-                  <span className="text-[11px] font-semibold text-white/40">🏆 Já somos mais de 100 membros</span>
                 </>
               )}
             </div>

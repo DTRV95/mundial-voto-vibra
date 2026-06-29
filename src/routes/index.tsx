@@ -621,9 +621,9 @@ function Home() {
             <Link to="/auth" className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
               Entrar grátis <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link to="/como-funciona" className="inline-flex items-center justify-center rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 transition-smooth">
-              Como?
-            </Link>
+            <div className="inline-flex items-center justify-center rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3 text-xs font-bold text-gold">
+              🏆 +100 membros
+            </div>
           </div>
         )}
       </section>

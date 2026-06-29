@@ -574,25 +574,25 @@ function Home() {
                 </p>
               </div>
             ) : (
-              <p className="mt-3 text-sm font-semibold text-white/70 max-w-[220px] leading-snug">
-                {user ? "Vota, compara e vibra." : "Cria o teu torneio, convida os teus amigos e vê quem manda."}
+              <p className="mt-3 text-xs font-semibold text-white/70 leading-snug">
+                {user ? "Vota, compara e vibra." : "Convida os teus amigos e vê quem manda."}
               </p>
             )}
 
             {/* CTA */}
-            <div className="mt-5 flex items-center gap-2.5">
+            <div className="mt-4 flex flex-col gap-2">
               {user ? (
                 <Link to="/jogos"
-                  className="inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth hover:scale-[1.03] active:scale-95">
+                  className="inline-flex w-fit items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth hover:scale-[1.03] active:scale-95">
                   Votar agora <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               ) : (
                 <>
                   <Link to="/auth"
-                    className="inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth hover:scale-[1.03] active:scale-95">
+                    className="inline-flex w-fit items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth hover:scale-[1.03] active:scale-95">
                     Entrar grátis <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
-                  <span className="text-xs font-semibold text-white/50">🏆 Já somos mais de 100 membros</span>
+                  <span className="text-[11px] font-semibold text-white/40">🏆 Já somos mais de 100 membros</span>
                 </>
               )}
             </div>

@@ -664,10 +664,13 @@ function Home() {
                         <span>{m.away?.flag}</span>
                       </div>
                     </div>
-                    <div className={`shrink-0 rounded-xl px-3 py-1 text-sm font-bold tabular-nums ${
-                      pts > 0 ? "bg-gold/15 text-gold border border-gold/30" : "bg-muted text-muted-foreground/40 border border-border"
-                    }`}>
-                      {pts > 0 ? `+${pts}` : "—"}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] font-semibold text-muted-foreground/50">Ver detalhe</span>
+                      <div className={`rounded-xl px-3 py-1 text-sm font-bold tabular-nums ${
+                        pts > 0 ? "bg-gold/15 text-gold border border-gold/30" : "bg-muted text-muted-foreground/40 border border-border"
+                      }`}>
+                        {pts > 0 ? `+${pts}` : "—"}
+                      </div>
                     </div>
                   </button>
                 );

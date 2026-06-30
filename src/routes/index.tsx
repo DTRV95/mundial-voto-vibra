@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, CheckCircle2, XCircle, Zap, ChevronRight, Target, AlertTriangle, Trophy, Share2 } from "lucide-react";
+import { ArrowRight, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, CheckCircle2, XCircle, Zap, ChevronRight, Target, AlertTriangle, Trophy, Share2, Swords } from "lucide-react";
 import { ShareButton, usePodiumShare, useRankShare } from "@/components/ShareCard";
 
 import { TeamBadge } from "@/lib/teamColors.tsx";
@@ -630,31 +630,47 @@ function Home() {
       {/* ===================== MY POINTS PER MATCH ===================== */}
       {user && myResults.length > 0 && (
         <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">
-          <div className="relative overflow-hidden rounded-2xl border border-gold/30"
-            style={{ background: "linear-gradient(135deg, oklch(0.16 0.03 85 / 0.5) 0%, oklch(0.13 0.02 260 / 0.3) 100%)", boxShadow: "0 2px 16px rgba(200,150,12,0.08)" }}>
-            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent 0%, #c8960c 50%, transparent 100%)" }} />
-            <div className="px-4 pt-3 pb-2 flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70">Os meus pontos por jogo</p>
+          <div className="overflow-hidden rounded-2xl border border-gold/30 bg-card"
+            style={{ boxShadow: "0 2px 16px oklch(0.75 0.18 85 / 0.10), 0 0 0 1px oklch(0.75 0.18 85 / 0.20)" }}>
+            {/* Gold stripe */}
+            <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/60">
+              <div className="flex items-center gap-2">
+                <Swords className="h-3.5 w-3.5 text-gold" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-gold">Os meus pontos</span>
+              </div>
               {myDivision && (
-                <span className="text-xs font-bold text-gold">{myDivision.points} pts total</span>
+                <span className="font-display text-sm text-gold-metallic">{myDivision.points} pts</span>
               )}
             </div>
-            <div className="divide-y divide-white/5">
+            {/* Match rows */}
+            <div className="divide-y divide-border/40">
               {myResults.map((m: any) => {
                 const pts = m.pred?.points ?? 0;
                 return (
                   <Link key={m.id} to="/jogo/$id" params={{ id: m.id }}
-                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-smooth">
-                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                      <span className="text-sm">{m.home?.flag}</span>
-                      <span className="text-xs font-semibold text-foreground truncate">{m.home?.name}</span>
-                      <span className="text-[10px] text-muted-foreground font-bold shrink-0">{m.home_score}–{m.away_score}</span>
-                      <span className="text-xs font-semibold text-foreground truncate">{m.away?.name}</span>
-                      <span className="text-sm">{m.away?.flag}</span>
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gold/5 transition-smooth group">
+                    {/* Teams */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <span>{m.home?.flag}</span>
+                        <span className="font-semibold text-foreground truncate">{m.home?.name}</span>
+                        <span className="shrink-0 rounded-md bg-secondary px-1.5 py-0.5 text-[11px] font-bold text-foreground tabular-nums">
+                          {m.home_score}–{m.away_score}
+                        </span>
+                        <span className="font-semibold text-foreground truncate">{m.away?.name}</span>
+                        <span>{m.away?.flag}</span>
+                      </div>
                     </div>
-                    <span className={`shrink-0 font-display text-lg leading-none ${pts > 0 ? "text-gold" : "text-muted-foreground/40"}`}>
+                    {/* Points badge */}
+                    <div className={`shrink-0 rounded-xl px-3 py-1 text-sm font-bold tabular-nums ${
+                      pts > 0
+                        ? "bg-gold/15 text-gold border border-gold/30"
+                        : "bg-muted text-muted-foreground/40 border border-border"
+                    }`}>
                       {pts > 0 ? `+${pts}` : "—"}
-                    </span>
+                    </div>
                   </Link>
                 );
               })}

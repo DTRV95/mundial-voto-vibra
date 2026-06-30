@@ -627,35 +627,39 @@ function Home() {
         )}
       </section>
 
-      {/* ===================== MY SCORE CARD ===================== */}
-      {user && myDivision && (
+      {/* ===================== MY POINTS PER MATCH ===================== */}
+      {user && myResults.length > 0 && (
         <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">
-          <Link to="/perfil"
-            className="relative overflow-hidden rounded-2xl border border-gold/30 flex items-center gap-4 px-4 py-3.5 transition-smooth hover:border-gold/50"
-            style={{ background: "linear-gradient(135deg, oklch(0.18 0.04 85 / 0.6) 0%, oklch(0.14 0.02 260 / 0.4) 100%)", boxShadow: "0 2px 16px rgba(200,150,12,0.10)" }}>
-            {/* Gold stripe */}
+          <div className="relative overflow-hidden rounded-2xl border border-gold/30"
+            style={{ background: "linear-gradient(135deg, oklch(0.16 0.03 85 / 0.5) 0%, oklch(0.13 0.02 260 / 0.3) 100%)", boxShadow: "0 2px 16px rgba(200,150,12,0.08)" }}>
             <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent 0%, #c8960c 50%, transparent 100%)" }} />
-            {/* Points */}
-            <div className="shrink-0 text-center">
-              <p className="font-display text-3xl leading-none text-gold-metallic">{myDivision.points}</p>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gold/60 mt-0.5">pontos</p>
+            <div className="px-4 pt-3 pb-2 flex items-center justify-between">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70">Os meus pontos por jogo</p>
+              {myDivision && (
+                <span className="text-xs font-bold text-gold">{myDivision.points} pts total</span>
+              )}
             </div>
-            {/* Divider */}
-            <div className="w-px self-stretch bg-gold/15" />
-            {/* Stats */}
-            <div className="flex-1 min-w-0 space-y-1">
-              <div className="flex items-center gap-2">
-                <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${myDivision.border} ${myDivision.bg} ${myDivision.text}`}>
-                  {myDivision.emoji} {myDivision.label}
-                </span>
-                <span className="text-[11px] font-bold text-muted-foreground">#{myDivision.rank}º global</span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">{myStreak?.predictions_made ?? 0}</span> jogos votados
-              </p>
+            <div className="divide-y divide-white/5">
+              {myResults.map((m: any) => {
+                const pts = m.pred?.points ?? 0;
+                return (
+                  <Link key={m.id} to="/jogo/$id" params={{ id: m.id }}
+                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-smooth">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                      <span className="text-sm">{m.home?.flag}</span>
+                      <span className="text-xs font-semibold text-foreground truncate">{m.home?.name}</span>
+                      <span className="text-[10px] text-muted-foreground font-bold shrink-0">{m.home_score}–{m.away_score}</span>
+                      <span className="text-xs font-semibold text-foreground truncate">{m.away?.name}</span>
+                      <span className="text-sm">{m.away?.flag}</span>
+                    </div>
+                    <span className={`shrink-0 font-display text-lg leading-none ${pts > 0 ? "text-gold" : "text-muted-foreground/40"}`}>
+                      {pts > 0 ? `+${pts}` : "—"}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
-            <span className="text-gold/40 text-lg shrink-0">→</span>
-          </Link>
+          </div>
         </div>
       )}
 

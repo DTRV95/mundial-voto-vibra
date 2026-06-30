@@ -627,28 +627,35 @@ function Home() {
         )}
       </section>
 
-      {/* ===================== PREDICTIONS WIDGET ===================== */}
-      {user && myStreak && (myStreak.predictions_made ?? 0) >= 1 && (
+      {/* ===================== MY SCORE CARD ===================== */}
+      {user && myDivision && (
         <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">
-          <div className="relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-500/8 via-orange-500/4 to-transparent px-4 py-3 flex items-center gap-3">
-            <span className="text-2xl animate-fire shrink-0">🔥</span>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-orange-500 uppercase tracking-widest leading-none mb-0.5">Os teus palpites</p>
-              <p className="text-sm font-semibold text-foreground">
-                {myStreak.predictions_made} jogos votados
-                {(myStreak.predictions_made ?? 0) >= 50 && (
-                  <span className="ml-1.5 text-[10px] rounded-full bg-orange-500/20 text-orange-500 px-1.5 py-0.5 font-bold">Top votante!</span>
-                )}
-                {(myStreak.predictions_made ?? 0) >= 20 && (myStreak.predictions_made ?? 0) < 50 && (
-                  <span className="ml-1.5 text-[10px] rounded-full bg-orange-500/20 text-orange-500 px-1.5 py-0.5 font-bold">Ativo!</span>
-                )}
+          <Link to="/perfil"
+            className="relative overflow-hidden rounded-2xl border border-gold/30 flex items-center gap-4 px-4 py-3.5 transition-smooth hover:border-gold/50"
+            style={{ background: "linear-gradient(135deg, oklch(0.18 0.04 85 / 0.6) 0%, oklch(0.14 0.02 260 / 0.4) 100%)", boxShadow: "0 2px 16px rgba(200,150,12,0.10)" }}>
+            {/* Gold stripe */}
+            <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent 0%, #c8960c 50%, transparent 100%)" }} />
+            {/* Points */}
+            <div className="shrink-0 text-center">
+              <p className="font-display text-3xl leading-none text-gold-metallic">{myDivision.points}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gold/60 mt-0.5">pontos</p>
+            </div>
+            {/* Divider */}
+            <div className="w-px self-stretch bg-gold/15" />
+            {/* Stats */}
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${myDivision.border} ${myDivision.bg} ${myDivision.text}`}>
+                  {myDivision.emoji} {myDivision.label}
+                </span>
+                <span className="text-[11px] font-bold text-muted-foreground">#{myDivision.rank}º global</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                <span className="font-semibold text-foreground">{myStreak?.predictions_made ?? 0}</span> jogos votados
               </p>
             </div>
-            <div className="shrink-0 text-right">
-              <p className="font-display text-2xl text-orange-500 leading-none">{myStreak.predictions_made}</p>
-              <p className="text-[10px] text-muted-foreground">palpites</p>
-            </div>
-          </div>
+            <span className="text-gold/40 text-lg shrink-0">→</span>
+          </Link>
         </div>
       )}
 

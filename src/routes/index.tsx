@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowRight, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, CheckCircle2, XCircle, Zap, ChevronRight, Target, AlertTriangle, Trophy, Share2, Swords } from "lucide-react";
 import { ShareButton, usePodiumShare, useRankShare } from "@/components/ShareCard";
 
@@ -246,7 +247,7 @@ function Home() {
       const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
       const { data: finished } = await supabase
         .from("matches")
-        .select("id,kickoff_at,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .select("id,kickoff_at,phase,home_score,away_score,qualifier,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
         .not("home_score", "is", null)
         .gte("kickoff_at", fourteenDaysAgo)
         .order("kickoff_at", { ascending: false })
@@ -254,7 +255,7 @@ function Home() {
       if (!finished?.length) return [];
       const { data: preds } = await supabase
         .from("predictions")
-        .select("match_id,points,exact_home,exact_away,result_90")
+        .select("match_id,points,exact_home,exact_away,result_90,btts,total_25,double_chance,combo_15,qualifier")
         .eq("user_id", user!.id)
         .in("match_id", (finished as any[]).map(m => m.id));
       if (!preds?.length) return [];
@@ -272,6 +273,7 @@ function Home() {
     staleTime: 120_000,
   });
 
+  const [selectedResult, setSelectedResult] = useState<any>(null);
   const [feedShown, setFeedShown] = useState(6);
   const feedSentinelRef = useRef<HTMLButtonElement>(null);
   const { data: following } = useFollowing();
@@ -649,9 +651,8 @@ function Home() {
               {myResults.map((m: any) => {
                 const pts = m.pred?.points ?? 0;
                 return (
-                  <Link key={m.id} to="/jogo/$id" params={{ id: m.id }}
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-gold/5 transition-smooth group">
-                    {/* Teams */}
+                  <button key={m.id} onClick={() => setSelectedResult(m)}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gold/5 transition-smooth text-left">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 text-sm">
                         <span>{m.home?.flag}</span>
@@ -663,21 +664,21 @@ function Home() {
                         <span>{m.away?.flag}</span>
                       </div>
                     </div>
-                    {/* Points badge */}
                     <div className={`shrink-0 rounded-xl px-3 py-1 text-sm font-bold tabular-nums ${
-                      pts > 0
-                        ? "bg-gold/15 text-gold border border-gold/30"
-                        : "bg-muted text-muted-foreground/40 border border-border"
+                      pts > 0 ? "bg-gold/15 text-gold border border-gold/30" : "bg-muted text-muted-foreground/40 border border-border"
                     }`}>
                       {pts > 0 ? `+${pts}` : "—"}
                     </div>
-                  </Link>
+                  </button>
                 );
               })}
             </div>
           </div>
         </div>
       )}
+
+      {/* ===================== MATCH BREAKDOWN DRAWER ===================== */}
+      {selectedResult && <MatchBreakdownDrawer match={selectedResult} onClose={() => setSelectedResult(null)} />}
 
       {/* ===================== COMMUNITY PULSE ===================== */}
       {communityPulse && communityPulse.todayVotes > 0 && (
@@ -1854,5 +1855,98 @@ function Countdown({ id, kickoff_at, home, away }: { id: string; kickoff_at: str
         </div>
       </div>
     </Link>
+  );
+}
+
+function MatchBreakdownDrawer({ match, onClose }: { match: any; onClose: () => void }) {
+  const pred = match.pred ?? {};
+  const h = match.home_score ?? 0;
+  const a = match.away_score ?? 0;
+  const total = h + a;
+  const res90 = h > a ? "home" : h < a ? "away" : "draw";
+  const qualifier = h > a ? "home" : h < a ? "away" : match.qualifier;
+  const btts = h > 0 && a > 0 ? "yes" : "no";
+  const t25 = total > 2 ? "over" : "under";
+  const d1x = res90 === "home" || res90 === "draw";
+  const dx2 = res90 === "away" || res90 === "draw";
+
+  const KNOCKOUT_PHASES = new Set(["ronda32","oitavos","quartos","meias","final"]);
+  const isKnockout = KNOCKOUT_PHASES.has(match.phase);
+
+  const res90Labels: Record<string,string> = { home: match.home?.name, draw: "Empate", away: match.away?.name };
+  const boolLabel = (v: string) => v === "yes" ? "Sim" : "Não";
+  const ouLabel = (v: string) => v === "over" ? "Mais" : "Menos";
+  const dcLabel = (v: string) => v === "1x" ? `${match.home?.name} ou Empate` : `${match.away?.name} ou Empate`;
+  const comboLabel = (v: string) => {
+    const [dc, ou] = v.split("_");
+    return `${dc === "1x" ? `${match.home?.name}/Empate` : `${match.away?.name}/Empate`} + ${ou === "over" ? "Mais" : "Menos"} 1.5`;
+  };
+
+  type Row = { label: string; voted: string; correct: boolean; pts: number } | null;
+  const rows: Row[] = [
+    pred.result_90 ? { label: "Resultado 90 min", voted: res90Labels[pred.result_90] ?? pred.result_90, correct: pred.result_90 === res90, pts: res90 === "draw" ? 4 : 3 } : null,
+    pred.btts ? { label: "Ambas marcam", voted: boolLabel(pred.btts), correct: pred.btts === btts, pts: 2 } : null,
+    pred.total_25 ? { label: "Total 2.5 golos", voted: ouLabel(pred.total_25), correct: pred.total_25 === t25, pts: 2 } : null,
+    pred.double_chance ? { label: "Dupla hipótese", voted: dcLabel(pred.double_chance), correct: (pred.double_chance === "1x" && d1x) || (pred.double_chance === "x2" && dx2), pts: 1 } : null,
+    pred.combo_15 ? { label: "Combinação 1.5", voted: comboLabel(pred.combo_15), correct: (() => { const [dc,ou] = pred.combo_15.split("_"); const dcOk = dc === "1x" ? d1x : dx2; const ouOk = ou === "over" ? total > 1 : total <= 1; return dcOk && ouOk; })(), pts: 4 } : null,
+    pred.exact_home != null && pred.exact_away != null ? { label: "Resultado exato", voted: `${pred.exact_home}–${pred.exact_away}`, correct: pred.exact_home === h && pred.exact_away === a, pts: 10 } : null,
+    isKnockout && pred.qualifier ? { label: "Qualificar", voted: pred.qualifier === "home" ? match.home?.name : match.away?.name, correct: pred.qualifier === qualifier, pts: 4 } : null,
+  ].filter(Boolean);
+
+  const totalPts = pred.points ?? 0;
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="relative z-10 rounded-t-3xl border-t border-gold/30 bg-card overflow-hidden"
+        onClick={e => e.stopPropagation()}>
+        {/* Gold stripe */}
+        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, #c8960c 50%, transparent 100%)" }} />
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="h-1 w-10 rounded-full bg-border" />
+        </div>
+        {/* Header */}
+        <div className="px-5 pb-3 flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <span>{match.home?.flag}</span>
+              <span>{match.home?.name}</span>
+              <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-bold tabular-nums">{h}–{a}</span>
+              <span>{match.away?.name}</span>
+              <span>{match.away?.flag}</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">Detalhes da tua previsão</p>
+          </div>
+          <div className={`rounded-xl px-3 py-1.5 text-center border ${totalPts > 0 ? "bg-gold/15 border-gold/30" : "bg-muted border-border"}`}>
+            <p className={`font-display text-xl leading-none ${totalPts > 0 ? "text-gold" : "text-muted-foreground"}`}>{totalPts > 0 ? `+${totalPts}` : "0"}</p>
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground">pts</p>
+          </div>
+        </div>
+        {/* Market rows */}
+        <div className="divide-y divide-border/40 mx-5 mb-6 rounded-2xl border border-border/60 overflow-hidden">
+          {(rows as NonNullable<Row>[]).map((row, i) => (
+            <div key={i} className="flex items-center gap-3 px-4 py-3">
+              <div className={`shrink-0 h-5 w-5 rounded-full flex items-center justify-center ${row.correct ? "bg-wc-green/20" : "bg-destructive/20"}`}>
+                {row.correct
+                  ? <CheckCircle2 className="h-3.5 w-3.5 text-wc-green" />
+                  : <XCircle className="h-3.5 w-3.5 text-destructive" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] text-muted-foreground leading-none mb-0.5">{row.label}</p>
+                <p className="text-sm font-semibold text-foreground truncate">{row.voted}</p>
+              </div>
+              <span className={`shrink-0 text-sm font-bold ${row.correct ? "text-gold" : "text-muted-foreground/40"}`}>
+                {row.correct ? `+${row.pts}` : "—"}
+              </span>
+            </div>
+          ))}
+          {rows.length === 0 && (
+            <div className="px-4 py-6 text-center text-sm text-muted-foreground">Sem previsões registadas</div>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }

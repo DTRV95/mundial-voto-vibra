@@ -244,14 +244,13 @@ function Home() {
     queryKey: ["my-results", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
       const { data: finished } = await supabase
         .from("matches")
         .select("id,kickoff_at,phase,home_score,away_score,qualifier,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
         .not("home_score", "is", null)
-        .gte("kickoff_at", fourteenDaysAgo)
+        .neq("phase", "grupos")
         .order("kickoff_at", { ascending: false })
-        .limit(15);
+        .limit(40);
       if (!finished?.length) return [];
       const { data: preds } = await supabase
         .from("predictions")
@@ -267,8 +266,7 @@ function Home() {
           const isExact = pred.exact_home === m.home_score && pred.exact_away === m.away_score;
           const isCorrect = (pred.points ?? 0) > 0;
           return { ...m, pred, isExact, isCorrect };
-        })
-        .slice(0, 6);
+        });
     },
     staleTime: 120_000,
   });

@@ -257,15 +257,13 @@ function Home() {
         .select("match_id,points,exact_home,exact_away,result_90,btts,total_25,double_chance,combo_15,qualifier")
         .eq("user_id", user!.id)
         .in("match_id", (finished as any[]).map(m => m.id));
-      if (!preds?.length) return [];
-      const predMap = Object.fromEntries((preds as any[]).map(p => [p.match_id, p]));
+      const predMap = Object.fromEntries(((preds ?? []) as any[]).map(p => [p.match_id, p]));
       return (finished as any[])
-        .filter(m => predMap[m.id])
         .map(m => {
-          const pred = predMap[m.id];
-          const isExact = pred.exact_home === m.home_score && pred.exact_away === m.away_score;
-          const isCorrect = (pred.points ?? 0) > 0;
-          return { ...m, pred, isExact, isCorrect };
+          const pred = predMap[m.id] ?? null;
+          const isExact = pred ? pred.exact_home === m.home_score && pred.exact_away === m.away_score : false;
+          const isCorrect = (pred?.points ?? 0) > 0;
+          return { ...m, pred, isExact, isCorrect, noVote: !pred };
         });
     },
     staleTime: 120_000,
@@ -650,8 +648,8 @@ function Home() {
               {(resultsExpanded ? myResults : myResults.slice(0, 5)).map((m: any) => {
                 const pts = m.pred?.points ?? 0;
                 return (
-                  <button key={m.id} onClick={() => setSelectedResult(m)}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gold/5 transition-smooth text-left">
+                  <button key={m.id} onClick={() => !m.noVote && setSelectedResult(m)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 transition-smooth text-left ${m.noVote ? "opacity-70 cursor-default" : "hover:bg-gold/5"}`}>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 text-sm">
                         <span>{m.home?.flag}</span>
@@ -664,12 +662,20 @@ function Home() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] font-semibold text-muted-foreground/50">Ver detalhe</span>
-                      <div className={`rounded-xl px-3 py-1 text-sm font-bold tabular-nums ${
-                        pts > 0 ? "bg-gold/15 text-gold border border-gold/30" : "bg-muted text-muted-foreground/40 border border-border"
-                      }`}>
-                        {pts > 0 ? `+${pts}` : "—"}
-                      </div>
+                      {m.noVote ? (
+                        <div className="rounded-xl px-3 py-1 text-[11px] font-bold bg-muted text-muted-foreground/50 border border-border">
+                          Não votaste · 0 pts
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-[10px] font-semibold text-muted-foreground/50">Ver detalhe</span>
+                          <div className={`rounded-xl px-3 py-1 text-sm font-bold tabular-nums ${
+                            pts > 0 ? "bg-gold/15 text-gold border border-gold/30" : "bg-muted text-muted-foreground/40 border border-border"
+                          }`}>
+                            {pts > 0 ? `+${pts}` : "—"}
+                          </div>
+                        </>
+                      )}
                     </div>
                   </button>
                 );

@@ -272,6 +272,7 @@ function Home() {
   });
 
   const [selectedResult, setSelectedResult] = useState<any>(null);
+  const [resultsExpanded, setResultsExpanded] = useState(false);
   const [feedShown, setFeedShown] = useState(6);
   const feedSentinelRef = useRef<HTMLButtonElement>(null);
   const { data: following } = useFollowing();
@@ -646,7 +647,7 @@ function Home() {
             </div>
             {/* Match rows */}
             <div className="divide-y divide-border/40">
-              {myResults.map((m: any) => {
+              {(resultsExpanded ? myResults : myResults.slice(0, 5)).map((m: any) => {
                 const pts = m.pred?.points ?? 0;
                 return (
                   <button key={m.id} onClick={() => setSelectedResult(m)}
@@ -674,6 +675,13 @@ function Home() {
                 );
               })}
             </div>
+            {/* Expand / collapse */}
+            {myResults.length > 5 && (
+              <button onClick={() => setResultsExpanded(v => !v)}
+                className="w-full border-t border-border/60 py-2.5 text-xs font-bold text-gold hover:bg-gold/5 transition-smooth">
+                {resultsExpanded ? "Mostrar menos ↑" : `Ver todos os jogos (${myResults.length}) ↓`}
+              </button>
+            )}
           </div>
         </div>
       )}

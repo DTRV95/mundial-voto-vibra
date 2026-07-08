@@ -549,7 +549,7 @@ function Home() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-red opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-wc-red" />
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Mundial 2026 · Ao Vivo</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Mundial 2026 · Quartos de Final</span>
             </div>
 
             {/* Title */}
@@ -600,14 +600,22 @@ function Home() {
           <div className="relative grid grid-cols-3 border-t border-white/8"
             style={{ background: "oklch(1 0 0 / 0.04)" }}>
             {[
-              { label: "Equipas", value: "48" },
-              { label: "Jogos", value: "104" },
-              { label: "Países", value: "3" },
+              { label: "Previsões hoje", value: (communityPulse?.todayVotes ?? 0) > 0 ? communityPulse!.todayVotes.toLocaleString("pt-PT") : "—", live: true },
+              { label: "Adeptos", value: (communityPulse?.totalUsers ?? 0) > 0 ? communityPulse!.totalUsers.toLocaleString("pt-PT") : "—", live: false },
+              { label: "Jogos", value: "104", live: false },
             ].map((s, i) => (
               <div key={s.label} className={`py-3 text-center text-white animate-stat-pop ${i === 1 ? "border-x border-white/8" : ""}`}
                 style={{ animationDelay: `${i * 80}ms` }}>
-                <div className="font-display text-xl md:text-2xl leading-none">{s.value}</div>
-                <div className="text-[9px] uppercase tracking-widest opacity-40 mt-0.5">{s.label}</div>
+                <div className="flex items-center justify-center gap-1.5 font-display text-xl md:text-2xl leading-none">
+                  {s.live && (
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-green opacity-75" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-wc-green" />
+                    </span>
+                  )}
+                  {s.value}
+                </div>
+                <div className="text-[10px] uppercase tracking-widest opacity-40 mt-0.5">{s.label}</div>
               </div>
             ))}
           </div>
@@ -757,24 +765,6 @@ function Home() {
       )}
 
 
-      {/* ===================== COMMUNITY PULSE ===================== */}
-      {communityPulse && communityPulse.todayVotes > 0 && (
-        <div className="mx-5 mt-3 md:mx-8 animate-enter delay-150">
-          <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card/50 px-3 py-2">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-green opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-wc-green" />
-            </span>
-            <p className="text-xs text-muted-foreground">
-              <span className="font-bold text-foreground">{communityPulse.todayVotes.toLocaleString("pt-PT")}</span> previsões feitas hoje
-              {communityPulse.totalUsers > 0 && (
-                <> · <span className="font-bold text-foreground">{communityPulse.totalUsers.toLocaleString("pt-PT")}</span> adeptos ativos</>
-              )}
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* ===================== COUNTDOWN + CTA ===================== */}
       <div className={`mx-5 mt-4 md:mx-8 ${nextMatch && !user ? "grid gap-3 sm:grid-cols-2" : ""}`}>
         {nextMatch && (
@@ -826,29 +816,6 @@ function Home() {
         </div>
       )}
 
-      {/* ===================== BANNER MATA-MATA — utilizadores logados ===================== */}
-      <div className="animate-enter delay-200">
-      {user && (
-        <div className="mx-5 mt-4 md:mx-8">
-          <div className="relative overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-r from-gold/8 via-gold/4 to-transparent">
-            <div className="h-1 w-full wc-tricolor rounded-t-2xl" />
-            <div className="flex items-center gap-4 px-4 py-3.5">
-              <span className="text-2xl shrink-0">⚔️</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70">A decorrer agora</p>
-                <p className="font-display text-base leading-tight">Quartos de Final · Mata-Mata</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Nova corrida — pontos reiniciados. Novo mercado: <span className="font-semibold text-gold">Qualificar (4 pts)</span></p>
-              </div>
-              <Link to="/como-funciona"
-                className="shrink-0 rounded-xl border border-gold/30 bg-gold/10 px-3 py-2 text-xs font-bold text-gold transition-smooth hover:bg-gold/20 whitespace-nowrap">
-                Ver regras
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      </div>
 
       {/* ===================== PÓDIO FASE DE GRUPOS ===================== */}
       <PodioFaseGrupos hof={grupHof} />
@@ -954,7 +921,7 @@ function Home() {
             <div className="flex items-center gap-2">
               <h2 className="font-display text-xl">Comunidade</h2>
               {following && following.size === 0 && (
-                <span className="rounded-full bg-muted px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Global</span>
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Global</span>
               )}
             </div>
             {following && following.size === 0 && (
@@ -1405,7 +1372,7 @@ const NEWS_CATEGORY: Record<string, { label: string; cls: string }> = {
 function NewsCategory({ category, small = false }: { category: string; small?: boolean }) {
   const c = NEWS_CATEGORY[category] ?? NEWS_CATEGORY.noticia;
   return (
-    <p className={`font-bold uppercase tracking-widest ${small ? "text-[9px]" : "text-[10px]"} ${c.cls}`}>
+    <p className={`font-bold uppercase tracking-widest ${small ? "text-[10px]" : "text-[10px]"} ${c.cls}`}>
       {category === "analise" && <TrendingUp className="inline h-2.5 w-2.5 mr-0.5 -mt-0.5" />}
       {c.label}
     </p>
@@ -1679,7 +1646,7 @@ function PremioFaseGrupos({ leader }: { leader: any }) {
                       >
                         {String(v).padStart(2, "0")}
                       </div>
-                      <div className="text-[9px] uppercase tracking-widest text-muted-foreground mt-1">{label}</div>
+                      <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">{label}</div>
                     </div>
                   </div>
                 ))}
@@ -1864,19 +1831,19 @@ function Countdown({ id, kickoff_at, home, away }: { id: string; kickoff_at: str
           <>
             <div className="text-center">
               <div className="font-display text-3xl leading-none" style={goldGrad}>{pad(h)}</div>
-              <div className="text-[8px] uppercase tracking-widest text-muted-foreground">h</div>
+              <div className="text-[9px] uppercase tracking-widest text-muted-foreground">h</div>
             </div>
             <span className="font-display text-xl text-gold/30 mb-3">:</span>
           </>
         )}
         <div className="text-center">
           <div className="font-display text-3xl leading-none" style={goldGrad}>{pad(m)}</div>
-          <div className="text-[8px] uppercase tracking-widest text-muted-foreground">min</div>
+          <div className="text-[9px] uppercase tracking-widest text-muted-foreground">min</div>
         </div>
         <span className="font-display text-xl text-gold/30 mb-3">:</span>
         <div className="text-center">
           <div className="font-display text-3xl leading-none" style={goldGrad}>{pad(s)}</div>
-          <div className="text-[8px] uppercase tracking-widest text-muted-foreground">seg</div>
+          <div className="text-[9px] uppercase tracking-widest text-muted-foreground">seg</div>
         </div>
       </div>
     </Link>
@@ -1945,7 +1912,7 @@ function MatchBreakdownDrawer({ match, onClose }: { match: any; onClose: () => v
           </div>
           <div className={`rounded-xl px-3 py-1.5 text-center border ${totalPts > 0 ? "bg-gold/15 border-gold/30" : "bg-muted border-border"}`}>
             <p className={`font-display text-xl leading-none ${totalPts > 0 ? "text-gold" : "text-muted-foreground"}`}>{totalPts > 0 ? `+${totalPts}` : "0"}</p>
-            <p className="text-[9px] uppercase tracking-widest text-muted-foreground">pts</p>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</p>
           </div>
         </div>
         {/* Market rows */}

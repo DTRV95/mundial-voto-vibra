@@ -695,6 +695,68 @@ function Home() {
       {/* ===================== MATCH BREAKDOWN DRAWER ===================== */}
       {selectedResult && <MatchBreakdownDrawer match={selectedResult} onClose={() => setSelectedResult(null)} />}
 
+      {/* ===================== JOGOS POR VOTAR ===================== */}
+      {user && pendingMatches.length > 0 && (
+        <div className="mx-5 mt-4 md:mx-8">
+          <div className="overflow-hidden rounded-2xl bg-wc-green panini-stripes"
+            style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.40)" }}>
+            <div className="px-5 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Não percas pontos</p>
+                  <h3 className="font-display text-xl text-white leading-tight">
+                    {pendingMatches.length === 1
+                      ? "1 jogo por votar"
+                      : `${pendingMatches.length} jogos por votar`}
+                  </h3>
+                </div>
+                <Link to="/jogos"
+                  className="shrink-0 rounded-xl bg-white/15 border border-white/20 px-3 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth">
+                  Ver todos →
+                </Link>
+              </div>
+              <div className="space-y-2">
+                {pendingMatches.slice(0, 3).map((m: any) => {
+                  const isToday = new Date(m.kickoff_at).toDateString() === new Date().toDateString();
+                  const time = new Date(m.kickoff_at).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+                  return (
+                    <Link key={m.id} to="/jogo/$id" params={{ id: String(m.id) }}
+                      className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-2.5 hover:bg-white/20 transition-smooth">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <TeamBadge code={m.home?.code} flag={m.home?.flag} name={m.home?.name} size="sm" />
+                        <span className="text-xs font-semibold text-white truncate">{m.home?.name}</span>
+                        <span className="text-[10px] text-white/40 shrink-0">vs</span>
+                        <span className="text-xs font-semibold text-white truncate">{m.away?.name}</span>
+                        <TeamBadge code={m.away?.code} flag={m.away?.flag} name={m.away?.name} size="sm" />
+                      </div>
+                      {(() => {
+                        const mins = Math.max(0, Math.round((new Date(m.kickoff_at).getTime() - Date.now()) / 60000) - 5);
+                        const closingSoon = mins <= 180;
+                        const label = closingSoon
+                          ? (mins < 60 ? `⏰ Fecha em ${mins}min` : `⏰ Fecha em ${Math.floor(mins / 60)}h${String(mins % 60).padStart(2, "0")}`)
+                          : isToday ? `Hoje ${time}` : `Amanhã ${time}`;
+                        return (
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${closingSoon ? "bg-wc-red text-white animate-pulse" : "bg-white/20 text-white"}`}>
+                            {label}
+                          </span>
+                        );
+                      })()}
+                    </Link>
+                  );
+                })}
+                {pendingMatches.length > 3 && (
+                  <Link to="/jogos"
+                    className="flex items-center justify-center py-1.5 text-xs font-semibold text-white/60 hover:text-white transition-smooth">
+                    +{pendingMatches.length - 3} mais →
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       {/* ===================== COMMUNITY PULSE ===================== */}
       {communityPulse && communityPulse.todayVotes > 0 && (
         <div className="mx-5 mt-3 md:mx-8 animate-enter delay-150">
@@ -877,58 +939,6 @@ function Home() {
             )}
             <ArrowRight className={`h-4 w-4 shrink-0 ${myDivision.text}`} />
           </Link>
-        </div>
-      )}
-
-      {/* ===================== JOGOS POR VOTAR ===================== */}
-      {user && pendingMatches.length > 0 && (
-        <div className="mx-5 mt-4 md:mx-8">
-          <div className="overflow-hidden rounded-2xl bg-wc-green panini-stripes"
-            style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.40)" }}>
-            <div className="px-5 py-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Não percas pontos</p>
-                  <h3 className="font-display text-xl text-white leading-tight">
-                    {pendingMatches.length === 1
-                      ? "1 jogo por votar"
-                      : `${pendingMatches.length} jogos por votar`}
-                  </h3>
-                </div>
-                <Link to="/jogos"
-                  className="shrink-0 rounded-xl bg-white/15 border border-white/20 px-3 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth">
-                  Ver todos →
-                </Link>
-              </div>
-              <div className="space-y-2">
-                {pendingMatches.slice(0, 3).map((m: any) => {
-                  const isToday = new Date(m.kickoff_at).toDateString() === new Date().toDateString();
-                  const time = new Date(m.kickoff_at).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
-                  return (
-                    <Link key={m.id} to="/jogo/$id" params={{ id: String(m.id) }}
-                      className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-2.5 hover:bg-white/20 transition-smooth">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <TeamBadge code={m.home?.code} flag={m.home?.flag} name={m.home?.name} size="sm" />
-                        <span className="text-xs font-semibold text-white truncate">{m.home?.name}</span>
-                        <span className="text-[10px] text-white/40 shrink-0">vs</span>
-                        <span className="text-xs font-semibold text-white truncate">{m.away?.name}</span>
-                        <TeamBadge code={m.away?.code} flag={m.away?.flag} name={m.away?.name} size="sm" />
-                      </div>
-                      <span className="shrink-0 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white">
-                        {isToday ? `Hoje ${time}` : `Amanhã ${time}`}
-                      </span>
-                    </Link>
-                  );
-                })}
-                {pendingMatches.length > 3 && (
-                  <Link to="/jogos"
-                    className="flex items-center justify-center py-1.5 text-xs font-semibold text-white/60 hover:text-white transition-smooth">
-                    +{pendingMatches.length - 3} mais →
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
       )}
 

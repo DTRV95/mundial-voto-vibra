@@ -549,7 +549,7 @@ function Home() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-red opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-wc-red" />
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Mundial 2026 · Quartos de Final</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Mundial 2026 · Meias-Finais</span>
             </div>
 
             {/* Title */}

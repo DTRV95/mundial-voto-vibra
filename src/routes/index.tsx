@@ -2084,6 +2084,7 @@ function SeasonPreRegModal({ user }: { user: any }) {
   const [features, setFeatures] = useState<Set<string>>(new Set());
   const [frequency, setFrequency] = useState<string>("");
   const [idea, setIdea] = useState("");
+  const [otherComp, setOtherComp] = useState("");
 
   useEffect(() => {
     try {
@@ -2121,7 +2122,7 @@ function SeasonPreRegModal({ user }: { user: any }) {
     setSaving(true);
     await (supabase as any).from("season_interest").upsert({
       user_id: user.id,
-      competitions: [...competitions],
+      competitions: [...competitions, ...(otherComp.trim() ? [`outra: ${otherComp.trim()}`] : [])],
       answers: {
         liked: [...liked],
         features: [...features],
@@ -2148,12 +2149,21 @@ function SeasonPreRegModal({ user }: { user: any }) {
       sub: "Escolhe todas as que te interessam",
       valid: true,
       body: (
-        <div className="flex flex-wrap justify-center gap-1.5">
-          {SEASON_COMPETITIONS.map(c => (
-            <button key={c.key} onClick={() => toggleIn(competitions, setCompetitions, c.key)} className={chip(competitions.has(c.key))}>
-              {c.label}
-            </button>
-          ))}
+        <div>
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {SEASON_COMPETITIONS.map(c => (
+              <button key={c.key} onClick={() => toggleIn(competitions, setCompetitions, c.key)} className={chip(competitions.has(c.key))}>
+                {c.label}
+              </button>
+            ))}
+          </div>
+          <input
+            value={otherComp}
+            onChange={e => setOtherComp(e.target.value)}
+            maxLength={120}
+            placeholder="Outra? Escreve aqui (ex: Bundesliga, Brasileirão…)"
+            className="mt-2.5 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-gold/50 focus:outline-none"
+          />
         </div>
       ),
     },

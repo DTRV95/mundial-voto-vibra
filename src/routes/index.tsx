@@ -822,6 +822,9 @@ function Home() {
       {/* ===================== MATCH BREAKDOWN DRAWER ===================== */}
       {selectedResult && <MatchBreakdownDrawer match={selectedResult} onClose={() => setSelectedResult(null)} />}
 
+      {/* ===================== PRÉ-REGISTO NOVA ÉPOCA ===================== */}
+      <SeasonPreRegModal user={user} />
+
       {/* ===================== JOGOS POR VOTAR ===================== */}
       {user && pendingMatches.length > 0 && (
         <div className="mx-5 mt-4 md:mx-8">
@@ -2056,6 +2059,142 @@ function MatchBreakdownDrawer({ match, onClose }: { match: any; onClose: () => v
             <div className="px-4 py-6 text-center text-sm text-muted-foreground">Sem previsões registadas</div>
           )}
         </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+const SEASON_COMPETITIONS = [
+  { key: "liga-portugal", label: "🇵🇹 Liga Portugal" },
+  { key: "champions", label: "⭐ Champions League" },
+  { key: "liga-europa", label: "🟠 Liga Europa" },
+  { key: "premier-league", label: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League" },
+  { key: "la-liga", label: "🇪🇸 La Liga" },
+  { key: "serie-a", label: "🇮🇹 Serie A" },
+];
+
+function SeasonPreRegModal({ user }: { user: any }) {
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set(["liga-portugal", "champions"]));
+  const [done, setDone] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("season_prereg_v1")) return;
+    } catch { return; }
+    let cancelled = false;
+    async function check() {
+      if (user?.id) {
+        const { data } = await (supabase as any)
+          .from("season_interest")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (data || cancelled) return;
+      }
+      setTimeout(() => { if (!cancelled) setOpen(true); }, 2500);
+    }
+    check();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  function dismiss() {
+    try { localStorage.setItem("season_prereg_v1", "1"); } catch {}
+    setOpen(false);
+  }
+
+  function toggle(key: string) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }
+
+  async function confirm() {
+    if (!user?.id || saving) return;
+    setSaving(true);
+    await (supabase as any).from("season_interest").upsert({
+      user_id: user.id,
+      competitions: [...selected],
+    }, { onConflict: "user_id" });
+    setSaving(false);
+    setDone(true);
+    try { localStorage.setItem("season_prereg_v1", "1"); } catch {}
+    setTimeout(() => setOpen(false), 2200);
+  }
+
+  if (!open) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-5" onClick={dismiss}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative z-10 w-full max-w-sm overflow-hidden rounded-3xl border border-gold/40 animate-enter"
+        style={{ background: "radial-gradient(ellipse 130% 80% at 50% -10%, oklch(0.28 0.07 85) 0%, oklch(0.14 0.03 265) 55%, oklch(0.11 0.02 265) 100%)", boxShadow: "0 20px 60px oklch(0.75 0.18 85 / 0.25)" }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
+        <button onClick={dismiss} className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-smooth">✕</button>
+
+        {done ? (
+          <div className="px-6 py-12 text-center">
+            <p className="text-5xl mb-3">🎉</p>
+            <p className="font-display text-2xl text-gold-metallic">Estás dentro!</p>
+            <p className="mt-2 text-sm text-white/70">Vais ser dos primeiros a saber quando a nova época arrancar.</p>
+          </div>
+        ) : (
+          <div className="px-6 pt-8 pb-6">
+            <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-gold/80">O jogo não acaba no domingo</p>
+            <h2 className="mt-2 text-center font-display text-[1.7rem] leading-tight text-gold-metallic">
+              A GERAÇÃO<br />CONTINUA ⚽
+            </h2>
+            <p className="mt-3 text-center text-sm text-white/75 leading-snug">
+              Liga Portugal, Champions e muito mais — previsões, torneios com amigos e rankings todas as semanas, durante toda a época.
+            </p>
+
+            <div className="mt-4 space-y-1.5">
+              {[
+                "Os teus torneios e amigos continuam contigo",
+                "Palpites de época: campeão, top 4, artilheiro",
+                "Vencedor do mês — corridas novas todos os meses",
+              ].map(b => (
+                <p key={b} className="flex items-start gap-2 text-xs text-white/70">
+                  <span className="text-gold shrink-0">✓</span> {b}
+                </p>
+              ))}
+            </div>
+
+            <p className="mt-4 mb-2 text-[11px] font-bold uppercase tracking-widest text-white/40 text-center">Que competições queres seguir?</p>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {SEASON_COMPETITIONS.map(c => (
+                <button key={c.key} onClick={() => toggle(c.key)}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-smooth ${
+                    selected.has(c.key)
+                      ? "border-gold bg-gold/20 text-gold"
+                      : "border-white/15 bg-white/5 text-white/50 hover:border-white/30"
+                  }`}>
+                  {c.label}
+                </button>
+              ))}
+            </div>
+
+            {user ? (
+              <button onClick={confirm} disabled={saving || selected.size === 0}
+                className="mt-5 w-full rounded-xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95 disabled:opacity-50">
+                {saving ? "A guardar…" : "Garantir o meu lugar 🔒"}
+              </button>
+            ) : (
+              <Link to="/auth" onClick={dismiss}
+                className="mt-5 block w-full rounded-xl bg-gold py-3 text-center text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95">
+                Criar conta e garantir lugar 🔒
+              </Link>
+            )}
+            <p className="mt-2 text-center text-[10px] text-white/35">Grátis, sem compromisso. Só te avisamos quando arrancar.</p>
+          </div>
+        )}
       </div>
     </div>,
     document.body

@@ -119,8 +119,7 @@ function Home() {
         .gte("created_at", today.toISOString());
       const { count: totalUsers } = await supabase
         .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .gt("predictions_made", 0);
+        .select("id", { count: "exact", head: true });
       return { todayVotes: todayVotes ?? 0, totalUsers: totalUsers ?? 0 };
     },
   });

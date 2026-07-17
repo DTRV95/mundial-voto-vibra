@@ -502,6 +502,22 @@ function Home() {
     },
   });
 
+  // Jogo da final (kickoff mais tardio da fase 'final' = a final; o outro é o 3º lugar)
+  const { data: finalMatch } = useQuery({
+    queryKey: ["matches", "final"],
+    staleTime: 300_000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("matches")
+        .select("id,kickoff_at")
+        .eq("phase", "final")
+        .order("kickoff_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const { share: shareRank, Portal: RankSharePortal } = useRankShare({
     displayName: myLeaderRank?.display_name ?? myLeaderEntry?.display_name ?? "Tu",
     rank: myLeaderEntry ? (topLeaders as any[]).indexOf(myLeaderEntry) + 1 : myLeaderRank?.rank ?? 1,
@@ -640,7 +656,8 @@ function Home() {
 
       {/* ===================== A GRANDE FINAL ===================== */}
       <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">
-        <Link to="/jogos" className="group block relative overflow-hidden rounded-3xl border border-gold/40 transition-smooth hover:border-gold/70"
+        <Link {...(finalMatch ? { to: "/jogo/$id" as const, params: { id: finalMatch.id } } : { to: "/jogos" as const })}
+          className="group block relative overflow-hidden rounded-3xl border border-gold/40 transition-smooth hover:border-gold/70"
           style={{ background: "radial-gradient(ellipse 120% 90% at 50% -20%, oklch(0.30 0.08 85) 0%, oklch(0.15 0.03 265) 55%, oklch(0.11 0.02 265) 100%)", boxShadow: "0 10px 40px oklch(0.75 0.18 85 / 0.22), inset 0 1px 0 oklch(1 0 0 / 0.08)" }}>
           {/* Glow central atrás do troféu */}
           <div className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full"

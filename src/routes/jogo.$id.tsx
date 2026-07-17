@@ -629,7 +629,13 @@ function JogoPage() {
         </MarketCard>
 
         {match.phase !== "grupos" && (
-          <MarketCard title="Qualificar" closed={closed} pts="4 pts"
+          <MarketCard
+            title={
+              match.phase === "final" && [home.name, away.name].includes("França") && [home.name, away.name].includes("Inglaterra")
+                ? "Ficar em 3º lugar"
+                : "Qualificar"
+            }
+            closed={closed} pts="4 pts"
             communityCount={community.length} showCommunity={showCommunity}>
             <VoteOptions value={pred.qualifier} disabled={closed}
               options={[

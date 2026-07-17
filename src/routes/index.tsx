@@ -2106,7 +2106,7 @@ function SeasonPreRegModal({ user }: { user: any }) {
   }, [user?.id]);
 
   function dismiss() {
-    try { localStorage.setItem("season_prereg_v1", "1"); } catch {}
+    // Fechar não marca como respondido — volta a aparecer na próxima visita
     setOpen(false);
   }
 

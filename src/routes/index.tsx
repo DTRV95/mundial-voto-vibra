@@ -634,6 +634,65 @@ function Home() {
         )}
       </section>
 
+      {/* ===================== A GRANDE FINAL ===================== */}
+      <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">
+        <Link to="/jogos" className="block relative overflow-hidden rounded-2xl border border-gold/40 transition-smooth hover:border-gold/60"
+          style={{ background: "linear-gradient(135deg, oklch(0.20 0.06 85 / 0.55) 0%, oklch(0.13 0.03 260) 55%, oklch(0.18 0.05 25 / 0.45) 100%)", boxShadow: "0 6px 28px oklch(0.75 0.18 85 / 0.18)" }}>
+          <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
+          <div className="px-5 py-4 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold/80 mb-1">🏆 Domingo · 20h00</p>
+            <p className="font-display text-2xl text-gold-metallic leading-tight">A GRANDE FINAL</p>
+            <div className="mt-2 flex items-center justify-center gap-3 text-base font-bold text-white">
+              <span>🇪🇸 Espanha</span>
+              <span className="text-gold/50 text-sm">vs</span>
+              <span>Argentina 🇦🇷</span>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">Sábado às 22h00 há ainda o 3º lugar: 🇫🇷 França vs Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿 — vota nos dois!</p>
+          </div>
+        </Link>
+      </div>
+
+      {/* ===================== A TUA JORNADA — obrigado ===================== */}
+      {user && myDivision && (myStreak?.predictions_made ?? 0) > 0 && (
+        <div className="mx-5 mt-4 md:mx-8 animate-enter delay-150">
+          <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="h-1 w-full wc-tricolor" />
+            <div className="px-5 py-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">A tua jornada no Mundial 2026</p>
+              <p className="font-display text-lg leading-snug">Obrigado por fazeres parte desta Geração 🙏</p>
+              <p className="text-xs text-muted-foreground mt-1">Desde a fase de grupos até à final — isto foi o que construíste:</p>
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {(() => {
+                  const best = [...myResults].filter((r: any) => !r.noVote).sort((x: any, y: any) => (y.pred?.points ?? 0) - (x.pred?.points ?? 0))[0];
+                  const stats = [
+                    { label: "Pontos", value: String(myDivision.points), gold: true },
+                    { label: "Posição global", value: `#${myDivision.rank}º`, gold: false },
+                    { label: "Jogos votados", value: String(myStreak?.predictions_made ?? 0), gold: false },
+                    { label: "Melhor jogo", value: best ? `+${best.pred?.points ?? 0}` : "—", sub: best ? `${best.home?.flag} vs ${best.away?.flag}` : "", gold: true },
+                  ];
+                  return stats.map(s => (
+                    <div key={s.label} className="rounded-xl border border-border/60 bg-background/40 px-3 py-2.5 text-center">
+                      <p className={`font-display text-xl leading-none ${s.gold ? "text-gold" : "text-foreground"}`}>{s.value}{(s as any).sub && <span className="ml-1 text-xs">{(s as any).sub}</span>}</p>
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">{s.label}</p>
+                    </div>
+                  ));
+                })()}
+              </div>
+              <button
+                onClick={async () => {
+                  const best = [...myResults].filter((r: any) => !r.noVote).sort((x: any, y: any) => (y.pred?.points ?? 0) - (x.pred?.points ?? 0))[0];
+                  const text = `⚽ A minha jornada no Mundial 2026 na Geração 2026:\n🏆 ${myDivision.points} pontos · #${myDivision.rank}º global\n🎯 ${myStreak?.predictions_made ?? 0} jogos votados${best ? `\n🔥 Melhor jogo: +${best.pred?.points} pts` : ""}\n\nJunta-te: https://geracao2026.com`;
+                  if (navigator.share) { await navigator.share({ text }).catch(() => {}); }
+                  else { await navigator.clipboard.writeText(text).catch(() => {}); }
+                }}
+                className="mt-3 w-full rounded-xl border border-gold/30 bg-gold/10 py-2.5 text-xs font-bold text-gold transition-smooth hover:bg-gold/20">
+                <Share2 className="mr-1.5 inline h-3.5 w-3.5" /> Partilhar a minha jornada
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ===================== MY POINTS PER MATCH ===================== */}
       {user && myResults.length > 0 && (
         <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">

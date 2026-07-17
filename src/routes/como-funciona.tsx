@@ -145,8 +145,8 @@ function ComoFunciona() {
             { phase: "16 Avos de Final", status: "✅ Concluída", desc: "" },
             { phase: "Oitavos de Final", status: "✅ Concluída", desc: "" },
             { phase: "Quartos de Final", status: "✅ Concluída", desc: "" },
-            { phase: "Meias-Finais", status: "🔥 A decorrer", desc: "" },
-            { phase: "Final", status: "⏳ Em breve", desc: "" },
+            { phase: "Meias-Finais", status: "✅ Concluída", desc: "" },
+            { phase: "Final", status: "🔥 A decorrer", desc: "3º lugar + Final — últimos jogos!" },
           ].map(({ phase, status, desc }) => (
             <div key={phase} className="flex items-center gap-3 rounded-xl border border-border bg-background/40 px-3 py-2.5">
               <div className="flex-1 min-w-0">

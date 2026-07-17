@@ -631,8 +631,10 @@ function JogoPage() {
         {match.phase !== "grupos" && (
           <MarketCard
             title={
-              match.phase === "final" && [home.name, away.name].includes("França") && [home.name, away.name].includes("Inglaterra")
-                ? "Ficar em 3º lugar"
+              match.phase === "final"
+                ? ([home.name, away.name].includes("França") && [home.name, away.name].includes("Inglaterra")
+                    ? "Ficar em 3º lugar"
+                    : "Campeão do Mundo")
                 : "Qualificar"
             }
             closed={closed} pts="4 pts"

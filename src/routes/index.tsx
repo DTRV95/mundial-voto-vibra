@@ -640,18 +640,57 @@ function Home() {
 
       {/* ===================== A GRANDE FINAL ===================== */}
       <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">
-        <Link to="/jogos" className="block relative overflow-hidden rounded-2xl border border-gold/50 transition-smooth hover:border-gold/70"
-          style={{ background: "linear-gradient(135deg, oklch(0.45 0.12 85) 0%, oklch(0.32 0.09 60) 45%, oklch(0.40 0.13 40) 100%)", boxShadow: "0 6px 28px oklch(0.75 0.18 85 / 0.30)" }}>
-          <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
-          <div className="px-5 py-4 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold/80 mb-1">🏆 Domingo · 20h00</p>
-            <p className="font-display text-2xl text-gold-metallic leading-tight">A GRANDE FINAL</p>
-            <div className="mt-2 flex items-center justify-center gap-3 text-base font-bold text-white">
-              <span>🇪🇸 Espanha</span>
-              <span className="text-gold/50 text-sm">vs</span>
-              <span>Argentina 🇦🇷</span>
+        <Link to="/jogos" className="group block relative overflow-hidden rounded-3xl border border-gold/40 transition-smooth hover:border-gold/70"
+          style={{ background: "radial-gradient(ellipse 120% 90% at 50% -20%, oklch(0.30 0.08 85) 0%, oklch(0.15 0.03 265) 55%, oklch(0.11 0.02 265) 100%)", boxShadow: "0 10px 40px oklch(0.75 0.18 85 / 0.22), inset 0 1px 0 oklch(1 0 0 / 0.08)" }}>
+          {/* Glow central atrás do troféu */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{ background: "oklch(0.75 0.18 85 / 0.14)", filter: "blur(52px)" }} />
+          {/* Linhas de campo decorativas */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.05]"
+            style={{ backgroundImage: "radial-gradient(circle at 50% 130%, transparent 39%, white 40%, transparent 41%), linear-gradient(white 1px, transparent 1px)", backgroundSize: "100% 100%, 100% 33.3%" }} />
+
+          <div className="relative px-5 pt-5 pb-4">
+            {/* Chip data */}
+            <div className="flex justify-center">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gold backdrop-blur-sm">
+                Domingo · 19 Jul · 20h00
+              </span>
             </div>
-            <p className="mt-2 text-xs text-white/75">Sábado às 22h00 há ainda o 3º lugar: 🇫🇷 França vs Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿 — vota nos dois!</p>
+
+            {/* Título */}
+            <div className="mt-3 text-center">
+              <span className="text-3xl leading-none">🏆</span>
+              <h2 className="mt-1 font-display text-gold-metallic leading-none" style={{ fontSize: "clamp(1.9rem, 7vw, 3rem)", letterSpacing: "0.02em" }}>
+                A GRANDE FINAL
+              </h2>
+            </div>
+
+            {/* Confronto */}
+            <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-5xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110">🇪🇸</span>
+                <span className="text-sm font-bold text-white">Espanha</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="grid h-10 w-10 place-items-center rounded-full border border-gold/50 bg-gold/15 font-display text-sm text-gold shadow-gold">VS</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-5xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110">🇦🇷</span>
+                <span className="text-sm font-bold text-white">Argentina</span>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="mt-4 flex justify-center">
+              <span className="inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth group-hover:scale-[1.04]">
+                Dar a minha previsão <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </div>
+
+            {/* 3º lugar */}
+            <p className="mt-3 text-center text-[11px] text-white/50">
+              Sábado 22h00 · 3º lugar: 🇫🇷 França vs Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿
+            </p>
           </div>
         </Link>
       </div>

@@ -2076,9 +2076,14 @@ const SEASON_COMPETITIONS = [
 
 function SeasonPreRegModal({ user }: { user: any }) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<Set<string>>(new Set(["liga-portugal", "champions"]));
+  const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [competitions, setCompetitions] = useState<Set<string>>(new Set(["liga-portugal", "champions"]));
+  const [liked, setLiked] = useState<Set<string>>(new Set());
+  const [features, setFeatures] = useState<Set<string>>(new Set());
+  const [frequency, setFrequency] = useState<string>("");
+  const [idea, setIdea] = useState("");
 
   useEffect(() => {
     try {
@@ -2105,12 +2110,10 @@ function SeasonPreRegModal({ user }: { user: any }) {
     setOpen(false);
   }
 
-  function toggle(key: string) {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
-      return next;
-    });
+  function toggleIn(set: Set<string>, setter: (s: Set<string>) => void, key: string) {
+    const next = new Set(set);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    setter(next);
   }
 
   async function confirm() {
@@ -2118,15 +2121,107 @@ function SeasonPreRegModal({ user }: { user: any }) {
     setSaving(true);
     await (supabase as any).from("season_interest").upsert({
       user_id: user.id,
-      competitions: [...selected],
+      competitions: [...competitions],
+      answers: {
+        liked: [...liked],
+        features: [...features],
+        frequency,
+        idea: idea.trim() || null,
+      },
     }, { onConflict: "user_id" });
     setSaving(false);
     setDone(true);
     try { localStorage.setItem("season_prereg_v1", "1"); } catch {}
-    setTimeout(() => setOpen(false), 2200);
+    setTimeout(() => setOpen(false), 2600);
   }
 
   if (!open) return null;
+
+  const chip = (active: boolean) =>
+    `rounded-full border px-3 py-1.5 text-xs font-semibold transition-smooth ${
+      active ? "border-gold bg-gold/20 text-gold" : "border-white/15 bg-white/5 text-white/55 hover:border-white/30"
+    }`;
+
+  const steps = [
+    {
+      title: "Que competições queres seguir?",
+      sub: "Escolhe todas as que te interessam",
+      valid: competitions.size > 0,
+      body: (
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {SEASON_COMPETITIONS.map(c => (
+            <button key={c.key} onClick={() => toggleIn(competitions, setCompetitions, c.key)} className={chip(competitions.has(c.key))}>
+              {c.label}
+            </button>
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: "O que mais gostaste no Mundial?",
+      sub: "Para fazermos mais disso",
+      valid: true,
+      body: (
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {[
+            ["torneios", "🏆 Torneios com amigos"],
+            ["rankings", "📊 Rankings e divisões"],
+            ["palpites", "⚽ Palpites por jogo"],
+            ["exato", "🎯 Resultado exato"],
+            ["chat", "💬 Chat e sondagens"],
+            ["partilha", "📲 Partilhar resultados"],
+          ].map(([k, l]) => (
+            <button key={k} onClick={() => toggleIn(liked, setLiked, k)} className={chip(liked.has(k))}>{l}</button>
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: "Que novidades te entusiasmam?",
+      sub: "Vamos construir com base nisto",
+      valid: true,
+      body: (
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {[
+            ["epoca", "🏅 Palpites de época (campeão, top 4...)"],
+            ["clube", "❤️ Clube do coração e rivalidades"],
+            ["mensal", "📅 Vencedor do mês"],
+            ["premios", "🎁 Prémios reais"],
+            ["notif", "🔔 Alertas da jornada"],
+            ["stats", "📈 Estatísticas pessoais avançadas"],
+          ].map(([k, l]) => (
+            <button key={k} onClick={() => toggleIn(features, setFeatures, k)} className={chip(features.has(k))}>{l}</button>
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: "Com que frequência jogarias?",
+      sub: "Sê honesto — ajuda-nos a desenhar o jogo certo",
+      valid: frequency !== "",
+      body: (
+        <div className="flex flex-col gap-1.5">
+          {[
+            ["sempre", "🔥 Todas as jornadas, sem falhar"],
+            ["grandes", "⭐ Só nos jogos grandes e europeus"],
+            ["asvezes", "🙂 De vez em quando"],
+          ].map(([k, l]) => (
+            <button key={k} onClick={() => setFrequency(k)} className={`${chip(frequency === k)} w-full text-center`}>{l}</button>
+          ))}
+          <input
+            value={idea}
+            onChange={e => setIdea(e.target.value)}
+            maxLength={200}
+            placeholder="Uma ideia tua? (opcional)"
+            className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-gold/50 focus:outline-none"
+          />
+        </div>
+      ),
+    },
+  ];
+
+  const current = steps[step];
+  const isLast = step === steps.length - 1;
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-5" onClick={dismiss}>
@@ -2137,62 +2232,56 @@ function SeasonPreRegModal({ user }: { user: any }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
-        <button onClick={dismiss} className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-smooth">✕</button>
+        <button onClick={dismiss} className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-smooth">✕</button>
 
         {done ? (
           <div className="px-6 py-12 text-center">
             <p className="text-5xl mb-3">🎉</p>
             <p className="font-display text-2xl text-gold-metallic">Estás dentro!</p>
-            <p className="mt-2 text-sm text-white/70">Vais ser dos primeiros a saber quando a nova época arrancar.</p>
+            <p className="mt-2 text-sm text-white/70">Obrigado — a tua opinião vai mesmo moldar o que vamos construir. Até já! ⚽</p>
+          </div>
+        ) : !user ? (
+          <div className="px-6 pt-8 pb-6 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold/80">O jogo não acaba no domingo</p>
+            <h2 className="mt-2 font-display text-[1.7rem] leading-tight text-gold-metallic">A GERAÇÃO<br />CONTINUA ⚽</h2>
+            <p className="mt-3 text-sm text-white/75 leading-snug">
+              Liga Portugal, Champions e muito mais. Cria conta e ajuda-nos a desenhar a próxima época.
+            </p>
+            <Link to="/auth" onClick={dismiss}
+              className="mt-5 block w-full rounded-xl bg-gold py-3 text-center text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95">
+              Criar conta e garantir lugar 🔒
+            </Link>
+            <p className="mt-2 text-[10px] text-white/35">Grátis, sem compromisso.</p>
           </div>
         ) : (
           <div className="px-6 pt-8 pb-6">
-            <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-gold/80">O jogo não acaba no domingo</p>
-            <h2 className="mt-2 text-center font-display text-[1.7rem] leading-tight text-gold-metallic">
-              A GERAÇÃO<br />CONTINUA ⚽
-            </h2>
-            <p className="mt-3 text-center text-sm text-white/75 leading-snug">
-              Liga Portugal, Champions e muito mais — previsões, torneios com amigos e rankings todas as semanas, durante toda a época.
-            </p>
+            <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-gold/80">A Geração continua · Nova época</p>
+            <h2 className="mt-1.5 text-center font-display text-xl leading-tight text-gold-metallic">{current.title}</h2>
+            <p className="mt-1 text-center text-xs text-white/50">{current.sub}</p>
 
-            <div className="mt-4 space-y-1.5">
-              {[
-                "Os teus torneios e amigos continuam contigo",
-                "Palpites de época: campeão, top 4, artilheiro",
-                "Vencedor do mês — corridas novas todos os meses",
-              ].map(b => (
-                <p key={b} className="flex items-start gap-2 text-xs text-white/70">
-                  <span className="text-gold shrink-0">✓</span> {b}
-                </p>
+            <div className="mt-4 min-h-[120px]">{current.body}</div>
+
+            {/* Progress dots */}
+            <div className="mt-4 flex justify-center gap-1.5">
+              {steps.map((_, i) => (
+                <span key={i} className={`h-1.5 rounded-full transition-all ${i === step ? "w-5 bg-gold" : "w-1.5 bg-white/20"}`} />
               ))}
             </div>
 
-            <p className="mt-4 mb-2 text-[11px] font-bold uppercase tracking-widest text-white/40 text-center">Que competições queres seguir?</p>
-            <div className="flex flex-wrap justify-center gap-1.5">
-              {SEASON_COMPETITIONS.map(c => (
-                <button key={c.key} onClick={() => toggle(c.key)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-smooth ${
-                    selected.has(c.key)
-                      ? "border-gold bg-gold/20 text-gold"
-                      : "border-white/15 bg-white/5 text-white/50 hover:border-white/30"
-                  }`}>
-                  {c.label}
+            <div className="mt-4 flex gap-2">
+              {step > 0 && (
+                <button onClick={() => setStep(s => s - 1)}
+                  className="rounded-xl border border-white/15 px-4 py-3 text-sm font-bold text-white/60 hover:text-white transition-smooth">
+                  ←
                 </button>
-              ))}
-            </div>
-
-            {user ? (
-              <button onClick={confirm} disabled={saving || selected.size === 0}
-                className="mt-5 w-full rounded-xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95 disabled:opacity-50">
-                {saving ? "A guardar…" : "Garantir o meu lugar 🔒"}
+              )}
+              <button
+                onClick={() => isLast ? confirm() : setStep(s => s + 1)}
+                disabled={!current.valid || saving}
+                className="flex-1 rounded-xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95 disabled:opacity-50">
+                {saving ? "A guardar…" : isLast ? "Garantir o meu lugar 🔒" : "Continuar →"}
               </button>
-            ) : (
-              <Link to="/auth" onClick={dismiss}
-                className="mt-5 block w-full rounded-xl bg-gold py-3 text-center text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95">
-                Criar conta e garantir lugar 🔒
-              </Link>
-            )}
-            <p className="mt-2 text-center text-[10px] text-white/35">Grátis, sem compromisso. Só te avisamos quando arrancar.</p>
+            </div>
           </div>
         )}
       </div>

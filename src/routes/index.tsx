@@ -2146,7 +2146,7 @@ function SeasonPreRegModal({ user }: { user: any }) {
     {
       title: "Que competições queres seguir?",
       sub: "Escolhe todas as que te interessam",
-      valid: competitions.size > 0,
+      valid: true,
       body: (
         <div className="flex flex-wrap justify-center gap-1.5">
           {SEASON_COMPETITIONS.map(c => (
@@ -2198,7 +2198,7 @@ function SeasonPreRegModal({ user }: { user: any }) {
     {
       title: "Com que frequência jogarias?",
       sub: "Sê honesto — ajuda-nos a desenhar o jogo certo",
-      valid: frequency !== "",
+      valid: true,
       body: (
         <div className="flex flex-col gap-1.5">
           {[

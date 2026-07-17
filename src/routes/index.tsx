@@ -99,7 +99,12 @@ function Home() {
         .select("predictions_made,predictions_correct")
         .eq("id", user!.id)
         .maybeSingle();
-      return data;
+      // Contagem real de todos os jogos votados (inclui fase de grupos)
+      const { count } = await supabase
+        .from("predictions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user!.id);
+      return { ...data, predictions_made: count ?? data?.predictions_made ?? 0 };
     },
   });
 
@@ -636,8 +641,8 @@ function Home() {
 
       {/* ===================== A GRANDE FINAL ===================== */}
       <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">
-        <Link to="/jogos" className="block relative overflow-hidden rounded-2xl border border-gold/40 transition-smooth hover:border-gold/60"
-          style={{ background: "linear-gradient(135deg, oklch(0.20 0.06 85 / 0.55) 0%, oklch(0.13 0.03 260) 55%, oklch(0.18 0.05 25 / 0.45) 100%)", boxShadow: "0 6px 28px oklch(0.75 0.18 85 / 0.18)" }}>
+        <Link to="/jogos" className="block relative overflow-hidden rounded-2xl border border-gold/50 transition-smooth hover:border-gold/70"
+          style={{ background: "linear-gradient(135deg, oklch(0.45 0.12 85) 0%, oklch(0.32 0.09 60) 45%, oklch(0.40 0.13 40) 100%)", boxShadow: "0 6px 28px oklch(0.75 0.18 85 / 0.30)" }}>
           <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
           <div className="px-5 py-4 text-center">
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold/80 mb-1">🏆 Domingo · 20h00</p>
@@ -647,7 +652,7 @@ function Home() {
               <span className="text-gold/50 text-sm">vs</span>
               <span>Argentina 🇦🇷</span>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">Sábado às 22h00 há ainda o 3º lugar: 🇫🇷 França vs Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿 — vota nos dois!</p>
+            <p className="mt-2 text-xs text-white/75">Sábado às 22h00 há ainda o 3º lugar: 🇫🇷 França vs Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿 — vota nos dois!</p>
           </div>
         </Link>
       </div>

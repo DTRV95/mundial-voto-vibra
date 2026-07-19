@@ -2527,7 +2527,7 @@ function ThanksModal({ onClose }: { onClose: () => void }) {
           <h2 className="font-display text-xl leading-snug text-gold-metallic">Uma palavra para ti</h2>
           <div className="mt-4 space-y-3 text-left text-sm text-white/80 leading-relaxed">
             <p>
-              O Mundial chegou ao fim — e antes de mais nada, queremos dizer-te uma coisa.
+              O Mundial chegou ao fim, e antes de mais nada, quero-te agradecer!
             </p>
             <p>
               Cada previsão que fizeste, cada torneio que criaste, cada mensagem no chat,
@@ -2544,7 +2544,7 @@ function ThanksModal({ onClose }: { onClose: () => void }) {
               E isto não acaba aqui — a Geração vai voltar. Época 2026/27, contamos contigo. ⚽
             </p>
           </div>
-          <p className="mt-4 text-xs text-white/40">— A equipa da Geração 2026</p>
+          <p className="mt-4 text-xs text-white/40">— David Vilaverde</p>
           <button onClick={onClose}
             className="mt-5 w-full rounded-xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95">
             Obrigado eu ❤️

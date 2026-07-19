@@ -308,7 +308,7 @@ function RootComponent() {
           </AppShell>
           <Toaster theme="dark" position="top-center" richColors />
           <MaintenanceNotice />
-          <Ronda32WelcomeModal />
+          {/* Ronda32WelcomeModal desativado — obsoleto após o Mundial */}
         </MaintenanceGuard>
       </AuthProvider>
     </QueryClientProvider>

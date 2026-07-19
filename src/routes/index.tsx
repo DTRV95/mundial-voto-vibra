@@ -2440,16 +2440,26 @@ function FinalCelebration({ finalMatch, ranking, userId }: { finalMatch: any; ra
       {/* Pódio mata-mata */}
       <section className="relative z-10 mx-5 mt-8 md:mx-auto md:max-w-lg animate-enter delay-100">
         <p className="mb-4 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">🏆 Pódio do Mata-Mata</p>
-        <div className="flex items-end gap-2">
-          <PodiumSpot entry={second} place={2} />
-          <PodiumSpot entry={first} place={1} />
-          <PodiumSpot entry={third} place={3} />
-        </div>
-        <div className="mt-5 rounded-2xl border border-gold/30 bg-gold/8 px-4 py-3 text-center">
-          <p className="text-sm text-foreground">
-            👑 <span className="font-bold text-gold">{first?.display_name}</span> é o grande vencedor do Mata-Mata da Geração 2026!
-          </p>
-        </div>
+        {ranking.length === 0 ? (
+          <div className="flex items-end gap-2">
+            {[0, 1, 2].map(i => <div key={i} className="h-40 flex-1 shimmer rounded-2xl" />)}
+          </div>
+        ) : (
+          <>
+            <div className="flex items-end gap-2">
+              <PodiumSpot entry={second} place={2} />
+              <PodiumSpot entry={first} place={1} />
+              <PodiumSpot entry={third} place={3} />
+            </div>
+            {first && (
+              <div className="mt-5 rounded-2xl border border-gold/30 bg-gold/8 px-4 py-3 text-center">
+                <p className="text-sm text-foreground">
+                  👑 <span className="font-bold text-gold">{first.display_name}</span> é o grande vencedor do Mata-Mata da Geração 2026!
+                </p>
+              </div>
+            )}
+          </>
+        )}
       </section>
 
       {/* Classificação global */}
@@ -2465,6 +2475,9 @@ function FinalCelebration({ finalMatch, ranking, userId }: { finalMatch: any; ra
             <span>#</span><span>Adepto</span><span className="text-right">Grup.</span><span className="text-right">Mata-M.</span><span className="text-right text-gold/80">Total</span>
           </div>
           <div className="divide-y divide-border/30">
+            {ranking.length === 0 && [0,1,2,3,4].map(i => (
+              <div key={`sk-${i}`} className="px-4 py-3"><div className="h-5 shimmer rounded-lg" /></div>
+            ))}
             {visible.map((r, i) => {
               const isMe = r.id === userId;
               const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : null;

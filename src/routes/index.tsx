@@ -2516,16 +2516,16 @@ function FinalCelebration({ finalMatch, ranking, userId }: { finalMatch: any; ra
 function ThanksModal({ onClose }: { onClose: () => void }) {
   return createPortal(
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-5">
-      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
-        className="relative z-10 w-full max-w-sm overflow-hidden rounded-3xl border border-gold/40 animate-enter"
-        style={{ background: "radial-gradient(ellipse 130% 80% at 50% -10%, oklch(0.24 0.05 85) 0%, oklch(0.13 0.03 265) 55%, oklch(0.10 0.02 265) 100%)", boxShadow: "0 20px 60px oklch(0.75 0.18 85 / 0.25)" }}
+        className="relative z-10 w-full max-w-sm overflow-hidden rounded-3xl border border-gold/50 animate-enter"
+        style={{ background: "linear-gradient(160deg, #fffdf7 0%, #fdf6e3 55%, #faeecf 100%)", boxShadow: "0 20px 60px rgba(200,150,12,0.30)" }}
       >
         <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
         <div className="px-6 pt-9 pb-7 text-center">
           <p className="text-4xl mb-3">❤️</p>
-          <h2 className="font-display text-xl leading-snug text-gold-metallic">Uma palavra para ti</h2>
-          <div className="mt-4 space-y-3 text-left text-sm text-white/80 leading-relaxed">
+          <h2 className="font-display text-xl leading-snug" style={{ color: "#a17a08" }}>Uma palavra para ti</h2>
+          <div className="mt-4 space-y-3 text-left text-sm text-stone-700 leading-relaxed">
             <p>
               O Mundial chegou ao fim, e antes de mais nada, quero-te agradecer!
             </p>
@@ -2537,14 +2537,14 @@ function ThanksModal({ onClose }: { onClose: () => void }) {
               Somos gente que gosta de futebol, como tu. E ver-te aqui, jornada após jornada,
               foi o melhor prémio deste Mundial.
             </p>
-            <p className="font-semibold text-white">
+            <p className="font-semibold text-stone-900">
               Obrigado. De coração. 🙏
             </p>
-            <p className="font-semibold text-gold">
+            <p className="font-semibold" style={{ color: "#a17a08" }}>
               E isto não acaba aqui — a Geração vai voltar. Época 2026/27, contamos contigo. ⚽
             </p>
           </div>
-          <p className="mt-4 text-xs text-white/40">— David Vilaverde</p>
+          <p className="mt-4 text-xs text-stone-500">— David Vilaverde</p>
           <button onClick={onClose}
             className="mt-5 w-full rounded-xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95">
             Obrigado eu ❤️

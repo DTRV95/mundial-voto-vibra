@@ -2367,6 +2367,9 @@ function FinalCelebration({ finalMatch, ranking, userId }: { finalMatch: any; ra
   const podium = byKnockout.slice(0, 3);
   const first = podium[0], second = podium[1], third = podium[2];
 
+  const globalPodium = ranking.slice(0, 3);
+  const gFirst = globalPodium[0], gSecond = globalPodium[1], gThird = globalPodium[2];
+
   const myGlobalIdx = ranking.findIndex(r => r.id === userId);
   const visible = showAll ? ranking : ranking.slice(0, 15);
 
@@ -2377,7 +2380,7 @@ function FinalCelebration({ finalMatch, ranking, userId }: { finalMatch: any; ra
     else { await navigator.clipboard.writeText(text).catch(() => {}); }
   }
 
-  function PodiumSpot({ entry, place }: { entry: any; place: 1 | 2 | 3 }) {
+  function PodiumSpot({ entry, place, field = "mataMata" }: { entry: any; place: 1 | 2 | 3; field?: string }) {
     if (!entry) return <div />;
     const cfg = place === 1
       ? { emoji: "👑", ring: "border-gold", glow: "0 0 40px oklch(0.75 0.18 85 / 0.45)", size: "h-24 w-24 text-3xl", medal: "🥇", h: "h-28", bg: "linear-gradient(180deg, oklch(0.75 0.18 85 / 0.35) 0%, oklch(0.75 0.18 85 / 0.08) 100%)" }
@@ -2395,7 +2398,7 @@ function FinalCelebration({ finalMatch, ranking, userId }: { finalMatch: any; ra
         </div>
         <div className="text-center">
           <p className={`font-bold leading-tight ${place === 1 ? "text-gold text-base" : "text-foreground text-sm"}`}>{entry.display_name}</p>
-          <p className={`font-display leading-none mt-0.5 ${place === 1 ? "text-2xl text-gold-metallic" : "text-lg text-foreground/80"}`}>{entry.mataMata} <span className="text-xs font-sans opacity-60">pts</span></p>
+          <p className={`font-display leading-none mt-0.5 ${place === 1 ? "text-2xl text-gold-metallic" : "text-lg text-foreground/80"}`}>{entry[field]} <span className="text-xs font-sans opacity-60">pts</span></p>
         </div>
         <div className={`w-full rounded-t-xl ${cfg.h} grid place-items-start justify-center pt-2 text-2xl`} style={{ background: cfg.bg }}>
           {cfg.medal}
@@ -2506,6 +2509,25 @@ function FinalCelebration({ finalMatch, ranking, userId }: { finalMatch: any; ra
           <p className="mt-2 text-center text-xs text-muted-foreground">A tua posição global: <span className="font-bold text-gold">#{myGlobalIdx + 1}º</span> com {ranking[myGlobalIdx]?.global} pts</p>
         )}
       </section>
+
+      {/* Pódio global */}
+      {ranking.length > 0 && (
+        <section className="relative z-10 mx-5 mt-8 md:mx-auto md:max-w-lg animate-enter delay-200">
+          <p className="mb-4 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">🌍 Pódio Global do Mundial</p>
+          <div className="flex items-end gap-2">
+            <PodiumSpot entry={gSecond} place={2} field="global" />
+            <PodiumSpot entry={gFirst} place={1} field="global" />
+            <PodiumSpot entry={gThird} place={3} field="global" />
+          </div>
+          {gFirst && (
+            <div className="mt-5 rounded-2xl border border-gold/30 bg-gold/8 px-4 py-3 text-center">
+              <p className="text-sm text-foreground">
+                🌍 <span className="font-bold text-gold">{gFirst.display_name}</span> é o campeão global do Mundial 2026 — grupos e mata-mata somados. Parabéns! 👏
+              </p>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Agradecimento + partilha */}
       <section className="relative z-10 mx-5 mt-8 md:mx-auto md:max-w-lg text-center animate-enter delay-300">

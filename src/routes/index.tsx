@@ -2530,7 +2530,7 @@ function ThanksModal({ onClose }: { onClose: () => void }) {
               O Mundial chegou ao fim, e antes de mais nada, quero-te agradecer!
             </p>
             <p>
-              Cada previsão que fizeste, cada torneio que criaste, cada mensagem no chat,
+              Cada previsão que fizeste, cada torneio que criaste,
               cada vez que abriste o site antes de um jogo… foi isso que tornou tudo real.
             </p>
             <p>

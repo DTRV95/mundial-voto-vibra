@@ -521,6 +521,11 @@ function Home() {
   // A festa liga-se quando o resultado da final estiver lançado
   const celebrationActive = (finalMatch as any)?.home_score != null;
 
+  // Pop-up de agradecimento (uma única vez por utilizador)
+  const [showThanks, setShowThanks] = useState(() => {
+    try { return !localStorage.getItem("mundial_thanks_v1"); } catch { return false; }
+  });
+
   // Classificação global: grupos (hall_of_fame) + mata-mata (profiles.total_points)
   const { data: globalRanking = [] } = useQuery({
     queryKey: ["global-ranking-encerramento"],
@@ -563,7 +568,14 @@ function Home() {
     return (
       <>
         <FinalCelebration finalMatch={finalMatch} ranking={globalRanking} userId={user?.id} />
-        <SeasonPreRegModal user={user} />
+        {showThanks ? (
+          <ThanksModal onClose={() => {
+            try { localStorage.setItem("mundial_thanks_v1", "1"); } catch {}
+            setShowThanks(false);
+          }} />
+        ) : (
+          <SeasonPreRegModal user={user} />
+        )}
       </>
     );
   }
@@ -2498,5 +2510,46 @@ function FinalCelebration({ finalMatch, ranking, userId }: { finalMatch: any; ra
         </div>
       </section>
     </div>
+  );
+}
+
+function ThanksModal({ onClose }: { onClose: () => void }) {
+  return createPortal(
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-5">
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+      <div
+        className="relative z-10 w-full max-w-sm overflow-hidden rounded-3xl border border-gold/40 animate-enter"
+        style={{ background: "radial-gradient(ellipse 130% 80% at 50% -10%, oklch(0.24 0.05 85) 0%, oklch(0.13 0.03 265) 55%, oklch(0.10 0.02 265) 100%)", boxShadow: "0 20px 60px oklch(0.75 0.18 85 / 0.25)" }}
+      >
+        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
+        <div className="px-6 pt-9 pb-7 text-center">
+          <p className="text-4xl mb-3">❤️</p>
+          <h2 className="font-display text-xl leading-snug text-gold-metallic">Uma palavra para ti</h2>
+          <div className="mt-4 space-y-3 text-left text-sm text-white/80 leading-relaxed">
+            <p>
+              Isto começou como uma ideia pequena: juntar amigos à volta do Mundial.
+              Tornou-se algo muito maior — e foi por tua causa.
+            </p>
+            <p>
+              Cada previsão que fizeste, cada torneio que criaste, cada mensagem no chat,
+              cada vez que abriste o site antes de um jogo… foi isso que tornou tudo real.
+            </p>
+            <p>
+              Não somos uma empresa grande. Somos gente que gosta de futebol, como tu.
+              E ver-te aqui, jornada após jornada, foi o melhor prémio deste Mundial.
+            </p>
+            <p className="font-semibold text-white">
+              Obrigado. De coração. 🙏
+            </p>
+          </div>
+          <p className="mt-4 text-xs text-white/40">— A equipa da Geração 2026</p>
+          <button onClick={onClose}
+            className="mt-5 w-full rounded-xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95">
+            Obrigado eu ❤️
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }

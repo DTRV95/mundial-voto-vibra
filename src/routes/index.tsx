@@ -509,12 +509,42 @@ function Home() {
     queryFn: async () => {
       const { data } = await supabase
         .from("matches")
-        .select("id,kickoff_at")
+        .select("id,kickoff_at,home_score,away_score,qualifier,home:home_team_id(name,flag),away:away_team_id(name,flag)")
         .eq("phase", "final")
         .order("kickoff_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      return data;
+      return data as any;
+    },
+  });
+
+  // A festa liga-se quando o resultado da final estiver lançado
+  const celebrationActive = (finalMatch as any)?.home_score != null;
+
+  // Classificação global: grupos (hall_of_fame) + mata-mata (profiles.total_points)
+  const { data: globalRanking = [] } = useQuery({
+    queryKey: ["global-ranking-encerramento"],
+    enabled: celebrationActive,
+    staleTime: 300_000,
+    queryFn: async () => {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id,display_name,avatar_url,total_points")
+        .order("total_points", { ascending: false })
+        .limit(300);
+      const { data: hof } = await (supabase as any)
+        .from("hall_of_fame")
+        .select("user_id,total_points")
+        .eq("phase", "grupos");
+      const gruposMap = Object.fromEntries((hof ?? []).map((h: any) => [h.user_id, h.total_points ?? 0]));
+      return (profiles ?? [])
+        .map((p: any) => ({
+          ...p,
+          grupos: gruposMap[p.id] ?? 0,
+          mataMata: p.total_points ?? 0,
+          global: (gruposMap[p.id] ?? 0) + (p.total_points ?? 0),
+        }))
+        .sort((a: any, b: any) => b.global - a.global || b.mataMata - a.mataMata);
     },
   });
 
@@ -526,6 +556,17 @@ function Home() {
     division: myDivision?.label ?? "1ª Liga",
     phase: "Mata-Mata",
   });
+
+  // ===================== ENCERRAMENTO DO MUNDIAL =====================
+  // Activa automaticamente quando o resultado da final é lançado no admin
+  if (celebrationActive) {
+    return (
+      <>
+        <FinalCelebration finalMatch={finalMatch} ranking={globalRanking} userId={user?.id} />
+        <SeasonPreRegModal user={user} />
+      </>
+    );
+  }
 
   return (
     <div className="pb-10">
@@ -2297,5 +2338,165 @@ function SeasonPreRegModal({ user }: { user: any }) {
       </div>
     </div>,
     document.body
+  );
+}
+
+function FinalCelebration({ finalMatch, ranking, userId }: { finalMatch: any; ranking: any[]; userId?: string }) {
+  const [showAll, setShowAll] = useState(false);
+
+  // Campeão do Mundo (equipa)
+  const h = finalMatch?.home_score ?? 0;
+  const a = finalMatch?.away_score ?? 0;
+  const champTeam = h > a ? finalMatch?.home : h < a ? finalMatch?.away
+    : finalMatch?.qualifier === "home" ? finalMatch?.home : finalMatch?.away;
+
+  // Pódio do mata-mata (ranking actual dos profiles)
+  const byKnockout = [...ranking].sort((x, y) => y.mataMata - x.mataMata);
+  const podium = byKnockout.slice(0, 3);
+  const first = podium[0], second = podium[1], third = podium[2];
+
+  const myGlobalIdx = ranking.findIndex(r => r.id === userId);
+  const visible = showAll ? ranking : ranking.slice(0, 15);
+
+  async function shareParty() {
+    const me = myGlobalIdx >= 0 ? ranking[myGlobalIdx] : null;
+    const text = `🏆 O Mundial 2026 terminou na Geração 2026!\n👑 Campeão da Geração: ${first?.display_name ?? "?"} (${first?.mataMata ?? 0} pts)${me ? `\n📊 Eu fiquei em #${myGlobalIdx + 1}º global com ${me.global} pts` : ""}\n\nhttps://geracao2026.com`;
+    if (navigator.share) { await navigator.share({ text }).catch(() => {}); }
+    else { await navigator.clipboard.writeText(text).catch(() => {}); }
+  }
+
+  function PodiumSpot({ entry, place }: { entry: any; place: 1 | 2 | 3 }) {
+    if (!entry) return <div />;
+    const cfg = place === 1
+      ? { emoji: "👑", ring: "border-gold", glow: "0 0 40px oklch(0.75 0.18 85 / 0.45)", size: "h-24 w-24 text-3xl", medal: "🥇", h: "h-28", bg: "linear-gradient(180deg, oklch(0.75 0.18 85 / 0.35) 0%, oklch(0.75 0.18 85 / 0.08) 100%)" }
+      : place === 2
+        ? { emoji: "", ring: "border-slate-300/70", glow: "0 0 24px rgba(203,213,225,0.25)", size: "h-16 w-16 text-xl", medal: "🥈", h: "h-20", bg: "linear-gradient(180deg, rgba(203,213,225,0.25) 0%, rgba(203,213,225,0.05) 100%)" }
+        : { emoji: "", ring: "border-amber-700/70", glow: "0 0 24px rgba(180,83,9,0.25)", size: "h-16 w-16 text-xl", medal: "🥉", h: "h-14", bg: "linear-gradient(180deg, rgba(180,83,9,0.28) 0%, rgba(180,83,9,0.06) 100%)" }
+    return (
+      <div className="flex flex-1 flex-col items-center justify-end gap-2">
+        {place === 1 && <span className="text-3xl animate-bounce">👑</span>}
+        <div className={`relative grid place-items-center rounded-full border-2 ${cfg.ring} ${cfg.size} overflow-hidden bg-secondary font-display`}
+          style={{ boxShadow: cfg.glow }}>
+          {entry.avatar_url
+            ? <img src={entry.avatar_url} alt="" className="h-full w-full object-cover" />
+            : <span>{(entry.display_name ?? "?").slice(0, 2).toUpperCase()}</span>}
+        </div>
+        <div className="text-center">
+          <p className={`font-bold leading-tight ${place === 1 ? "text-gold text-base" : "text-foreground text-sm"}`}>{entry.display_name}</p>
+          <p className={`font-display leading-none mt-0.5 ${place === 1 ? "text-2xl text-gold-metallic" : "text-lg text-foreground/80"}`}>{entry.mataMata} <span className="text-xs font-sans opacity-60">pts</span></p>
+        </div>
+        <div className={`w-full rounded-t-xl ${cfg.h} grid place-items-start justify-center pt-2 text-2xl`} style={{ background: cfg.bg }}>
+          {cfg.medal}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pb-12 overflow-hidden">
+      {/* Confetes */}
+      <style>{`
+        @keyframes confetti-fall {
+          0% { transform: translateY(-8vh) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(105vh) rotate(720deg); opacity: 0.4; }
+        }
+      `}</style>
+      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
+        {["🎉","✨","🎊","⚽","🏆","✨","🎉","⭐","🎊","✨","⚽","🎉"].map((e, i) => (
+          <span key={i} className="absolute text-xl"
+            style={{
+              left: `${(i * 8.3 + 4) % 100}%`,
+              animation: `confetti-fall ${5 + (i % 4) * 1.6}s linear ${i * 0.7}s infinite`,
+            }}>{e}</span>
+        ))}
+      </div>
+
+      {/* Cabeçalho */}
+      <section className="relative z-10 px-5 pt-8 text-center animate-enter">
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold/70">Mundial 2026 · Encerramento</p>
+        <h1 className="mt-2 font-display text-gold-metallic leading-none" style={{ fontSize: "clamp(2.4rem, 9vw, 4rem)" }}>
+          FIM DA VIAGEM
+        </h1>
+        {champTeam && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Campeão do Mundo: <span className="font-bold text-foreground">{champTeam.flag} {champTeam.name}</span>
+            <span className="text-muted-foreground/60"> · {finalMatch.home?.name} {h}–{a} {finalMatch.away?.name}</span>
+          </p>
+        )}
+      </section>
+
+      {/* Pódio mata-mata */}
+      <section className="relative z-10 mx-5 mt-8 md:mx-auto md:max-w-lg animate-enter delay-100">
+        <p className="mb-4 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">🏆 Pódio do Mata-Mata</p>
+        <div className="flex items-end gap-2">
+          <PodiumSpot entry={second} place={2} />
+          <PodiumSpot entry={first} place={1} />
+          <PodiumSpot entry={third} place={3} />
+        </div>
+        <div className="mt-5 rounded-2xl border border-gold/30 bg-gold/8 px-4 py-3 text-center">
+          <p className="text-sm text-foreground">
+            👑 <span className="font-bold text-gold">{first?.display_name}</span> é o grande vencedor do Mata-Mata da Geração 2026!
+          </p>
+        </div>
+      </section>
+
+      {/* Classificação global */}
+      <section className="relative z-10 mx-5 mt-8 md:mx-auto md:max-w-lg animate-enter delay-200">
+        <div className="overflow-hidden rounded-2xl border border-gold/30 bg-card"
+          style={{ boxShadow: "0 2px 16px oklch(0.75 0.18 85 / 0.10)" }}>
+          <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
+          <div className="px-4 py-3 border-b border-border/60">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-gold">Classificação Global do Mundial</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Fase de grupos + mata-mata somados</p>
+          </div>
+          <div className="grid grid-cols-[2rem_1fr_3rem_3.4rem_3.4rem] items-center gap-1 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 border-b border-border/40">
+            <span>#</span><span>Adepto</span><span className="text-right">Grup.</span><span className="text-right">Mata-M.</span><span className="text-right text-gold/80">Total</span>
+          </div>
+          <div className="divide-y divide-border/30">
+            {visible.map((r, i) => {
+              const isMe = r.id === userId;
+              const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : null;
+              return (
+                <div key={r.id}
+                  className={`grid grid-cols-[2rem_1fr_3rem_3.4rem_3.4rem] items-center gap-1 px-4 py-2.5 ${isMe ? "bg-gold/10 border-l-2 border-gold" : ""}`}>
+                  <span className="text-sm font-bold text-muted-foreground">{medal ?? i + 1}</span>
+                  <span className={`truncate text-sm ${isMe ? "font-bold text-gold" : "font-semibold text-foreground"}`}>
+                    {r.display_name}{isMe ? " (tu)" : ""}
+                  </span>
+                  <span className="text-right text-xs tabular-nums text-muted-foreground">{r.grupos}</span>
+                  <span className="text-right text-xs tabular-nums text-muted-foreground">{r.mataMata}</span>
+                  <span className="text-right text-sm font-bold tabular-nums text-gold">{r.global}</span>
+                </div>
+              );
+            })}
+          </div>
+          {ranking.length > 15 && (
+            <button onClick={() => setShowAll(v => !v)}
+              className="w-full border-t border-border/60 py-2.5 text-xs font-bold text-gold hover:bg-gold/5 transition-smooth">
+              {showAll ? "Mostrar menos ↑" : `Ver classificação completa (${ranking.length}) ↓`}
+            </button>
+          )}
+        </div>
+        {myGlobalIdx >= 15 && !showAll && (
+          <p className="mt-2 text-center text-xs text-muted-foreground">A tua posição global: <span className="font-bold text-gold">#{myGlobalIdx + 1}º</span> com {ranking[myGlobalIdx]?.global} pts</p>
+        )}
+      </section>
+
+      {/* Agradecimento + partilha */}
+      <section className="relative z-10 mx-5 mt-8 md:mx-auto md:max-w-lg text-center animate-enter delay-300">
+        <div className="rounded-2xl border border-border bg-card px-5 py-6">
+          <p className="text-3xl mb-2">🙏</p>
+          <p className="font-display text-xl leading-snug">Obrigado por teres feito parte desta Geração</p>
+          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+            Um mês, 104 jogos, milhares de previsões e torneios disputados até ao último minuto.
+            Isto foi só o início — <span className="font-semibold text-gold">a Geração continua na época 2026/27</span>. ⚽
+          </p>
+          <button onClick={shareParty}
+            className="mt-4 w-full rounded-xl bg-gold py-3 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95">
+            <Share2 className="mr-1.5 inline h-4 w-4" /> Partilhar o encerramento
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }

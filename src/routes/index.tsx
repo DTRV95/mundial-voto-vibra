@@ -2527,19 +2527,21 @@ function ThanksModal({ onClose }: { onClose: () => void }) {
           <h2 className="font-display text-xl leading-snug text-gold-metallic">Uma palavra para ti</h2>
           <div className="mt-4 space-y-3 text-left text-sm text-white/80 leading-relaxed">
             <p>
-              Isto começou como uma ideia pequena: juntar amigos à volta do Mundial.
-              Tornou-se algo muito maior — e foi por tua causa.
+              O Mundial chegou ao fim — e antes de mais nada, queremos dizer-te uma coisa.
             </p>
             <p>
               Cada previsão que fizeste, cada torneio que criaste, cada mensagem no chat,
               cada vez que abriste o site antes de um jogo… foi isso que tornou tudo real.
             </p>
             <p>
-              Não somos uma empresa grande. Somos gente que gosta de futebol, como tu.
-              E ver-te aqui, jornada após jornada, foi o melhor prémio deste Mundial.
+              Somos gente que gosta de futebol, como tu. E ver-te aqui, jornada após jornada,
+              foi o melhor prémio deste Mundial.
             </p>
             <p className="font-semibold text-white">
               Obrigado. De coração. 🙏
+            </p>
+            <p className="font-semibold text-gold">
+              E isto não acaba aqui — a Geração vai voltar. Época 2026/27, contamos contigo. ⚽
             </p>
           </div>
           <p className="mt-4 text-xs text-white/40">— A equipa da Geração 2026</p>

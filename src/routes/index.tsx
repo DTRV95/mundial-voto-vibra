@@ -526,9 +526,9 @@ function Home() {
     try { return !localStorage.getItem("mundial_thanks_v1"); } catch { return false; }
   });
 
-  // Classificação global: grupos (hall_of_fame) + mata-mata (profiles.total_points)
+  // Classificação global: grupos (phase_results, tem TODOS os utilizadores) + mata-mata (profiles.total_points)
   const { data: globalRanking = [] } = useQuery({
-    queryKey: ["global-ranking-encerramento"],
+    queryKey: ["global-ranking-encerramento-v2"],
     enabled: celebrationActive,
     staleTime: 300_000,
     queryFn: async () => {
@@ -537,11 +537,11 @@ function Home() {
         .select("id,display_name,avatar_url,total_points")
         .order("total_points", { ascending: false })
         .limit(300);
-      const { data: hof } = await (supabase as any)
-        .from("hall_of_fame")
+      const { data: gruposResults } = await (supabase as any)
+        .from("phase_results")
         .select("user_id,total_points")
         .eq("phase", "grupos");
-      const gruposMap = Object.fromEntries((hof ?? []).map((h: any) => [h.user_id, h.total_points ?? 0]));
+      const gruposMap = Object.fromEntries((gruposResults ?? []).map((h: any) => [h.user_id, h.total_points ?? 0]));
       return (profiles ?? [])
         .map((p: any) => ({
           ...p,

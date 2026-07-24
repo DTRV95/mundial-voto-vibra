@@ -28,11 +28,12 @@ export const COMPETITIONS: CompetitionTheme[] = [
     name: "Liga Portugal",
     short: "Liga",
     badge: "🇵🇹",
-    accent: "oklch(0.72 0.16 158)",
-    accentBright: "oklch(0.80 0.17 158)",
-    glow: "oklch(0.72 0.16 158 / 0.35)",
+    // Identidade oficial: vermelho + branco (patrocínio Betclic)
+    accent: "oklch(0.62 0.23 25)",
+    accentBright: "oklch(0.70 0.22 25)",
+    glow: "oklch(0.60 0.24 25 / 0.40)",
     heroGradient:
-      "radial-gradient(ellipse 120% 90% at 50% -20%, oklch(0.34 0.10 158) 0%, oklch(0.15 0.03 200) 55%, oklch(0.11 0.02 260) 100%)",
+      "radial-gradient(ellipse 120% 90% at 50% -20%, oklch(0.40 0.17 25) 0%, oklch(0.17 0.06 20) 55%, oklch(0.10 0.02 20) 100%)",
   },
   {
     slug: "champions",

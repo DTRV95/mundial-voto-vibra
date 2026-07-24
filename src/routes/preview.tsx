@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Clock, TrendingUp, TrendingDown, Minus, Trophy, ArrowRight, Flame } from "lucide-react";
-import { GOLD, type CompetitionTheme } from "@/lib/competitionTheme";
+import { GOLD, COMPETITIONS, type CompetitionTheme } from "@/lib/competitionTheme";
 import { useCompetitions, type Competition } from "@/lib/useCompetitions";
 
 export const Route = createFileRoute("/preview")({
@@ -9,16 +9,22 @@ export const Route = createFileRoute("/preview")({
   component: Preview,
 });
 
+// Fallback caso a BD não responda (ex: ambiente sem acesso ao Supabase)
+const FALLBACK: Competition[] = COMPETITIONS.map((c) => ({
+  ...c, id: c.slug, format: "liga", status: "upcoming", season: "2026/27",
+}));
+
 function Preview() {
-  const { data: competitions = [], isLoading } = useCompetitions();
+  const { data: dbCompetitions = [], isLoading } = useCompetitions();
+  const competitions = dbCompetitions.length > 0 ? dbCompetitions : FALLBACK;
   const [comp, setComp] = useState<Competition | null>(null);
 
-  // Escolhe a primeira competição assim que os dados chegam da BD
+  // Escolhe a primeira competição assim que houver dados
   useEffect(() => {
     if (!comp && competitions.length > 0) setComp(competitions[0]);
   }, [competitions, comp]);
 
-  if (isLoading || !comp) {
+  if (!comp) {
     return (
       <div className="min-h-screen bg-[#0a0b0f] px-5 pt-10">
         <div className="mx-auto max-w-2xl space-y-3">

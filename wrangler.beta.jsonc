@@ -1,0 +1,14 @@
+{
+  // Worker de STAGING/BETA — desenvolvimento da época 2026/27.
+  // Deploy automático a partir do branch `epoca-2027`. Invisível para os utilizadores.
+  "name": "geracao-beta",
+  "compatibility_date": "2026-06-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "dist/server/server.js",
+  "assets": {
+    "directory": "./dist/client"
+  },
+  "routes": [
+    { "pattern": "beta.geracao2026.com", "custom_domain": true }
+  ]
+}

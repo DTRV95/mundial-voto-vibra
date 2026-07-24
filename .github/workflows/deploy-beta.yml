@@ -1,0 +1,28 @@
+name: Deploy BETA (staging)
+
+on:
+  push:
+    branches:
+      - epoca-2027
+
+jobs:
+  deploy-beta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to beta worker
+        run: npx wrangler deploy --config wrangler.beta.jsonc
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

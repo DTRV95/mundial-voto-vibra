@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Clock, TrendingUp, TrendingDown, Minus, Trophy, ArrowRight, Flame } from "lucide-react";
-import { COMPETITIONS, GOLD, type CompetitionTheme } from "@/lib/competitionTheme";
+import { GOLD, type CompetitionTheme } from "@/lib/competitionTheme";
+import { useCompetitions, type Competition } from "@/lib/useCompetitions";
 
 export const Route = createFileRoute("/preview")({
   head: () => ({ meta: [{ title: "Preview · Época 2026/27" }] }),
@@ -9,7 +10,24 @@ export const Route = createFileRoute("/preview")({
 });
 
 function Preview() {
-  const [comp, setComp] = useState<CompetitionTheme>(COMPETITIONS[0]);
+  const { data: competitions = [], isLoading } = useCompetitions();
+  const [comp, setComp] = useState<Competition | null>(null);
+
+  // Escolhe a primeira competição assim que os dados chegam da BD
+  useEffect(() => {
+    if (!comp && competitions.length > 0) setComp(competitions[0]);
+  }, [competitions, comp]);
+
+  if (isLoading || !comp) {
+    return (
+      <div className="min-h-screen bg-[#0a0b0f] px-5 pt-10">
+        <div className="mx-auto max-w-2xl space-y-3">
+          <div className="h-8 w-48 shimmer rounded-lg" />
+          <div className="h-64 shimmer rounded-3xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -32,7 +50,7 @@ function Preview() {
       {/* Seletor de competição */}
       <div className="sticky top-0 z-20 border-b border-white/10 bg-[#0a0b0f]/90 backdrop-blur-lg">
         <div className="mx-auto flex max-w-2xl gap-2 overflow-x-auto px-5 py-3">
-          {COMPETITIONS.map((c) => {
+          {competitions.map((c) => {
             const active = c.slug === comp.slug;
             return (
               <button

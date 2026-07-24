@@ -5,6 +5,7 @@ import {
   HeadContent,
   Scripts,
   Link,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "../lib/useAuth";
@@ -284,6 +285,9 @@ function MaintenancePage() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // O preview da nova época renderiza sozinho, sem o chrome do Mundial.
+  const standalone = pathname.startsWith("/preview");
 
   useEffect(() => {
     // After a new deploy, old JS chunks no longer exist.
@@ -302,14 +306,18 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <MaintenanceGuard>
-          <AppShell>
-            <Outlet />
-          </AppShell>
-          <Toaster theme="dark" position="top-center" richColors />
-          <MaintenanceNotice />
-          {/* Ronda32WelcomeModal desativado — obsoleto após o Mundial */}
-        </MaintenanceGuard>
+        {standalone ? (
+          <Outlet />
+        ) : (
+          <MaintenanceGuard>
+            <AppShell>
+              <Outlet />
+            </AppShell>
+            <Toaster theme="dark" position="top-center" richColors />
+            <MaintenanceNotice />
+            {/* Ronda32WelcomeModal desativado — obsoleto após o Mundial */}
+          </MaintenanceGuard>
+        )}
       </AuthProvider>
     </QueryClientProvider>
   );

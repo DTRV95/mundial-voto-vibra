@@ -21,6 +21,7 @@ export interface CompetitionTheme {
   heroGradient: string;
 }
 
+// ── Competições do LANÇAMENTO (época 2026/27) ──────────────
 export const COMPETITIONS: CompetitionTheme[] = [
   {
     slug: "liga-portugal",
@@ -44,6 +45,10 @@ export const COMPETITIONS: CompetitionTheme[] = [
     heroGradient:
       "radial-gradient(ellipse 120% 90% at 50% -20%, oklch(0.34 0.13 264) 0%, oklch(0.16 0.06 266) 55%, oklch(0.10 0.02 262) 100%)",
   },
+];
+
+// ── Competições FUTURAS (adicionar mais tarde ao array acima) ──
+export const FUTURE_COMPETITIONS: CompetitionTheme[] = [
   {
     slug: "liga-europa",
     name: "Liga Europa",

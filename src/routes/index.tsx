@@ -44,7 +44,22 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+// No ambiente BETA, a raiz salta direto para o preview da nova época.
+// A produção (geracao2026.com) não é afetada. Componente-porteiro para
+// não interferir com os hooks de Home.
 function Home() {
+  const [isBeta, setIsBeta] = useState(false);
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hostname.startsWith("beta.")) {
+      setIsBeta(true);
+      window.location.replace("/preview");
+    }
+  }, []);
+  if (isBeta) return null;
+  return <HomeContent />;
+}
+
+function HomeContent() {
   const { user } = useAuth();
   const { data: todays = [] } = useQuery({
     queryKey: ["matches", "today"],

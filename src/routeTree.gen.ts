@@ -13,6 +13,7 @@ import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SuporteRouteImport } from './routes/suporte'
 import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as PreviewRouteImport } from './routes/preview'
 import { Route as PremiosRouteImport } from './routes/premios'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as NoticiasRouteImport } from './routes/noticias'
@@ -50,6 +51,11 @@ const RankingsRoute = RankingsRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewRoute = PreviewRouteImport.update({
+  id: '/preview',
+  path: '/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PremiosRoute = PremiosRouteImport.update({
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/noticias': typeof NoticiasRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
+  '/preview': typeof PreviewRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
+  '/preview': typeof PreviewRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/noticias': typeof NoticiasRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/premios': typeof PremiosRoute
+  '/preview': typeof PreviewRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/noticias'
     | '/perfil'
     | '/premios'
+    | '/preview'
     | '/privacidade'
     | '/rankings'
     | '/suporte'
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/ligas'
     | '/perfil'
     | '/premios'
+    | '/preview'
     | '/privacidade'
     | '/rankings'
     | '/suporte'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/noticias'
     | '/perfil'
     | '/premios'
+    | '/preview'
     | '/privacidade'
     | '/rankings'
     | '/suporte'
@@ -302,6 +314,7 @@ export interface RootRouteChildren {
   NoticiasRoute: typeof NoticiasRouteWithChildren
   PerfilRoute: typeof PerfilRoute
   PremiosRoute: typeof PremiosRoute
+  PreviewRoute: typeof PreviewRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   RankingsRoute: typeof RankingsRoute
   SuporteRoute: typeof SuporteRoute
@@ -340,6 +353,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preview': {
+      id: '/preview'
+      path: '/preview'
+      fullPath: '/preview'
+      preLoaderRoute: typeof PreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/premios': {
@@ -498,6 +518,7 @@ const rootRouteChildren: RootRouteChildren = {
   NoticiasRoute: NoticiasRouteWithChildren,
   PerfilRoute: PerfilRoute,
   PremiosRoute: PremiosRoute,
+  PreviewRoute: PreviewRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   RankingsRoute: RankingsRoute,
   SuporteRoute: SuporteRoute,

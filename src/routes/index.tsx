@@ -1277,29 +1277,37 @@ function Home() {
 
       {/* ===================== RANKING + LIGAS + PRÉMIOS ===================== */}
       <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
-        {/* Ranking — fundo verde Panini */}
-        <div className="rounded-2xl overflow-hidden bg-wc-green panini-stripes" style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.45)" }}>
-          <div className="text-white">
+        {/* Ranking — card moderno com acento da competição */}
+        <div className="relative overflow-hidden rounded-2xl"
+          style={{
+            background: "linear-gradient(160deg, oklch(0.24 0.09 148) 0%, oklch(0.17 0.05 160) 60%, oklch(0.14 0.03 200) 100%)",
+            boxShadow: "0 12px 36px -8px oklch(0.55 0.20 142 / 0.40), inset 0 1px 0 oklch(1 0 0 / 0.10)",
+          }}>
+          {/* Halo suave */}
+          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full"
+            style={{ background: "oklch(0.65 0.18 148 / 0.28)", filter: "blur(50px)" }} />
+
+          <div className="relative text-white">
             {/* Cabeçalho */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/20">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-white/15 ring-1 ring-white/15">
                   <BarChart3 className="h-5 w-5 text-white" />
                 </div>
                 <h3 className="font-display text-xl">Líderes</h3>
               </div>
-              <Link to="/rankings" className="text-xs font-bold text-white/80 hover:text-white">Ver rankings →</Link>
+              <Link to="/rankings" className="text-xs font-bold text-white/70 hover:text-white transition-smooth">Ver rankings →</Link>
             </div>
 
             {/* Seletor de competição — época 2026/27 */}
             {competitions.length > 0 && (
-              <div className="flex gap-2 border-b border-white/20 px-5 py-2.5">
+              <div className="flex gap-2 border-b border-white/10 px-5 py-2.5">
                 {competitions.map(c => {
                   const on = c.slug === (homeCompSlug ?? competitions[0]?.slug);
                   return (
                     <button key={c.slug} onClick={() => setHomeCompSlug(c.slug)}
                       className={`flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold transition-smooth ${
-                        on ? "bg-white text-wc-green" : "bg-white/15 text-white/70 hover:bg-white/25"
+                        on ? "bg-white text-[#14301f]" : "bg-white/10 text-white/65 hover:bg-white/20"
                       }`}>
                       <span>{c.emoji}</span>{c.short}
                     </button>
@@ -1314,16 +1322,16 @@ function Home() {
             ) : (
               <ol>
                 {(topLeaders as any[]).map((u, i) => (
-                  <li key={i} className={`flex items-center justify-between px-5 py-3 ${i < topLeaders.length - 1 ? "border-b border-white/20" : ""}`}>
+                  <li key={i} className={`flex items-center justify-between px-5 py-3 transition-smooth hover:bg-white/[0.04] ${i < topLeaders.length - 1 ? "border-b border-white/10" : ""}`}>
                     <span className="flex items-center gap-3">
                       <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                        i === 0 ? "bg-white text-wc-green" : "bg-white/20 text-white"
+                        i === 0 ? "bg-gold text-background shadow-gold" : "bg-white/15 text-white"
                       }`}>{i + 1}</span>
                       <Link to="/adepto/$id" params={{ id: u.id }} className="font-semibold text-sm hover:underline underline-offset-2">
                         {u.display_name ?? "Adepto"}
                       </Link>
                     </span>
-                    <span className="font-display text-lg">{u.total_points} <span className="text-xs font-sans opacity-70">pts</span></span>
+                    <span className="font-display text-lg tabular-nums text-gold-metallic">{u.total_points} <span className="text-xs font-sans font-semibold text-white/50">pts</span></span>
                   </li>
                 ))}
                 {(myLeaderRank || myLeaderEntry) && user && (

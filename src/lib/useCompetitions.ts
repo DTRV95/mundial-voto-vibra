@@ -13,8 +13,8 @@ export interface Competition {
 
 // Cor por competição — apenas as duas do lançamento
 const ACCENTS: Record<string, string> = {
-  "liga-portugal": "oklch(0.62 0.23 25)",   // vermelho oficial Liga Portugal
-  "champions": "oklch(0.66 0.17 262)",      // azul Champions
+  "liga-portugal": "oklch(0.36 0.15 268)",  // azul-marinho oficial Liga Portugal Betclic
+  "champions": "oklch(0.55 0.20 285)",      // azul-violeta Champions (distinto do da Liga)
 };
 const DEFAULT_ACCENT = "var(--gold)";
 

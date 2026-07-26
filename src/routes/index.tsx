@@ -679,7 +679,7 @@ function Home() {
 
             {/* Fundo: arte oficial da competição, ou atmosfera desenhada */}
             {activeComp && findCompetitionArt(activeComp.slug) ? (
-              <CompetitionArt slug={activeComp.slug} />
+              <CompetitionArt slug={activeComp.slug} position={activeComp.artPosition} />
             ) : activeComp?.motif === "stars" ? (
               <>
                 <ChampionsAtmosphere />
@@ -698,7 +698,7 @@ function Home() {
 
             <div className={`relative flex flex-col gap-5 px-5 md:flex-row md:items-center md:justify-between md:px-8 ${
               activeComp && findCompetitionArt(activeComp.slug)
-                ? "py-9 md:min-h-[260px] md:py-10"
+                ? "py-10 md:min-h-[340px] md:py-12"
                 : "py-6 md:py-7"
             }`}>
               {/* Identidade */}

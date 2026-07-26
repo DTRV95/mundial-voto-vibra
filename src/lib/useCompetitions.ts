@@ -21,6 +21,8 @@ export interface Competition {
   motif: "energy" | "stars";
   /** Cor de texto secundária característica */
   tone: string;
+  /** Enquadramento da arte oficial (object-position) */
+  artPosition: string;
 }
 
 /**
@@ -37,6 +39,7 @@ const THEMES: Record<string, Omit<Competition, "id" | "slug" | "name" | "short" 
     heroGradient: "linear-gradient(145deg, #82000A 0%, #BE000F 45%, #2a0a18 100%)",
     motif: "energy",
     tone: "#FFD9DD",
+    artPosition: "center 50%",   // setas simétricas dos dois lados
   },
   "champions": {
     accent: "#183059",                       // azul real
@@ -46,6 +49,7 @@ const THEMES: Record<string, Omit<Competition, "id" | "slug" | "name" | "short" 
     heroGradient: "linear-gradient(145deg, #0A1428 0%, #183059 55%, #0E1E38 100%)",
     motif: "stars",
     tone: "#B1C1C1",                         // prata metálica UEFA
+    artPosition: "center 58%",   // arco de luzes com a starball por cima
   },
 };
 
@@ -57,6 +61,7 @@ const FALLBACK = {
   heroGradient: "linear-gradient(145deg, #1a1a1a 0%, #2a2a2a 100%)",
   motif: "energy" as const,
   tone: "#e5e5e5",
+  artPosition: "center 50%",
 };
 
 /** Lê as competições ativas da base de dados e junta-lhes o tema oficial. */

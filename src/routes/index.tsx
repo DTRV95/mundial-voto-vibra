@@ -524,7 +524,10 @@ function Home() {
   });
 
   // A festa liga-se quando o resultado da final estiver lançado
-  const celebrationActive = (finalMatch as any)?.home_score != null;
+  // A festa de encerramento do Mundial fica ativa em produção, mas desligada
+  // no BETA — para podermos ver e trabalhar a homepage da nova época.
+  const isBeta = typeof window !== "undefined" && window.location.hostname.startsWith("beta.");
+  const celebrationActive = !isBeta && (finalMatch as any)?.home_score != null;
 
   // Pop-up de agradecimento (uma única vez por utilizador)
   const [showThanks, setShowThanks] = useState(() => {

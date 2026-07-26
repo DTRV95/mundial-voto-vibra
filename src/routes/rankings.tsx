@@ -6,6 +6,7 @@ import { Trophy, ArrowUp, ArrowDown, Minus, Shield, Users2, Crown, Star } from "
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 import { FollowButton } from "@/components/FollowButton";
+import { useCompetitions } from "@/lib/useCompetitions";
 
 const HOF_PHASE_LABEL: Record<string, string> = {
   grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos",
@@ -109,6 +110,11 @@ function Rankings() {
   const [tab, setTab] = useState<"ligas" | "jogos" | "divisoes" | "hof">(search.tab as any ?? "divisoes");
   const [expandedDivs, setExpandedDivs] = useState<Record<string, boolean>>({});
   const { user } = useAuth();
+
+  // Seletor de competição (época 2026/27)
+  const { data: competitions = [] } = useCompetitions();
+  const [compSlug, setCompSlug] = useState<string | null>(null);
+  const activeSlug = compSlug ?? competitions[0]?.slug ?? null;
 
   // Ranking de ligas
   const { data: leagueRanking = [] } = useQuery({
@@ -231,6 +237,24 @@ function Rankings() {
         <h1 className="font-display text-3xl">Rankings</h1>
         <p className="text-sm text-muted-foreground">Compete por fase do Mundial e ganha prémios.</p>
       </header>
+
+      {/* Seletor de competição — época 2026/27 */}
+      {competitions.length > 0 && (
+        <div className="mb-4 -mx-5 flex gap-2 overflow-x-auto px-5">
+          {competitions.map(c => {
+            const on = c.slug === activeSlug;
+            return (
+              <button key={c.slug} onClick={() => setCompSlug(c.slug)}
+                className="flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition-smooth"
+                style={on
+                  ? { borderColor: c.accent, background: c.accent, color: "#fff" }
+                  : { borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
+                <span>{c.emoji}</span>{c.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Tabs principais */}
       <div className="mb-5 flex gap-2">

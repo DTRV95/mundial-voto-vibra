@@ -14,7 +14,7 @@ export interface Competition {
 // Cor por competição — apenas as duas do lançamento
 const ACCENTS: Record<string, string> = {
   "liga-portugal": "#E10014",               // vermelho Magma — tom principal Betclic
-  "champions": "oklch(0.55 0.20 285)",      // azul-violeta Champions (distinto do da Liga)
+  "champions": "#183059",                    // azul real UEFA "Kick of Light" (2024-27)
 };
 const DEFAULT_ACCENT = "var(--gold)";
 

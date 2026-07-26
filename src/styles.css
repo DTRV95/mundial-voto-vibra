@@ -44,6 +44,10 @@
   --color-lp-cyan: var(--lp-cyan);
   --color-lp-mint: var(--lp-mint);
   --color-lp-navy: var(--lp-navy);
+  --color-ucl-silver: var(--ucl-silver);
+  --color-ucl-cyan: var(--ucl-cyan);
+  --color-ucl-magenta: var(--ucl-magenta);
+  --color-ucl-midnight: var(--ucl-midnight);
 
   --font-display: "Bebas Neue", "Oswald", "Inter", system-ui, sans-serif;
   --font-sans: "Inter", system-ui, sans-serif;
@@ -59,6 +63,14 @@
   --lp-navy:    oklch(0.30 0.13 268);  /* azul institucional     */
   --lp-cyan:    #00FAFF;   /* ciano elétrico — grafismos digitais */
   --lp-mint:    #19FF91;   /* verde menta néon — energia          */
+
+  /* ── Paleta oficial UEFA Champions League "Kick of Light" (2024–27) ── */
+  --ucl-midnight: #0A1428;  /* azul noite — base institucional      */
+  --ucl-night:    #0E1E38;  /* azul noite (variação)                */
+  --ucl-royal:    #183059;  /* azul real — gradientes                */
+  --ucl-silver:   #B1C1C1;  /* prata metálica — troféu e prestígio   */
+  --ucl-cyan:     #00FAFF;  /* prisma: ciano vivo                    */
+  --ucl-magenta:  #E1007A;  /* prisma: magenta elétrico              */
 
   /* ── Cores de acento (usadas em todo o site) ───────────── */
   --wc-red:   #E10014;                /* vermelho Betclic (destaque)     */
@@ -138,6 +150,8 @@
   .text-wc-green { color: var(--wc-green); }
   .text-lp-cyan  { color: var(--lp-cyan); }
   .text-lp-mint  { color: var(--lp-mint); }
+  .text-ucl-silver  { color: var(--ucl-silver); }
+  .text-ucl-magenta { color: var(--ucl-magenta); }
   .shadow-elegant { box-shadow: var(--shadow-elegant); }
   .shadow-gold { box-shadow: var(--shadow-gold); }
   .transition-smooth { transition: var(--transition-smooth); }

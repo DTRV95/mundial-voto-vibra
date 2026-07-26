@@ -591,7 +591,25 @@ function Home() {
   }
 
   return (
-    <div className="pb-10">
+    <div
+      className="relative pb-10 transition-smooth"
+      style={{
+        // Tema da competição escolhida — veste a homepage inteira
+        ["--comp-accent" as any]: activeComp?.accent ?? "var(--gold)",
+        ["--comp-deep" as any]: activeComp?.deep ?? "#1a1a1a",
+        ["--comp-glow" as any]: activeComp?.glow ?? "rgba(200,150,12,0.35)",
+        ["--comp-electric" as any]: activeComp?.electric ?? "var(--gold)",
+      }}
+    >
+      {/* Atmosfera da competição — muda com a tab escolhida */}
+      {activeComp && (
+        <div className="pointer-events-none fixed inset-0 -z-10 transition-smooth" aria-hidden
+          style={{
+            background: `radial-gradient(ellipse 90% 45% at 50% 0%, ${activeComp.glow}, transparent 70%)`,
+            opacity: 0.5,
+          }} />
+      )}
+
       {RankSharePortal}
 
       {/* ===================== HERO ===================== */}
@@ -599,9 +617,13 @@ function Home() {
         <div
           className="relative overflow-hidden rounded-3xl"
           style={{
-            background: "linear-gradient(135deg, oklch(0.30 0.12 142) 0%, oklch(0.22 0.10 142) 55%, oklch(0.18 0.06 165) 100%)",
-            boxShadow: "0 16px 48px oklch(0.55 0.20 142 / 0.35), 0 0 0 1px oklch(1 0 0 / 0.08)",
+            background: activeComp?.heroGradient
+              ?? "linear-gradient(135deg, oklch(0.30 0.12 142) 0%, oklch(0.22 0.10 142) 55%, oklch(0.18 0.06 165) 100%)",
+            boxShadow: activeComp
+              ? `0 20px 56px -12px ${activeComp.glow}, 0 0 0 1px oklch(1 0 0 / 0.10)`
+              : "0 16px 48px oklch(0.55 0.20 142 / 0.35), 0 0 0 1px oklch(1 0 0 / 0.08)",
             minHeight: "220px",
+            transition: "background 400ms ease, box-shadow 400ms ease",
           }}
         >
           {/* Shimmer sweep */}
@@ -618,8 +640,8 @@ function Home() {
           </div>
 
           {/* Red glow behind trophy */}
-          <div className="absolute right-[10%] top-1/2 -translate-y-1/2 h-48 w-48 rounded-full pointer-events-none"
-            style={{ background: "oklch(0.75 0.18 85 / 0.20)", filter: "blur(48px)" }} />
+          <div className="absolute right-[10%] top-1/2 -translate-y-1/2 h-48 w-48 rounded-full pointer-events-none transition-smooth"
+            style={{ background: activeComp ? activeComp.glow : "oklch(0.75 0.18 85 / 0.20)", filter: "blur(48px)" }} />
 
           {/* Green corner accent */}
           <div className="absolute bottom-0 left-0 h-14 w-14 md:h-18 md:w-18 bg-gold/60" style={{ borderTopRightRadius: "36px" }} />
@@ -632,7 +654,7 @@ function Home() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-red opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-wc-red" />
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Mundial 2026 · Final</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">{activeComp ? activeComp.name : "Mundial 2026 · Final"}</span>
             </div>
 
             {/* Title */}
@@ -1401,13 +1423,17 @@ function Home() {
         </div>
 
         {/* Ranking de Torneios — card moderno */}
-        <div className="relative overflow-hidden rounded-2xl"
+        <div className="relative overflow-hidden rounded-2xl transition-smooth"
           style={{
-            background: "linear-gradient(160deg, oklch(0.26 0.11 268) 0%, oklch(0.18 0.07 265) 60%, oklch(0.14 0.04 260) 100%)",
-            boxShadow: "0 12px 36px -8px oklch(0.45 0.18 265 / 0.45), inset 0 1px 0 oklch(1 0 0 / 0.10)",
+            background: activeComp
+              ? `linear-gradient(160deg, ${activeComp.deep} 0%, color-mix(in srgb, ${activeComp.deep} 55%, #0d1017) 60%, #0d1017 100%)`
+              : "linear-gradient(160deg, oklch(0.26 0.11 268) 0%, oklch(0.18 0.07 265) 60%, oklch(0.14 0.04 260) 100%)",
+            boxShadow: activeComp
+              ? `0 12px 36px -8px ${activeComp.glow}, inset 0 1px 0 oklch(1 0 0 / 0.10)`
+              : "0 12px 36px -8px oklch(0.45 0.18 265 / 0.45), inset 0 1px 0 oklch(1 0 0 / 0.10)",
           }}>
-          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full"
-            style={{ background: "oklch(0.55 0.20 268 / 0.32)", filter: "blur(50px)" }} />
+          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full transition-smooth"
+            style={{ background: activeComp ? activeComp.glow : "oklch(0.55 0.20 268 / 0.32)", filter: "blur(50px)" }} />
 
           <div className="relative text-white">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">

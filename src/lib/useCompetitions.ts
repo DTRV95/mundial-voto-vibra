@@ -7,18 +7,49 @@ export interface Competition {
   name: string;
   short: string;
   emoji: string;
-  /** Cor de acento da competição (usada no seletor) */
+  /** Acento principal — botões, destaques, estado ativo */
   accent: string;
+  /** Tom profundo — base de gradientes escuros */
+  deep: string;
+  /** Cor de brilho/halo */
+  glow: string;
+  /** Cor "elétrica" da marca — momentos dinâmicos */
+  electric: string;
+  /** Gradiente para heros e painéis grandes */
+  heroGradient: string;
 }
 
-// Cor por competição — apenas as duas do lançamento
-const ACCENTS: Record<string, string> = {
-  "liga-portugal": "#E10014",               // vermelho Magma — tom principal Betclic
-  "champions": "#183059",                    // azul real UEFA "Kick of Light" (2024-27)
+/**
+ * Temas oficiais das competições.
+ * Liga Portugal Betclic — manual de normas gráficas.
+ * UEFA Champions League — identidade "Kick of Light" (2024–27).
+ */
+const THEMES: Record<string, Omit<Competition, "id" | "slug" | "name" | "short" | "emoji">> = {
+  "liga-portugal": {
+    accent: "#E10014",                       // vermelho Magma
+    deep: "#82000A",                         // vermelho profundo
+    glow: "rgba(225, 0, 20, 0.45)",
+    electric: "#19FF91",                     // verde menta néon
+    heroGradient: "linear-gradient(145deg, #82000A 0%, #BE000F 45%, #2a0a18 100%)",
+  },
+  "champions": {
+    accent: "#183059",                       // azul real
+    deep: "#0A1428",                         // midnight blue
+    glow: "rgba(24, 48, 89, 0.55)",
+    electric: "#00FAFF",                     // ciano prisma
+    heroGradient: "linear-gradient(145deg, #0A1428 0%, #183059 55%, #0E1E38 100%)",
+  },
 };
-const DEFAULT_ACCENT = "var(--gold)";
 
-/** Lê as competições ativas da base de dados. */
+const FALLBACK = {
+  accent: "var(--gold)",
+  deep: "#1a1a1a",
+  glow: "rgba(200, 150, 12, 0.35)",
+  electric: "var(--gold)",
+  heroGradient: "linear-gradient(145deg, #1a1a1a 0%, #2a2a2a 100%)",
+};
+
+/** Lê as competições ativas da base de dados e junta-lhes o tema oficial. */
 export function useCompetitions() {
   return useQuery({
     queryKey: ["competitions"],
@@ -35,7 +66,7 @@ export function useCompetitions() {
         name: c.name,
         short: c.short_name ?? c.name,
         emoji: c.emoji ?? "⚽",
-        accent: ACCENTS[c.slug] ?? DEFAULT_ACCENT,
+        ...(THEMES[c.slug] ?? FALLBACK),
       }));
     },
   });

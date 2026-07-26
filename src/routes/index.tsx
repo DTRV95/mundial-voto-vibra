@@ -15,6 +15,8 @@ import { useCountUp } from "@/lib/useCountUp";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { PickCompetitionsModal } from "@/components/PickCompetitionsModal";
 import { ChampionsAtmosphere } from "@/components/ChampionsAtmosphere";
+import { LigaAtmosphere } from "@/components/LigaAtmosphere";
+import { CompetitionArt } from "@/components/CompetitionArt";
 import { useFollowing } from "@/lib/useFollow";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
 import premioCamisola from "@/assets/premio-camisola.jpg";
@@ -670,7 +672,7 @@ function Home() {
           {/* Faixa da competição — identidade + estado do utilizador */}
           <div className="vignette relative overflow-hidden"
             style={{
-              background: activeComp?.heroGradient ?? "linear-gradient(140deg, oklch(0.28 0.11 148) 0%, oklch(0.18 0.06 165) 100%)",
+              background: activeComp ? "transparent" : "linear-gradient(140deg, oklch(0.28 0.11 148) 0%, oklch(0.18 0.06 165) 100%)",
               transition: "background 450ms ease",
             }}>
             <div className="sheen absolute inset-0" />
@@ -684,11 +686,14 @@ function Home() {
               </>
             ) : (
               <>
-                {/* Liga: velocidade e energia */}
-                <div className="motif-speed absolute inset-0 opacity-70" />
+                {/* Liga Portugal: azul-marinho com setas vermelhas e verdes */}
+                <LigaAtmosphere />
                 <div className="motif-energy-beam" style={{ left: 0 }} />
               </>
             )}
+
+            {/* Arte oficial da competição (se existir em src/assets/comp-<slug>.png) */}
+            {activeComp && <CompetitionArt slug={activeComp.slug} />}
 
             <div className="pointer-events-none absolute -right-6 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full"
               style={{ background: activeComp?.glow ?? "oklch(0.75 0.18 85 / 0.20)", filter: "blur(52px)", transition: "background 450ms ease" }} />

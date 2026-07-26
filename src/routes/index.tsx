@@ -11,6 +11,7 @@ import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { PushNotificationPrompt } from "@/components/PushNotificationPrompt";
 import { useAuth } from "@/lib/useAuth";
 import { useCompetitions } from "@/lib/useCompetitions";
+import { useCountUp } from "@/lib/useCountUp";
 import { useMyCompetitions } from "@/lib/useMyCompetitions";
 import { PickCompetitionsModal } from "@/components/PickCompetitionsModal";
 import { useFollowing } from "@/lib/useFollow";
@@ -630,193 +631,133 @@ function Home() {
 
       {RankSharePortal}
 
-      {/* ===================== COMPETIÇÃO ATIVA (topo) ===================== */}
-      {competitions.length > 0 && (
-        <section className="px-4 pt-4 md:px-6">
-          <div className="flex gap-2.5 overflow-x-auto pb-1">
-            {competitions.map(c => {
-              const on = c.slug === activeComp?.slug;
-              return (
-                <button key={c.slug} onClick={() => setHomeCompSlug(c.slug)}
-                  className="group relative flex flex-1 shrink-0 items-center justify-center gap-2.5 overflow-hidden rounded-2xl px-4 py-3.5 pressable"
-                  style={on ? {
-                    background: `linear-gradient(140deg, color-mix(in srgb, ${c.accent} 88%, white) 0%, ${c.accent} 45%, ${c.deep} 100%)`,
-                    boxShadow: `0 1px 2px oklch(0 0 0 / 0.20), 0 8px 20px -6px ${c.glow}, 0 18px 40px -18px ${c.glow}, inset 0 1px 0 oklch(1 0 0 / 0.28)`,
-                    transition: "background 400ms ease, box-shadow 400ms ease, transform 200ms ease",
-                  } : {
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    boxShadow: "0 1px 2px oklch(0.20 0.04 265 / 0.05)",
-                    transition: "all 300ms ease",
-                  }}>
+      {/* ===================== PAINEL DA COMPETIÇÃO ===================== */}
+      <section className="px-4 pt-4 md:px-6 md:pt-6 animate-fade-in">
+        <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-elegant">
 
-                  {/* Luz diagonal no estado ativo */}
-                  {on && (
-                    <span className="pointer-events-none absolute inset-0"
-                      style={{ background: "linear-gradient(115deg, oklch(1 0 0 / 0.20) 0%, transparent 45%, transparent 70%, oklch(1 0 0 / 0.08) 100%)" }} />
-                  )}
-                  {/* Fio de luz no topo */}
-                  {on && (
-                    <span className="pointer-events-none absolute inset-x-5 top-0 h-px"
-                      style={{ background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.55), transparent)" }} />
-                  )}
-
-                  <span className={`relative text-lg transition-transform duration-300 ${on ? "scale-110" : "opacity-60 group-hover:opacity-100"}`}>
-                    {c.emoji}
-                  </span>
-                  <span className="relative leading-tight">
-                    <span className="block text-sm font-bold whitespace-nowrap"
-                      style={{ color: on ? "#fff" : "var(--muted-foreground)" }}>
-                      {c.name}
-                    </span>
+          {/* Tabs de competição */}
+          {competitions.length > 0 && (
+            <div className="flex gap-1.5 border-b border-border p-1.5">
+              {competitions.map(c => {
+                const on = c.slug === activeComp?.slug;
+                return (
+                  <button key={c.slug} onClick={() => setHomeCompSlug(c.slug)}
+                    className="pressable relative flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-2xl px-3 py-2.5"
+                    style={on ? {
+                      background: `linear-gradient(140deg, color-mix(in srgb, ${c.accent} 88%, white) 0%, ${c.accent} 48%, ${c.deep} 100%)`,
+                      boxShadow: `0 1px 2px oklch(0 0 0 / 0.18), 0 6px 16px -6px ${c.glow}, inset 0 1px 0 oklch(1 0 0 / 0.30)`,
+                      transition: "background 400ms ease, box-shadow 400ms ease",
+                    } : { background: "transparent", transition: "all 250ms ease" }}>
+                    {on && <span className="pointer-events-none absolute inset-x-4 top-0 h-px"
+                      style={{ background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.55), transparent)" }} />}
+                    <span className={`text-base transition-transform duration-300 ${on ? "scale-110" : "opacity-55"}`}>{c.emoji}</span>
+                    <span className="text-[13px] font-bold whitespace-nowrap"
+                      style={{ color: on ? "#fff" : "var(--muted-foreground)" }}>{c.name}</span>
                     {on && (
-                      <span className="block text-[9px] font-bold uppercase tracking-[0.2em] text-white/60">
-                        a decorrer
+                      <span className="relative flex h-1.5 w-1.5 shrink-0">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" style={{ background: c.electric }} />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: c.electric }} />
                       </span>
                     )}
-                  </span>
-
-                  {/* Ponto elétrico da marca no estado ativo */}
-                  {on && (
-                    <span className="relative flex h-1.5 w-1.5 shrink-0">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
-                        style={{ background: c.electric }} />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: c.electric }} />
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* ===================== HERO ===================== */}
-      <section className="relative px-4 pt-4 md:px-6 md:pt-5 animate-fade-in">
-        <div
-          className="relative overflow-hidden rounded-3xl"
-          style={{
-            background: activeComp?.heroGradient
-              ?? "linear-gradient(135deg, oklch(0.30 0.12 142) 0%, oklch(0.22 0.10 142) 55%, oklch(0.18 0.06 165) 100%)",
-            boxShadow: activeComp
-              ? `0 2px 6px oklch(0 0 0 / 0.16), 0 12px 28px -8px ${activeComp.glow}, 0 32px 64px -20px ${activeComp.glow}, inset 0 1px 0 oklch(1 0 0 / 0.18), 0 0 0 1px oklch(1 0 0 / 0.10)`
-              : "0 2px 6px oklch(0 0 0 / 0.16), 0 12px 28px -8px oklch(0.55 0.20 142 / 0.35), 0 32px 64px -20px oklch(0.55 0.20 142 / 0.30), inset 0 1px 0 oklch(1 0 0 / 0.18), 0 0 0 1px oklch(1 0 0 / 0.10)",
-            minHeight: "240px",
-            transition: "background 400ms ease, box-shadow 400ms ease",
-          }}
-        >
-          {/* Luz difusa diagonal */}
-          <div className="sheen absolute inset-0 rounded-3xl" />
-
-          {/* Shimmer sweep */}
-          <div className="hero-shimmer rounded-3xl" />
-
-          {/* Grelha de campo subtil */}
-          <div className="absolute inset-0 opacity-[0.05]"
-            style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 39px, oklch(1 0 0) 39px, oklch(1 0 0) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, oklch(1 0 0) 39px, oklch(1 0 0) 40px)" }} />
-
-          {/* Monograma da marca — preenche o espaço à direita */}
-          <span className="watermark">7</span>
-
-          {/* Halos de luz — profundidade */}
-          <div className="pointer-events-none absolute -right-8 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full transition-smooth"
-            style={{ background: activeComp ? activeComp.glow : "oklch(0.75 0.18 85 / 0.22)", filter: "blur(56px)" }} />
-          <div className="pointer-events-none absolute -left-16 -bottom-16 h-48 w-48 rounded-full"
-            style={{ background: "oklch(1 0 0 / 0.10)", filter: "blur(56px)" }} />
-
-          {/* Fio de luz no topo */}
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-px"
-            style={{ background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.45), transparent)" }} />
-
-          {/* Content */}
-          <div className="relative px-5 py-6 md:px-10 md:py-8 pr-[38%] md:pr-[34%]">
-            {/* Live badge */}
-            <div className="flex items-center gap-2 mb-3">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-red opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-wc-red" />
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">{activeComp ? activeComp.name : "Mundial 2026 · Final"}</span>
+                  </button>
+                );
+              })}
             </div>
+          )}
 
-            {/* Title */}
-            <h1 className="font-display leading-none text-gold-metallic" style={{ fontSize: "clamp(2.8rem,9vw,5.5rem)" }}>
-              UMA<br />GERAÇÃO
-            </h1>
+          {/* Faixa da competição — identidade + estado do utilizador */}
+          <div className="relative overflow-hidden"
+            style={{
+              background: activeComp?.heroGradient ?? "linear-gradient(140deg, oklch(0.28 0.11 148) 0%, oklch(0.18 0.06 165) 100%)",
+              transition: "background 450ms ease",
+            }}>
+            <div className="sheen absolute inset-0" />
+            <div className="pointer-events-none absolute -right-6 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full"
+              style={{ background: activeComp?.glow ?? "oklch(0.75 0.18 85 / 0.20)", filter: "blur(52px)", transition: "background 450ms ease" }} />
+            <span className="watermark">7</span>
 
-            {/* Personal stat or tagline */}
-            {user && myDivision ? (
-              <div className="mt-4 flex flex-col gap-1.5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold backdrop-blur-sm ${myDivision.border} ${myDivision.bg} ${myDivision.text}`}>
-                    {myDivision.emoji} {myDivision.label}
+            <div className="relative flex flex-col gap-5 px-5 py-6 md:flex-row md:items-center md:justify-between md:px-8 md:py-7">
+              {/* Identidade */}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                      style={{ background: activeComp?.electric ?? "var(--gold)" }} />
+                    <span className="relative inline-flex h-2 w-2 rounded-full"
+                      style={{ background: activeComp?.electric ?? "var(--gold)" }} />
                   </span>
-                  <span className="text-xs font-bold text-white/60">
-                    #{myDivision.rank}º global
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">
+                    {activeComp ? "Época 2026/27 · a decorrer" : "Época 2026/27"}
                   </span>
                 </div>
-                <p className="font-display text-2xl text-white leading-none">
-                  {myDivision.points} <span className="text-sm font-sans text-white/50 font-semibold">pontos</span>
+                <h1 className="mt-1.5 font-display leading-none text-white" style={{ fontSize: "clamp(1.9rem,5vw,2.9rem)" }}>
+                  {activeComp ? activeComp.name : "Uma Geração"}
+                </h1>
+                <p className="mt-1.5 max-w-md text-sm text-white/70">
+                  {user
+                    ? "Vota em cada jornada, sobe no ranking e desafia os teus amigos."
+                    : "Prevê os jogos, cria torneios com os teus amigos e vê quem manda."}
                 </p>
               </div>
-            ) : (
-              <p className="mt-3 text-xs font-semibold text-white/70 leading-snug">
-                {user ? "Vota, compara e vibra." : "Convida os teus amigos e vê quem manda."}
-              </p>
-            )}
 
-            {/* CTA */}
-            <div className="mt-4 flex flex-col gap-2">
-              {user ? (
-                <Link to="/jogos"
-                  className="inline-flex w-fit items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth hover:scale-[1.03] active:scale-95">
-                  Votar agora <ArrowRight className="h-3.5 w-3.5" />
+              {/* Estado do utilizador + ação */}
+              <div className="flex shrink-0 items-center gap-3 md:flex-col md:items-end md:gap-3">
+                {user && myDivision ? (
+                  <div className="flex items-center gap-2.5">
+                    <div className="glass rounded-2xl px-4 py-2.5 text-center">
+                      <p className="font-display text-2xl leading-none tabular-nums text-white">
+                        <CountUpText value={myDivision.points} />
+                      </p>
+                      <p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/55">pontos</p>
+                    </div>
+                    <div className="glass rounded-2xl px-4 py-2.5 text-center">
+                      <p className="font-display text-2xl leading-none text-white">#{myDivision.rank}º</p>
+                      <p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/55">global</p>
+                    </div>
+                    <div className="glass hidden rounded-2xl px-4 py-2.5 text-center sm:block">
+                      <p className="font-display text-2xl leading-none text-white">{myDivision.emoji}</p>
+                      <p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/55">{myDivision.label}</p>
+                    </div>
+                  </div>
+                ) : null}
+
+                <Link to={user ? "/jogos" : "/auth"}
+                  className="pressable group inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-sm font-bold text-background shadow-gold hover:scale-[1.03]">
+                  {user ? "Votar agora" : "Entrar grátis"}
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
                 </Link>
-              ) : (
-                <>
-                  <Link to="/auth"
-                    className="inline-flex w-fit items-center gap-2 rounded-xl bg-gold px-5 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth hover:scale-[1.03] active:scale-95">
-                    Entrar grátis <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Stats bar — real data */}
-          <div className="glass relative grid grid-cols-3 border-x-0 border-b-0"
-            style={{ borderTop: "1px solid oklch(1 0 0 / 0.14)" }}>
-            {[
-              { label: "Previsões hoje", value: (communityPulse?.todayVotes ?? 0) > 0 ? communityPulse!.todayVotes.toLocaleString("pt-PT") : "—", live: true },
-              { label: "Adeptos", value: (communityPulse?.totalUsers ?? 0) > 0 ? communityPulse!.totalUsers.toLocaleString("pt-PT") : "—", live: false },
-              { label: "Jogos", value: "104", live: false },
-            ].map((s, i) => (
-              <div key={s.label} className={`py-3 text-center text-white animate-stat-pop ${i === 1 ? "border-x border-white/8" : ""}`}
-                style={{ animationDelay: `${i * 80}ms` }}>
-                <div className="flex items-center justify-center gap-1.5 font-display text-xl md:text-2xl leading-none">
-                  {s.live && (
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-green opacity-75" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-wc-green" />
-                    </span>
-                  )}
-                  {s.value}
-                </div>
-                <div className="text-[10px] uppercase tracking-widest opacity-40 mt-0.5">{s.label}</div>
               </div>
-            ))}
+            </div>
+
+            {/* Estatísticas da comunidade */}
+            <div className="glass relative grid grid-cols-3 border-x-0 border-b-0"
+              style={{ borderTop: "1px solid oklch(1 0 0 / 0.14)" }}>
+              {[
+                { label: "Previsões hoje", num: communityPulse?.todayVotes ?? 0, live: true },
+                { label: "Adeptos", num: communityPulse?.totalUsers ?? 0, live: false },
+                { label: "Jogos", num: 104, live: false },
+              ].map((st, i) => (
+                <div key={st.label} className={`py-3 text-center text-white ${i === 1 ? "border-x border-white/10" : ""}`}>
+                  <div className="flex items-center justify-center gap-1.5 font-display text-lg leading-none tabular-nums md:text-xl">
+                    {st.live && st.num > 0 && (
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-green opacity-75" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-wc-green" />
+                      </span>
+                    )}
+                    {st.num > 0 ? <CountUpText value={st.num} /> : "—"}
+                  </div>
+                  <div className="mt-0.5 text-[9px] uppercase tracking-widest text-white/45">{st.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Mobile CTA only for guests */}
+        {/* Prova social — apenas visitantes */}
         {!user && (
-          <div className="flex gap-3 pt-4 md:hidden">
-            <Link to="/auth" className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-wc-red py-3 text-sm font-bold text-white shadow-gold transition-smooth active:scale-95">
-              Entrar grátis <ArrowRight className="h-4 w-4" />
-            </Link>
-            <div className="inline-flex items-center justify-center rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3 text-xs font-bold text-gold">
-              🏆 +100 membros
-            </div>
+          <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold text-muted-foreground">
+            <span>🏆</span> Já somos mais de 100 membros
           </div>
         )}
       </section>
@@ -2632,4 +2573,10 @@ function ThanksModal({ onClose }: { onClose: () => void }) {
     </div>,
     document.body
   );
+}
+
+/** Número que sobe suavemente até ao valor final. */
+function CountUpText({ value }: { value: number }) {
+  const n = useCountUp(value);
+  return <>{n.toLocaleString("pt-PT")}</>;
 }

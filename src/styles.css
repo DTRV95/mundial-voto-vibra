@@ -115,11 +115,11 @@
   --pitch-deep: oklch(0.30 0.09 155);
 
   --gradient-hero: linear-gradient(140deg, oklch(0.34 0.14 268) 0%, oklch(0.22 0.09 265) 100%);
-  --gradient-gold: linear-gradient(135deg, oklch(0.74 0.13 88) 0%, oklch(0.60 0.12 74) 100%);
+  --gradient-gold: linear-gradient(140deg, #F4D06A 0%, #D9A93C 40%, #B8871F 100%);
   --gradient-pitch: linear-gradient(180deg, oklch(0.58 0.17 155) 0%, oklch(0.30 0.09 155) 100%);
 
-  --shadow-elegant: 0 24px 60px -18px oklch(0.20 0.04 265 / 0.28);
-  --shadow-gold: 0 6px 22px -6px oklch(0.66 0.13 82 / 0.55);
+  --shadow-elegant: 0 1px 2px oklch(0.20 0.04 265 / 0.06), 0 8px 20px -8px oklch(0.20 0.04 265 / 0.14), 0 28px 60px -24px oklch(0.20 0.04 265 / 0.24);
+  --shadow-gold: 0 1px 2px oklch(0 0 0 / 0.18), 0 6px 18px -6px rgba(184,135,31,0.55), inset 0 1px 0 rgba(255,255,255,0.35);
 
   --transition-smooth: all 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -417,3 +417,45 @@
   100% { opacity: 1; transform: translateY(0)   scale(1); }
 }
 .animate-stat-pop { animation: stat-pop 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* ═══════════════════════════════════════════════════════════
+   Acabamentos premium — Época 2026/27
+   ═══════════════════════════════════════════════════════════ */
+
+/* Vidro fosco — superfícies sobre fundos coloridos */
+.glass {
+  background: oklch(1 0 0 / 0.08);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid oklch(1 0 0 / 0.14);
+}
+
+/* Brilho interior no topo — dá espessura ao cartão */
+.inner-light { box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.16), inset 0 -1px 0 oklch(0 0 0 / 0.20); }
+
+/* Luz difusa que atravessa o painel na diagonal */
+.sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, oklch(1 0 0 / 0.14) 0%, transparent 38%, transparent 62%, oklch(1 0 0 / 0.06) 100%);
+}
+
+/* Marca de água — monograma grande e subtil */
+.watermark {
+  position: absolute;
+  right: -2%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(9rem, 26vw, 15rem);
+  line-height: 0.8;
+  color: oklch(1 0 0 / 0.07);
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -0.04em;
+}
+
+/* Anel de luz nas bordas de painéis escuros */
+.ring-light { box-shadow: 0 0 0 1px oklch(1 0 0 / 0.10), 0 0 0 4px oklch(1 0 0 / 0.03); }

@@ -653,25 +653,34 @@ function Home() {
             background: activeComp?.heroGradient
               ?? "linear-gradient(135deg, oklch(0.30 0.12 142) 0%, oklch(0.22 0.10 142) 55%, oklch(0.18 0.06 165) 100%)",
             boxShadow: activeComp
-              ? `0 20px 56px -12px ${activeComp.glow}, 0 0 0 1px oklch(1 0 0 / 0.10)`
-              : "0 16px 48px oklch(0.55 0.20 142 / 0.35), 0 0 0 1px oklch(1 0 0 / 0.08)",
-            minHeight: "220px",
+              ? `0 2px 6px oklch(0 0 0 / 0.16), 0 12px 28px -8px ${activeComp.glow}, 0 32px 64px -20px ${activeComp.glow}, inset 0 1px 0 oklch(1 0 0 / 0.18), 0 0 0 1px oklch(1 0 0 / 0.10)`
+              : "0 2px 6px oklch(0 0 0 / 0.16), 0 12px 28px -8px oklch(0.55 0.20 142 / 0.35), 0 32px 64px -20px oklch(0.55 0.20 142 / 0.30), inset 0 1px 0 oklch(1 0 0 / 0.18), 0 0 0 1px oklch(1 0 0 / 0.10)",
+            minHeight: "240px",
             transition: "background 400ms ease, box-shadow 400ms ease",
           }}
         >
+          {/* Luz difusa diagonal */}
+          <div className="sheen absolute inset-0 rounded-3xl" />
+
           {/* Shimmer sweep */}
           <div className="hero-shimmer rounded-3xl" />
 
-          {/* Pitch grid subtle overlay */}
-          <div className="absolute inset-0 opacity-[0.04]"
+          {/* Grelha de campo subtil */}
+          <div className="absolute inset-0 opacity-[0.05]"
             style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 39px, oklch(1 0 0) 39px, oklch(1 0 0) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, oklch(1 0 0) 39px, oklch(1 0 0) 40px)" }} />
 
-          {/* Red glow behind trophy */}
-          <div className="absolute right-[10%] top-1/2 -translate-y-1/2 h-48 w-48 rounded-full pointer-events-none transition-smooth"
-            style={{ background: activeComp ? activeComp.glow : "oklch(0.75 0.18 85 / 0.20)", filter: "blur(48px)" }} />
+          {/* Monograma da marca — preenche o espaço à direita */}
+          <span className="watermark">7</span>
 
-          {/* Green corner accent */}
-          <div className="absolute bottom-0 left-0 h-14 w-14 md:h-18 md:w-18 bg-gold/60" style={{ borderTopRightRadius: "36px" }} />
+          {/* Halos de luz — profundidade */}
+          <div className="pointer-events-none absolute -right-8 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full transition-smooth"
+            style={{ background: activeComp ? activeComp.glow : "oklch(0.75 0.18 85 / 0.22)", filter: "blur(56px)" }} />
+          <div className="pointer-events-none absolute -left-16 -bottom-16 h-48 w-48 rounded-full"
+            style={{ background: "oklch(1 0 0 / 0.10)", filter: "blur(56px)" }} />
+
+          {/* Fio de luz no topo */}
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-px"
+            style={{ background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.45), transparent)" }} />
 
           {/* Content */}
           <div className="relative px-5 py-6 md:px-10 md:py-8 pr-[38%] md:pr-[34%]">
@@ -729,8 +738,8 @@ function Home() {
           </div>
 
           {/* Stats bar — real data */}
-          <div className="relative grid grid-cols-3 border-t border-white/8"
-            style={{ background: "oklch(1 0 0 / 0.04)" }}>
+          <div className="glass relative grid grid-cols-3 border-x-0 border-b-0"
+            style={{ borderTop: "1px solid oklch(1 0 0 / 0.14)" }}>
             {[
               { label: "Previsões hoje", value: (communityPulse?.todayVotes ?? 0) > 0 ? communityPulse!.todayVotes.toLocaleString("pt-PT") : "—", live: true },
               { label: "Adeptos", value: (communityPulse?.totalUsers ?? 0) > 0 ? communityPulse!.totalUsers.toLocaleString("pt-PT") : "—", live: false },

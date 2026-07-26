@@ -11,6 +11,8 @@ import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { PushNotificationPrompt } from "@/components/PushNotificationPrompt";
 import { useAuth } from "@/lib/useAuth";
 import { useCompetitions } from "@/lib/useCompetitions";
+import { useMyCompetitions } from "@/lib/useMyCompetitions";
+import { PickCompetitionsModal } from "@/components/PickCompetitionsModal";
 import { useFollowing } from "@/lib/useFollow";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
 import premioCamisola from "@/assets/premio-camisola.jpg";
@@ -276,7 +278,12 @@ function Home() {
   const [selectedResult, setSelectedResult] = useState<any>(null);
 
   // Seletor de competição no card de Líderes (época 2026/27)
-  const { data: competitions = [] } = useCompetitions();
+  const { data: allCompetitions = [] } = useCompetitions();
+  const { data: myCompIds } = useMyCompetitions();
+  // Mostra apenas as competições seguidas; sem inscrições (ou sem sessão) mostra todas
+  const competitions = (myCompIds && myCompIds.length > 0)
+    ? allCompetitions.filter(c => myCompIds.includes(c.id))
+    : allCompetitions;
   const [homeCompSlug, setHomeCompSlug] = useState<string | null>(null);
   const activeComp = competitions.find(c => c.slug === homeCompSlug) ?? competitions[0] ?? null;
   const [resultsExpanded, setResultsExpanded] = useState(false);
@@ -830,6 +837,9 @@ function Home() {
 
       {/* ===================== PRÉ-REGISTO NOVA ÉPOCA ===================== */}
       <SeasonPreRegModal user={user} />
+
+      {/* Primeira visita: escolher competições a seguir */}
+      <PickCompetitionsModal />
 
       {/* ===================== JOGOS POR VOTAR ===================== */}
       {user && pendingMatches.length > 0 && (

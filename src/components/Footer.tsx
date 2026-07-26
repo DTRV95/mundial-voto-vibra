@@ -15,7 +15,7 @@ export function Footer() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-display text-sm text-foreground">Uma Geração</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Plataforma de previsões · Mundial 2026 · Sem apostas</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Plataforma de previsões · Época 2026/27 · Sem apostas</p>
             <a
               href="https://instagram.com/umageracao2026"
               target="_blank"

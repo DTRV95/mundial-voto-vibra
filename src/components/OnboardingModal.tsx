@@ -11,7 +11,7 @@ const STEPS = [
   {
     icon: "⚽",
     title: "Bem-vindo ao Uma Geração!",
-    description: "A tua comunidade de previsões para o Mundial 2026. Vota nos jogos, acumula pontos e compete com os teus amigos.",
+    description: "A tua comunidade de previsões de futebol. Vota nos jogos, acumula pontos e compete com os teus amigos.",
     cta: null,
   },
   {

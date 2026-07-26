@@ -12,7 +12,6 @@ import { PushNotificationPrompt } from "@/components/PushNotificationPrompt";
 import { useAuth } from "@/lib/useAuth";
 import { useCompetitions } from "@/lib/useCompetitions";
 import { useFollowing } from "@/lib/useFollow";
-import trophyImg from "@/assets/trophy-hero.jpg";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
 import premioCamisola from "@/assets/premio-camisola.jpg";
 
@@ -612,6 +611,33 @@ function Home() {
 
       {RankSharePortal}
 
+      {/* ===================== COMPETIÇÃO ATIVA (topo) ===================== */}
+      {competitions.length > 0 && (
+        <section className="px-4 pt-4 md:px-6">
+          <div className="flex gap-2 overflow-x-auto pb-0.5">
+            {competitions.map(c => {
+              const on = c.slug === activeComp?.slug;
+              return (
+                <button key={c.slug} onClick={() => setHomeCompSlug(c.slug)}
+                  className="group relative flex flex-1 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl border px-4 py-2.5 transition-smooth"
+                  style={on
+                    ? { borderColor: c.accent, background: `color-mix(in srgb, ${c.accent} 14%, transparent)`,
+                        boxShadow: `0 8px 24px -12px ${c.accent}` }
+                    : { borderColor: "var(--border)", background: "var(--card)" }}>
+                  <span className="absolute inset-x-0 bottom-0 h-[3px] transition-smooth"
+                    style={{ background: on ? c.accent : "transparent" }} />
+                  <span className="text-lg">{c.emoji}</span>
+                  <span className="text-sm font-bold whitespace-nowrap"
+                    style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
+                    {c.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* ===================== HERO ===================== */}
       <section className="relative px-4 pt-4 md:px-6 md:pt-5 animate-fade-in">
         <div
@@ -633,12 +659,6 @@ function Home() {
           <div className="absolute inset-0 opacity-[0.04]"
             style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 39px, oklch(1 0 0) 39px, oklch(1 0 0) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, oklch(1 0 0) 39px, oklch(1 0 0) 40px)" }} />
 
-          {/* Trophy — right side, bleeds off */}
-          <div className="absolute right-0 top-0 h-full w-[44%] md:w-[38%] pointer-events-none select-none"
-            style={{ maskImage: "linear-gradient(to left, black 40%, transparent 100%)" }}>
-            <img src={trophyImg} alt="" className="h-full w-full object-cover object-center scale-110 trophy-shine" />
-          </div>
-
           {/* Red glow behind trophy */}
           <div className="absolute right-[10%] top-1/2 -translate-y-1/2 h-48 w-48 rounded-full pointer-events-none transition-smooth"
             style={{ background: activeComp ? activeComp.glow : "oklch(0.75 0.18 85 / 0.20)", filter: "blur(48px)" }} />
@@ -647,7 +667,7 @@ function Home() {
           <div className="absolute bottom-0 left-0 h-14 w-14 md:h-18 md:w-18 bg-gold/60" style={{ borderTopRightRadius: "36px" }} />
 
           {/* Content */}
-          <div className="relative px-5 py-5 md:px-10 md:py-7 pr-[46%] md:pr-[42%]">
+          <div className="relative px-5 py-6 md:px-10 md:py-8 pr-[38%] md:pr-[34%]">
             {/* Live badge */}
             <div className="flex items-center gap-2 mb-3">
               <span className="relative flex h-2 w-2">
@@ -738,105 +758,6 @@ function Home() {
           </div>
         )}
       </section>
-
-      {/* ===================== A GRANDE FINAL ===================== */}
-      <div className="mx-5 mt-4 md:mx-8 animate-enter delay-100">
-        <Link {...(finalMatch ? { to: "/jogo/$id" as const, params: { id: finalMatch.id } } : { to: "/jogos" as const })}
-          className="group block relative overflow-hidden rounded-3xl border border-gold/40 transition-smooth hover:border-gold/70"
-          style={{ background: "radial-gradient(ellipse 120% 90% at 50% -20%, oklch(0.30 0.08 85) 0%, oklch(0.15 0.03 265) 55%, oklch(0.11 0.02 265) 100%)", boxShadow: "0 10px 40px oklch(0.75 0.18 85 / 0.22), inset 0 1px 0 oklch(1 0 0 / 0.08)" }}>
-          {/* Glow central atrás do troféu */}
-          <div className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full"
-            style={{ background: "oklch(0.75 0.18 85 / 0.14)", filter: "blur(52px)" }} />
-          {/* Linhas de campo decorativas */}
-          <div className="pointer-events-none absolute inset-0 opacity-[0.05]"
-            style={{ backgroundImage: "radial-gradient(circle at 50% 130%, transparent 39%, white 40%, transparent 41%), linear-gradient(white 1px, transparent 1px)", backgroundSize: "100% 100%, 100% 33.3%" }} />
-
-          <div className="relative px-5 pt-5 pb-4">
-            {/* Chip data */}
-            <div className="flex justify-center">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gold backdrop-blur-sm">
-                Domingo · 19 Jul · 20h00
-              </span>
-            </div>
-
-            {/* Título */}
-            <div className="mt-3 text-center">
-              <span className="text-3xl leading-none">🏆</span>
-              <h2 className="mt-1 font-display text-gold-metallic leading-none" style={{ fontSize: "clamp(1.9rem, 7vw, 3rem)", letterSpacing: "0.02em" }}>
-                A GRANDE FINAL
-              </h2>
-            </div>
-
-            {/* Confronto */}
-            <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-5xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110">🇪🇸</span>
-                <span className="text-sm font-bold text-white">Espanha</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="grid h-10 w-10 place-items-center rounded-full border border-gold/50 bg-gold/15 font-display text-sm text-gold shadow-gold">VS</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-5xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110">🇦🇷</span>
-                <span className="text-sm font-bold text-white">Argentina</span>
-              </div>
-            </div>
-
-            {/* CTA */}
-            <div className="mt-4 flex justify-center">
-              <span className="inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-2.5 text-xs font-bold text-background shadow-gold transition-smooth group-hover:scale-[1.04]">
-                Dar a minha previsão <ArrowRight className="h-3.5 w-3.5" />
-              </span>
-            </div>
-
-            {/* 3º lugar */}
-            <p className="mt-3 text-center text-[11px] text-white/50">
-              Sábado 22h00 · 3º lugar: 🇫🇷 França vs Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿
-            </p>
-          </div>
-        </Link>
-      </div>
-
-      {/* ===================== A TUA JORNADA — obrigado ===================== */}
-      {user && myDivision && (myStreak?.predictions_made ?? 0) > 0 && (
-        <div className="mx-5 mt-4 md:mx-8 animate-enter delay-150">
-          <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
-            <div className="h-1 w-full wc-tricolor" />
-            <div className="px-5 py-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">A tua jornada no Mundial 2026</p>
-              <p className="font-display text-lg leading-snug">Obrigado por fazeres parte desta Geração 🙏</p>
-              <p className="text-xs text-muted-foreground mt-1">Desde a fase de grupos até à final — isto foi o que construíste:</p>
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {(() => {
-                  const best = [...myResults].filter((r: any) => !r.noVote).sort((x: any, y: any) => (y.pred?.points ?? 0) - (x.pred?.points ?? 0))[0];
-                  const stats = [
-                    { label: "Pontos", value: String(myDivision.points), gold: true },
-                    { label: "Posição global", value: `#${myDivision.rank}º`, gold: false },
-                    { label: "Jogos votados", value: String(myStreak?.predictions_made ?? 0), gold: false },
-                    { label: "Melhor jogo", value: best ? `+${best.pred?.points ?? 0}` : "—", sub: best ? `${best.home?.flag} vs ${best.away?.flag}` : "", gold: true },
-                  ];
-                  return stats.map(s => (
-                    <div key={s.label} className="rounded-xl border border-border/60 bg-background/40 px-3 py-2.5 text-center">
-                      <p className={`font-display text-xl leading-none ${s.gold ? "text-gold" : "text-foreground"}`}>{s.value}{(s as any).sub && <span className="ml-1 text-xs">{(s as any).sub}</span>}</p>
-                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">{s.label}</p>
-                    </div>
-                  ));
-                })()}
-              </div>
-              <button
-                onClick={async () => {
-                  const best = [...myResults].filter((r: any) => !r.noVote).sort((x: any, y: any) => (y.pred?.points ?? 0) - (x.pred?.points ?? 0))[0];
-                  const text = `⚽ A minha jornada no Mundial 2026 na Geração 2026:\n🏆 ${myDivision.points} pontos · #${myDivision.rank}º global\n🎯 ${myStreak?.predictions_made ?? 0} jogos votados${best ? `\n🔥 Melhor jogo: +${best.pred?.points} pts` : ""}\n\nJunta-te: https://geracao2026.com`;
-                  if (navigator.share) { await navigator.share({ text }).catch(() => {}); }
-                  else { await navigator.clipboard.writeText(text).catch(() => {}); }
-                }}
-                className="mt-3 w-full rounded-xl border border-gold/30 bg-gold/10 py-2.5 text-xs font-bold text-gold transition-smooth hover:bg-gold/20">
-                <Share2 className="mr-1.5 inline h-3.5 w-3.5" /> Partilhar a minha jornada
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ===================== MY POINTS PER MATCH ===================== */}
       {user && myResults.length > 0 && (
@@ -1023,9 +944,6 @@ function Home() {
         </div>
       )}
 
-
-      {/* ===================== PÓDIO FASE DE GRUPOS ===================== */}
-      <PodioFaseGrupos hof={grupHof} />
 
       {/* ===================== BANNER PROGNÓSTICOS — todos os utilizadores ===================== */}
       <div className="mx-5 mt-4 md:mx-8">
@@ -1301,47 +1219,6 @@ function Home() {
           </>
         )}
       </section>
-
-      {/* ===================== COMPETIÇÕES + RANKING ===================== */}
-      {/* Tabs de competição — comandam o ranking apresentado */}
-      {competitions.length > 0 && (
-        <section className="px-5 pt-10 md:px-8">
-          <div className="mb-1 flex items-center gap-2.5">
-            <span className="h-4 w-1 rounded-full" style={{ background: activeComp?.accent }} />
-            <h2 className="font-display text-2xl">Competições</h2>
-          </div>
-          <p className="mb-3 text-sm text-muted-foreground">Escolhe a competição e vê a classificação.</p>
-
-          <div className="-mx-5 flex gap-2.5 overflow-x-auto px-5 pb-1 md:mx-0 md:px-0">
-            {competitions.map(c => {
-              const on = c.slug === activeComp?.slug;
-              return (
-                <button key={c.slug} onClick={() => setHomeCompSlug(c.slug)}
-                  className="group relative flex shrink-0 items-center gap-2.5 overflow-hidden rounded-2xl border px-4 py-3 text-left transition-smooth"
-                  style={on
-                    ? { borderColor: c.accent, background: `color-mix(in srgb, ${c.accent} 12%, transparent)`,
-                        boxShadow: `0 8px 26px -10px ${c.accent}` }
-                    : { borderColor: "var(--border)", background: "var(--card)" }}>
-                  {/* faixa lateral de cor */}
-                  <span className="absolute inset-y-0 left-0 w-1 transition-smooth"
-                    style={{ background: on ? c.accent : "transparent" }} />
-                  <span className="text-xl">{c.emoji}</span>
-                  <span className="leading-tight">
-                    <span className="block text-[10px] font-bold uppercase tracking-[0.16em]"
-                      style={{ color: on ? c.accent : "var(--muted-foreground)" }}>
-                      {on ? "A ver agora" : "Ver"}
-                    </span>
-                    <span className="block text-sm font-bold whitespace-nowrap"
-                      style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
-                      {c.name}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      )}
 
       {/* ===================== RANKING + LIGAS + PRÉMIOS ===================== */}
       <section className="grid gap-4 px-5 pt-5 sm:grid-cols-2 md:px-8">

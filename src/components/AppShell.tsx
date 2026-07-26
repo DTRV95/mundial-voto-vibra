@@ -69,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <img src={logoSvg} alt="Logo" className="h-8 w-8" />
             <div className="leading-tight">
               <div className="font-display text-base tracking-wide text-foreground">UMA GERAÇÃO</div>
-              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Mundial 2026</div>
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Época 2026/27</div>
             </div>
           </Link>
           <div className="flex items-center gap-2">

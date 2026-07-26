@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { PushNotificationPrompt } from "@/components/PushNotificationPrompt";
 import { useAuth } from "@/lib/useAuth";
+import { useCompetitions } from "@/lib/useCompetitions";
 import { useFollowing } from "@/lib/useFollow";
 import trophyImg from "@/assets/trophy-hero.jpg";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
@@ -274,6 +275,10 @@ function Home() {
   });
 
   const [selectedResult, setSelectedResult] = useState<any>(null);
+
+  // Seletor de competição no card de Líderes (época 2026/27)
+  const { data: competitions = [] } = useCompetitions();
+  const [homeCompSlug, setHomeCompSlug] = useState<string | null>(null);
   const [resultsExpanded, setResultsExpanded] = useState(false);
   const [feedShown, setFeedShown] = useState(6);
   const feedSentinelRef = useRef<HTMLButtonElement>(null);
@@ -1285,6 +1290,24 @@ function Home() {
               </div>
               <Link to="/rankings" className="text-xs font-bold text-white/80 hover:text-white">Ver rankings →</Link>
             </div>
+
+            {/* Seletor de competição — época 2026/27 */}
+            {competitions.length > 0 && (
+              <div className="flex gap-2 border-b border-white/20 px-5 py-2.5">
+                {competitions.map(c => {
+                  const on = c.slug === (homeCompSlug ?? competitions[0]?.slug);
+                  return (
+                    <button key={c.slug} onClick={() => setHomeCompSlug(c.slug)}
+                      className={`flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold transition-smooth ${
+                        on ? "bg-white text-wc-green" : "bg-white/15 text-white/70 hover:bg-white/25"
+                      }`}>
+                      <span>{c.emoji}</span>{c.short}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Linhas da tabela */}
             {topLeaders.length === 0 ? (
               <p className="px-5 py-4 text-sm text-white/70">Ainda sem dados — sê o primeiro a marcar pontos.</p>

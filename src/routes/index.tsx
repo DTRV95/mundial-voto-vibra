@@ -1367,17 +1367,24 @@ function Home() {
           </div>
         </div>
 
-        {/* Ranking de Torneios — fundo azul Panini */}
-        <div className="rounded-2xl overflow-hidden bg-wc-blue panini-stripes shadow-elegant">
-          <div className="text-white">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/20">
+        {/* Ranking de Torneios — card moderno */}
+        <div className="relative overflow-hidden rounded-2xl"
+          style={{
+            background: "linear-gradient(160deg, oklch(0.26 0.11 268) 0%, oklch(0.18 0.07 265) 60%, oklch(0.14 0.04 260) 100%)",
+            boxShadow: "0 12px 36px -8px oklch(0.45 0.18 265 / 0.45), inset 0 1px 0 oklch(1 0 0 / 0.10)",
+          }}>
+          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full"
+            style={{ background: "oklch(0.55 0.20 268 / 0.32)", filter: "blur(50px)" }} />
+
+          <div className="relative text-white">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-white/20">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-white/15 ring-1 ring-white/15">
                   <Users className="h-5 w-5 text-white" />
                 </div>
                 <h3 className="font-display text-xl">Leader Board Torneios</h3>
               </div>
-              <Link to="/rankings" search={{ tab: "ligas" } as any} className="text-xs font-bold text-white/80 hover:text-white">Ver todos →</Link>
+              <Link to="/rankings" search={{ tab: "ligas" } as any} className="text-xs font-bold text-white/70 hover:text-white transition-smooth">Ver todos →</Link>
             </div>
             {topPools.length === 0 ? (
               <div className="px-5 py-5 text-center">
@@ -1390,18 +1397,18 @@ function Home() {
               <>
                 <ol>
                   {topPools.map((pool, i) => (
-                    <li key={pool.id} className={`flex items-center justify-between px-5 py-3 ${i < topPools.length - 1 ? "border-b border-white/20" : ""}`}>
+                    <li key={pool.id} className={`flex items-center justify-between px-5 py-3 transition-smooth hover:bg-white/[0.04] ${i < topPools.length - 1 ? "border-b border-white/10" : ""}`}>
                       <span className="flex items-center gap-3 min-w-0">
                         <span className={`shrink-0 grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                          i === 0 ? "bg-white text-wc-blue" : "bg-white/20 text-white"
+                          i === 0 ? "bg-gold text-background shadow-gold" : "bg-white/15 text-white"
                         }`}>{i + 1}</span>
                         <span className="font-semibold text-sm truncate">{pool.name}</span>
                       </span>
-                      <span className="shrink-0 font-display text-lg ml-2">{pool.points} <span className="text-xs font-sans opacity-70">pts</span></span>
+                      <span className="shrink-0 font-display text-lg ml-2 tabular-nums text-gold-metallic">{pool.points} <span className="text-xs font-sans font-semibold text-white/50">pts</span></span>
                     </li>
                   ))}
                 </ol>
-                <div className="border-t border-white/20 px-5 py-3 text-center">
+                <div className="border-t border-white/10 px-5 py-3 text-center">
                   <Link to="/rankings" search={{ tab: "ligas" } as any} className="text-xs font-bold text-white/60 hover:text-white transition-smooth">
                     Ver ranking completo de torneios →
                   </Link>

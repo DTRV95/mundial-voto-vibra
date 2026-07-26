@@ -17,6 +17,10 @@ export interface Competition {
   electric: string;
   /** Gradiente para heros e painéis grandes */
   heroGradient: string;
+  /** Motivo visual — define a atmosfera da competição */
+  motif: "energy" | "stars";
+  /** Cor de texto secundária característica */
+  tone: string;
 }
 
 /**
@@ -31,6 +35,8 @@ const THEMES: Record<string, Omit<Competition, "id" | "slug" | "name" | "short" 
     glow: "rgba(225, 0, 20, 0.45)",
     electric: "#19FF91",                     // verde menta néon
     heroGradient: "linear-gradient(145deg, #82000A 0%, #BE000F 45%, #2a0a18 100%)",
+    motif: "energy",
+    tone: "#FFD9DD",
   },
   "champions": {
     accent: "#183059",                       // azul real
@@ -38,6 +44,8 @@ const THEMES: Record<string, Omit<Competition, "id" | "slug" | "name" | "short" 
     glow: "rgba(24, 48, 89, 0.55)",
     electric: "#00FAFF",                     // ciano prisma
     heroGradient: "linear-gradient(145deg, #0A1428 0%, #183059 55%, #0E1E38 100%)",
+    motif: "stars",
+    tone: "#B1C1C1",                         // prata metálica UEFA
   },
 };
 
@@ -47,6 +55,8 @@ const FALLBACK = {
   glow: "rgba(200, 150, 12, 0.35)",
   electric: "var(--gold)",
   heroGradient: "linear-gradient(145deg, #1a1a1a 0%, #2a2a2a 100%)",
+  motif: "energy" as const,
+  tone: "#e5e5e5",
 };
 
 /** Lê as competições ativas da base de dados e junta-lhes o tema oficial. */

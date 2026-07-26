@@ -541,3 +541,114 @@
     0 18px 36px -12px oklch(0.20 0.04 265 / 0.20),
     0 40px 80px -40px oklch(0.20 0.04 265 / 0.28);
 }
+
+
+/* ═══════════════════════════════════════════════════════════
+   MOTIVOS POR COMPETIÇÃO — identidades visuais distintas
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── LIGA PORTUGAL: energia, velocidade, paixão ───────────── */
+
+/* Linhas de velocidade diagonais */
+@keyframes speed-drift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 120px -120px; }
+}
+.motif-speed {
+  background-image: repeating-linear-gradient(
+    -52deg,
+    transparent 0px, transparent 22px,
+    oklch(1 0 0 / 0.05) 22px, oklch(1 0 0 / 0.05) 24px
+  );
+  animation: speed-drift 9s linear infinite;
+}
+
+/* Pulso de energia que atravessa o painel */
+@keyframes energy-pulse {
+  0%, 100% { opacity: 0; transform: translateX(-30%) scaleY(1); }
+  50%      { opacity: 1; transform: translateX(130%) scaleY(1.2); }
+}
+.motif-energy-beam {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 18%;
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.12), transparent);
+  animation: energy-pulse 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── CHAMPIONS: noite, estrelas, prisma ───────────────────── */
+
+/* Campo de estrelas */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 0.9; }
+}
+.motif-stars::before,
+.motif-stars::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+}
+.motif-stars::before {
+  background-image:
+    radial-gradient(1.6px 1.6px at 18% 22%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 62% 14%, #fff, transparent),
+    radial-gradient(1.8px 1.8px at 84% 44%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 34% 68%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 72% 78%, #fff, transparent);
+  background-size: 340px 200px;
+  opacity: 0.55;
+  animation: twinkle 4.5s ease-in-out infinite;
+}
+.motif-stars::after {
+  background-image:
+    radial-gradient(1.2px 1.2px at 46% 36%, #B1C1C1, transparent),
+    radial-gradient(1px 1px at 12% 82%, #B1C1C1, transparent),
+    radial-gradient(1.4px 1.4px at 92% 18%, #B1C1C1, transparent);
+  background-size: 260px 170px;
+  opacity: 0.4;
+  animation: twinkle 6.5s ease-in-out infinite reverse;
+}
+
+/* Raios de luz descendo do topo — "Kick of Light" */
+@keyframes ray-sway {
+  0%, 100% { opacity: 0.30; transform: translateX(0) skewX(-14deg); }
+  50%      { opacity: 0.60; transform: translateX(4%) skewX(-10deg); }
+}
+.motif-rays {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(96deg,
+    transparent 12%,
+    oklch(1 0 0 / 0.07) 20%,
+    transparent 27%,
+    transparent 52%,
+    oklch(1 0 0 / 0.05) 60%,
+    transparent 67%);
+  animation: ray-sway 11s ease-in-out infinite;
+}
+
+/* Refração de prisma nas bordas */
+@keyframes prism-shift {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.9; }
+}
+.motif-prism {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, #00FAFF 26%, transparent), transparent 22%),
+    linear-gradient(270deg, color-mix(in srgb, #E1007A 22%, transparent), transparent 22%);
+  mix-blend-mode: screen;
+  animation: prism-shift 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motif-speed, .motif-energy-beam, .motif-stars::before,
+  .motif-stars::after, .motif-rays, .motif-prism { animation: none !important; }
+}

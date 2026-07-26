@@ -617,6 +617,13 @@ function Home() {
             style={{ background: activeComp.glow, filter: "blur(90px)", opacity: 0.55, transition: "background 500ms ease" }} />
           <div className="absolute -right-[18%] top-[26%] h-[40vh] w-[55vw] rounded-full"
             style={{ background: `color-mix(in srgb, ${activeComp.electric} 22%, transparent)`, filter: "blur(100px)", opacity: 0.5, transition: "background 500ms ease" }} />
+
+          {/* Textura de fundo característica da competição */}
+          {activeComp.motif === "stars" ? (
+            <div className="motif-stars absolute inset-x-0 top-0 h-[75vh] opacity-60" />
+          ) : (
+            <div className="motif-speed absolute inset-x-0 top-0 h-[60vh] opacity-40" />
+          )}
           {/* Brilho de base */}
           <div className="absolute inset-x-0 bottom-0 h-[35vh]"
             style={{ background: `linear-gradient(0deg, color-mix(in srgb, ${activeComp.deep} 12%, transparent) 0%, transparent 100%)`, transition: "background 500ms ease" }} />
@@ -666,6 +673,23 @@ function Home() {
               transition: "background 450ms ease",
             }}>
             <div className="sheen absolute inset-0" />
+
+            {/* Motivo da competição */}
+            {activeComp?.motif === "stars" ? (
+              <>
+                {/* Champions: noite estrelada + raios de luz + prisma */}
+                <div className="motif-stars absolute inset-0" />
+                <div className="motif-rays" />
+                <div className="motif-prism" />
+              </>
+            ) : (
+              <>
+                {/* Liga: velocidade e energia */}
+                <div className="motif-speed absolute inset-0 opacity-70" />
+                <div className="motif-energy-beam" style={{ left: 0 }} />
+              </>
+            )}
+
             <div className="pointer-events-none absolute -right-6 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full"
               style={{ background: activeComp?.glow ?? "oklch(0.75 0.18 85 / 0.20)", filter: "blur(52px)", transition: "background 450ms ease" }} />
             <span className="watermark">7</span>
@@ -680,14 +704,16 @@ function Home() {
                     <span className="relative inline-flex h-2 w-2 rounded-full"
                       style={{ background: activeComp?.electric ?? "var(--gold)" }} />
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] transition-smooth"
+                    style={{ color: activeComp ? activeComp.tone : "oklch(1 0 0 / 0.60)" }}>
                     {activeComp ? "Época 2026/27 · a decorrer" : "Época 2026/27"}
                   </span>
                 </div>
                 <h1 className="mt-1.5 font-display leading-none text-white" style={{ fontSize: "clamp(1.9rem,5vw,2.9rem)" }}>
                   {activeComp ? activeComp.name : "Uma Geração"}
                 </h1>
-                <p className="mt-1.5 max-w-md text-sm text-white/70">
+                <p className="mt-1.5 max-w-md text-sm transition-smooth"
+                  style={{ color: activeComp ? `color-mix(in srgb, ${activeComp.tone} 80%, transparent)` : "oklch(1 0 0 / 0.70)" }}>
                   {user
                     ? "Vota em cada jornada, sobe no ranking e desafia os teus amigos."
                     : "Prevê os jogos, cria torneios com os teus amigos e vê quem manda."}

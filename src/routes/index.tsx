@@ -607,13 +607,25 @@ function Home() {
         ["--comp-electric" as any]: activeComp?.electric ?? "var(--gold)",
       }}
     >
-      {/* Atmosfera da competição — muda com a tab escolhida */}
+      {/* Ambiente da competição — o fundo da página muda de mundo */}
       {activeComp && (
-        <div className="pointer-events-none fixed inset-0 -z-10 transition-smooth" aria-hidden
-          style={{
-            background: `radial-gradient(ellipse 90% 45% at 50% 0%, ${activeComp.glow}, transparent 70%)`,
-            opacity: 0.5,
-          }} />
+        <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden
+          style={{ transition: "opacity 500ms ease" }}>
+          {/* Manto de cor descendo do topo */}
+          <div className="absolute inset-x-0 top-0 h-[70vh]"
+            style={{
+              background: `linear-gradient(180deg, color-mix(in srgb, ${activeComp.accent} 26%, transparent) 0%, color-mix(in srgb, ${activeComp.accent} 10%, transparent) 38%, transparent 100%)`,
+              transition: "background 500ms ease",
+            }} />
+          {/* Halos laterais profundos */}
+          <div className="absolute -left-[15%] top-[6%] h-[46vh] w-[65vw] rounded-full"
+            style={{ background: activeComp.glow, filter: "blur(90px)", opacity: 0.55, transition: "background 500ms ease" }} />
+          <div className="absolute -right-[18%] top-[26%] h-[40vh] w-[55vw] rounded-full"
+            style={{ background: `color-mix(in srgb, ${activeComp.electric} 22%, transparent)`, filter: "blur(100px)", opacity: 0.5, transition: "background 500ms ease" }} />
+          {/* Brilho de base */}
+          <div className="absolute inset-x-0 bottom-0 h-[35vh]"
+            style={{ background: `linear-gradient(0deg, color-mix(in srgb, ${activeComp.deep} 12%, transparent) 0%, transparent 100%)`, transition: "background 500ms ease" }} />
+        </div>
       )}
 
       {RankSharePortal}
@@ -621,23 +633,57 @@ function Home() {
       {/* ===================== COMPETIÇÃO ATIVA (topo) ===================== */}
       {competitions.length > 0 && (
         <section className="px-4 pt-4 md:px-6">
-          <div className="flex gap-2 overflow-x-auto pb-0.5">
+          <div className="flex gap-2.5 overflow-x-auto pb-1">
             {competitions.map(c => {
               const on = c.slug === activeComp?.slug;
               return (
                 <button key={c.slug} onClick={() => setHomeCompSlug(c.slug)}
-                  className="group relative flex flex-1 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl border px-4 py-2.5 transition-smooth"
-                  style={on
-                    ? { borderColor: c.accent, background: `color-mix(in srgb, ${c.accent} 14%, transparent)`,
-                        boxShadow: `0 8px 24px -12px ${c.accent}` }
-                    : { borderColor: "var(--border)", background: "var(--card)" }}>
-                  <span className="absolute inset-x-0 bottom-0 h-[3px] transition-smooth"
-                    style={{ background: on ? c.accent : "transparent" }} />
-                  <span className="text-lg">{c.emoji}</span>
-                  <span className="text-sm font-bold whitespace-nowrap"
-                    style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
-                    {c.name}
+                  className="group relative flex flex-1 shrink-0 items-center justify-center gap-2.5 overflow-hidden rounded-2xl px-4 py-3.5 pressable"
+                  style={on ? {
+                    background: `linear-gradient(140deg, color-mix(in srgb, ${c.accent} 88%, white) 0%, ${c.accent} 45%, ${c.deep} 100%)`,
+                    boxShadow: `0 1px 2px oklch(0 0 0 / 0.20), 0 8px 20px -6px ${c.glow}, 0 18px 40px -18px ${c.glow}, inset 0 1px 0 oklch(1 0 0 / 0.28)`,
+                    transition: "background 400ms ease, box-shadow 400ms ease, transform 200ms ease",
+                  } : {
+                    background: "var(--card)",
+                    border: "1px solid var(--border)",
+                    boxShadow: "0 1px 2px oklch(0.20 0.04 265 / 0.05)",
+                    transition: "all 300ms ease",
+                  }}>
+
+                  {/* Luz diagonal no estado ativo */}
+                  {on && (
+                    <span className="pointer-events-none absolute inset-0"
+                      style={{ background: "linear-gradient(115deg, oklch(1 0 0 / 0.20) 0%, transparent 45%, transparent 70%, oklch(1 0 0 / 0.08) 100%)" }} />
+                  )}
+                  {/* Fio de luz no topo */}
+                  {on && (
+                    <span className="pointer-events-none absolute inset-x-5 top-0 h-px"
+                      style={{ background: "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.55), transparent)" }} />
+                  )}
+
+                  <span className={`relative text-lg transition-transform duration-300 ${on ? "scale-110" : "opacity-60 group-hover:opacity-100"}`}>
+                    {c.emoji}
                   </span>
+                  <span className="relative leading-tight">
+                    <span className="block text-sm font-bold whitespace-nowrap"
+                      style={{ color: on ? "#fff" : "var(--muted-foreground)" }}>
+                      {c.name}
+                    </span>
+                    {on && (
+                      <span className="block text-[9px] font-bold uppercase tracking-[0.2em] text-white/60">
+                        a decorrer
+                      </span>
+                    )}
+                  </span>
+
+                  {/* Ponto elétrico da marca no estado ativo */}
+                  {on && (
+                    <span className="relative flex h-1.5 w-1.5 shrink-0">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                        style={{ background: c.electric }} />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: c.electric }} />
+                    </span>
+                  )}
                 </button>
               );
             })}

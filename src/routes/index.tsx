@@ -757,11 +757,11 @@ function Home() {
       </section>
 
       {/* ===================== GRELHA BENTO ===================== */}
-      <div className="mt-5 grid grid-cols-1 gap-4 px-4 md:px-6 lg:grid-cols-12">
+      <div className="mt-5 grid grid-cols-1 items-start gap-4 px-4 md:px-6 lg:grid-cols-2" style={{ gridAutoFlow: "dense" }}>
 
       {/* ===================== MY POINTS PER MATCH ===================== */}
       {user && myResults.length > 0 && (
-        <div className="animate-enter delay-100 lg:col-span-5">
+        <div className="animate-enter delay-100">
           <div className="overflow-hidden rounded-2xl border border-gold/30 bg-card"
             style={{ boxShadow: "0 2px 16px oklch(0.75 0.18 85 / 0.10), 0 0 0 1px oklch(0.75 0.18 85 / 0.20)" }}>
             {/* Gold stripe */}
@@ -826,15 +826,15 @@ function Home() {
       )}
 
       {/* ===================== MATCH BREAKDOWN DRAWER ===================== */}
-      <div className="lg:col-span-12">{selectedResult && <MatchBreakdownDrawer match={selectedResult} onClose={() => setSelectedResult(null)} />}</div>
+      <div className="lg:col-span-2">{selectedResult && <MatchBreakdownDrawer match={selectedResult} onClose={() => setSelectedResult(null)} />}</div>
 
       {/* ===================== PRÉ-REGISTO NOVA ÉPOCA ===================== */}
-      <div className="lg:col-span-12"><SeasonPreRegModal user={user} />
+      <div className="lg:col-span-2"><SeasonPreRegModal user={user} />
       <PickCompetitionsModal /></div>
 
       {/* ===================== JOGOS POR VOTAR ===================== */}
       {user && pendingMatches.length > 0 && (
-        <div className="lg:col-span-7">
+        <div className="">
           <div className="relative overflow-hidden rounded-2xl transition-smooth"
             style={{
               background: activeComp
@@ -903,7 +903,7 @@ function Home() {
 
 
       {/* ===================== COUNTDOWN + CTA ===================== */}
-      <div className={`lg:col-span-5 ${nextMatch && !user ? "grid gap-3 sm:grid-cols-2" : ""}`}>
+      <div className={`${nextMatch && !user ? "grid gap-3 sm:grid-cols-2" : ""}`}>
         {nextMatch && (
           <Countdown id={nextMatch.id} kickoff_at={nextMatch.kickoff_at} home={(nextMatch as any).home} away={(nextMatch as any).away} />
         )}
@@ -939,7 +939,7 @@ function Home() {
 
       {/* ===================== BANNER PERSUASÃO — visitantes ===================== */}
       {!user && (
-        <div className="lg:col-span-12">
+        <div className="lg:col-span-2">
           <div className="relative overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/8 via-transparent to-transparent px-5 py-4">
             <div className="absolute right-4 top-1/2 -translate-y-1/2 font-display text-6xl opacity-[0.06] select-none pointer-events-none">🏆</div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70 mb-1">Junta-te à comunidade</p>
@@ -956,7 +956,7 @@ function Home() {
 
 
       {/* ===================== BANNER PROGNÓSTICOS — todos os utilizadores ===================== */}
-      <div className="lg:col-span-7">
+      <div className="">
         <div
           className="relative overflow-hidden rounded-2xl"
           style={{
@@ -1001,7 +1001,7 @@ function Home() {
 
       {/* ===================== BANNER TORNEIO — logado sem liga ===================== */}
       {user && myPools.length === 0 && (
-        <div className="lg:col-span-6">
+        <div className="">
           <div className="relative overflow-hidden rounded-2xl border border-gold/30 bg-gradient-to-r from-gold/10 via-gold/5 to-transparent px-5 py-4">
             <div className="absolute right-4 top-1/2 -translate-y-1/2 flex -space-x-2 opacity-30 pointer-events-none select-none text-2xl">
               <span>👤</span><span>👤</span><span>👤</span>
@@ -1023,7 +1023,7 @@ function Home() {
 
       {/* ===================== DIVISÃO DO UTILIZADOR ===================== */}
       {user && myDivision && (
-        <div className="lg:col-span-6">
+        <div className="">
           <Link to="/rankings" search={{ tab: "divisoes" } as any}
             className={`flex items-center gap-4 rounded-2xl border ${myDivision.border} ${myDivision.bg} px-5 py-4 transition-smooth hover:opacity-90`}
           >
@@ -1045,13 +1045,13 @@ function Home() {
       )}
 
       {/* ===================== NOTIFICAÇÕES PUSH ===================== */}
-      <div className="lg:col-span-12"><PushNotificationPrompt /></div>
+      <div className="lg:col-span-2"><PushNotificationPrompt /></div>
 
 
 
       {/* ===================== FEED DA COMUNIDADE ===================== */}
       {activityFeed.length > 0 && (
-        <section className="lg:col-span-7">
+        <section className="">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="font-display text-xl">Comunidade</h2>
@@ -1186,7 +1186,7 @@ function Home() {
       )}
 
       {/* ===================== JOGOS DE HOJE ===================== */}
-      <section className="relative lg:col-span-5">
+      <section className="relative">
         <div className="mb-4 flex items-end justify-between">
           <div>
             <h2 className="font-display text-2xl md:text-3xl text-gray-900">Jogos de Hoje</h2>
@@ -1231,7 +1231,7 @@ function Home() {
       </section>
 
       {/* ===================== RANKING + LIGAS + PRÉMIOS ===================== */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:col-span-12">
+      <section className="grid gap-4 sm:grid-cols-2 lg:col-span-2">
         {/* Ranking — veste a cor da competição escolhida */}
         <div className="relative overflow-hidden rounded-2xl transition-smooth"
           style={{
@@ -1367,7 +1367,7 @@ function Home() {
       </section>
 
       {/* ===================== CONVIDA OS TEUS AMIGOS ===================== */}
-      <section className="lg:col-span-12">
+      <section className="lg:col-span-2">
         <div
           className="overflow-hidden rounded-2xl panini-stripes"
           style={{ background: "linear-gradient(135deg, oklch(0.54 0.24 27) 0%, oklch(0.38 0.16 350) 60%, oklch(0.28 0.14 270) 100%)", boxShadow: "0 8px 32px oklch(0.54 0.24 27 / 0.30)" }}
@@ -1387,7 +1387,7 @@ function Home() {
       </section>
 
       {/* ===================== COMO FUNCIONA — apenas para visitantes ===================== */}
-      {!user && <section id="como-funciona" className="lg:col-span-12">
+      {!user && <section id="como-funciona" className="lg:col-span-2">
         <div className="mb-5 flex items-end justify-between">
           <h2 className="font-display text-2xl md:text-3xl">Como funciona</h2>
           <Link to="/como-funciona" className="text-xs font-semibold text-gold hover:text-gold/70 transition-smooth">
@@ -1438,7 +1438,7 @@ function Home() {
 
       {/* ===================== NOTÍCIAS EM DESTAQUE ===================== */}
       {featuredNewsList.length > 0 && (
-        <section className="lg:col-span-12">
+        <section className="lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-2xl md:text-3xl">Últimas Notícias</h2>
             <Link to="/noticias" search={{} as any} className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">

@@ -7,6 +7,7 @@ import logoSvg from "@/assets/logo.svg";
 import { useQuery } from "@tanstack/react-query";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { useNotifications } from "@/lib/useNotifications";
+import { useActiveCompetition } from "@/lib/useActiveCompetition";
 
 const items = [
   { to: "/",        label: "Home",     icon: Home },
@@ -44,13 +45,15 @@ export function SideNav() {
   });
 
   const { data: notifs } = useNotifications();
+  const { active: comp } = useActiveCompetition();
   const unreadCount = notifs?.total ?? 0;
 
   return (
     <aside className="hidden md:flex fixed left-0 top-0 h-full w-56 flex-col border-r border-border bg-card z-40 shadow-elegant">
 
-      {/* Stripe tricolor no topo */}
-      <div className="wc-tricolor h-[3px] w-full shrink-0" />
+      {/* Faixa da competição ativa */}
+      <div className={`h-[3px] w-full shrink-0 transition-smooth ${comp ? "" : "wc-tricolor"}`}
+        style={comp ? { background: `linear-gradient(90deg, ${comp.deep}, ${comp.accent} 50%, ${comp.electric})` } : undefined} />
 
       {/* Logo */}
       <div className="px-5 py-4 border-b border-border">
@@ -58,7 +61,10 @@ export function SideNav() {
           <img src={logoSvg} alt="Logo" className="h-9 w-9 shrink-0" />
           <div className="leading-tight">
             <div className="font-display text-sm tracking-wide text-foreground">UMA GERAÇÃO</div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Comunidade</div>
+            <div className="text-[10px] uppercase tracking-widest transition-smooth"
+              style={{ color: comp ? comp.accent : "var(--muted-foreground)" }}>
+              {comp ? comp.name : "Comunidade"}
+            </div>
           </div>
         </Link>
       </div>
@@ -70,14 +76,16 @@ export function SideNav() {
           return (
             <Link key={to} to={to}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-smooth ${
-                active
-                  ? "bg-wc-red/15 text-wc-red"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                active ? "" : "text-muted-foreground hover:bg-accent hover:text-foreground"
               }`}
+              style={active && comp
+                ? { background: `color-mix(in srgb, ${comp.accent} 14%, transparent)`, color: comp.accent }
+                : active ? { background: "color-mix(in srgb, var(--wc-red) 14%, transparent)", color: "var(--wc-red)" } : undefined}
             >
               <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.4 : 1.8} />
               {label}
-              {active && <span className="ml-auto h-2 w-2 rounded-full bg-wc-red" />}
+              {active && <span className="ml-auto h-2 w-2 rounded-full"
+                style={{ background: comp ? comp.accent : "var(--wc-red)" }} />}
             </Link>
           );
         })}

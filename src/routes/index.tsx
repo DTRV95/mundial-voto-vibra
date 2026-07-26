@@ -12,7 +12,7 @@ import { PushNotificationPrompt } from "@/components/PushNotificationPrompt";
 import { useAuth } from "@/lib/useAuth";
 import { useCompetitions } from "@/lib/useCompetitions";
 import { useCountUp } from "@/lib/useCountUp";
-import { useMyCompetitions } from "@/lib/useMyCompetitions";
+import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { PickCompetitionsModal } from "@/components/PickCompetitionsModal";
 import { useFollowing } from "@/lib/useFollow";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
@@ -279,14 +279,8 @@ function Home() {
   const [selectedResult, setSelectedResult] = useState<any>(null);
 
   // Seletor de competição no card de Líderes (época 2026/27)
-  const { data: allCompetitions = [] } = useCompetitions();
-  const { data: myCompIds } = useMyCompetitions();
-  // Mostra apenas as competições seguidas; sem inscrições (ou sem sessão) mostra todas
-  const competitions = (myCompIds && myCompIds.length > 0)
-    ? allCompetitions.filter(c => myCompIds.includes(c.id))
-    : allCompetitions;
-  const [homeCompSlug, setHomeCompSlug] = useState<string | null>(null);
-  const activeComp = competitions.find(c => c.slug === homeCompSlug) ?? competitions[0] ?? null;
+  // Competição ativa — partilhada com a sidebar e guardada entre visitas
+  const { competitions, active: activeComp, setSlug: setHomeCompSlug } = useActiveCompetition();
   const [resultsExpanded, setResultsExpanded] = useState(false);
   const [feedShown, setFeedShown] = useState(6);
   const feedSentinelRef = useRef<HTMLButtonElement>(null);
@@ -840,8 +834,16 @@ function Home() {
       {/* ===================== JOGOS POR VOTAR ===================== */}
       {user && pendingMatches.length > 0 && (
         <div className="mx-5 mt-4 md:mx-8">
-          <div className="overflow-hidden rounded-2xl bg-wc-green panini-stripes"
-            style={{ boxShadow: "0 6px 24px -4px oklch(0.55 0.20 142 / 0.40)" }}>
+          <div className="relative overflow-hidden rounded-2xl transition-smooth"
+            style={{
+              background: activeComp
+                ? `linear-gradient(150deg, ${activeComp.accent} 0%, ${activeComp.deep} 100%)`
+                : "linear-gradient(150deg, oklch(0.55 0.20 142) 0%, oklch(0.30 0.10 142) 100%)",
+              boxShadow: activeComp
+                ? `0 1px 3px oklch(0 0 0 / 0.16), 0 10px 26px -8px ${activeComp.glow}, inset 0 1px 0 oklch(1 0 0 / 0.16)`
+                : "0 6px 24px -4px oklch(0.55 0.20 142 / 0.40)",
+            }}>
+            <div className="sheen absolute inset-0" />
             <div className="px-5 py-4">
               <div className="flex items-center justify-between mb-3">
                 <div>
@@ -943,7 +945,8 @@ function Home() {
             <p className="font-display text-base leading-snug mb-0.5">Vota nestes jogos e vê se acertaste</p>
             <p className="text-xs text-muted-foreground mb-3">Regista-te em segundos — é grátis, sem cartão, sem spam.</p>
             <Link to="/auth"
-              className="inline-flex items-center gap-2 rounded-xl bg-wc-red px-5 py-2.5 text-sm font-bold text-white shadow-gold transition-smooth hover:scale-[1.01] active:scale-95">
+              className="pressable inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-smooth hover:scale-[1.02]"
+              style={{ background: activeComp ? activeComp.accent : "var(--wc-red)", boxShadow: activeComp ? `0 6px 18px -6px ${activeComp.glow}` : undefined }}>
               Criar conta grátis <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -1423,7 +1426,8 @@ function Home() {
               </p>
             </div>
             <Link to="/auth"
-              className="shrink-0 rounded-xl bg-wc-red px-5 py-2.5 text-sm font-bold text-white shadow-gold transition-smooth hover:scale-[1.01] active:scale-95 text-center whitespace-nowrap">
+              className="pressable shrink-0 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-smooth hover:scale-[1.02] text-center whitespace-nowrap"
+              style={{ background: activeComp ? activeComp.accent : "var(--wc-red)", boxShadow: activeComp ? `0 6px 18px -6px ${activeComp.glow}` : undefined }}>
               Entrar grátis →
             </Link>
           </div>

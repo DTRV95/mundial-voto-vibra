@@ -627,7 +627,7 @@ function Home() {
 
       {/* ===================== PAINEL DA COMPETIÇÃO ===================== */}
       <section className="px-4 pt-4 md:px-6 md:pt-6 animate-fade-in">
-        <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-elegant">
+        <div className="surface overflow-hidden rounded-3xl">
 
           {/* Tabs de competição */}
           {competitions.length > 0 && (
@@ -1140,7 +1140,7 @@ function Home() {
                   item.result90 === "draw" ? "empate" : null;
                 if (!resultLabel && item.exactHome == null) return null;
                 return (
-                  <div key={item.id} className="flex items-center gap-3 overflow-hidden rounded-2xl border border-border bg-card/60 px-4 py-3">
+                  <div key={item.id} className="flex items-center gap-3 overflow-hidden edge raise rounded-2xl px-4 py-3">
                     <span className="text-xl shrink-0">⚽</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground">{item.name}</p>
@@ -1543,7 +1543,7 @@ function NewsCategory({ category, small = false }: { category: string; small?: b
 
 function Step({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border bg-card/60 p-5">
+    <div className="edge raise rounded-2xl p-5">
       <div className="mb-2 grid h-8 w-8 place-items-center rounded-full bg-gold font-display text-background">{n}</div>
       <h3 className="font-display text-lg">{title}</h3>
       <p className="mt-1 text-sm text-muted-foreground">{children}</p>

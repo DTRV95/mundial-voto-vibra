@@ -54,7 +54,7 @@
 }
 
 :root {
-  --radius: 0.875rem;
+  --radius: 1.35rem;
 
   /* ── Paleta oficial Liga Portugal Betclic ──────────────── */
   --lp-magma:   #E10014;   /* vermelho Betclic — tom principal   */
@@ -459,3 +459,85 @@
 
 /* Anel de luz nas bordas de painéis escuros */
 .ring-light { box-shadow: 0 0 0 1px oklch(1 0 0 / 0.10), 0 0 0 4px oklch(1 0 0 / 0.03); }
+
+
+/* ═══════════════════════════════════════════════════════════
+   LINGUAGEM VISUAL — Época 2026/27
+   Cartões flutuantes, contornos em gradiente, cabeçalhos com carácter
+   ═══════════════════════════════════════════════════════════ */
+
+/* Cartão moderno: sem contorno duro, assente na sombra */
+.surface {
+  background: var(--card);
+  border-radius: var(--radius-2xl);
+  box-shadow:
+    0 0 0 1px oklch(0.20 0.04 265 / 0.05),
+    0 1px 2px oklch(0.20 0.04 265 / 0.04),
+    0 10px 24px -10px oklch(0.20 0.04 265 / 0.12),
+    0 30px 60px -30px oklch(0.20 0.04 265 / 0.18);
+}
+
+/* Contorno em gradiente — substitui a borda cinzenta chapada */
+.edge {
+  position: relative;
+  border-radius: var(--radius-2xl);
+  background: var(--card);
+}
+.edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(150deg,
+    oklch(1 0 0 / 0.9) 0%,
+    oklch(0.20 0.04 265 / 0.12) 40%,
+    oklch(0.20 0.04 265 / 0.05) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Contorno em gradiente na cor da competição */
+.edge-accent::before {
+  background: linear-gradient(150deg,
+    color-mix(in srgb, var(--comp-accent, var(--gold)) 65%, transparent) 0%,
+    color-mix(in srgb, var(--comp-accent, var(--gold)) 12%, transparent) 45%,
+    transparent 100%);
+}
+
+/* Cabeçalho de secção com carácter — barra + tipografia forte */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.section-head::before {
+  content: "";
+  width: 4px;
+  height: 1.35rem;
+  border-radius: 99px;
+  background: linear-gradient(180deg,
+    var(--comp-accent, var(--gold)),
+    color-mix(in srgb, var(--comp-accent, var(--gold)) 35%, transparent));
+  flex-shrink: 0;
+}
+
+/* Bilhete: canto inferior direito cortado — forma distintiva */
+.ticket {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%);
+}
+
+/* Elevação ao interagir — cartões que reagem */
+.raise {
+  transition: transform 320ms cubic-bezier(0.16,1,0.3,1), box-shadow 320ms ease;
+}
+.raise:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 0 0 1px oklch(0.20 0.04 265 / 0.06),
+    0 4px 10px oklch(0.20 0.04 265 / 0.08),
+    0 18px 36px -12px oklch(0.20 0.04 265 / 0.20),
+    0 40px 80px -40px oklch(0.20 0.04 265 / 0.28);
+}

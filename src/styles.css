@@ -49,54 +49,54 @@
 :root {
   --radius: 0.875rem;
 
-  /* ── Cores oficiais FIFA World Cup 2026 ─────────────── */
-  --wc-red:   oklch(0.54 0.24 27);    /* Canada  #E61D25 */
-  --wc-green: oklch(0.55 0.20 142);   /* Mexico  #3CAC3B */
-  --wc-blue:  oklch(0.40 0.18 265);   /* USA     #2A398D */
+  /* ── Cores de acento (mantidas: usadas em todo o site) ─── */
+  --wc-red:   oklch(0.56 0.22 25);    /* vermelho de alerta / destaque   */
+  --wc-green: oklch(0.58 0.17 155);   /* verde de sucesso / confirmação  */
+  --wc-blue:  oklch(0.36 0.15 268);   /* azul-marinho — Liga Portugal    */
 
-  /* Tema claro */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.15 0.005 0);
+  /* ── Superfícies: claro, limpo, moderno ───────────────── */
+  --background: oklch(0.985 0.004 250);   /* branco levemente frio       */
+  --foreground: oklch(0.17 0.02 260);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.005 0);
+  --card-foreground: oklch(0.17 0.02 260);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.005 0);
+  --popover-foreground: oklch(0.17 0.02 260);
 
-  /* Verde México */
-  --primary: oklch(0.55 0.20 142);
+  /* Azul-marinho Liga Portugal como cor primária */
+  --primary: oklch(0.36 0.15 268);
   --primary-foreground: oklch(1 0 0);
 
-  --secondary: oklch(0.96 0.005 0);
-  --secondary-foreground: oklch(0.15 0.005 0);
+  --secondary: oklch(0.965 0.006 255);
+  --secondary-foreground: oklch(0.17 0.02 260);
 
-  --muted: oklch(0.96 0.005 0);
-  --muted-foreground: oklch(0.50 0.005 0);
+  --muted: oklch(0.965 0.006 255);
+  --muted-foreground: oklch(0.50 0.02 260);
 
-  --accent: oklch(0.94 0.005 0);
-  --accent-foreground: oklch(0.15 0.005 0);
+  --accent: oklch(0.945 0.008 255);
+  --accent-foreground: oklch(0.17 0.02 260);
 
-  /* Vermelho Canadá */
-  --destructive: oklch(0.54 0.24 27);
+  --destructive: oklch(0.56 0.22 25);
   --destructive-foreground: oklch(1 0 0);
 
-  --border: oklch(0.90 0.005 0);
-  --input: oklch(0.92 0.005 0);
-  --ring: oklch(0.54 0.24 27);
+  --border: oklch(0.905 0.008 258);
+  --input: oklch(0.925 0.008 258);
+  --ring: oklch(0.36 0.15 268);
 
-  /* Acento principal: Vermelho WC26 */
-  --pitch: oklch(0.55 0.20 142);
-  --pitch-deep: oklch(0.28 0.10 142);
-  --gold: oklch(0.54 0.24 27);
-  --gold-soft: oklch(0.25 0.06 27);
+  /* ── Dourado a sério — reservado a pontos e conquistas ── */
+  --gold: oklch(0.66 0.13 82);
+  --gold-soft: oklch(0.42 0.08 80);
 
-  --gradient-hero: linear-gradient(135deg, oklch(0.54 0.24 27) 0%, oklch(0.46 0.22 15) 100%);
-  --gradient-gold: linear-gradient(135deg, oklch(0.58 0.24 27) 0%, oklch(0.48 0.22 18) 100%);
-  --gradient-pitch: linear-gradient(180deg, oklch(0.55 0.20 142) 0%, oklch(0.30 0.10 142) 100%);
+  --pitch: oklch(0.58 0.17 155);
+  --pitch-deep: oklch(0.30 0.09 155);
 
-  --shadow-elegant: 0 30px 80px -20px oklch(0 0 0 / 0.70);
-  --shadow-gold: 0 6px 24px -4px oklch(0.54 0.24 27 / 0.45);
+  --gradient-hero: linear-gradient(140deg, oklch(0.34 0.14 268) 0%, oklch(0.22 0.09 265) 100%);
+  --gradient-gold: linear-gradient(135deg, oklch(0.74 0.13 88) 0%, oklch(0.60 0.12 74) 100%);
+  --gradient-pitch: linear-gradient(180deg, oklch(0.58 0.17 155) 0%, oklch(0.30 0.09 155) 100%);
+
+  --shadow-elegant: 0 24px 60px -18px oklch(0.20 0.04 265 / 0.28);
+  --shadow-gold: 0 6px 22px -6px oklch(0.66 0.13 82 / 0.55);
 
   --transition-smooth: all 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -108,12 +108,11 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    /* Padrão diagonal Panini no fundo da página */
-    background-image: repeating-linear-gradient(
-      -45deg,
-      transparent 0px, transparent 18px,
-      oklch(0 0 0 / 0.07) 18px, oklch(0 0 0 / 0.07) 19px
-    );
+    /* Atmosfera subtil: halos de cor da competição, sem textura pesada */
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, oklch(0.36 0.15 268 / 0.07), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, oklch(0.66 0.13 82 / 0.05), transparent 70%);
+    background-attachment: fixed;
   }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: 0.01em; }
 }
@@ -130,12 +129,14 @@
   .shadow-gold { box-shadow: var(--shadow-gold); }
   .transition-smooth { transition: var(--transition-smooth); }
 
-  /* Barra tricolor oficial */
+  /* Barra de marca — azul-marinho com passagem dourada */
   .wc-tricolor {
     background: linear-gradient(90deg,
-      var(--wc-red)   0%   33.3%,
-      var(--wc-green) 33.3% 66.6%,
-      var(--wc-blue)  66.6% 100%
+      oklch(0.30 0.13 268) 0%,
+      oklch(0.42 0.16 268) 32%,
+      var(--gold) 52%,
+      oklch(0.42 0.16 268) 72%,
+      oklch(0.30 0.13 268) 100%
     );
   }
 

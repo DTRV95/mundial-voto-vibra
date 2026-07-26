@@ -43,15 +43,15 @@ export function AppShell({ children }: { children: ReactNode }) {
       {!loggedIn && (
         <>
           <div className="hidden md:block fixed left-0 top-0 h-full w-3 z-30"
-            style={{ background: "linear-gradient(180deg, #E61D25 0%, #3CAC3B 50%, #2A398D 100%)", opacity: 0.55 }} />
+            style={{ background: "linear-gradient(180deg, oklch(0.30 0.13 268) 0%, oklch(0.66 0.13 82) 50%, oklch(0.30 0.13 268) 100%)", opacity: 0.45 }} />
           <div className="hidden md:block fixed right-0 top-0 h-full w-3 z-30"
-            style={{ background: "linear-gradient(180deg, #2A398D 0%, #3CAC3B 50%, #E61D25 100%)", opacity: 0.55 }} />
+            style={{ background: "linear-gradient(180deg, oklch(0.66 0.13 82) 0%, oklch(0.30 0.13 268) 50%, oklch(0.66 0.13 82) 100%)", opacity: 0.45 }} />
         </>
       )}
       {/* Barra lateral direita quando logged in (esquerda tem a sidebar) */}
       {loggedIn && (
         <div className="hidden md:block fixed right-0 top-0 h-full w-3 z-30"
-          style={{ background: "linear-gradient(180deg, #E61D25 0%, #3CAC3B 50%, #2A398D 100%)", opacity: 0.55 }} />
+          style={{ background: "linear-gradient(180deg, oklch(0.30 0.13 268) 0%, oklch(0.66 0.13 82) 50%, oklch(0.30 0.13 268) 100%)", opacity: 0.45 }} />
       )}
 
       {/* ── DESKTOP ──────────────────────────────────────────── */}

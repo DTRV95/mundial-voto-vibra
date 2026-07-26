@@ -16,7 +16,7 @@ import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { PickCompetitionsModal } from "@/components/PickCompetitionsModal";
 import { ChampionsAtmosphere } from "@/components/ChampionsAtmosphere";
 import { LigaAtmosphere } from "@/components/LigaAtmosphere";
-import { CompetitionArt } from "@/components/CompetitionArt";
+import { CompetitionArt, findCompetitionArt } from "@/components/CompetitionArt";
 import { useFollowing } from "@/lib/useFollow";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
 import premioCamisola from "@/assets/premio-camisola.jpg";
@@ -677,29 +677,30 @@ function Home() {
             }}>
             <div className="sheen absolute inset-0" />
 
-            {/* Motivo da competição */}
-            {activeComp?.motif === "stars" ? (
+            {/* Fundo: arte oficial da competição, ou atmosfera desenhada */}
+            {activeComp && findCompetitionArt(activeComp.slug) ? (
+              <CompetitionArt slug={activeComp.slug} />
+            ) : activeComp?.motif === "stars" ? (
               <>
-                {/* Champions: estrela de cristal, luzes de estádio, partículas */}
                 <ChampionsAtmosphere />
                 <div className="motif-prism opacity-60" />
               </>
             ) : (
               <>
-                {/* Liga Portugal: azul-marinho com setas vermelhas e verdes */}
                 <LigaAtmosphere />
                 <div className="motif-energy-beam" style={{ left: 0 }} />
               </>
             )}
 
-            {/* Arte oficial da competição (se existir em src/assets/comp-<slug>.png) */}
-            {activeComp && <CompetitionArt slug={activeComp.slug} />}
-
             <div className="pointer-events-none absolute -right-6 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full"
               style={{ background: activeComp?.glow ?? "oklch(0.75 0.18 85 / 0.20)", filter: "blur(52px)", transition: "background 450ms ease" }} />
             {activeComp?.motif !== "stars" && <span className="watermark">7</span>}
 
-            <div className="relative flex flex-col gap-5 px-5 py-6 md:flex-row md:items-center md:justify-between md:px-8 md:py-7">
+            <div className={`relative flex flex-col gap-5 px-5 md:flex-row md:items-center md:justify-between md:px-8 ${
+              activeComp && findCompetitionArt(activeComp.slug)
+                ? "py-9 md:min-h-[260px] md:py-10"
+                : "py-6 md:py-7"
+            }`}>
               {/* Identidade */}
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -714,9 +715,11 @@ function Home() {
                     {activeComp ? "Época 2026/27 · a decorrer" : "Época 2026/27"}
                   </span>
                 </div>
-                <h1 className="display-hero mt-2 leading-none text-white" style={{ fontSize: "clamp(2rem,5.2vw,3.1rem)" }}>
-                  {activeComp ? activeComp.name : "Uma Geração"}
-                </h1>
+                {!(activeComp && findCompetitionArt(activeComp.slug)) && (
+                  <h1 className="display-hero mt-2 leading-none text-white" style={{ fontSize: "clamp(2rem,5.2vw,3.1rem)" }}>
+                    {activeComp ? activeComp.name : "Uma Geração"}
+                  </h1>
+                )}
                 <p className="mt-1.5 max-w-md text-sm transition-smooth"
                   style={{ color: activeComp ? `color-mix(in srgb, ${activeComp.tone} 80%, transparent)` : "oklch(1 0 0 / 0.70)" }}>
                   {user

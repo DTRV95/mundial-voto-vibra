@@ -283,6 +283,12 @@
 }
 
 @font-face {
+  font-family: 'Anton';
+  src: url('https://fonts.gstatic.com/s/anton/v25/1Ptgg87LROyAm3Kz-Co.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Bebas Neue';
   src: url('https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXoo9WlhyyTh89Y.woff2') format('woff2');
   font-display: swap;
@@ -651,4 +657,72 @@
 @media (prefers-reduced-motion: reduce) {
   .motif-speed, .motif-energy-beam, .motif-stars::before,
   .motif-stars::after, .motif-rays, .motif-prism { animation: none !important; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   REQUINTE — detalhes que fazem parecer exclusivo
+   ═══════════════════════════════════════════════════════════ */
+
+/* Título de exceção — para o nome da competição */
+.display-hero {
+  font-family: 'Anton', 'Bebas Neue', system-ui, sans-serif;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+}
+
+/* Micro-etiqueta em versaletes largos — assinatura premium */
+.eyebrow {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  line-height: 1;
+}
+
+/* Fio metálico — separador fino e nobre */
+.hairline {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--gold) 55%, transparent) 20%,
+    color-mix(in srgb, var(--gold) 75%, transparent) 50%,
+    color-mix(in srgb, var(--gold) 55%, transparent) 80%,
+    transparent);
+}
+
+/* Contorno metálico fino em cartões escuros */
+.edge-metal {
+  position: relative;
+}
+.edge-metal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(150deg,
+    color-mix(in srgb, var(--gold) 55%, transparent) 0%,
+    oklch(1 0 0 / 0.14) 25%,
+    transparent 55%,
+    color-mix(in srgb, var(--gold) 22%, transparent) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Relevo dourado no texto — pequenos números de destaque */
+.emboss-gold {
+  color: var(--gold);
+  text-shadow: 0 1px 0 oklch(1 0 0 / 0.25), 0 -1px 0 oklch(0 0 0 / 0.35);
+}
+
+/* Vinheta suave nas extremidades de painéis grandes */
+.vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 130% 100% at 50% 40%, transparent 45%, oklch(0 0 0 / 0.28) 100%);
 }

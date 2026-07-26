@@ -634,7 +634,7 @@ function Home() {
 
       {/* ===================== PAINEL DA COMPETIÇÃO ===================== */}
       <section className="px-4 pt-4 md:px-6 md:pt-6 animate-fade-in">
-        <div className="surface overflow-hidden rounded-3xl">
+        <div className="surface edge-metal overflow-hidden rounded-3xl">
 
           {/* Tabs de competição */}
           {competitions.length > 0 && (
@@ -667,7 +667,7 @@ function Home() {
           )}
 
           {/* Faixa da competição — identidade + estado do utilizador */}
-          <div className="relative overflow-hidden"
+          <div className="vignette relative overflow-hidden"
             style={{
               background: activeComp?.heroGradient ?? "linear-gradient(140deg, oklch(0.28 0.11 148) 0%, oklch(0.18 0.06 165) 100%)",
               transition: "background 450ms ease",
@@ -704,12 +704,12 @@ function Home() {
                     <span className="relative inline-flex h-2 w-2 rounded-full"
                       style={{ background: activeComp?.electric ?? "var(--gold)" }} />
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] transition-smooth"
+                  <span className="eyebrow transition-smooth"
                     style={{ color: activeComp ? activeComp.tone : "oklch(1 0 0 / 0.60)" }}>
                     {activeComp ? "Época 2026/27 · a decorrer" : "Época 2026/27"}
                   </span>
                 </div>
-                <h1 className="mt-1.5 font-display leading-none text-white" style={{ fontSize: "clamp(1.9rem,5vw,2.9rem)" }}>
+                <h1 className="display-hero mt-2 leading-none text-white" style={{ fontSize: "clamp(2rem,5.2vw,3.1rem)" }}>
                   {activeComp ? activeComp.name : "Uma Geração"}
                 </h1>
                 <p className="mt-1.5 max-w-md text-sm transition-smooth"
@@ -725,7 +725,7 @@ function Home() {
                 {user && myDivision ? (
                   <div className="flex items-center gap-2.5">
                     <div className="glass rounded-2xl px-4 py-2.5 text-center">
-                      <p className="font-display text-2xl leading-none tabular-nums text-white">
+                      <p className="font-display text-2xl leading-none tabular-nums emboss-gold">
                         <CountUpText value={myDivision.points} />
                       </p>
                       <p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/55">pontos</p>
@@ -750,8 +750,8 @@ function Home() {
             </div>
 
             {/* Estatísticas da comunidade */}
-            <div className="glass relative grid grid-cols-3 border-x-0 border-b-0"
-              style={{ borderTop: "1px solid oklch(1 0 0 / 0.14)" }}>
+            <div className="hairline relative opacity-50" />
+            <div className="glass relative grid grid-cols-3 border-0">
               {[
                 { label: "Previsões hoje", num: communityPulse?.todayVotes ?? 0, live: true },
                 { label: "Adeptos", num: communityPulse?.totalUsers ?? 0, live: false },
@@ -767,7 +767,7 @@ function Home() {
                     )}
                     {st.num > 0 ? <CountUpText value={st.num} /> : "—"}
                   </div>
-                  <div className="mt-0.5 text-[9px] uppercase tracking-widest text-white/45">{st.label}</div>
+                  <div className="eyebrow mt-1 text-white/40" style={{ fontSize: "0.5625rem" }}>{st.label}</div>
                 </div>
               ))}
             </div>

@@ -696,11 +696,7 @@ function Home() {
               style={{ background: activeComp?.glow ?? "oklch(0.75 0.18 85 / 0.20)", filter: "blur(52px)", transition: "background 450ms ease" }} />
             {activeComp?.motif !== "stars" && <span className="watermark">7</span>}
 
-            <div className={`relative flex flex-col gap-5 px-5 md:flex-row md:items-center md:justify-between md:px-8 ${
-              activeComp && findCompetitionArt(activeComp.slug)
-                ? "py-10 md:min-h-[340px] md:py-12"
-                : "py-6 md:py-7"
-            }`}>
+            <div className="relative flex flex-col gap-5 px-5 py-6 md:flex-row md:items-center md:justify-between md:px-8 md:py-7">
               {/* Identidade */}
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -712,14 +708,12 @@ function Home() {
                   </span>
                   <span className="eyebrow transition-smooth"
                     style={{ color: activeComp ? activeComp.tone : "oklch(1 0 0 / 0.60)" }}>
-                    {activeComp ? "Época 2026/27 · a decorrer" : "Época 2026/27"}
+                    {"Época 2026/27"}
                   </span>
                 </div>
-                {!(activeComp && findCompetitionArt(activeComp.slug)) && (
-                  <h1 className="display-hero mt-2 leading-none text-white" style={{ fontSize: "clamp(2rem,5.2vw,3.1rem)" }}>
-                    {activeComp ? activeComp.name : "Uma Geração"}
-                  </h1>
-                )}
+                <h1 className="display-hero mt-2 leading-none text-white" style={{ fontSize: "clamp(1.9rem,4.8vw,2.8rem)" }}>
+                  UMA GERAÇÃO
+                </h1>
                 <p className="mt-1.5 max-w-md text-sm transition-smooth"
                   style={{ color: activeComp ? `color-mix(in srgb, ${activeComp.tone} 80%, transparent)` : "oklch(1 0 0 / 0.70)" }}>
                   {user

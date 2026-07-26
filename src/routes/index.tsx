@@ -279,6 +279,7 @@ function Home() {
   // Seletor de competição no card de Líderes (época 2026/27)
   const { data: competitions = [] } = useCompetitions();
   const [homeCompSlug, setHomeCompSlug] = useState<string | null>(null);
+  const activeComp = competitions.find(c => c.slug === homeCompSlug) ?? competitions[0] ?? null;
   const [resultsExpanded, setResultsExpanded] = useState(false);
   const [feedShown, setFeedShown] = useState(6);
   const feedSentinelRef = useRef<HTMLButtonElement>(null);
@@ -530,9 +531,10 @@ function Home() {
   const celebrationActive = !isBeta && (finalMatch as any)?.home_score != null;
 
   // Pop-up de agradecimento (uma única vez por utilizador)
-  const [showThanks, setShowThanks] = useState(() => {
-    try { return !localStorage.getItem("mundial_thanks_v1"); } catch { return false; }
-  });
+  const [showThanks, setShowThanks] = useState(false);
+  useEffect(() => {
+    try { if (!window.localStorage.getItem("mundial_thanks_v1")) setShowThanks(true); } catch { /* noop */ }
+  }, []);
 
   // Classificação global: grupos (phase_results, tem TODOS os utilizadores) + mata-mata (profiles.total_points)
   const { data: globalRanking = [] } = useQuery({
@@ -1278,17 +1280,62 @@ function Home() {
         )}
       </section>
 
+      {/* ===================== COMPETIÇÕES + RANKING ===================== */}
+      {/* Tabs de competição — comandam o ranking apresentado */}
+      {competitions.length > 0 && (
+        <section className="px-5 pt-10 md:px-8">
+          <div className="mb-1 flex items-center gap-2.5">
+            <span className="h-4 w-1 rounded-full" style={{ background: activeComp?.accent }} />
+            <h2 className="font-display text-2xl">Competições</h2>
+          </div>
+          <p className="mb-3 text-sm text-muted-foreground">Escolhe a competição e vê a classificação.</p>
+
+          <div className="-mx-5 flex gap-2.5 overflow-x-auto px-5 pb-1 md:mx-0 md:px-0">
+            {competitions.map(c => {
+              const on = c.slug === activeComp?.slug;
+              return (
+                <button key={c.slug} onClick={() => setHomeCompSlug(c.slug)}
+                  className="group relative flex shrink-0 items-center gap-2.5 overflow-hidden rounded-2xl border px-4 py-3 text-left transition-smooth"
+                  style={on
+                    ? { borderColor: c.accent, background: `color-mix(in srgb, ${c.accent} 12%, transparent)`,
+                        boxShadow: `0 8px 26px -10px ${c.accent}` }
+                    : { borderColor: "var(--border)", background: "var(--card)" }}>
+                  {/* faixa lateral de cor */}
+                  <span className="absolute inset-y-0 left-0 w-1 transition-smooth"
+                    style={{ background: on ? c.accent : "transparent" }} />
+                  <span className="text-xl">{c.emoji}</span>
+                  <span className="leading-tight">
+                    <span className="block text-[10px] font-bold uppercase tracking-[0.16em]"
+                      style={{ color: on ? c.accent : "var(--muted-foreground)" }}>
+                      {on ? "A ver agora" : "Ver"}
+                    </span>
+                    <span className="block text-sm font-bold whitespace-nowrap"
+                      style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
+                      {c.name}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* ===================== RANKING + LIGAS + PRÉMIOS ===================== */}
-      <section className="grid gap-4 px-5 pt-10 sm:grid-cols-2 md:px-8">
-        {/* Ranking — card moderno com acento da competição */}
-        <div className="relative overflow-hidden rounded-2xl"
+      <section className="grid gap-4 px-5 pt-5 sm:grid-cols-2 md:px-8">
+        {/* Ranking — veste a cor da competição escolhida */}
+        <div className="relative overflow-hidden rounded-2xl transition-smooth"
           style={{
-            background: "linear-gradient(160deg, oklch(0.24 0.09 148) 0%, oklch(0.17 0.05 160) 60%, oklch(0.14 0.03 200) 100%)",
-            boxShadow: "0 12px 36px -8px oklch(0.55 0.20 142 / 0.40), inset 0 1px 0 oklch(1 0 0 / 0.10)",
+            background: activeComp
+              ? `linear-gradient(160deg, color-mix(in srgb, ${activeComp.accent} 42%, #0d1017) 0%, color-mix(in srgb, ${activeComp.accent} 16%, #0d1017) 60%, #0d1017 100%)`
+              : "linear-gradient(160deg, oklch(0.24 0.09 148) 0%, oklch(0.17 0.05 160) 60%, oklch(0.14 0.03 200) 100%)",
+            boxShadow: activeComp
+              ? `0 12px 36px -8px color-mix(in srgb, ${activeComp.accent} 45%, transparent), inset 0 1px 0 oklch(1 0 0 / 0.10)`
+              : "0 12px 36px -8px oklch(0.55 0.20 142 / 0.40), inset 0 1px 0 oklch(1 0 0 / 0.10)",
           }}>
-          {/* Halo suave */}
-          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full"
-            style={{ background: "oklch(0.65 0.18 148 / 0.28)", filter: "blur(50px)" }} />
+          {/* Halo suave da cor da competição */}
+          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full transition-smooth"
+            style={{ background: activeComp ? `color-mix(in srgb, ${activeComp.accent} 55%, transparent)` : "oklch(0.65 0.18 148 / 0.28)", filter: "blur(50px)" }} />
 
           <div className="relative text-white">
             {/* Cabeçalho */}
@@ -1297,27 +1344,13 @@ function Home() {
                 <div className="grid h-9 w-9 place-items-center rounded-full bg-white/15 ring-1 ring-white/15">
                   <BarChart3 className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="font-display text-xl">Líderes</h3>
+                <div className="leading-tight">
+                  <h3 className="font-display text-xl">Líderes</h3>
+                  {activeComp && <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/50">{activeComp.name}</p>}
+                </div>
               </div>
               <Link to="/rankings" className="text-xs font-bold text-white/70 hover:text-white transition-smooth">Ver rankings →</Link>
             </div>
-
-            {/* Seletor de competição — época 2026/27 */}
-            {competitions.length > 0 && (
-              <div className="flex gap-2 border-b border-white/10 px-5 py-2.5">
-                {competitions.map(c => {
-                  const on = c.slug === (homeCompSlug ?? competitions[0]?.slug);
-                  return (
-                    <button key={c.slug} onClick={() => setHomeCompSlug(c.slug)}
-                      className={`flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold transition-smooth ${
-                        on ? "bg-white text-[#14301f]" : "bg-white/10 text-white/65 hover:bg-white/20"
-                      }`}>
-                      <span>{c.emoji}</span>{c.short}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
 
             {/* Linhas da tabela */}
             {topLeaders.length === 0 ? (
@@ -1615,9 +1648,10 @@ function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
 }
 
 function PodioFaseGrupos({ hof }: { hof: any[] }) {
-  const [dismissed, setDismissed] = useState(() => {
-    try { return localStorage.getItem("podio_grupos_dismissed") === "1"; } catch { return false; }
-  });
+  const [dismissed, setDismissed] = useState(false);
+  useEffect(() => {
+    try { if (window.localStorage.getItem("podio_grupos_dismissed") === "1") setDismissed(true); } catch { /* noop */ }
+  }, []);
 
   const [first, second, third] = hof ?? [];
 

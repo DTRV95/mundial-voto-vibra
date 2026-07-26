@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, BellOff, X } from "lucide-react";
 import { usePushNotifications } from "@/lib/usePushNotifications";
 import { useAuth } from "@/lib/useAuth";
@@ -8,7 +8,11 @@ const DISMISSED_KEY = "push_prompt_dismissed";
 export function PushNotificationPrompt() {
   const { user } = useAuth();
   const { supported, permission, subscribed, loading, subscribe } = usePushNotifications(user?.id);
-  const [dismissed, setDismissed] = useState(() => !!localStorage.getItem(DISMISSED_KEY));
+  // Começa igual no servidor e no cliente; lê o storage depois de montar
+  const [dismissed, setDismissed] = useState(false);
+  useEffect(() => {
+    try { if (window.localStorage.getItem(DISMISSED_KEY)) setDismissed(true); } catch { /* noop */ }
+  }, []);
 
   // Don't show if: not supported, already granted/denied, subscribed, or dismissed
   if (!supported || !user || permission === "denied" || subscribed || dismissed) return null;

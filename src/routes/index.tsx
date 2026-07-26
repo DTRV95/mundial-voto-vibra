@@ -14,6 +14,7 @@ import { useCompetitions } from "@/lib/useCompetitions";
 import { useCountUp } from "@/lib/useCountUp";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { PickCompetitionsModal } from "@/components/PickCompetitionsModal";
+import { ChampionsAtmosphere } from "@/components/ChampionsAtmosphere";
 import { useFollowing } from "@/lib/useFollow";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
 import premioCamisola from "@/assets/premio-camisola.jpg";
@@ -677,10 +678,9 @@ function Home() {
             {/* Motivo da competição */}
             {activeComp?.motif === "stars" ? (
               <>
-                {/* Champions: noite estrelada + raios de luz + prisma */}
-                <div className="motif-stars absolute inset-0" />
-                <div className="motif-rays" />
-                <div className="motif-prism" />
+                {/* Champions: estrela de cristal, luzes de estádio, partículas */}
+                <ChampionsAtmosphere />
+                <div className="motif-prism opacity-60" />
               </>
             ) : (
               <>
@@ -692,7 +692,7 @@ function Home() {
 
             <div className="pointer-events-none absolute -right-6 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full"
               style={{ background: activeComp?.glow ?? "oklch(0.75 0.18 85 / 0.20)", filter: "blur(52px)", transition: "background 450ms ease" }} />
-            <span className="watermark">7</span>
+            {activeComp?.motif !== "stars" && <span className="watermark">7</span>}
 
             <div className="relative flex flex-col gap-5 px-5 py-6 md:flex-row md:items-center md:justify-between md:px-8 md:py-7">
               {/* Identidade */}

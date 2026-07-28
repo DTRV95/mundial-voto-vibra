@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useSearch, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Trophy, ArrowUp, ArrowDown, Minus, Shield, Users2, Crown, Star } from "lucide-react";
@@ -7,6 +7,7 @@ import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 import { FollowButton } from "@/components/FollowButton";
 import { useCompetitions } from "@/lib/useCompetitions";
+import { useRanking, useRankingMes, useMeses, mesAtual, type LinhaRanking } from "@/lib/usePontos";
 
 const HOF_PHASE_LABEL: Record<string, string> = {
   grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos",
@@ -80,10 +81,10 @@ function RankTrend({ currentRank, previousRank }: { currentRank: number; previou
 export const Route = createFileRoute("/rankings")({
   head: () => ({
     meta: [
-      { title: "Rankings — Uma Geração | Mundial 2026" },
-      { name: "description", content: "Ranking dos adeptos por fase do Mundial 2026 — Grupos, Oitavos, Quartos, Meias-finais e Final. Vê quem lidera a classificação." },
-      { property: "og:title", content: "Rankings — Uma Geração | Mundial 2026" },
-      { property: "og:description", content: "Descobre quem lidera o ranking de previsões do Mundial 2026." },
+      { title: "Rankings — Uma Geração" },
+      { name: "description", content: "Ranking dos adeptos da Liga Portugal e da Champions League — por competição, por mês e no total da época." },
+      { property: "og:title", content: "Rankings — Uma Geração" },
+      { property: "og:description", content: "Descobre quem lidera o ranking de previsões da época." },
       { property: "og:url", content: "https://geracao2026.com/rankings" },
     ],
     links: [{ rel: "canonical", href: "https://geracao2026.com/rankings" }],
@@ -111,10 +112,15 @@ function Rankings() {
   const [expandedDivs, setExpandedDivs] = useState<Record<string, boolean>>({});
   const { user } = useAuth();
 
-  // Seletor de competição (época 2026/27)
+  // Seletor de competição — "total" soma todas as competições da época
   const { data: competitions = [] } = useCompetitions();
-  const [compSlug, setCompSlug] = useState<string | null>(null);
-  const activeSlug = compSlug ?? competitions[0]?.slug ?? null;
+  const [compSlug, setCompSlug] = useState<string>("total");
+  const activeComp = competitions.find(c => c.slug === compSlug) ?? null;
+
+  // Período: a época toda ou só o mês competitivo em curso
+  const [periodo, setPeriodo] = useState<"epoca" | "mes">("epoca");
+  const { data: meses = [] } = useMeses(activeComp?.id);
+  const mes = mesAtual(meses);
 
   // Ranking de ligas
   const { data: leagueRanking = [] } = useQuery({
@@ -160,16 +166,17 @@ function Rankings() {
 
   // Ranking por jogo
   const { data: matchRanking = [] } = useQuery({
-    queryKey: ["match-ranking"],
+    queryKey: ["match-ranking", activeComp?.id ?? "todas"],
     staleTime: 60_000,
     enabled: tab === "jogos",
     queryFn: async () => {
-      const { data: matches } = await supabase
+      let q = (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,phase,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .select("id,kickoff_at,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
         .eq("status", "finished")
-        .order("kickoff_at", { ascending: false })
-        .limit(20);
+        .eq("is_official", true);
+      if (activeComp?.id) q = q.eq("competition_id", activeComp.id);
+      const { data: matches } = await q.order("kickoff_at", { ascending: false }).limit(20);
       if (!matches || matches.length === 0) return [];
 
       const results = await Promise.all(matches.map(async (m: any) => {
@@ -205,7 +212,7 @@ function Rankings() {
         .select("phase,rank,total_points,user_id")
         .order("phase").order("rank");
       if (!hof || hof.length === 0) return [];
-      const userIds = [...new Set(hof.map((h: any) => h.user_id))];
+      const userIds = [...new Set(hof.map((h: any) => h.user_id))] as string[];
       const { data: profiles } = await supabase
         .from("profiles").select("id,display_name,avatar_url").in("id", userIds);
       const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
@@ -213,46 +220,65 @@ function Rankings() {
     },
   });
 
-  // Query para divisões — todos os utilizadores ordenados por pontos
-  const { data: allUsers = [], isLoading: loadingUsers } = useQuery({
-    queryKey: ["all-users-ranking"],
-    staleTime: 60_000,
-    enabled: tab === "divisoes",
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id,display_name,avatar_url,total_points,previous_rank")
-        .order("total_points", { ascending: false });
-      return (data ?? []).map((r, i) => ({
-        ...r,
-        rank: i + 1,
-        division: getDivision(i + 1),
-      }));
-    },
-  });
+  // Divisões — pontos calculados das vistas (nunca guardados)
+  const porEpoca = useRanking(activeComp?.id ?? null);
+  const porMes = useRankingMes(periodo === "mes" ? mes?.id : null);
+  const fonte = periodo === "mes" ? porMes : porEpoca;
+
+  const allUsers = useMemo(
+    () => (fonte.data ?? []).map((r: LinhaRanking) => ({ ...r, division: getDivision(r.rank) })),
+    [fonte.data],
+  );
+  const loadingUsers = fonte.isLoading;
 
   return (
     <div className="px-5 pt-6">
       <header className="mb-5">
         <h1 className="font-display text-3xl">Rankings</h1>
-        <p className="text-sm text-muted-foreground">Compete por fase do Mundial e ganha prémios.</p>
+        <p className="text-sm text-muted-foreground">
+          Pontos dos jogos oficiais de cada jornada — por competição ou no total.
+        </p>
       </header>
 
       {/* Seletor de competição — época 2026/27 */}
       {competitions.length > 0 && (
-        <div className="mb-4 -mx-5 flex gap-2 overflow-x-auto px-5">
+        <div className="mb-3 -mx-5 flex gap-2 overflow-x-auto px-5">
+          <button onClick={() => { setCompSlug("total"); setPeriodo("epoca"); }}
+            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition-smooth ${
+              compSlug === "total"
+                ? "border-gold bg-gold text-background"
+                : "border-border text-muted-foreground hover:border-gold/40"
+            }`}>
+            🎯 Total
+          </button>
           {competitions.map(c => {
-            const on = c.slug === activeSlug;
+            const on = c.slug === compSlug;
             return (
               <button key={c.slug} onClick={() => setCompSlug(c.slug)}
                 className="flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition-smooth"
                 style={on
                   ? { borderColor: c.accent, background: c.accent, color: "#fff" }
                   : { borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
-                <span>{c.emoji}</span>{c.name}
+                <span>{c.emoji}</span>{c.short}
               </button>
             );
           })}
+        </div>
+      )}
+
+      {/* Período — só faz sentido dentro de uma competição */}
+      {activeComp && mes && (
+        <div className="mb-4 flex gap-1.5">
+          {([["epoca", "Época"], ["mes", mes.label]] as const).map(([k, rotulo]) => (
+            <button key={k} onClick={() => setPeriodo(k)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-smooth ${
+                periodo === k
+                  ? "border-foreground/30 bg-foreground/10 text-foreground"
+                  : "border-border text-muted-foreground hover:text-foreground"
+              }`}>
+              {rotulo}
+            </button>
+          ))}
         </div>
       )}
 
@@ -407,17 +433,22 @@ function Rankings() {
         <div className="space-y-6">
           {/* Cartão da divisão do utilizador */}
           {user && (() => {
-            const me = allUsers.find(u => u.id === user.id);
+            const me = allUsers.find(u => u.user_id === user.id);
             if (!me) return null;
             const div = me.division;
             return (
               <div className={`rounded-2xl border ${div.border} ${div.bg} p-4`}>
-                <p className="text-xs text-muted-foreground mb-1">A tua divisão</p>
+                <p className="text-xs text-muted-foreground mb-1">
+                  A tua divisão · {compSlug === "total" ? "Total" : activeComp?.short}
+                  {periodo === "mes" && mes ? ` · ${mes.label}` : ""}
+                </p>
                 <div className="flex items-center gap-3">
                   <span className="text-4xl">{div.emoji}</span>
                   <div>
                     <p className={`font-display text-2xl ${div.text}`}>{div.label}</p>
-                    <p className="text-xs text-muted-foreground">#{me.rank}º global · {me.total_points} pts</p>
+                    <p className="text-xs text-muted-foreground">
+                      #{me.rank}º · {me.pontos} pts · {me.acertos}/{me.previsoes} acertos
+                    </p>
                   </div>
                 </div>
               </div>
@@ -444,11 +475,11 @@ function Rankings() {
                 {/* Membros */}
                 <div className="divide-y divide-border/50">
                   {(expandedDivs[div.key] ? members : members.slice(0, 25)).map((u, i) => {
-                    const isMe = u.id === user?.id;
+                    const isMe = u.user_id === user?.id;
                     const isTop3 = i < 3;
                     const isBottom3 = i >= members.length - 3 && members.length > 3;
                     return (
-                      <div key={u.id} className={`flex items-center gap-3 px-4 py-2.5 ${
+                      <div key={u.user_id} className={`flex items-center gap-3 px-4 py-2.5 ${
                         isMe ? div.bg : isTop3 ? "bg-wc-green/5" : isBottom3 ? "bg-wc-red/5" : ""
                       }`}>
                         <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
@@ -459,16 +490,18 @@ function Rankings() {
                         }`}>
                           {i === 0 ? <Crown className="h-3.5 w-3.5" /> : i + 1}
                         </span>
-                        <Link to="/adepto/$id" params={{ id: u.id }} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-smooth">
-                          <UserAvatar avatarUrl={(u as any).avatar_url} name={u.display_name} size={7} className="rounded-full shrink-0" />
+                        <Link to="/adepto/$id" params={{ id: u.user_id }} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-smooth">
+                          <UserAvatar avatarUrl={u.avatar_url} name={u.display_name ?? "—"} size={7} className="rounded-full shrink-0" />
                           <span className={`flex-1 text-sm font-semibold truncate ${isMe ? div.text : ""}`}>
-                            {u.display_name}{isMe && " (tu)"}
+                            {u.display_name ?? "—"}{isMe && " (tu)"}
                           </span>
                         </Link>
                         <div className="flex items-center gap-2 shrink-0">
-                          <RankTrend currentRank={u.rank} previousRank={(u as any).previous_rank} />
-                          <span className="font-display text-base text-gold">{u.total_points}</span>
-                          {!isMe && <FollowButton targetId={u.id} />}
+                          <span className="hidden text-[10px] text-muted-foreground sm:inline">
+                            {u.acertos}/{u.previsoes}
+                          </span>
+                          <span className="font-display text-base text-gold">{u.pontos}</span>
+                          {!isMe && <FollowButton targetId={u.user_id} />}
                         </div>
                       </div>
                     );

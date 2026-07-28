@@ -607,7 +607,7 @@ function Home() {
     >
       {/* Ambiente da competição — o fundo da página muda de mundo */}
       {activeComp && (
-        <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden
+        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden
           style={{ transition: "opacity 500ms ease" }}>
           {/* Manto de cor descendo do topo */}
           <div className="absolute inset-x-0 top-0 h-[70vh]"
@@ -789,7 +789,7 @@ function Home() {
 
       {/* ===================== MY POINTS PER MATCH ===================== */}
       {user && myResults.length > 0 && (
-        <div className="animate-enter delay-100">
+        <div className="animate-enter delay-100 lg:col-span-2">
           <div className="overflow-hidden rounded-2xl border border-gold/30 bg-card"
             style={{ boxShadow: "0 2px 16px oklch(0.75 0.18 85 / 0.10), 0 0 0 1px oklch(0.75 0.18 85 / 0.20)" }}>
             {/* Gold stripe */}

@@ -78,7 +78,7 @@ function Stat({ label, value, icon }: { label: string; value: number; icon?: Rea
 }
 
 function Tabs() {
-  const [tab, setTab] = useState<"importacao" | "jornadas" | "matches" | "analysis" | "news" | "prognosticos" | "teams" | "groups" | "prizes" | "suporte" | "fase">("matches");
+  const [tab, setTab] = useState<"importacao" | "jornadas" | "matches" | "analysis" | "news" | "prognosticos" | "teams" | "prizes" | "suporte">("importacao");
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["admin", "support-unread"],
@@ -93,17 +93,15 @@ function Tabs() {
   });
 
   const tabs = [
-    { k: "importacao", label: "📥 Importação" },
-    { k: "jornadas",   label: "🗓️ Jornadas" },
-    { k: "matches",  label: "Jogos" },
-    { k: "analysis",     label: "ScoreLab" },
-    { k: "news",         label: "Notícias" },
-    { k: "prognosticos", label: "Prognósticos" },
-    { k: "teams",    label: "Equipas" },
-    { k: "groups",   label: "Grupos" },
-    { k: "prizes",   label: "Prémios" },
-    { k: "suporte",  label: "Suporte", badge: unreadCount },
-    { k: "fase",     label: "⚙️ Fase" },
+    { k: "importacao",   label: "📥 Importar" },
+    { k: "jornadas",     label: "🗓️ Jornadas" },
+    { k: "matches",      label: "⚽ Resultados" },
+    { k: "teams",        label: "👕 Equipas" },
+    { k: "news",         label: "📰 Notícias" },
+    { k: "prognosticos", label: "🎯 Prognósticos" },
+    { k: "analysis",     label: "🔬 ScoreLab" },
+    { k: "prizes",       label: "🎁 Prémios" },
+    { k: "suporte",      label: "💬 Suporte", badge: unreadCount },
   ] as const;
   return (
     <>
@@ -128,163 +126,14 @@ function Tabs() {
       {tab === "analysis" && <AnalysisAdmin />}
       {tab === "news"          && <NewsAdmin />}
       {tab === "prognosticos"  && <PrognosticosAdmin />}
-      {tab === "groups"        && <GroupsAdmin />}
       {tab === "teams"    && <TeamsAdmin />}
       {tab === "prizes"   && <PrizesAdmin />}
       {tab === "suporte"  && <SuporteAdmin />}
-      {tab === "fase"     && <FaseAdmin />}
     </>
   );
 }
 
-function FaseAdmin() {
-  const [phase, setPhase] = useState("grupos");
-  const [step, setStep] = useState<"idle" | "confirm" | "running" | "done" | "error">("idle");
-  const [log, setLog] = useState<string[]>([]);
-  const [error, setError] = useState("");
 
-  const PHASES = [
-    { v: "grupos",  label: "Fase de Grupos" },
-    { v: "ronda32", label: "16 Avos de Final" },
-    { v: "oitavos", label: "Oitavos de Final" },
-    { v: "quartos", label: "Quartos de Final" },
-    { v: "meias",   label: "Meias-Finais" },
-    { v: "final",   label: "Final" },
-  ];
-
-  async function runReset() {
-    setStep("running");
-    setLog([]);
-    setError("");
-    const addLog = (msg: string) => setLog(l => [...l, msg]);
-
-    try {
-      addLog(`📸 A gravar resultados da fase "${phase}"...`);
-      const { error: e1 } = await (supabase as any).rpc("save_phase_results", { p_phase: phase });
-      if (e1) throw new Error(`save_phase_results: ${e1.message}`);
-      addLog("✅ Resultados gravados em phase_results");
-
-      addLog("🔄 A repor pontos de todos os utilizadores a 0...");
-      const { error: e2 } = await (supabase as any).rpc("reset_all_points");
-      if (e2) throw new Error(`reset_all_points: ${e2.message}`);
-      addLog("✅ Pontos resetados");
-
-      addLog("🏆 A registar vencedores nos torneios privados...");
-      const { error: e3 } = await (supabase as any).rpc("save_pool_phase_winners", { p_phase: phase });
-      if (e3) {
-        addLog(`⚠️ save_pool_phase_winners: ${e3.message} (pode não existir ainda — ignorado)`);
-      } else {
-        addLog("✅ Vencedores dos torneios registados");
-      }
-
-      addLog("🎉 Reset completo!");
-      setStep("done");
-    } catch (err: any) {
-      setError(err.message ?? "Erro desconhecido");
-      setStep("error");
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="rounded-2xl border border-wc-red/30 bg-wc-red/5 p-4">
-        <p className="text-sm font-bold text-wc-red mb-1">⚠️ Zona de perigo</p>
-        <p className="text-xs text-muted-foreground">Estas ações são irreversíveis. Usa apenas no fim de uma fase.</p>
-      </div>
-
-      <div className="rounded-2xl border border-border bg-card/70 p-5 space-y-4">
-        <h3 className="font-display text-lg">Reset de Fase</h3>
-        <p className="text-sm text-muted-foreground">
-          Grava os resultados da fase selecionada, depois repõe todos os pontos a zero. Usa no final de cada fase antes de iniciar a próxima.
-        </p>
-
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Fase a terminar</label>
-          <select value={phase} onChange={e => { setPhase(e.target.value); setStep("idle"); }}
-            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
-            {PHASES.map(p => <option key={p.v} value={p.v}>{p.label}</option>)}
-          </select>
-        </div>
-
-        {step === "idle" && (
-          <button onClick={() => setStep("confirm")}
-            className="w-full rounded-xl bg-wc-red px-4 py-3 text-sm font-bold text-white transition-smooth hover:opacity-90">
-            Iniciar reset da {PHASES.find(p => p.v === phase)?.label}
-          </button>
-        )}
-
-        {step === "confirm" && (
-          <div className="space-y-3 rounded-xl border border-wc-red/40 bg-wc-red/8 p-4">
-            <p className="text-sm font-semibold">Tens a certeza? Esta ação vai:</p>
-            <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
-              <li>Gravar posições e pontos de todos na tabela <code>phase_results</code></li>
-              <li>Repor os pontos de todos a <strong>0</strong></li>
-              <li>Registar o vencedor de cada torneio privado</li>
-            </ul>
-            <div className="flex gap-2 pt-1">
-              <button onClick={() => setStep("idle")}
-                className="flex-1 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted-foreground">
-                Cancelar
-              </button>
-              <button onClick={runReset}
-                className="flex-1 rounded-xl bg-wc-red px-4 py-2 text-sm font-bold text-white">
-                Confirmar reset
-              </button>
-            </div>
-          </div>
-        )}
-
-        {(step === "running" || step === "done" || step === "error") && (
-          <div className="rounded-xl border border-border bg-background p-4 space-y-1 font-mono text-xs">
-            {log.map((l, i) => <p key={i}>{l}</p>)}
-            {step === "running" && <p className="animate-pulse text-muted-foreground">A processar...</p>}
-            {step === "error" && <p className="text-wc-red font-bold">❌ {error}</p>}
-            {step === "done" && (
-              <button onClick={() => { setStep("idle"); setLog([]); }}
-                className="mt-2 rounded-xl border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                Fechar
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function GroupsAdmin() {
-  const qc = useQueryClient();
-  const [name, setName] = useState("");
-  const { data: groups = [] } = useQuery({
-    queryKey: ["admin", "groups"],
-    queryFn: async () => (await supabase.from("groups").select("*").order("name")).data ?? [],
-  });
-  async function add() {
-    if (!name.trim()) return;
-    const { error } = await supabase.from("groups").insert({ name: name.trim() });
-    if (error) toast.error(error.message); else { toast.success("Grupo criado"); setName(""); qc.invalidateQueries({ queryKey: ["admin", "groups"] }); }
-  }
-  async function del(id: string) {
-    const { error } = await supabase.from("groups").delete().eq("id", id);
-    if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["admin", "groups"] });
-  }
-  return (
-    <Section>
-      <Row>
-        <input placeholder="Grupo A" value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
-        <button onClick={add} className={btnCls}><Plus className="h-4 w-4" /></button>
-      </Row>
-      <ul className="mt-3 space-y-2">
-        {groups.map((g: any) => (
-          <li key={g.id} className={rowItemCls}>
-            <span className="font-medium">{g.name}</span>
-            <button onClick={() => del(g.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
-          </li>
-        ))}
-      </ul>
-    </Section>
-  );
-}
 
 function TeamsAdmin() {
   const qc = useQueryClient();
@@ -386,7 +235,7 @@ function MatchesAdmin() {
   const { data: matches = [] } = useQuery({
     queryKey: ["admin", "matches"],
     queryFn: async () => (await supabase.from("matches")
-      .select("id,kickoff_at,phase,voting_open,home_score,away_score,qualifier,home:home_team_id(name),away:away_team_id(name)")
+      .select("id,kickoff_at,phase,voting_open,home_score,away_score,qualifier,is_official,round_id,rounds(label),home:home_team_id(name,short_name),away:away_team_id(name,short_name)")
       .order("kickoff_at")).data ?? [],
   });
   async function add() {
@@ -403,7 +252,8 @@ function MatchesAdmin() {
   }
   const [pending, setPending] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
-  const [phaseFilter, setPhaseFilter] = useState<string>("ronda32");
+  const [soOficiais, setSoOficiais] = useState(true);
+  const [jornadaFiltro, setJornadaFiltro] = useState<string>("");
   const [editForm, setEditForm] = useState<{ kickoff_at: string; phase: string; home_score: string; away_score: string; qualifier: string }>({ kickoff_at: "", phase: "grupos", home_score: "", away_score: "", qualifier: "" });
   const [calcAllState, setCalcAllState] = useState<{ loading: boolean; result: string | null }>({ loading: false, result: null });
 
@@ -493,20 +343,26 @@ function MatchesAdmin() {
         </button>
         {calcAllState.result && <span className="text-xs text-muted-foreground">{calcAllState.result}</span>}
       </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {Object.entries(PHASE_LABEL).map(([k, v]) => (
-          <button key={k} onClick={() => setPhaseFilter(k)}
-            className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${phaseFilter === k ? "border-gold bg-gold text-background" : "border-border bg-card/40 text-muted-foreground hover:border-gold/40"}`}>
-            {v}
-          </button>
-        ))}
-        <button onClick={() => setPhaseFilter("")}
-          className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${phaseFilter === "" ? "border-primary bg-primary/20 text-primary" : "border-border bg-card/40 text-muted-foreground hover:border-primary/40"}`}>
-          Todos
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button onClick={() => setSoOficiais(v => !v)}
+          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+            soOficiais ? "border-gold bg-gold text-background" : "border-border bg-card/40 text-muted-foreground"
+          }`}>
+          ⭐ Só jogos oficiais
         </button>
+        <select value={jornadaFiltro} onChange={e => setJornadaFiltro(e.target.value)}
+          className="rounded-full border border-border bg-card/40 px-3 py-1.5 text-xs font-semibold">
+          <option value="">Todas as jornadas</option>
+          {[...new Set((matches as any[]).map((m: any) => m.rounds?.label).filter(Boolean))].map((l: any) => (
+            <option key={l} value={l}>{l}</option>
+          ))}
+        </select>
       </div>
       <ul className="mt-3 space-y-2">
-        {(matches as any[]).filter((m: any) => !phaseFilter || m.phase === phaseFilter).map((m: any) => (
+        {(matches as any[])
+          .filter((m: any) => !soOficiais || m.is_official)
+          .filter((m: any) => !jornadaFiltro || m.rounds?.label === jornadaFiltro)
+          .map((m: any) => (
           <li key={m.id} className="rounded-xl border border-border bg-card/60 p-3">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">{m.home?.name ?? "?"} vs {m.away?.name ?? "?"}</span>
@@ -558,7 +414,7 @@ function MatchesAdmin() {
               </div>
             )}
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-              <span className="rounded-full bg-secondary px-2 py-0.5">{PHASE_LABEL[m.phase]}</span>
+              <span className="rounded-full bg-secondary px-2 py-0.5">{m.rounds?.label ?? PHASE_LABEL[m.phase] ?? "—"}</span>
               <button
                 onClick={() => toggleVoting(m.id, m.voting_open)}
                 disabled={!!pending}

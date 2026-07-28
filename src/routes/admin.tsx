@@ -6,6 +6,7 @@ import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { toast } from "sonner";
 import { PHASE_LABEL } from "@/lib/format";
 import { ImportacaoPanel } from "@/components/ImportacaoPanel";
+import { JornadasAdmin } from "@/components/JornadasAdmin";
 import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil, X, ImageIcon, Eye, Newspaper, Target, ChevronUp, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -77,7 +78,7 @@ function Stat({ label, value, icon }: { label: string; value: number; icon?: Rea
 }
 
 function Tabs() {
-  const [tab, setTab] = useState<"importacao" | "matches" | "analysis" | "news" | "prognosticos" | "teams" | "groups" | "prizes" | "suporte" | "fase">("matches");
+  const [tab, setTab] = useState<"importacao" | "jornadas" | "matches" | "analysis" | "news" | "prognosticos" | "teams" | "groups" | "prizes" | "suporte" | "fase">("matches");
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["admin", "support-unread"],
@@ -93,6 +94,7 @@ function Tabs() {
 
   const tabs = [
     { k: "importacao", label: "📥 Importação" },
+    { k: "jornadas",   label: "🗓️ Jornadas" },
     { k: "matches",  label: "Jogos" },
     { k: "analysis",     label: "ScoreLab" },
     { k: "news",         label: "Notícias" },
@@ -121,6 +123,7 @@ function Tabs() {
         ))}
       </div>
       {tab === "importacao" && <ImportacaoPanel />}
+      {tab === "jornadas"   && <JornadasAdmin />}
       {tab === "matches"  && <MatchesAdmin />}
       {tab === "analysis" && <AnalysisAdmin />}
       {tab === "news"          && <NewsAdmin />}

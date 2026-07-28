@@ -23,7 +23,6 @@ import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ApiTesteRouteImport } from './routes/api-teste'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
@@ -103,11 +102,6 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTesteRoute = ApiTesteRouteImport.update({
-  id: '/api-teste',
-  path: '/api-teste',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -152,7 +146,6 @@ const AdeptoIdRoute = AdeptoIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/api-teste': typeof ApiTesteRoute
   '/auth': typeof AuthRoute
   '/aviso-legal': typeof AvisoLegalRoute
   '/como-funciona': typeof ComoFuncionaRoute
@@ -177,7 +170,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/api-teste': typeof ApiTesteRoute
   '/auth': typeof AuthRoute
   '/aviso-legal': typeof AvisoLegalRoute
   '/como-funciona': typeof ComoFuncionaRoute
@@ -202,7 +194,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/api-teste': typeof ApiTesteRoute
   '/auth': typeof AuthRoute
   '/aviso-legal': typeof AvisoLegalRoute
   '/como-funciona': typeof ComoFuncionaRoute
@@ -229,7 +220,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
-    | '/api-teste'
     | '/auth'
     | '/aviso-legal'
     | '/como-funciona'
@@ -254,7 +244,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
-    | '/api-teste'
     | '/auth'
     | '/aviso-legal'
     | '/como-funciona'
@@ -278,7 +267,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
-    | '/api-teste'
     | '/auth'
     | '/aviso-legal'
     | '/como-funciona'
@@ -304,7 +292,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  ApiTesteRoute: typeof ApiTesteRoute
   AuthRoute: typeof AuthRoute
   AvisoLegalRoute: typeof AvisoLegalRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
@@ -425,13 +412,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api-teste': {
-      id: '/api-teste'
-      path: '/api-teste'
-      fullPath: '/api-teste'
-      preLoaderRoute: typeof ApiTesteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -508,7 +488,6 @@ const NoticiasRouteWithChildren = NoticiasRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  ApiTesteRoute: ApiTesteRoute,
   AuthRoute: AuthRoute,
   AvisoLegalRoute: AvisoLegalRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,

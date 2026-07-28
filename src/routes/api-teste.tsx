@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api-teste")({
 
 /** Corre no servidor (Cloudflare Worker) — sem CORS, sem bloqueios. */
 const testarApi = createServerFn({ method: "POST" })
-  .validator((d: { key: string }) => d)
+  .inputValidator((d: { key: string }) => d)
   .handler(async ({ data }) => {
     const key = (data?.key ?? "").trim();
     if (!key) return { erro: "Falta a chave." };

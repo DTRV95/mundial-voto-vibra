@@ -1,19 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
-import { formatDate } from "@/lib/format";
-import { CalendarClock, CheckCircle2, Target } from "lucide-react";
+import { useActiveCompetition } from "@/lib/useActiveCompetition";
+import { CalendarClock, Target, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/jogos")({
   head: () => ({
     meta: [
-      { title: "Jogos do Mundial 2026 — Uma Geração" },
-      { name: "description", content: "Calendário completo dos jogos do Mundial 2026. Filtra por dia ou fase e deixa as tuas previsões antes do apito inicial." },
-      { property: "og:title", content: "Jogos do Mundial 2026 — Uma Geração" },
-      { property: "og:description", content: "Todos os jogos do Mundial 2026. Vota nas tuas previsões e compara com a comunidade." },
+      { title: "A tua jornada — Uma Geração" },
+      { name: "description", content: "Os 5 jogos oficiais de cada jornada. Dá a tua previsão antes do apito inicial e sobe no ranking." },
+      { property: "og:title", content: "A tua jornada — Uma Geração" },
+      { property: "og:description", content: "Os 5 jogos oficiais de cada jornada. Dá a tua previsão e compara com a comunidade." },
       { property: "og:url", content: "https://geracao2026.com/jogos" },
     ],
     links: [{ rel: "canonical", href: "https://geracao2026.com/jogos" }],
@@ -21,72 +21,51 @@ export const Route = createFileRoute("/jogos")({
   component: Jogos,
 });
 
-type Filter = "hoje" | "amanha" | "semana" | "votados" | "todos";
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: "hoje",    label: "Hoje" },
-  { key: "amanha",  label: "Amanhã" },
-  { key: "semana",  label: "Esta semana" },
-  { key: "votados", label: "Já votados" },
-  { key: "todos",   label: "Todos" },
-];
-
-type PhaseFilter = "todas" | "grupos" | "ronda32" | "oitavos" | "quartos" | "meias" | "final";
-const PHASE_FILTERS: { key: PhaseFilter; label: string }[] = [
-  { key: "todas",    label: "Todas as fases" },
-  { key: "grupos",   label: "Grupos" },
-  { key: "ronda32",  label: "16avos" },
-  { key: "oitavos",  label: "Oitavos" },
-  { key: "quartos",  label: "Quartos" },
-  { key: "meias",    label: "Meias-Finais" },
-  { key: "final",    label: "Final" },
-];
-
-const VALID_FILTERS: Filter[] = ["hoje", "amanha", "semana", "votados", "todos"];
-const VALID_PHASES: PhaseFilter[] = ["todas", "grupos", "ronda32", "oitavos", "quartos", "meias", "final"];
-
-function readSession<T>(key: string, fallback: T): T {
-  try { const v = sessionStorage.getItem(key); return v ? (v as unknown as T) : fallback; } catch { return fallback; }
-}
-function writeSession(key: string, value: string) {
-  try { sessionStorage.setItem(key, value); } catch { /* noop */ }
+interface JogoOficial extends MatchCardData {
+  round_id: string;
+  round_number: number | null;
+  official_position: number | null;
 }
 
 function Jogos() {
-  const [filter, setFilterRaw] = useState<Filter>("hoje");
-  const [phase,  setPhaseRaw]  = useState<PhaseFilter>("todas");
   const { user } = useAuth();
+  const { competitions, active, setSlug } = useActiveCompetition();
 
-  // Restore filter only when returning from a match page (flag set by MatchCard onClick)
-  useEffect(() => {
-    try {
-      const returning = sessionStorage.getItem("jogos_return");
-      if (returning) {
-        sessionStorage.removeItem("jogos_return");
-        const f = readSession<Filter>("jogos_filter", "hoje");
-        const p = readSession<PhaseFilter>("jogos_phase", "todas");
-        if (VALID_FILTERS.includes(f)) setFilterRaw(f);
-        if (VALID_PHASES.includes(p)) setPhaseRaw(p);
-      }
-    } catch { /* noop */ }
-  }, []);
-
-  function setFilter(f: Filter) { setFilterRaw(f); writeSession("jogos_filter", f); }
-  function setPhase(p: PhaseFilter) { setPhaseRaw(p); writeSession("jogos_phase", p); }
-
-  const { data: all = [], isLoading } = useQuery({
-    queryKey: ["matches", "all"],
+  // Só os jogos oficiais de jornadas publicadas da competição ativa
+  const { data: jogos = [], isLoading } = useQuery({
+    queryKey: ["jogos-oficiais", active?.id],
+    enabled: !!active?.id,
     staleTime: 60_000,
-    queryFn: async (): Promise<MatchCardData[]> => {
-      const { data } = await supabase
+    queryFn: async (): Promise<JogoOficial[]> => {
+      const { data } = await (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,phase,status,voting_open,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code),predictions(count)")
+        .select(
+          "id,kickoff_at,phase,status,voting_open,official_position," +
+          "home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)," +
+          "round:round_id!inner(id,number,label,status),predictions(count)"
+        )
+        .eq("competition_id", active!.id)
+        .eq("is_official", true)
+        .eq("round.status", "publicada")
         .order("kickoff_at");
-      return ((data as any) ?? [])
-        .filter((m: any) => m.home && m.away)
-        .map((m: any) => ({
-        ...m,
-        votes_count: m.predictions?.[0]?.count ?? 0,
-      }));
+
+      return ((data ?? []) as any[])
+        .filter((m) => m.home && m.away && m.round)
+        .map((m) => ({
+          id: m.id,
+          kickoff_at: m.kickoff_at,
+          phase: m.phase ?? "",
+          status: m.status,
+          voting_open: m.voting_open,
+          home: m.home,
+          away: m.away,
+          votes_count: m.predictions?.[0]?.count ?? 0,
+          is_official: true,
+          round_label: m.round.label ?? (m.round.number ? `Jornada ${m.round.number}` : null),
+          round_id: m.round.id,
+          round_number: m.round.number ?? null,
+          official_position: m.official_position ?? null,
+        }));
     },
   });
 
@@ -104,64 +83,63 @@ function Jogos() {
     },
   });
 
-  const filtered = useMemo(() => {
-    const now = new Date();
-    const s = (d: Date) => { const c = new Date(d); c.setHours(0,0,0,0); return c; };
-    const e = (d: Date) => { const c = new Date(d); c.setHours(23,59,59,999); return c; };
-    const today    = s(now);
-    const tomorrow = s(new Date(now.getTime() + 86400000));
-    const weekEnd  = e(new Date(now.getTime() + 6 * 86400000));
-
-    return all
-      .map(m => ({ ...m, already_voted: votedIds.has(m.id) }))
-      .filter(m => {
-        const t = new Date(m.kickoff_at);
-        if (filter === "hoje")    return t >= today && t <= e(now);
-        if (filter === "amanha")  return t >= tomorrow && t <= e(tomorrow);
-        if (filter === "semana")  return t >= today && t <= weekEnd;
-        if (filter === "votados") return m.already_voted;
-        return true;
-      })
-      .filter(m => phase === "todas" || m.phase === phase);
-  }, [all, filter, phase, votedIds]);
-
-  const grouped = useMemo(() => {
-    const map: Record<string, MatchCardData[]> = {};
-    filtered.forEach(m => {
-      const key = new Date(m.kickoff_at).toDateString();
-      if (!map[key]) map[key] = [];
-      map[key].push(m);
-    });
-    return Object.entries(map).map(([key, matches]) => ({
-      date: new Date(key),
-      matches,
+  // Agrupa por jornada, com a mais próxima primeiro
+  const jornadas = useMemo(() => {
+    const map = new Map<string, { label: string; numero: number | null; jogos: JogoOficial[] }>();
+    for (const j of jogos) {
+      const atual = map.get(j.round_id);
+      const jogo = { ...j, already_voted: votedIds.has(j.id) };
+      if (atual) atual.jogos.push(jogo);
+      else map.set(j.round_id, { label: j.round_label ?? "Jornada", numero: j.round_number, jogos: [jogo] });
+    }
+    return [...map.values()].map((r) => ({
+      ...r,
+      jogos: r.jogos.sort(
+        (a, b) => (a.official_position ?? 99) - (b.official_position ?? 99),
+      ),
+      votados: r.jogos.filter((m) => votedIds.has(m.id)).length,
     }));
-  }, [filtered]);
-
-  function countFilter(f: Filter) {
-    const now = new Date();
-    const s = (d: Date) => { const c = new Date(d); c.setHours(0,0,0,0); return c; };
-    const e = (d: Date) => { const c = new Date(d); c.setHours(23,59,59,999); return c; };
-    return all.filter(m => {
-      const t = new Date(m.kickoff_at);
-      if (f === "hoje")    return t >= s(now) && t <= e(now);
-      if (f === "amanha")  return t >= s(new Date(now.getTime()+86400000)) && t <= e(new Date(now.getTime()+86400000));
-      if (f === "semana")  return t >= s(now) && t <= e(new Date(now.getTime()+6*86400000));
-      if (f === "votados") return votedIds.has(m.id);
-      return true;
-    }).length;
-  }
+  }, [jogos, votedIds]);
 
   return (
     <div className="px-4 pt-6 pb-10 md:px-8">
       <header className="mb-5">
-        <h1 className="font-display text-3xl md:text-4xl">Jogos</h1>
-        <p className="text-sm text-muted-foreground mt-0.5 capitalize">{formatDate(new Date().toISOString())}</p>
+        <h1 className="font-display text-3xl md:text-4xl">A tua jornada</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          Cada jornada tem 5 jogos oficiais — os mesmos para toda a gente.
+        </p>
       </header>
 
+      {/* Competições */}
+      {competitions.length > 1 && (
+        <div className="mb-4 -mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
+          <div className="flex w-max gap-2">
+            {competitions.map((c) => {
+              const ativa = c.id === active?.id;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => setSlug(c.slug)}
+                  className="whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth"
+                  style={
+                    ativa
+                      ? { borderColor: c.accent, background: c.accent, color: "#fff" }
+                      : { borderColor: "var(--border)", color: "var(--muted-foreground)" }
+                  }
+                >
+                  {c.emoji} {c.short}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Banner prognósticos */}
-      <Link to="/noticias/" search={{ prog: true } as any}
-        className="group mb-4 flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border px-4 py-3 transition-smooth hover:border-wc-blue/40"
+      <Link
+        to="/noticias"
+        search={{ prog: true } as any}
+        className="group mb-6 flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border px-4 py-3 transition-smooth hover:border-wc-blue/40"
         style={{ background: "linear-gradient(135deg, oklch(0.20 0.04 250 / 0.5) 0%, oklch(0.16 0.02 260 / 0.3) 100%)" }}
       >
         <div className="flex items-center gap-3">
@@ -169,113 +147,73 @@ function Jogos() {
             <Target className="h-4 w-4 text-white/70" />
           </div>
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-white/40 leading-none mb-0.5">Antes de votares</p>
-            <p className="text-sm font-bold text-white/90 leading-none">Ver prognósticos</p>
+            <p className="mb-0.5 text-[9px] font-bold uppercase leading-none tracking-widest text-white/40">Antes de votares</p>
+            <p className="text-sm font-bold leading-none text-white/90">Ver prognósticos</p>
           </div>
         </div>
-        <span className="text-xs font-bold text-white/50 group-hover:text-white/80 transition-smooth shrink-0">→</span>
+        <span className="shrink-0 text-xs font-bold text-white/50 transition-smooth group-hover:text-white/80">→</span>
       </Link>
 
-      {/* Filtros */}
-      <div className="mb-3 -mx-4 md:mx-0 overflow-x-auto px-4 md:px-0">
-        <div className="flex gap-2 w-max">
-          {FILTERS.map(f => {
-            // Só mostra "Já votados" se o user estiver autenticado
-            if (f.key === "votados" && !user) return null;
-            const count = countFilter(f.key);
-            return (
-              <button key={f.key} onClick={() => setFilter(f.key)}
-                className={`flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth ${
-                  filter === f.key
-                    ? "border-gold bg-gold text-background shadow-gold"
-                    : "border-border bg-card/60 text-muted-foreground hover:border-gold/40 hover:text-foreground"
-                }`}>
-                {f.key === "votados" && (
-                  <CheckCircle2 className={`h-3.5 w-3.5 ${filter === f.key ? "text-background" : "text-primary"}`} />
-                )}
-                {f.label}
-                {count > 0 && (
-                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                    filter === f.key ? "bg-background/20 text-background" : "bg-secondary text-muted-foreground"
-                  }`}>{count}</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Filtros de fase */}
-      <div className="mb-6 -mx-4 md:mx-0 overflow-x-auto px-4 md:px-0">
-        <div className="flex gap-1.5 w-max">
-          {PHASE_FILTERS.map(f => (
-            <button key={f.key} onClick={() => setPhase(f.key)}
-              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition-smooth ${
-                phase === f.key
-                  ? "border-wc-red bg-wc-red/20 text-wc-red"
-                  : "border-border bg-card/40 text-muted-foreground hover:border-wc-red/30 hover:text-foreground"
-              }`}>
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Conteúdo */}
       {isLoading && (
         <div className="grid gap-3">
-          {[0,1,2].map(i => <div key={i} className="h-32 shimmer rounded-2xl" />)}
+          {[0, 1, 2].map((i) => <div key={i} className="shimmer h-32 rounded-2xl" />)}
         </div>
       )}
 
-      {!isLoading && grouped.length === 0 && (
+      {!isLoading && jornadas.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center">
           <CalendarClock className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" />
-          <p className="font-display text-lg">
-            {filter === "votados" ? "Ainda não votaste em nenhum jogo" : "Sem jogos para este período"}
+          <p className="font-display text-lg">Ainda não há jornada aberta</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Assim que a próxima jornada de {active?.name ?? "competição"} for publicada, os 5 jogos aparecem aqui.
           </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            {filter === "votados" ? "Vai à página de jogos e dá a tua previsão!" : "Experimenta outro filtro."}
-          </p>
-          {filter !== "todos" && (
-            <button onClick={() => setFilter("todos")} className="mt-4 rounded-full border border-border px-4 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-smooth">
-              Ver todos os jogos
-            </button>
-          )}
         </div>
       )}
 
       <div className="space-y-8">
-        {grouped.map(({ date, matches }) => (
-          <div key={date.toDateString()}>
+        {jornadas.map((r) => (
+          <section key={r.label}>
             <div className="mb-3 flex items-center gap-3">
               <div className="rounded-xl border border-border bg-card/60 px-3 py-1.5">
-                <p className="text-xs font-bold uppercase tracking-wider text-gold">
-                  {isToday(date) ? "Hoje" : isTomorrow(date) ? "Amanhã" : date.toLocaleDateString("pt-PT", { weekday: "long" })}
+                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: active?.accent }}>
+                  {r.label}
                 </p>
-                <p className="text-[11px] text-muted-foreground capitalize">
-                  {date.toLocaleDateString("pt-PT", { day: "numeric", month: "long" })}
-                </p>
+                <p className="text-[11px] text-muted-foreground">{active?.short}</p>
               </div>
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground">{matches.length} {matches.length === 1 ? "jogo" : "jogos"}</span>
+              <div className="h-px flex-1 bg-border" />
+              {user ? (
+                <span className="flex items-center gap-1.5 text-xs font-semibold">
+                  {r.votados === r.jogos.length && (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-wc-green" />
+                  )}
+                  <span className={r.votados === r.jogos.length ? "text-wc-green" : "text-muted-foreground"}>
+                    {r.votados} de {r.jogos.length} previsões
+                  </span>
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground">{r.jogos.length} jogos</span>
+              )}
             </div>
 
+            {/* Barra de progresso */}
+            {user && (
+              <div className="mb-3 h-1 overflow-hidden rounded-full bg-border">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${(r.votados / Math.max(r.jogos.length, 1)) * 100}%`,
+                    background: active?.accent ?? "var(--gold)",
+                  }}
+                />
+              </div>
+            )}
+
             <div className="grid gap-3 md:grid-cols-2">
-              {matches.map(m => <MatchCard key={m.id} match={m} />)}
+              {r.jogos.map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
-          </div>
+          </section>
         ))}
       </div>
     </div>
   );
-}
-
-function isToday(d: Date) {
-  return d.toDateString() === new Date().toDateString();
-}
-function isTomorrow(d: Date) {
-  const t = new Date();
-  t.setDate(t.getDate() + 1);
-  return d.toDateString() === t.toDateString();
 }

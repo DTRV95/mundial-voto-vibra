@@ -13,6 +13,10 @@ export interface MatchCardData {
   away: { name: string; flag: string | null; code: string | null };
   votes_count?: number;
   already_voted?: boolean;
+  /** Etiqueta a mostrar no topo (ex: "Jornada 8"). Substitui a fase do Mundial. */
+  round_label?: string | null;
+  /** Jogo oficial — conta para o ranking */
+  is_official?: boolean;
 }
 
 const KNOCKOUT_PHASES = new Set(["ronda32", "oitavos", "quartos", "meias", "final"]);
@@ -20,11 +24,11 @@ const KNOCKOUT_PHASES = new Set(["ronda32", "oitavos", "quartos", "meias", "fina
 export function MatchCard({ match }: { match: MatchCardData }) {
   if (!match.home || !match.away) return null;
   const status = votingStatus(match);
-  const isKnockout = KNOCKOUT_PHASES.has(match.phase);
+  const isKnockout = match.is_official || KNOCKOUT_PHASES.has(match.phase);
   const isThirdPlace = match.phase === "final"
     && [match.home.name, match.away.name].includes("França")
     && [match.home.name, match.away.name].includes("Inglaterra");
-  const phaseLabel = isThirdPlace ? "3º Lugar" : (PHASE_LABEL[match.phase] ?? match.phase);
+  const phaseLabel = match.round_label ?? (isThirdPlace ? "3º Lugar" : (PHASE_LABEL[match.phase] ?? match.phase));
 
   const statusCls =
     match.status === "live"

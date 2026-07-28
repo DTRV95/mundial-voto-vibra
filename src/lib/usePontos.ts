@@ -132,6 +132,36 @@ export function mesAtual(meses: MesCompetitivo[]): MesCompetitivo | null {
   );
 }
 
+/**
+ * Identificador do ranking, para a tendência saber com o que comparar.
+ * Tem de ser igual ao que a função `gravar_fotografia_ranking()` escreve.
+ */
+export function escopoDe(opts: { competitionId?: string | null; monthId?: string | null }): string {
+  if (opts.monthId) return `mes:${opts.monthId}`;
+  if (opts.competitionId) return `comp:${opts.competitionId}`;
+  return "total";
+}
+
+/**
+ * Posição anterior de cada utilizador neste ranking — a base da
+ * seta de subiu/desceu. Devolve um mapa user_id → posição de ontem.
+ */
+export function useTendencia(escopo: string) {
+  return useQuery({
+    queryKey: ["tendencia", escopo],
+    staleTime: 300_000,
+    queryFn: async (): Promise<Map<string, number>> => {
+      const { data } = await (supabase as any)
+        .from("ranking_tendencia")
+        .select("user_id,rank_anterior")
+        .eq("escopo", escopo);
+      return new Map<string, number>(
+        ((data ?? []) as any[]).map((r) => [r.user_id, r.rank_anterior]),
+      );
+    },
+  });
+}
+
 /** Os pontos do próprio utilizador numa competição (ou no total). */
 export function useOsMeusPontos(userId: string | undefined, competitionId: string | null) {
   const { data: ranking = [], isLoading } = useRanking(competitionId);

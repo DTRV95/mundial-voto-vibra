@@ -7,7 +7,10 @@ import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 import { FollowButton } from "@/components/FollowButton";
 import { useCompetitions } from "@/lib/useCompetitions";
-import { useRanking, useRankingMes, useMeses, mesAtual, type LinhaRanking } from "@/lib/usePontos";
+import {
+  useRanking, useRankingMes, useMeses, mesAtual, useTendencia, escopoDe,
+  type LinhaRanking,
+} from "@/lib/usePontos";
 
 const HOF_PHASE_LABEL: Record<string, string> = {
   grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos",
@@ -231,6 +234,14 @@ function Rankings() {
   );
   const loadingUsers = fonte.isLoading;
 
+  // Posição de ontem no mesmo ranking — alimenta a seta de tendência
+  const escopo = escopoDe(
+    periodo === "mes"
+      ? { monthId: mes?.id }
+      : { competitionId: activeComp?.id },
+  );
+  const { data: anteriores } = useTendencia(escopo);
+
   return (
     <div className="px-5 pt-6">
       <header className="mb-5">
@@ -446,8 +457,9 @@ function Rankings() {
                   <span className="text-4xl">{div.emoji}</span>
                   <div>
                     <p className={`font-display text-2xl ${div.text}`}>{div.label}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       #{me.rank}º · {me.pontos} pts · {me.acertos}/{me.previsoes} acertos
+                      <RankTrend currentRank={me.rank} previousRank={anteriores?.get(me.user_id) ?? null} />
                     </p>
                   </div>
                 </div>
@@ -497,6 +509,7 @@ function Rankings() {
                           </span>
                         </Link>
                         <div className="flex items-center gap-2 shrink-0">
+                          <RankTrend currentRank={u.rank} previousRank={anteriores?.get(u.user_id) ?? null} />
                           <span className="hidden text-[10px] text-muted-foreground sm:inline">
                             {u.acertos}/{u.previsoes}
                           </span>

@@ -613,6 +613,43 @@ function Home() {
       {/* ===================== GRELHA BENTO ===================== */}
       <div className="mt-5 grid grid-cols-1 items-start gap-4 px-4 md:px-6 lg:grid-cols-2" style={{ gridAutoFlow: "dense" }}>
 
+      {/* ===================== PRÉ-REGISTO NOVA ÉPOCA ===================== */}
+      <div className="lg:col-span-2"><SeasonPreRegModal user={user} />
+      <PickCompetitionsModal /></div>
+
+      {/* ===================== A TUA JORNADA ===================== */}
+      {/* Substitui tres blocos que diziam o mesmo: jogos por votar,
+          jogos de hoje e o banner de prognosticos.
+          Ocupa a linha toda: e a acao principal da pagina. */}
+      <div className="lg:col-span-2">
+        {jornadaFoco
+          ? <CartaoJornada jornada={jornadaFoco} comp={activeComp} />
+          : <CartaoSemJornada comp={activeComp} />}
+      </div>
+
+      {/* ===================== DIVISÃO DO UTILIZADOR ===================== */}
+      {user && myDivision && (
+        <div className="">
+          <Link to="/rankings" search={{ tab: "divisoes" } as any}
+            className={`flex items-center gap-4 rounded-2xl border ${myDivision.border} ${myDivision.bg} px-5 py-4 transition-smooth hover:opacity-90`}
+          >
+            <span className="text-4xl">{myDivision.emoji}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">A tua divisão</p>
+              <p className={`font-display text-xl leading-none ${myDivision.text}`}>{myDivision.label}</p>
+              <p className="text-xs text-muted-foreground mt-1">#{myDivision.rank}º global · {myDivision.points} pts</p>
+            </div>
+            {myDivision.streak > 0 && (
+              <div className="flex flex-col items-center shrink-0 rounded-xl bg-orange-500/15 border border-orange-500/30 px-3 py-1.5">
+                <span className="text-lg leading-none">🔥</span>
+                <span className="text-[11px] font-bold text-orange-400 leading-none mt-0.5">{myDivision.streak}</span>
+              </div>
+            )}
+            <ArrowRight className={`h-4 w-4 shrink-0 ${myDivision.text}`} />
+          </Link>
+        </div>
+      )}
+
       {/* ===================== MY POINTS PER MATCH ===================== */}
       {user && myResults.length > 0 && (
         <div className="animate-enter delay-100 lg:col-span-2">
@@ -682,19 +719,6 @@ function Home() {
       {/* ===================== MATCH BREAKDOWN DRAWER ===================== */}
       <div className="lg:col-span-2">{selectedResult && <MatchBreakdownDrawer match={selectedResult} onClose={() => setSelectedResult(null)} />}</div>
 
-      {/* ===================== PRÉ-REGISTO NOVA ÉPOCA ===================== */}
-      <div className="lg:col-span-2"><SeasonPreRegModal user={user} />
-      <PickCompetitionsModal /></div>
-
-      {/* ===================== A TUA JORNADA ===================== */}
-      {/* Substitui tres blocos que diziam o mesmo: jogos por votar,
-          jogos de hoje e o banner de prognosticos. */}
-      <div>
-        {jornadaFoco
-          ? <CartaoJornada jornada={jornadaFoco} comp={activeComp} />
-          : <CartaoSemJornada comp={activeComp} />}
-      </div>
-
       {/* ===================== BANNER TORNEIO — logado sem liga ===================== */}
       {user && myPools.length === 0 && (
         <div className="">
@@ -716,34 +740,6 @@ function Home() {
           </div>
         </div>
       )}
-
-      {/* ===================== DIVISÃO DO UTILIZADOR ===================== */}
-      {user && myDivision && (
-        <div className="">
-          <Link to="/rankings" search={{ tab: "divisoes" } as any}
-            className={`flex items-center gap-4 rounded-2xl border ${myDivision.border} ${myDivision.bg} px-5 py-4 transition-smooth hover:opacity-90`}
-          >
-            <span className="text-4xl">{myDivision.emoji}</span>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">A tua divisão</p>
-              <p className={`font-display text-xl leading-none ${myDivision.text}`}>{myDivision.label}</p>
-              <p className="text-xs text-muted-foreground mt-1">#{myDivision.rank}º global · {myDivision.points} pts</p>
-            </div>
-            {myDivision.streak > 0 && (
-              <div className="flex flex-col items-center shrink-0 rounded-xl bg-orange-500/15 border border-orange-500/30 px-3 py-1.5">
-                <span className="text-lg leading-none">🔥</span>
-                <span className="text-[11px] font-bold text-orange-400 leading-none mt-0.5">{myDivision.streak}</span>
-              </div>
-            )}
-            <ArrowRight className={`h-4 w-4 shrink-0 ${myDivision.text}`} />
-          </Link>
-        </div>
-      )}
-
-      {/* ===================== NOTIFICAÇÕES PUSH ===================== */}
-      <div className="lg:col-span-2"><PushNotificationPrompt /></div>
-
-
 
       {/* ===================== FEED DA COMUNIDADE ===================== */}
       {activityFeed.length > 0 && (
@@ -1016,6 +1012,11 @@ function Home() {
         </div>
 
       </section>
+
+      {/* ===================== NOTIFICAÇÕES PUSH ===================== */}
+      {/* Pedir autorização só depois de a pessoa ter visto o que o site
+          faz — pedir à entrada é a melhor forma de levar um "não". */}
+      <div className="lg:col-span-2"><PushNotificationPrompt /></div>
 
       {/* ===================== CONVIDA OS TEUS AMIGOS ===================== */}
       <section className="lg:col-span-2">

@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarClock, Users, Trophy, Shield, HelpCircle, Swords, Target } from "lucide-react";
+import { Home, CalendarClock, Users, Trophy, Shield, HelpCircle, Swords, Target, Table2 } from "lucide-react";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import logoSvg from "@/assets/logo.svg";
 
@@ -9,6 +9,7 @@ const items = [
   { to: "/ligas",    label: "Torneios",    icon: Users },
   { to: "/duelos",   label: "Duelos",   icon: Swords },
   { to: "/prognosticos", label: "Prognósticos", icon: Target },
+  { to: "/classificacao", label: "Classificação", icon: Table2 },
   { to: "/rankings", label: "Rankings", icon: Trophy },
 ];
 

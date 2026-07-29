@@ -143,7 +143,7 @@ function EntrarPage() {
 
             <div className="mt-4 border-t border-white/15 pt-4">
               <p className="text-sm text-white/70">
-                Foste convidado para entrar neste torneio do Mundial 2026. Junta-te, faz as tuas previsões e compete com os teus amigos!
+                Foste convidado para entrar neste torneio. Junta-te, faz as tuas previsões e compete com os teus amigos!
               </p>
             </div>
           </div>

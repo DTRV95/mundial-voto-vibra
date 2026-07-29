@@ -141,7 +141,7 @@ function AuthPage() {
               : mode === "reset"
               ? "Define a tua nova palavra-passe."
               : mode === "signup"
-              ? "Junta-te à comunidade do Mundial 2026."
+              ? "Junta-te à comunidade da época 2026/27."
               : "Vota, compara e vibra com a comunidade."}
           </p>
         </div>

@@ -29,7 +29,7 @@ function NotFoundComponent() {
         </div>
         <p className="font-display text-2xl">Página não encontrada</p>
         <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-          Esta página saiu do campo. Volta para a homepage ou explora os jogos do Mundial.
+          Esta página saiu do campo. Volta para a homepage ou vê os jogos da jornada.
         </p>
         <div className="flex items-center justify-center gap-3 pt-2">
           <a href="/" className="rounded-full bg-gold px-5 py-2.5 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02]">
@@ -78,12 +78,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "Uma Geração" },
       { title: "Uma Geração — Vota, compara e vibra com a comunidade" },
-      { name: "description", content: "A comunidade onde os adeptos deixam previsões, acompanham os jogos e competem nos rankings do Mundial 2026." },
-      { name: "keywords", content: "Mundial 2026, previsões Mundial, palpites futebol, comunidade futebol, jogos do Mundial, ranking Mundial, Uma Geração, ScoreLab" },
+      { name: "description", content: "A comunidade onde os adeptos deixam previsões nos jogos da Liga Portugal e da Champions, e competem nos rankings da época." },
+      { name: "keywords", content: "Liga Portugal, Champions League, previsões futebol, palpites futebol, prognósticos, comunidade futebol, ranking futebol, Uma Geração" },
       { name: "robots", content: "index, follow" },
       { property: "og:site_name", content: "Uma Geração" },
       { property: "og:title", content: "Uma Geração — Vota, compara e vibra com a comunidade" },
-      { property: "og:description", content: "Faz as tuas previsões para o Mundial 2026, compara com a comunidade e compete nos rankings por fase." },
+      { property: "og:description", content: "Faz as tuas previsões nos 5 jogos de cada jornada, desafia amigos para duelos e sobe nas divisões." },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "pt_PT" },
       { property: "og:url", content: "https://geracao2026.com/" },
@@ -91,8 +91,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Uma Geração — Mundial 2026" },
-      { name: "twitter:description", content: "Vota, compara e vibra com a comunidade de adeptos do Mundial 2026." },
+      { name: "twitter:title", content: "Uma Geração — Liga Portugal e Champions" },
+      { name: "twitter:description", content: "Vota, compara e vibra com a comunidade a cada jornada." },
       { name: "twitter:image", content: "https://geracao2026.com/og-image.png" },
     ],
     links: [
@@ -110,7 +110,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "WebSite",
           "name": "Uma Geração",
           "url": "https://geracao2026.com",
-          "description": "A comunidade onde os adeptos fazem previsões, acompanham os jogos e competem nos rankings do Mundial 2026.",
+          "description": "A comunidade onde os adeptos fazem previsões nos jogos da Liga Portugal e da Champions, e competem nos rankings da época.",
           "inLanguage": "pt-PT",
           "potentialAction": {
             "@type": "SearchAction",
@@ -176,7 +176,7 @@ function RootShell({ children }: { children: ReactNode }) {
               div.innerHTML = ''
                 + '<div style="width:64px;height:64px;background:linear-gradient(135deg,#c9a84c,#f0d080);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:20px;box-shadow:0 8px 32px rgba(201,168,76,0.3)">🏆</div>'
                 + '<h1 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 6px;letter-spacing:-.02em">Uma Geração</h1>'
-                + '<p style="color:rgba(255,255,255,0.4);font-size:13px;margin:0 0 28px;letter-spacing:.05em;text-transform:uppercase">Mundial 2026</p>'
+                + '<p style="color:rgba(255,255,255,0.4);font-size:13px;margin:0 0 28px;letter-spacing:.05em;text-transform:uppercase">Época 2026/27</p>'
                 + '<div style="width:100%;max-width:360px">'
                 + '<p style="color:rgba(255,255,255,0.6);font-size:15px;line-height:1.6;margin:0 0 16px">O site não funciona dentro<br>do browser do Instagram.</p>'
                 + step
@@ -223,7 +223,7 @@ function MaintenanceNotice() {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-foreground">Manutenção programada</p>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-            O site estará em manutenção no dia <span className="text-foreground font-semibold">28 de junho, das 14h às 16h</span>. Estamos a preparar o mata-mata!
+            O site estará em manutenção para preparar a próxima jornada.
           </p>
         </div>
         <button
@@ -265,14 +265,14 @@ function MaintenancePage() {
         </div>
 
         <h1 className="font-display text-4xl text-white mb-2">Uma Geração</h1>
-        <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-8">Mundial 2026</p>
+        <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-8">Época 2026/27</p>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-6">
           <p className="text-white/90 font-semibold text-lg mb-2">
-            Estamos a preparar o mata-mata{dots}
+            Estamos a preparar a próxima jornada{dots}
           </p>
           <p className="text-white/50 text-sm leading-relaxed">
-            A nova fase está quase pronta. Voltamos em breve com os 16 avos de final e pontos a zero para todos!
+            Voltamos em breve com os jogos oficiais da próxima jornada.
           </p>
         </div>
 
@@ -308,142 +308,12 @@ function RootComponent() {
           </AppShell>
           <Toaster theme="dark" position="top-center" richColors />
           <MaintenanceNotice />
-          {/* Ronda32WelcomeModal desativado — obsoleto após o Mundial */}
         </MaintenanceGuard>
       </AuthProvider>
     </QueryClientProvider>
   );
 }
 
-function Ronda32WelcomeModal() {
-  const { user, loading } = useAuth();
-  const [visible, setVisible] = useState(false);
-  const [phaseResult, setPhaseResult] = useState<{ rank: number; total_points: number } | null>(null);
-  const [dataLoaded, setDataLoaded] = useState(false);
-
-  useEffect(() => {
-    if (loading) return;
-    const key = "ronda32_welcome_v1";
-    try {
-      if (localStorage.getItem(key)) return;
-    } catch { return; }
-
-    if (!user) {
-      setDataLoaded(true);
-      setVisible(true);
-      return;
-    }
-
-    supabase
-      .from("phase_results" as any)
-      .select("rank,total_points")
-      .eq("user_id", user.id)
-      .eq("phase", "grupos")
-      .maybeSingle()
-      .then(({ data }: any) => {
-        if (data) setPhaseResult({ rank: data.rank, total_points: data.total_points });
-        setDataLoaded(true);
-        setVisible(true);
-      });
-  }, [user, loading]);
-
-  function dismiss() {
-    try { localStorage.setItem("ronda32_welcome_v1", "1"); } catch { /* noop */ }
-    setVisible(false);
-  }
-
-  if (!visible || !dataLoaded) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-      style={{ background: "oklch(0 0 0 / 0.7)" }}
-      onClick={dismiss}>
-      <div
-        className="relative w-full max-w-sm overflow-hidden rounded-3xl"
-        style={{ background: "linear-gradient(160deg, oklch(0.18 0.04 250) 0%, oklch(0.14 0.03 142) 100%)" }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Tricolor bar */}
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, oklch(0.54 0.24 27) 0%, oklch(0.55 0.20 142) 50%, oklch(0.40 0.18 265) 100%)" }} />
-
-        <div className="px-6 py-7">
-          {/* Badge nova fase */}
-          <div className="mb-5 flex items-center gap-3">
-            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/10"
-              style={{ background: "oklch(0.55 0.20 142 / 0.2)" }}>
-              <span className="text-2xl">⚽</span>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/40">Uma Geração · Mundial 2026</p>
-              <p className="font-display text-xl text-white leading-tight">16 Avos de Final</p>
-            </div>
-          </div>
-
-          {/* Resultado fase de grupos (utilizadores existentes) */}
-          {phaseResult ? (
-            <div className="mb-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
-              <p className="text-xs text-white/50 mb-2 font-semibold uppercase tracking-wider">O teu resultado — Fase de Grupos</p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{phaseResult.rank <= 3 ? ["🥇","🥈","🥉"][phaseResult.rank - 1] : "🏅"}</span>
-                  <div>
-                    <p className="font-display text-3xl text-white leading-none">#{phaseResult.rank}º</p>
-                    <p className="text-xs text-white/40">lugar final</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-display text-3xl text-gold leading-none">{phaseResult.total_points}</p>
-                  <p className="text-xs text-white/40">pontos</p>
-                </div>
-              </div>
-            </div>
-          ) : user ? null : (
-            <div className="mb-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-              <p className="text-sm text-white/70 leading-relaxed">Cria conta para entrar no mata-mata e competir pelos 16 avos de final!</p>
-            </div>
-          )}
-
-          {/* Mensagem */}
-          <p className="text-sm text-white/70 leading-relaxed mb-4">
-            A fase de grupos terminou. Os pontos foram a zero e começa uma nova corrida — os 16 avos de final já estão disponíveis!
-          </p>
-
-          {/* Novo mercado */}
-          <div className="mb-5 rounded-2xl border border-gold/30 bg-gold/8 px-4 py-3 space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70">Novidade no mata-mata</p>
-            <div className="flex items-start gap-2.5">
-              <span className="text-xl shrink-0">⚔️</span>
-              <div>
-                <p className="text-sm font-bold text-white">Qualificar — 4 pts</p>
-                <p className="text-xs text-white/60 mt-0.5">Escolhe qual das equipas passa à próxima ronda. Conta mesmo que seja nos penáltis!</p>
-              </div>
-            </div>
-            <div className="pt-1 border-t border-white/10 grid grid-cols-2 gap-2 text-[10px] text-white/50">
-              <div className="flex items-center gap-1"><span className="text-gold">✓</span> Resultado (3–4 pts)</div>
-              <div className="flex items-center gap-1"><span className="text-gold">✓</span> BTTS (2 pts)</div>
-              <div className="flex items-center gap-1"><span className="text-gold">✓</span> +/- 2.5 golos (2 pts)</div>
-              <div className="flex items-center gap-1"><span className="text-gold">✓</span> Marcador exato (10 pts)</div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={dismiss}
-              className="w-full rounded-2xl py-3.5 font-bold text-background transition-smooth hover:brightness-110"
-              style={{ background: "linear-gradient(90deg, oklch(0.55 0.20 142) 0%, oklch(0.40 0.18 265) 100%)" }}
-            >
-              Vamos lá! →
-            </button>
-            <Link to="/como-funciona" onClick={dismiss}
-              className="w-full rounded-2xl border border-white/15 py-2.5 text-center text-xs font-semibold text-white/60 transition-smooth hover:border-white/30 hover:text-white/90">
-              Ver guia completo do mata-mata
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function MaintenanceGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();

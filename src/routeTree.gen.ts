@@ -17,10 +17,10 @@ import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as LigasRouteImport } from './routes/ligas'
 import { Route as JogosRouteImport } from './routes/jogos'
-import { Route as GruposRouteImport } from './routes/grupos'
 import { Route as DuelosRouteImport } from './routes/duelos'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
+import { Route as ClassificacaoRouteImport } from './routes/classificacao'
 import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -70,11 +70,6 @@ const JogosRoute = JogosRouteImport.update({
   path: '/jogos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GruposRoute = GruposRouteImport.update({
-  id: '/grupos',
-  path: '/grupos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DuelosRoute = DuelosRouteImport.update({
   id: '/duelos',
   path: '/duelos',
@@ -88,6 +83,11 @@ const CookiesRoute = CookiesRouteImport.update({
 const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
   id: '/como-funciona',
   path: '/como-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClassificacaoRoute = ClassificacaoRouteImport.update({
+  id: '/classificacao',
+  path: '/classificacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AvisoLegalRoute = AvisoLegalRouteImport.update({
@@ -136,10 +136,10 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/aviso-legal': typeof AvisoLegalRoute
+  '/classificacao': typeof ClassificacaoRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
   '/duelos': typeof DuelosRoute
-  '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
@@ -158,10 +158,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/aviso-legal': typeof AvisoLegalRoute
+  '/classificacao': typeof ClassificacaoRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
   '/duelos': typeof DuelosRoute
-  '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
@@ -181,10 +181,10 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/aviso-legal': typeof AvisoLegalRoute
+  '/classificacao': typeof ClassificacaoRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
   '/duelos': typeof DuelosRoute
-  '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
@@ -205,10 +205,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/aviso-legal'
+    | '/classificacao'
     | '/como-funciona'
     | '/cookies'
     | '/duelos'
-    | '/grupos'
     | '/jogos'
     | '/ligas'
     | '/perfil'
@@ -227,10 +227,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/aviso-legal'
+    | '/classificacao'
     | '/como-funciona'
     | '/cookies'
     | '/duelos'
-    | '/grupos'
     | '/jogos'
     | '/ligas'
     | '/perfil'
@@ -249,10 +249,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/aviso-legal'
+    | '/classificacao'
     | '/como-funciona'
     | '/cookies'
     | '/duelos'
-    | '/grupos'
     | '/jogos'
     | '/ligas'
     | '/perfil'
@@ -272,10 +272,10 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   AvisoLegalRoute: typeof AvisoLegalRoute
+  ClassificacaoRoute: typeof ClassificacaoRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   CookiesRoute: typeof CookiesRoute
   DuelosRoute: typeof DuelosRoute
-  GruposRoute: typeof GruposRoute
   JogosRoute: typeof JogosRoute
   LigasRoute: typeof LigasRoute
   PerfilRoute: typeof PerfilRoute
@@ -348,13 +348,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JogosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/grupos': {
-      id: '/grupos'
-      path: '/grupos'
-      fullPath: '/grupos'
-      preLoaderRoute: typeof GruposRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/duelos': {
       id: '/duelos'
       path: '/duelos'
@@ -374,6 +367,13 @@ declare module '@tanstack/react-router' {
       path: '/como-funciona'
       fullPath: '/como-funciona'
       preLoaderRoute: typeof ComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/classificacao': {
+      id: '/classificacao'
+      path: '/classificacao'
+      fullPath: '/classificacao'
+      preLoaderRoute: typeof ClassificacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/aviso-legal': {
@@ -440,10 +440,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   AvisoLegalRoute: AvisoLegalRoute,
+  ClassificacaoRoute: ClassificacaoRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   CookiesRoute: CookiesRoute,
   DuelosRoute: DuelosRoute,
-  GruposRoute: GruposRoute,
   JogosRoute: JogosRoute,
   LigasRoute: LigasRoute,
   PerfilRoute: PerfilRoute,

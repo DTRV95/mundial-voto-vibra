@@ -28,17 +28,23 @@ function Ligas() {
   const [newPrize, setNewPrize] = useState("");
   const [newEmoji, setNewEmoji] = useState("⚽");
   const [newDurationType, setNewDurationType] = useState<"ongoing" | "phase" | "date">("ongoing");
-  const [newDurationPhase, setNewDurationPhase] = useState("ronda32");
+  const [newDurationPhase, setNewDurationPhase] = useState("2027-05");
   const [newDurationDate, setNewDurationDate] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Meses da época — o torneio termina no fim do mês escolhido
   const PHASES = [
-    { value: "ronda32", label: "16 Avos de Final" },
-    { value: "oitavos", label: "Oitavos de Final" },
-    { value: "quartos", label: "Quartos de Final" },
-    { value: "meias", label: "Meias-Finais" },
-    { value: "final", label: "Final" },
+    { value: "2026-08", label: "Agosto 2026" },
+    { value: "2026-09", label: "Setembro 2026" },
+    { value: "2026-10", label: "Outubro 2026" },
+    { value: "2026-11", label: "Novembro 2026" },
+    { value: "2026-12", label: "Dezembro 2026" },
+    { value: "2027-01", label: "Janeiro 2027" },
+    { value: "2027-02", label: "Fevereiro 2027" },
+    { value: "2027-03", label: "Março 2027" },
+    { value: "2027-04", label: "Abril 2027" },
+    { value: "2027-05", label: "Maio 2027" },
   ];
 
   const EMOJIS = ["⚽", "🍺", "👨‍👩‍👧", "💼", "🏆", "🎮", "🎓", "🏋️", "🎉", "🔥", "💪", "🤝", "🦁", "🐉", "🌍"];
@@ -159,7 +165,7 @@ function Ligas() {
   function copyLink(code: string, poolId: string) {
     const url = `${"https://geracao2026.com"}/liga/${code}`;
     if (navigator.share) {
-      navigator.share({ title: "Junta-te ao meu torneio!", text: "Vota comigo no Mundial 2026 🏆", url });
+      navigator.share({ title: "Junta-te ao meu torneio!", text: "Vota comigo nos jogos da jornada 🏆", url });
     } else {
       navigator.clipboard.writeText(url);
       setCopiedId(poolId);
@@ -170,7 +176,7 @@ function Ligas() {
 
   function shareWhatsApp(code: string, name: string) {
     const url = `${"https://geracao2026.com"}/liga/${code}`;
-    const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
+    const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${name}" no Uma Geração!\nVota nos jogos da jornada e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }
 
@@ -203,7 +209,7 @@ function Ligas() {
         <div className="relative px-5 pt-8 pb-6 md:px-8">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Mundial 2026</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">Época 2026/27</p>
               <h1 className="font-display text-[clamp(2rem,8vw,3rem)] leading-none text-gold-metallic">
                 Torneios Privados
               </h1>
@@ -310,7 +316,7 @@ function Ligas() {
               <div className="grid grid-cols-3 gap-2 mb-3">
                 {[
                   { value: "ongoing", label: "Sem limite", icon: "♾️" },
-                  { value: "phase",   label: "Por fase",   icon: "🏟️" },
+                  { value: "phase",   label: "Por mês",    icon: "🗓️" },
                   { value: "date",    label: "Por data",   icon: "📅" },
                 ].map(opt => (
                   <button key={opt.value} type="button"

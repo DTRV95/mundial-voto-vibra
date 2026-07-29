@@ -13,9 +13,9 @@ import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 export const Route = createFileRoute("/jogo/$id")({
   head: () => ({
     meta: [
-      { title: "Análise & Previsão — Voz do Mundial" },
+      { title: "Análise & Previsão — Uma Geração" },
       { name: "description", content: "Dá a tua previsão e compara com a comunidade." },
-      { property: "og:title", content: "Voz do Mundial — Dá a tua previsão!" },
+      { property: "og:title", content: "Uma Geração — Dá a tua previsão!" },
       { property: "og:description", content: "Vota, compara e vibra com a comunidade. Grátis." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -157,7 +157,7 @@ function JogoPage() {
       : `${home} vs ${away} — dá a tua previsão! 🏆`;
     const url = "https://geracao2026.com" + window.location.pathname;
     if (navigator.share) {
-      await navigator.share({ title: `${home} vs ${away} — Voz do Mundial`, text, url }).catch(() => {});
+      await navigator.share({ title: `${home} vs ${away} — Uma Geração`, text, url }).catch(() => {});
     } else {
       await navigator.clipboard.writeText(url);
       setShared(true);

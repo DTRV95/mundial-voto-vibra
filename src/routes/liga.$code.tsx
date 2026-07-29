@@ -382,7 +382,7 @@ function copyLink() {
 
   function shareWhatsApp() {
     const url = `${"https://geracao2026.com"}/entrar/${pool?.code}`;
-    const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${pool?.name}" no Uma Geração!\nVota no Mundial 2026 e compete comigo: ${url}`);
+    const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${pool?.name}" no Uma Geração!\nVota nos jogos da jornada e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }
 
@@ -482,7 +482,11 @@ function copyLink() {
               </div>
             )}
             {(pool as any).duration_type && (pool as any).duration_type !== "ongoing" && (() => {
-              const PHASE_LABELS: Record<string,string> = { ronda32: "16 Avos", oitavos: "Oitavos", quartos: "Quartos", meias: "Meias-Finais", final: "Final" };
+              const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+              const rotuloMes = (v: string) => {
+                const [ano, mes] = String(v).split("-");
+                return MESES[Number(mes) - 1] ? `${MESES[Number(mes) - 1]} ${ano}` : v;
+              };
               const dt = (pool as any).duration_type;
               const dv = (pool as any).duration_value;
               const isDate = dt === "date" && dv;
@@ -490,7 +494,7 @@ function copyLink() {
               const daysLeft = endDate ? Math.ceil((endDate.getTime() - Date.now()) / 86400000) : null;
               return (
                 <div className="flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-sm px-3 py-1 text-xs font-semibold text-white">
-                  {dt === "phase" && <><Layers className="h-3.5 w-3.5" /> {PHASE_LABELS[dv] ?? dv}</>}
+                  {dt === "phase" && <><Layers className="h-3.5 w-3.5" /> {rotuloMes(dv)}</>}
                   {dt === "date" && <><CalendarDays className="h-3.5 w-3.5" />
                     {daysLeft !== null && daysLeft > 0 ? `${daysLeft}d restantes` : daysLeft === 0 ? "Termina hoje" : "Terminado"}
                   </>}

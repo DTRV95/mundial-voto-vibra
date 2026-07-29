@@ -128,7 +128,15 @@ export function ImportacaoPanel() {
             <Metrica rotulo="Jogos atualizados" valor={resultado.jogosAtualizados} />
             <Metrica rotulo="Jornadas criadas" valor={resultado.jornadasCriadas} />
             <Metrica rotulo="Meses criados" valor={resultado.mesesCriados} />
+            <Metrica rotulo="Emblemas" valor={resultado.emblemas} />
           </div>
+          {resultado.emblemas === 0 && (
+            <p className="mt-3 rounded-xl border border-gold/30 bg-gold/5 px-3 py-2 text-xs text-muted-foreground">
+              A API não devolveu emblemas. Se acabaste de publicar uma versão nova,
+              espera um minuto e volta a importar — o servidor pode ainda estar a correr a versão anterior.
+            </p>
+          )}
+
           {resultado.avisos.length > 0 && (
             <details className="mt-3">
               <summary className="cursor-pointer text-xs font-semibold text-muted-foreground">

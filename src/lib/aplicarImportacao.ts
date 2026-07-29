@@ -18,6 +18,8 @@ export interface ResultadoImportacao {
   jogosAtualizados: number;
   jornadasCriadas: number;
   mesesCriados: number;
+  /** Quantas equipas vieram com emblema oficial da API */
+  emblemas: number;
   avisos: string[];
 }
 
@@ -30,7 +32,7 @@ export async function aplicarImportacao(
   const r: ResultadoImportacao = {
     equipasNovas: 0, equipasAtualizadas: 0,
     jogosNovos: 0, jogosAtualizados: 0,
-    jornadasCriadas: 0, mesesCriados: 0, avisos: [],
+    jornadasCriadas: 0, mesesCriados: 0, emblemas: 0, avisos: [],
   };
   const db = supabase as any;
 
@@ -54,6 +56,7 @@ export async function aplicarImportacao(
 
   // ── 2. Equipas ───────────────────────────────────────────
   aoProgredir?.("Equipas…");
+  r.emblemas = dados.equipas.filter(e => !!e.emblema).length;
   const extIds = dados.equipas.map(e => e.externalId);
   const { data: existentes } = await db.from("teams")
     .select("id,external_id").in("external_id", extIds);

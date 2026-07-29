@@ -56,17 +56,10 @@ function EntrarPage() {
 
   const joinPool = useMutation({
     mutationFn: async () => {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("total_points")
-        .eq("id", user!.id)
-        .maybeSingle();
-
-      const start_points = profile?.total_points ?? 0;
 
       const { error } = await (supabase as any)
         .from("pool_members")
-        .insert({ pool_id: pool!.id, user_id: user!.id, start_points });
+        .insert({ pool_id: pool!.id, user_id: user!.id });
 
       // 23505 = unique violation — already a member, just proceed
       if (error && error.code !== "23505") throw error;

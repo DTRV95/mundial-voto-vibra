@@ -60,13 +60,25 @@ function Home() {
 
   const { data: topLeaders = [] } = useQuery({
     queryKey: ["leaders", "home"],
+    staleTime: 60_000,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id,display_name,total_points,predictions_made")
-        .order("total_points", { ascending: false })
-        .limit(5);
-      return data ?? [];
+      // v_divisao ordena pela mesma soma que os rankings usam
+      const { data: topo } = await (supabase as any)
+        .from("v_divisao").select("user_id,pontos,posicao")
+        .order("posicao").limit(5);
+      const linhas = (topo ?? []) as any[];
+      if (linhas.length === 0) return [];
+
+      const { data: perfis } = await supabase
+        .from("profiles").select("id,display_name")
+        .in("id", linhas.map(l => l.user_id));
+      const nomes = new Map((perfis ?? []).map((x: any) => [x.id, x.display_name]));
+
+      return linhas.map(l => ({
+        id: l.user_id,
+        display_name: nomes.get(l.user_id) ?? "Adepto",
+        total_points: l.pontos ?? 0,
+      }));
     },
   });
 
@@ -125,12 +137,11 @@ function Home() {
       }
 
       const userIds = [...new Set(members.map((m) => m.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, total_points")
-        .in("id", userIds);
+      const { data: pontos } = await (supabase as any)
+        .from("v_dna_progresso").select("user_id,pontos").in("user_id", userIds);
 
-      const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p.total_points ?? 0]));
+      const profileMap = Object.fromEntries(
+        ((pontos ?? []) as any[]).map(p => [p.user_id, p.pontos ?? 0]));
 
       // Agrupar pontos por pool e aplicar regra top-3
       const poolMemberPts: Record<string, number[]> = {};
@@ -158,15 +169,13 @@ function Home() {
     queryFn: async () => {
       const { data: me } = await supabase
         .from("profiles")
-        .select("total_points,vote_streak,max_vote_streak")
+        .select("vote_streak,max_vote_streak")
         .eq("id", user!.id)
         .maybeSingle();
-      if (!me) return null;
-      const { count } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .gt("total_points", me.total_points ?? 0);
-      const rank = (count ?? 0) + 1;
+      const { data: d } = await (supabase as any)
+        .from("v_divisao").select("posicao,pontos")
+        .eq("user_id", user!.id).maybeSingle();
+      const rank = d?.posicao ?? 999;
       const DIVISIONS = [
         { label: "1ª Liga",            emoji: "🏆", min: 1,  max: 10,  border: "border-cyan-400/40",    bg: "bg-cyan-400/10",    text: "text-cyan-400" },
         { label: "2ª Liga",            emoji: "⚽", min: 11, max: 25,  border: "border-yellow-400/40",  bg: "bg-yellow-400/10",  text: "text-yellow-400" },
@@ -174,7 +183,7 @@ function Home() {
         { label: "Liga do Zé Povinho", emoji: "🟢", min: 51, max: Infinity, border: "border-green-700/40", bg: "bg-green-700/10", text: "text-green-600" },
       ];
       const div = DIVISIONS.find(d => rank >= d.min && rank <= d.max) ?? DIVISIONS[3];
-      return { rank, points: me.total_points ?? 0, streak: (me as any).vote_streak ?? 0, maxStreak: (me as any).max_vote_streak ?? 0, ...div };
+      return { rank, points: d?.pontos ?? 0, streak: (me as any)?.vote_streak ?? 0, maxStreak: (me as any)?.max_vote_streak ?? 0, ...div };
     },
   });
 
@@ -249,7 +258,7 @@ function Home() {
       const authorIds = [...new Set((activityEvents as any[]).map((e: any) => e.user_id))];
       const { data: authors } = await supabase
         .from("profiles")
-        .select("id,display_name,total_points")
+        .select("id,display_name")
         .in("id", authorIds);
       const profileMap = Object.fromEntries((authors ?? []).map((p: any) => [p.id, p]));
 
@@ -373,16 +382,15 @@ function Home() {
     enabled: !!user?.id && !myLeaderEntry && topLeaders.length > 0,
     queryFn: async () => {
       const { data: me } = await supabase
-        .from("profiles")
-        .select("id,display_name,total_points")
-        .eq("id", user!.id)
-        .maybeSingle();
+        .from("profiles").select("id,display_name").eq("id", user!.id).maybeSingle();
       if (!me) return null;
-      const { count } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .gt("total_points", me.total_points);
-      return { display_name: me.display_name, total_points: me.total_points, rank: (count ?? 0) + 1 };
+      const { data: d } = await (supabase as any)
+        .from("v_divisao").select("posicao,pontos").eq("user_id", user!.id).maybeSingle();
+      return {
+        display_name: me.display_name,
+        total_points: d?.pontos ?? 0,
+        rank: d?.posicao ?? null,
+      };
     },
   });
 
@@ -436,7 +444,6 @@ function Home() {
 
 
 
-  // Classificação global: grupos (phase_results, tem TODOS os utilizadores) + mata-mata (profiles.total_points)
 
   const { share: shareRank, Portal: RankSharePortal } = useRankShare({
     displayName: myLeaderRank?.display_name ?? myLeaderEntry?.display_name ?? "Tu",

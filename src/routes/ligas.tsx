@@ -94,10 +94,9 @@ function Ligas() {
         .single();
       if (error) throw error;
 
-      // auto-entrar na liga
-      const { data: myProfile } = await supabase.from("profiles").select("total_points").eq("id", user!.id).maybeSingle();
-      const start_points = myProfile?.total_points ?? 0;
-      await supabase.from("pool_members").insert({ pool_id: pool.id, user_id: user!.id, start_points });
+      // Auto-entrar. start_points já não é usado: a pontuação da liga
+      // conta a partir de pool_members.conta_desde (Fase 7).
+      await supabase.from("pool_members").insert({ pool_id: pool.id, user_id: user!.id });
       return pool;
     },
     onSuccess: (pool: any) => {
@@ -105,7 +104,7 @@ function Ligas() {
       setNewPrize("");
       setNewEmoji("⚽");
       setNewDurationType("ongoing");
-      setNewDurationPhase("ronda32");
+      setNewDurationPhase("2027-05");
       setNewDurationDate("");
       qc.invalidateQueries({ queryKey: ["my-pools"] });
       toast.success("Torneio criado!");
@@ -123,11 +122,9 @@ function Ligas() {
         .maybeSingle();
       if (error || !pool) throw new Error("Liga não encontrada.");
 
-      const { data: myProfile } = await supabase.from("profiles").select("total_points").eq("id", user!.id).maybeSingle();
-      const start_points = myProfile?.total_points ?? 0;
       const { error: joinError } = await supabase
         .from("pool_members")
-        .insert({ pool_id: pool.id, user_id: user!.id, start_points });
+        .insert({ pool_id: pool.id, user_id: user!.id });
       if (joinError?.code === "23505") throw new Error("Já és membro deste torneio.");
       if (joinError) throw joinError;
       return pool;

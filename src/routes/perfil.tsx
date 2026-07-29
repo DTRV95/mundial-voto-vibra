@@ -13,6 +13,7 @@ import { useNotifications, markChatRead, markRankSeen, markFollowSeen } from "@/
 import { FollowButton } from "@/components/FollowButton";
 import { BadgeShelf } from "@/components/Badges";
 import { CartaoDnaCompacto } from "@/components/dna/CartaoDnaCompacto";
+import { useEstatisticas, usePosicaoGeral } from "@/lib/useEstatisticas";
 import { DefinicoesDna } from "@/components/dna/DefinicoesDna";
 
 export const Route = createFileRoute("/perfil")({
@@ -39,7 +40,7 @@ function Perfil() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct,vote_streak,max_vote_streak")
+        .select("id,display_name,avatar_url,vote_streak,max_vote_streak")
         .eq("id", user!.id)
         .maybeSingle();
       if (error) console.error("Profile fetch error:", error);
@@ -83,16 +84,9 @@ function Perfil() {
     },
   });
 
-  const { data: myGlobalRank } = useQuery({
-    queryKey: ["global-rank", user?.id], enabled: !!user?.id && !!profile,
-    queryFn: async () => {
-      const { count } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .gt("total_points", profile!.total_points ?? 0);
-      return (count ?? 0) + 1;
-    },
-  });
+  // Fonte única: as mesmas somas que alimentam os rankings.
+  const { data: stats } = useEstatisticas(user?.id);
+  const { data: myGlobalRank } = usePosicaoGeral(user?.id);
 
   const DIVISIONS = [
     { label: "1ª Liga", min: 1, max: 10 },
@@ -105,7 +99,7 @@ function Perfil() {
   const { share: shareMyRank, Portal: RankSharePortal } = useRankShare({
     displayName: profile?.display_name ?? "Adepto",
     rank: myGlobalRank ?? 1,
-    totalPoints: profile?.total_points ?? 0,
+    totalPoints: stats?.pontos ?? 0,
     totalUsers: 0,
     division: myRankDivision,
     phase: "Mata-Mata",
@@ -174,8 +168,7 @@ function Perfil() {
 
   if (!user) return null;
 
-  const acc = profile && profile.predictions_made > 0
-    ? Math.round((profile.predictions_correct / profile.predictions_made) * 100) : 0;
+  const acc = stats?.acertoPct ?? 0;
 
   const pointsHistory = history.filter((h: any) => h.points != null && h.points > 0);
   const bestGame = pointsHistory.length > 0
@@ -414,8 +407,8 @@ function Perfil() {
           {/* Stats strip */}
           <div className="grid grid-cols-3 border-t border-white/8 mt-2">
             {[
-              { label: "Pontos", value: profile?.total_points ?? 0, color: "text-gold" },
-              { label: "Previsões", value: profile?.predictions_made ?? 0, color: "text-white" },
+              { label: "Pontos", value: stats?.pontos ?? 0, color: "text-gold" },
+              { label: "Previsões", value: stats?.previsoes ?? 0, color: "text-white" },
               { label: "Acerto", value: `${acc}%`, color: acc >= 50 ? "text-wc-green" : "text-white/70" },
             ].map((s, i) => (
               <div key={i} className={`py-3.5 text-center ${i > 0 ? "border-l border-white/8" : ""}`}>
@@ -448,7 +441,7 @@ function Perfil() {
         exactScores={exactScores}
         bestCorrectStreak={bestCorrectStreak}
         maxStreak={maxStreak}
-        totalPredictions={profile?.predictions_made ?? 0}
+        totalPredictions={stats?.previsoes ?? 0}
         acc={acc}
       />
 

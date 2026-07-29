@@ -9,6 +9,7 @@ import { PHASE_LABEL, formatDate } from "@/lib/format";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { BadgeShelf } from "@/components/Badges";
 import { DnaPublico } from "@/components/dna/DnaPublico";
+import { useEstatisticas, usePosicaoGeral } from "@/lib/useEstatisticas";
 
 export const Route = createFileRoute("/adepto/$id")({
   component: PublicProfile,
@@ -24,7 +25,7 @@ function PublicProfile() {
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id,display_name,avatar_url,total_points,predictions_made,predictions_correct")
+        .select("id,display_name,avatar_url")
         .eq("id", id)
         .maybeSingle();
       return data;
@@ -46,17 +47,8 @@ function PublicProfile() {
     },
   });
 
-  const { data: globalRank } = useQuery({
-    queryKey: ["public-global-rank", id],
-    enabled: !!profile,
-    queryFn: async () => {
-      const { count } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .gt("total_points", profile!.total_points ?? 0);
-      return (count ?? 0) + 1;
-    },
-  });
+  const { data: stats } = useEstatisticas(id);
+  const { data: globalRank } = usePosicaoGeral(id);
 
   const { data: leagues = [] } = useQuery({
     queryKey: ["public-leagues", id],
@@ -90,9 +82,7 @@ function PublicProfile() {
     );
   }
 
-  const acc = profile.predictions_made > 0
-    ? Math.round((profile.predictions_correct / profile.predictions_made) * 100)
-    : 0;
+  const acc = stats?.acertoPct ?? 0;
 
   return (
     <div className="pb-16">
@@ -141,11 +131,11 @@ function PublicProfile() {
             {/* Stats */}
             <div className="mt-3 grid grid-cols-3 gap-3">
               <div className="rounded-xl bg-white/10 px-3 py-2.5 text-center">
-                <p className="font-display text-2xl text-white">{profile.total_points ?? 0}</p>
+                <p className="font-display text-2xl text-white">{stats?.pontos ?? 0}</p>
                 <p className="text-[10px] text-white/60 uppercase tracking-wider">Pontos</p>
               </div>
               <div className="rounded-xl bg-white/10 px-3 py-2.5 text-center">
-                <p className="font-display text-2xl text-white">{profile.predictions_made ?? 0}</p>
+                <p className="font-display text-2xl text-white">{stats?.previsoes ?? 0}</p>
                 <p className="text-[10px] text-white/60 uppercase tracking-wider">Previsões</p>
               </div>
               <div className="rounded-xl bg-white/10 px-3 py-2.5 text-center">

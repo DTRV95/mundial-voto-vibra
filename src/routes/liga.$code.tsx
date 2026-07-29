@@ -65,7 +65,7 @@ function LigaPage() {
   const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
   const [addSearch, setAddSearch] = useState("");
-  const [addTarget, setAddTarget] = useState<{ id: string; display_name: string; total_points: number; avatar_url: string | null } | null>(null);
+  const [addTarget, setAddTarget] = useState<{ id: string; display_name: string; avatar_url: string | null } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showAllMembers, setShowAllMembers] = useState(false);
   const [showPhaseHistory, setShowPhaseHistory] = useState(false);
@@ -209,17 +209,14 @@ function LigaPage() {
     queryKey: ["pool-global-ranks", pool?.id],
     enabled: !!pool && ranking.length > 0,
     queryFn: async () => {
-      const { data: allProfiles } = await supabase
-        .from("profiles")
-        .select("id,total_points")
-        .order("total_points", { ascending: false });
+      // v_divisao já traz a posição calculada da mesma fonte que os
+      // rankings — sem isto, a liga mostrava uma posição e o ranking outra.
+      const memberIds = [...new Set(ranking.map((r: any) => r.id))];
+      const { data: linhas } = await (supabase as any)
+        .from("v_divisao").select("user_id,posicao").in("user_id", memberIds);
 
-      if (!allProfiles) return {};
-      const memberIds = new Set(ranking.map(r => r.id));
       const ranks: Record<string, number> = {};
-      allProfiles.forEach((p, i) => {
-        if (memberIds.has(p.id)) ranks[p.id] = i + 1;
-      });
+      for (const l of ((linhas ?? []) as any[])) ranks[l.user_id] = l.posicao;
       return ranks;
     },
   });
@@ -270,18 +267,9 @@ function LigaPage() {
 
   const joinPool = useMutation({
     mutationFn: async () => {
-      // Busca pontos actuais para usar como ponto de partida na liga
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("total_points")
-        .eq("id", user!.id)
-        .maybeSingle();
-
-      const start_points = profile?.total_points ?? 0;
-
       const { error } = await supabase
         .from("pool_members")
-        .insert({ pool_id: pool!.id, user_id: user!.id, start_points });
+        .insert({ pool_id: pool!.id, user_id: user!.id });
       if (error?.code === "23505") return;
       if (error) throw error;
     },
@@ -339,22 +327,21 @@ function LigaPage() {
       const memberIds = new Set(ranking.map((r: any) => r.id));
       const { data } = await supabase
         .from("profiles")
-        .select("id, display_name, total_points, avatar_url")
+        .select("id, display_name, avatar_url")
         .ilike("display_name", `%${addSearch.trim()}%`)
-        .order("total_points", { ascending: false })
+        .order("display_name")
         .limit(8);
       return (data ?? []).filter((u: any) => !memberIds.has(u.id));
     },
   });
 
   const addMember = useMutation({
-    mutationFn: async ({ userId, startFromZero }: { userId: string; startFromZero: boolean }) => {
-      const { data: profile } = await supabase
-        .from("profiles").select("total_points").eq("id", userId).maybeSingle();
-      const start_points = startFromZero ? (profile?.total_points ?? 0) : 0;
+    // A pontuação conta sempre a partir da entrada (pool_members.conta_desde),
+    // por isso já não existe a distinção "começar do zero".
+    mutationFn: async ({ userId }: { userId: string }) => {
       const { error } = await supabase
         .from("pool_members")
-        .insert({ pool_id: pool!.id, user_id: userId, start_points });
+        .insert({ pool_id: pool!.id, user_id: userId });
       if (error?.code === "23505") throw new Error("Utilizador já é membro.");
       if (error) throw error;
     },
@@ -1038,25 +1025,17 @@ function copyLink() {
                 <p className="text-sm text-muted-foreground">{addTarget.total_points} pontos globais</p>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground mb-5">Como deve entrar neste torneio?</p>
-            <div className="space-y-2">
-              <button
-                onClick={() => addMember.mutate({ userId: addTarget.id, startFromZero: false })}
-                disabled={addMember.isPending}
-                className="w-full rounded-2xl border-2 border-gold/40 bg-gold/10 px-4 py-3.5 text-left hover:bg-gold/20 transition-smooth disabled:opacity-50"
-              >
-                <p className="font-bold text-sm">Com os pontos que já tem</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Entra com {addTarget.total_points} pts — conta tudo desde o início do torneio</p>
-              </button>
-              <button
-                onClick={() => addMember.mutate({ userId: addTarget.id, startFromZero: true })}
-                disabled={addMember.isPending}
-                className="w-full rounded-2xl border-2 border-wc-red/40 bg-wc-red/10 px-4 py-3.5 text-left hover:bg-wc-red/20 transition-smooth disabled:opacity-50"
-              >
-                <p className="font-bold text-sm">A partir do zero</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Só contam os pontos feitos a partir de agora</p>
-              </button>
-            </div>
+            <p className="mb-5 text-sm text-muted-foreground">
+              Só contam os pontos feitos a partir da entrada — o histórico anterior
+              não entra na classificação do torneio.
+            </p>
+            <button
+              onClick={() => addMember.mutate({ userId: addTarget.id })}
+              disabled={addMember.isPending}
+              className="w-full rounded-2xl bg-gold px-4 py-3 text-sm font-bold text-background shadow-gold transition-smooth disabled:opacity-50"
+            >
+              {addMember.isPending ? "A adicionar…" : "Adicionar ao torneio"}
+            </button>
             <button onClick={() => setAddTarget(null)} className="mt-3 w-full text-center text-xs text-muted-foreground hover:text-foreground transition-smooth">
               Cancelar
             </button>

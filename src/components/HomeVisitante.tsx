@@ -44,19 +44,30 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
   const profundo = activeComp?.deep ?? "#82000A";
 
   return (
-    <div className="relative overflow-hidden">
-      {/* ── Fundo vivo ──────────────────────────────────────── */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
-        <div className="aurora absolute -left-[20%] -top-[10%] h-[70vh] w-[80vw] rounded-full"
-          style={{ background: `radial-gradient(circle, ${acento} 0%, transparent 65%)`, filter: "blur(90px)", opacity: 0.55 }} />
-        <div className="aurora-lenta absolute -right-[15%] top-[15%] h-[60vh] w-[70vw] rounded-full"
-          style={{ background: `radial-gradient(circle, ${eletrico} 0%, transparent 65%)`, filter: "blur(110px)", opacity: 0.3 }} />
-        <div className="absolute inset-x-0 top-0 h-[80vh]"
-          style={{ background: `linear-gradient(180deg, ${profundo}55 0%, transparent 70%)` }} />
+    // Fundo escuro próprio: sem isto, os halos de cor lavavam a página
+    // e o texto branco deixava de se ler.
+    <div className="relative isolate min-h-screen overflow-hidden" style={{ background: "#080B12" }}>
+
+      {/* ── Fundo vivo, por baixo de tudo ───────────────────── */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
+        <div className="aurora absolute -left-[25%] -top-[15%] h-[65vh] w-[75vw] rounded-full"
+          style={{ background: `radial-gradient(circle, ${acento} 0%, transparent 68%)`, filter: "blur(110px)", opacity: 0.38 }} />
+        <div className="aurora-lenta absolute -right-[20%] top-[18%] h-[55vh] w-[65vw] rounded-full"
+          style={{ background: `radial-gradient(circle, ${eletrico} 0%, transparent 68%)`, filter: "blur(130px)", opacity: 0.14 }} />
+        <div className="absolute inset-x-0 top-0 h-[70vh]"
+          style={{ background: `linear-gradient(180deg, ${profundo}66 0%, transparent 75%)` }} />
         {activeComp?.motif === "stars"
-          ? <div className="motif-stars absolute inset-x-0 top-0 h-[80vh] opacity-50" />
-          : <div className="motif-speed absolute inset-x-0 top-0 h-[70vh] opacity-30" />}
+          ? <div className="motif-stars absolute inset-x-0 top-0 h-[80vh] opacity-40" />
+          : <div className="motif-speed absolute inset-x-0 top-0 h-[70vh] opacity-20" />}
+
+        {/* Véu escuro por cima dos halos: garante contraste do texto
+            seja qual for a cor da competição */}
+        <div className="absolute inset-0"
+          style={{ background: "linear-gradient(180deg, rgba(8,11,18,0.35) 0%, rgba(8,11,18,0.55) 45%, rgba(8,11,18,0.80) 100%)" }} />
       </div>
+
+      {/* Todo o conteúdo fica acima do fundo */}
+      <div className="relative z-10">
 
       {/* ── HERO ────────────────────────────────────────────── */}
       <section className="px-5 pb-8 pt-10 md:px-8 md:pt-16">
@@ -194,14 +205,14 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
             É competir com pessoas com nome, cara e conversa no grupo.
           </p>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Destaque
               icone={Users}
               cor={acento}
               titulo="Torneios à tua medida"
               texto="Cria um torneio, partilha um código de 6 letras e escolhe as regras: que competições contam, e se contam todos os jogos, só os dos grandes, ou só os do teu clube."
               nota="Com chat próprio"
-              grande
+              destaque
             />
             <Destaque
               icone={Swords}
@@ -209,6 +220,7 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
               titulo="Duelos 1 contra 1"
               texto="Desafia qualquer adepto por um jogo, uma jornada ou o mês inteiro. Ganhas pontos num ranking à parte — e o confronto direto fica guardado para sempre."
               nota="5–2 contra o teu cunhado, para a vida"
+              destaque
             />
             <Destaque
               icone={Trophy}
@@ -303,20 +315,22 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 }
 
-function Destaque({ icone: Icone, cor, titulo, texto, nota, grande }: {
+function Destaque({ icone: Icone, cor, titulo, texto, nota, destaque }: {
   icone: React.ElementType;
   cor: string;
   titulo: string;
   texto: string;
   nota?: string;
-  grande?: boolean;
+  /** Os dois diferenciais principais ocupam mais espaço em ecrã grande */
+  destaque?: boolean;
 }) {
   return (
-    <div className={`cartao-eleva relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm ${grande ? "md:row-span-2" : ""}`}>
+    <div className={`cartao-eleva relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur-sm ${destaque ? "sm:col-span-2 lg:col-span-3" : ""}`}>
       {/* Halo do canto, na cor do destaque */}
       <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full"
         style={{ background: cor, filter: "blur(60px)", opacity: 0.22 }} />

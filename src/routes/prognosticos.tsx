@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Target, Clock } from "lucide-react";
 import { PageTabs, ABAS_JOGAR } from "@/components/PageTabs";
+import { CompetitionAtmosphere, PageHeader } from "@/components/CompetitionAtmosphere";
+import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { formatTime } from "@/lib/format";
 
@@ -36,6 +38,7 @@ function shortDayLabel(iso: string) {
 }
 
 function Prognosticos() {
+  const { active } = useActiveCompetition();
   const todayKey = dayKey(new Date().toISOString());
   const [dayFilter, setDayFilter] = useState<string>(todayKey);
 
@@ -78,12 +81,14 @@ function Prognosticos() {
 
   return (
     <div className="px-4 pt-6 pb-10 md:px-8">
-      <header className="mb-5">
-        <h1 className="font-display text-3xl md:text-4xl">Prognósticos</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Análises dos jogos oficiais, antes de dares a tua previsão.
-        </p>
-      </header>
+      <CompetitionAtmosphere comp={active} />
+
+      <PageHeader
+        eyebrow={active?.name}
+        title="Prognósticos"
+        subtitle="Análises dos jogos oficiais, antes de dares a tua previsão."
+        comp={active}
+      />
 
       <PageTabs abas={ABAS_JOGAR} />
 

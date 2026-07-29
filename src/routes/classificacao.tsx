@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Table2 } from "lucide-react";
 import { PageTabs, ABAS_JOGAR } from "@/components/PageTabs";
+import { CompetitionAtmosphere, PageHeader, CompetitionPicker } from "@/components/CompetitionAtmosphere";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 
@@ -69,33 +70,18 @@ function Classificacao() {
 
   return (
     <div className="px-4 pt-6 pb-10 md:px-8">
-      <header className="mb-5">
-        <h1 className="font-display text-3xl md:text-4xl">Tabela classificativa</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          A classificação das equipas na competição. Para a classificação dos adeptos, vê os Rankings.
-        </p>
-      </header>
+      <CompetitionAtmosphere comp={active} />
+
+      <PageHeader
+        eyebrow={active?.name}
+        title="Tabela classificativa"
+        subtitle="A classificação das equipas. Para a classificação dos adeptos, vê os Rankings."
+        comp={active}
+      />
 
       <PageTabs abas={ABAS_JOGAR} />
 
-      {competitions.length > 1 && (
-        <div className="mb-5 -mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-          <div className="flex w-max gap-2">
-            {competitions.map(c => {
-              const on = c.id === active?.id;
-              return (
-                <button key={c.id} onClick={() => setSlug(c.slug)}
-                  className="whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth"
-                  style={on
-                    ? { borderColor: c.accent, background: c.accent, color: "#fff" }
-                    : { borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
-                  {c.emoji} {c.short}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <CompetitionPicker competitions={competitions} activeId={active?.id} onPick={setSlug} />
 
       {isLoading && <div className="shimmer h-96 rounded-2xl" />}
 

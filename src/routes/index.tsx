@@ -16,6 +16,7 @@ import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { PickCompetitionsModal } from "@/components/PickCompetitionsModal";
 import { ChampionsAtmosphere } from "@/components/ChampionsAtmosphere";
 import { LigaAtmosphere } from "@/components/LigaAtmosphere";
+import { CompetitionAtmosphere } from "@/components/CompetitionAtmosphere";
 import { CompetitionArt, findCompetitionArt } from "@/components/CompetitionArt";
 import { useFollowing } from "@/lib/useFollow";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
@@ -509,33 +510,7 @@ function Home() {
         ["--comp-electric" as any]: activeComp?.electric ?? "var(--gold)",
       }}
     >
-      {/* Ambiente da competição — o fundo da página muda de mundo */}
-      {activeComp && (
-        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden
-          style={{ transition: "opacity 500ms ease" }}>
-          {/* Manto de cor descendo do topo */}
-          <div className="absolute inset-x-0 top-0 h-[70vh]"
-            style={{
-              background: `linear-gradient(180deg, color-mix(in srgb, ${activeComp.accent} 26%, transparent) 0%, color-mix(in srgb, ${activeComp.accent} 10%, transparent) 38%, transparent 100%)`,
-              transition: "background 500ms ease",
-            }} />
-          {/* Halos laterais profundos */}
-          <div className="absolute -left-[15%] top-[6%] h-[46vh] w-[65vw] rounded-full"
-            style={{ background: activeComp.glow, filter: "blur(90px)", opacity: 0.55, transition: "background 500ms ease" }} />
-          <div className="absolute -right-[18%] top-[26%] h-[40vh] w-[55vw] rounded-full"
-            style={{ background: `color-mix(in srgb, ${activeComp.electric} 22%, transparent)`, filter: "blur(100px)", opacity: 0.5, transition: "background 500ms ease" }} />
-
-          {/* Textura de fundo característica da competição */}
-          {activeComp.motif === "stars" ? (
-            <div className="motif-stars absolute inset-x-0 top-0 h-[75vh] opacity-60" />
-          ) : (
-            <div className="motif-speed absolute inset-x-0 top-0 h-[60vh] opacity-40" />
-          )}
-          {/* Brilho de base */}
-          <div className="absolute inset-x-0 bottom-0 h-[35vh]"
-            style={{ background: `linear-gradient(0deg, color-mix(in srgb, ${activeComp.deep} 12%, transparent) 0%, transparent 100%)`, transition: "background 500ms ease" }} />
-        </div>
-      )}
+      <CompetitionAtmosphere comp={activeComp} />
 
       {RankSharePortal}
 

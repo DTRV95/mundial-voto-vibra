@@ -7,6 +7,7 @@ import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { CalendarClock, CheckCircle2 } from "lucide-react";
 import { PageTabs, ABAS_JOGAR } from "@/components/PageTabs";
+import { CompetitionAtmosphere, PageHeader, CompetitionPicker } from "@/components/CompetitionAtmosphere";
 
 export const Route = createFileRoute("/jogos")({
   head: () => ({
@@ -104,39 +105,18 @@ function Jogos() {
 
   return (
     <div className="px-4 pt-6 pb-10 md:px-8">
-      <header className="mb-5">
-        <h1 className="font-display text-3xl md:text-4xl">A tua jornada</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Cada jornada tem 5 jogos oficiais — os mesmos para toda a gente.
-        </p>
-      </header>
+      <CompetitionAtmosphere comp={active} />
+
+      <PageHeader
+        eyebrow={active?.name}
+        title="A tua jornada"
+        subtitle="5 jogos oficiais — os mesmos para toda a gente."
+        comp={active}
+      />
 
       <PageTabs abas={ABAS_JOGAR} />
 
-      {/* Competições */}
-      {competitions.length > 1 && (
-        <div className="mb-4 -mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-          <div className="flex w-max gap-2">
-            {competitions.map((c) => {
-              const ativa = c.id === active?.id;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => setSlug(c.slug)}
-                  className="whitespace-nowrap rounded-full border px-4 py-2 text-sm font-semibold transition-smooth"
-                  style={
-                    ativa
-                      ? { borderColor: c.accent, background: c.accent, color: "#fff" }
-                      : { borderColor: "var(--border)", color: "var(--muted-foreground)" }
-                  }
-                >
-                  {c.emoji} {c.short}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <CompetitionPicker competitions={competitions} activeId={active?.id} onPick={setSlug} />
 
       {isLoading && (
         <div className="grid gap-3">

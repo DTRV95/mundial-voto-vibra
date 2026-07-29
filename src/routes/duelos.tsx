@@ -14,6 +14,8 @@ import {
 import { Swords, Trophy, History, Search, Check, X, Clock, Info } from "lucide-react";
 import { toast } from "sonner";
 import { PageTabs, ABAS_SOCIAL } from "@/components/PageTabs";
+import { CompetitionAtmosphere, PageHeader } from "@/components/CompetitionAtmosphere";
+import { useActiveCompetition } from "@/lib/useActiveCompetition";
 
 export const Route = createFileRoute("/duelos")({
   head: () => ({
@@ -30,6 +32,7 @@ export const Route = createFileRoute("/duelos")({
 
 function Duelos() {
   const { user } = useAuth();
+  const { active } = useActiveCompetition();
   const [tab, setTab] = useState<"ativos" | "ranking" | "rivalidades">("ativos");
   const [aDesafiar, setADesafiar] = useState(false);
 
@@ -57,16 +60,23 @@ function Duelos() {
 
   return (
     <div className="px-5 pt-6 pb-10">
-      <header className="mb-5 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="font-display text-3xl">Duelos</h1>
-          <p className="text-sm text-muted-foreground">Um contra um. Ganhar dá pontos no ranking de duelos.</p>
-        </div>
-        <button onClick={() => setADesafiar(true)}
-          className="shrink-0 rounded-full bg-gold px-4 py-2 text-sm font-bold text-background shadow-gold">
-          Desafiar
-        </button>
-      </header>
+      <CompetitionAtmosphere comp={active} />
+
+      <PageHeader
+        title="Duelos"
+        subtitle="Um contra um. Ganhar dá pontos no ranking de duelos."
+        comp={active}
+        acao={
+          <button onClick={() => setADesafiar(true)}
+            className="rounded-full px-4 py-2 text-sm font-bold text-white transition-smooth"
+            style={{
+              background: active ? `linear-gradient(135deg, ${active.accent}, ${active.deep})` : "var(--gold)",
+              boxShadow: active ? `0 6px 20px ${active.glow}` : undefined,
+            }}>
+            Desafiar
+          </button>
+        }
+      />
 
       <PageTabs abas={ABAS_SOCIAL} />
 

@@ -7,6 +7,7 @@ import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 import { FollowButton } from "@/components/FollowButton";
 import { useCompetitions } from "@/lib/useCompetitions";
+import { CompetitionAtmosphere, PageHeader, CompetitionPicker } from "@/components/CompetitionAtmosphere";
 import {
   useRanking, useRankingMes, useMeses, mesAtual, useTendencia, escopoDe,
   type LinhaRanking,
@@ -279,38 +280,25 @@ function Rankings() {
 
   return (
     <div className="px-5 pt-6">
-      <header className="mb-5">
-        <h1 className="font-display text-3xl">Rankings</h1>
-        <p className="text-sm text-muted-foreground">
-          Pontos dos jogos oficiais de cada jornada — por competição ou no total.
-        </p>
-      </header>
+      <CompetitionAtmosphere comp={activeComp} />
 
-      {/* Seletor de competição — época 2026/27 */}
-      {competitions.length > 0 && (
-        <div className="mb-3 -mx-5 flex gap-2 overflow-x-auto px-5">
-          <button onClick={() => { setCompSlug("total"); setPeriodo("epoca"); }}
-            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition-smooth ${
-              compSlug === "total"
-                ? "border-gold bg-gold text-background"
-                : "border-border text-muted-foreground hover:border-gold/40"
-            }`}>
-            🎯 Total
-          </button>
-          {competitions.map(c => {
-            const on = c.slug === compSlug;
-            return (
-              <button key={c.slug} onClick={() => setCompSlug(c.slug)}
-                className="flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition-smooth"
-                style={on
-                  ? { borderColor: c.accent, background: c.accent, color: "#fff" }
-                  : { borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
-                <span>{c.emoji}</span>{c.short}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      <PageHeader
+        eyebrow={activeComp?.name ?? "Todas as competições"}
+        title="Rankings"
+        subtitle="A classificação dos adeptos, dos jogos oficiais de cada jornada."
+        comp={activeComp}
+      />
+
+      <CompetitionPicker
+        competitions={competitions}
+        activeId={activeComp?.id}
+        onPick={setCompSlug}
+        extra={{
+          label: "🎯 Total",
+          active: compSlug === "total",
+          onClick: () => { setCompSlug("total"); setPeriodo("epoca"); },
+        }}
+      />
 
       {/* Período — só faz sentido dentro de uma competição */}
       {activeComp && mes && (

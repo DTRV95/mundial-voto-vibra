@@ -474,6 +474,16 @@ function Rankings() {
 
       {tab === "divisoes" && !loadingUsers && (
         <div className="space-y-6">
+          {/* Época ainda por começar — evita parecer que está avariado */}
+          {allUsers.length > 0 && allUsers.every(u => u.pontos === 0) && (
+            <div className="rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3">
+              <p className="text-sm font-bold">A época ainda não começou</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Estão todos a zero até haver resultados dos jogos oficiais. As divisões
+                organizam-se sozinhas assim que a primeira jornada for apurada.
+              </p>
+            </div>
+          )}
           {/* Cartão da divisão do utilizador */}
           {user && (() => {
             const me = allUsers.find(u => u.user_id === user.id);

@@ -19,36 +19,52 @@ export interface LinhaRanking {
   avatar_url: string | null;
 }
 
-/** Junta os perfis às linhas de pontos e ordena. */
-async function comPerfis(linhas: any[]): Promise<LinhaRanking[]> {
-  if (linhas.length === 0) return [];
-
-  const ids = [...new Set(linhas.map((l) => l.user_id))];
+/** Todos os adeptos registados, em blocos (o PostgREST limita a 1000). */
+async function todosOsPerfis(): Promise<any[]> {
   const perfis: any[] = [];
-  for (let i = 0; i < ids.length; i += 300) {
+  for (let inicio = 0; ; inicio += 1000) {
     const { data } = await supabase
       .from("profiles")
       .select("id,display_name,avatar_url")
-      .in("id", ids.slice(i, i + 300));
+      .range(inicio, inicio + 999);
     perfis.push(...(data ?? []));
+    if (!data || data.length < 1000) break;
   }
-  const mapa = new Map(perfis.map((p) => [p.id, p]));
+  return perfis;
+}
 
-  return linhas
-    .map((l) => ({
-      user_id: l.user_id,
-      pontos: l.pontos ?? 0,
-      previsoes: l.previsoes ?? 0,
-      acertos: l.acertos ?? 0,
-      display_name: mapa.get(l.user_id)?.display_name ?? null,
-      avatar_url: mapa.get(l.user_id)?.avatar_url ?? null,
-      rank: 0,
-    }))
+/**
+ * Constrói o ranking a partir de TODOS os adeptos registados,
+ * não só dos que já pontuaram. Quem ainda não tem pontos aparece
+ * na mesma, com zero — senão o ranking arrancaria vazio e as
+ * pessoas não se encontrariam nele.
+ */
+async function comPerfis(linhas: any[]): Promise<LinhaRanking[]> {
+  const perfis = await todosOsPerfis();
+  if (perfis.length === 0) return [];
+
+  const pontos = new Map(linhas.map((l) => [l.user_id, l]));
+
+  return perfis
+    .map((p) => {
+      const l = pontos.get(p.id);
+      return {
+        user_id: p.id,
+        pontos: l?.pontos ?? 0,
+        previsoes: l?.previsoes ?? 0,
+        acertos: l?.acertos ?? 0,
+        display_name: p.display_name ?? null,
+        avatar_url: p.avatar_url ?? null,
+        rank: 0,
+      };
+    })
     .sort((a, b) =>
-      // Desempate: pontos → percentagem de acerto → menos previsões feitas
+      // Desempate: pontos → percentagem de acerto → menos previsões feitas.
+      // O nome no fim mantém a ordem estável entre quem tem tudo igual.
       b.pontos - a.pontos ||
       b.acertos / Math.max(b.previsoes, 1) - a.acertos / Math.max(a.previsoes, 1) ||
-      a.previsoes - b.previsoes,
+      a.previsoes - b.previsoes ||
+      (a.display_name ?? "").localeCompare(b.display_name ?? "", "pt"),
     )
     .map((l, i) => ({ ...l, rank: i + 1 }));
 }

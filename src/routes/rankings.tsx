@@ -182,32 +182,18 @@ function Rankings() {
         .select("id, name, code, emoji");
       if (!pools || pools.length === 0) return [];
 
-      // Busca membros com start_points
-      const { data: allMembers } = await supabase
-        .from("pool_members")
-        .select("pool_id, user_id, start_points");
+      // Pontuação já calculada com as regras de cada liga (top 3 membros)
+      const { data: totais } = await (supabase as any)
+        .from("ranking_ligas")
+        .select("pool_id,pontos,membros");
+      const mapa = new Map(((totais ?? []) as any[]).map(t => [t.pool_id, t]));
 
-      if (!allMembers || allMembers.length === 0) return [];
-
-      const userIds = [...new Set(allMembers.map(m => m.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, total_points")
-        .in("id", userIds);
-
-      const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p.total_points ?? 0]));
-
-      const results = pools.map(pool => {
-        const members = allMembers.filter(m => m.pool_id === pool.id);
-        const memberPts = members
-          .map(m => Math.max(0, (profileMap[m.user_id] ?? 0) - (m.start_points ?? 0)))
-          .sort((a, b) => b - a);
-        const topN = Math.min(3, memberPts.length);
-        const total = memberPts.slice(0, topN).reduce((s, p) => s + p, 0);
-        return { ...pool, total_points: total, members: members.length };
-      });
-
-      return results
+      return pools
+        .map(pool => ({
+          ...pool,
+          total_points: mapa.get(pool.id)?.pontos ?? 0,
+          members: mapa.get(pool.id)?.membros ?? 0,
+        }))
         .filter(l => l.members > 0)
         .sort((a, b) => b.total_points - a.total_points);
     },

@@ -2,7 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX, UserPlus, Search, ArrowUp, ArrowDown, Minus, Layers, CalendarDays } from "lucide-react";
+import { Trophy, Users, Copy, Check, ArrowLeft, Gift, Target, Zap, Crown, ArrowRight, Eye, ChevronDown, ChevronUp, MessageCircle, Send, UserX, UserPlus, Search, ArrowUp, ArrowDown, Minus, Layers, CalendarDays, Swords } from "lucide-react";
+import { LigaConfigPanel } from "@/components/LigaConfigPanel";
+import { descreverConfig, useClubes } from "@/lib/useLigaConfig";
+import { useCompetitions } from "@/lib/useCompetitions";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { UserAvatar } from "@/components/AvatarPicker";
@@ -74,13 +77,13 @@ function LigaPage() {
     queryKey: ["pool", code],
     retry: false,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("pools")
-        .select("id, name, code, created_by, prize, created_at, emoji, duration_type, duration_value")
+        .select("id, name, code, created_by, prize, created_at, emoji, duration_type, duration_value, competition_ids, filtro_jogos, equipa_id, duelos_ativos")
         .eq("code", code.toUpperCase())
         .maybeSingle();
       if (error) throw error;
-      return data ?? null;
+      return (data ?? null) as any;
     },
   });
 
@@ -140,33 +143,29 @@ function LigaPage() {
     queryKey: ["pool-ranking", pool?.id],
     enabled: !!pool,
     queryFn: async () => {
-      const { data: members } = await supabase
-        .from("pool_members")
-        .select("user_id, start_points")
+      // Pontos somados das previsões, já com as regras da liga aplicadas
+      const { data: linhas } = await (supabase as any)
+        .from("pontos_liga")
+        .select("user_id,pontos,previsoes,acertos")
         .eq("pool_id", pool!.id);
 
-      if (!members || members.length === 0) return [];
-
-      const userIds = members.map((m) => m.user_id);
+      if (!linhas || linhas.length === 0) return [];
 
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, total_points, predictions_made, predictions_correct")
-        .in("id", userIds);
+        .select("id, display_name, avatar_url")
+        .in("id", (linhas as any[]).map(l => l.user_id));
+      const perfil = new Map((profiles ?? []).map((p: any) => [p.id, p]));
 
-      return (profiles ?? [])
-        .map((profile) => {
-          const member = members.find(m => m.user_id === profile.id);
-          const league_points = (profile.total_points ?? 0) - (member?.start_points ?? 0);
-          return {
-            id: profile.id,
-            display_name: profile.display_name ?? "Adepto",
-            avatar_url: (profile as any).avatar_url ?? null,
-            total_points: Math.max(0, league_points),
-            predictions_made: profile.predictions_made ?? 0,
-            predictions_correct: profile.predictions_correct ?? 0,
-          };
-        })
+      return (linhas as any[])
+        .map((l) => ({
+          id: l.user_id,
+          display_name: perfil.get(l.user_id)?.display_name ?? "Adepto",
+          avatar_url: perfil.get(l.user_id)?.avatar_url ?? null,
+          total_points: l.pontos ?? 0,
+          predictions_made: l.previsoes ?? 0,
+          predictions_correct: l.acertos ?? 0,
+        }))
         .sort((a, b) => {
           if (b.total_points !== a.total_points) return b.total_points - a.total_points;
           const accA = a.predictions_made > 0 ? a.predictions_correct / a.predictions_made : 0;
@@ -326,6 +325,12 @@ function LigaPage() {
   });
 
   const isCreator = user?.id === pool?.created_by;
+
+  // Para descrever as regras da liga em português
+  const { data: todasCompeticoes = [] } = useCompetitions();
+  const { data: clubes = [] } = useClubes();
+  const nomesCompeticoes = new Map(todasCompeticoes.map(c => [c.id, c.short]));
+  const nomeEquipa = clubes.find(c => c.id === (pool as any)?.equipa_id)?.short_name ?? null;
 
   const { data: searchResults = [] } = useQuery({
     queryKey: ["user-search", addSearch],
@@ -492,6 +497,18 @@ function copyLink() {
                 </div>
               );
             })()}
+          </div>
+
+          {/* Regras da liga */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold text-white/80">
+              {descreverConfig(pool as any, nomesCompeticoes, nomeEquipa)}
+            </span>
+            {(pool as any).duelos_ativos !== false && (
+              <Link to="/duelos" className="flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold text-white/80 hover:bg-white/25">
+                <Swords className="h-3 w-3" /> Duelos ativos
+              </Link>
+            )}
           </div>
 
           {/* Botões de partilha */}
@@ -945,6 +962,21 @@ function copyLink() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── REGRAS DA LIGA (só criador) ────────────────────────── */}
+      {isCreator && pool && (
+        <div className="mx-5 mt-8 md:mx-8">
+          <LigaConfigPanel
+            poolId={pool.id}
+            config={{
+              competition_ids: (pool as any).competition_ids ?? null,
+              filtro_jogos: (pool as any).filtro_jogos ?? "todos",
+              equipa_id: (pool as any).equipa_id ?? null,
+              duelos_ativos: (pool as any).duelos_ativos ?? true,
+            }}
+          />
         </div>
       )}
 

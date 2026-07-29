@@ -726,3 +726,43 @@
   pointer-events: none;
   background: radial-gradient(ellipse 130% 100% at 50% 40%, transparent 45%, oklch(0 0 0 / 0.28) 100%);
 }
+
+/* ── Landing de visitante ──────────────────────────────────── */
+
+/* Fundo que respira: dois gradientes a deslizar em tempos diferentes */
+@keyframes aurora-deriva {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(6%, -4%, 0) scale(1.12); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+.aurora { animation: aurora-deriva 18s ease-in-out infinite; }
+.aurora-lenta { animation: aurora-deriva 26s ease-in-out infinite reverse; }
+
+/* Gradiente animado para o título — o "estrondo" sem gritar */
+@keyframes gradiente-vivo {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+.texto-vivo {
+  background-size: 220% 220%;
+  animation: gradiente-vivo 7s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Fita de emblemas a passar, em ciclo contínuo */
+@keyframes fita {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.fita-emblemas { animation: fita 38s linear infinite; }
+.fita-emblemas:hover { animation-play-state: paused; }
+
+/* Cartão que se levanta ao passar o rato */
+.cartao-eleva { transition: transform 320ms cubic-bezier(0.16,1,0.3,1), box-shadow 320ms ease; }
+.cartao-eleva:hover { transform: translateY(-6px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora, .aurora-lenta, .texto-vivo, .fita-emblemas { animation: none; }
+}

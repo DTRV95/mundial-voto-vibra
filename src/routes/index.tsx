@@ -18,6 +18,7 @@ import { ChampionsAtmosphere } from "@/components/ChampionsAtmosphere";
 import { LigaAtmosphere } from "@/components/LigaAtmosphere";
 import { CompetitionAtmosphere } from "@/components/CompetitionAtmosphere";
 import { CartaoJornada, CartaoSemJornada } from "@/components/CartaoJornada";
+import { HomeVisitante } from "@/components/HomeVisitante";
 import { useJornadas, jornadaEmFoco } from "@/lib/useJornada";
 import { CompetitionArt, findCompetitionArt } from "@/components/CompetitionArt";
 import { useFollowing } from "@/lib/useFollow";
@@ -446,6 +447,19 @@ function Home() {
   });
 
 
+  // Quem ainda não tem conta vê uma página própria: o objetivo dela é
+  // explicar e convencer, não gerir previsões que ainda não existem.
+  if (!user) {
+    return (
+      <HomeVisitante
+        competitions={competitions}
+        activeComp={activeComp}
+        totalAdeptos={communityPulse?.totalUsers ?? 0}
+        previsoesHoje={communityPulse?.todayVotes ?? 0}
+      />
+    );
+  }
+
   return (
     <div
       className="relative pb-10 transition-smooth"
@@ -602,12 +616,6 @@ function Home() {
           </div>
         </div>
 
-        {/* Prova social — apenas visitantes */}
-        {!user && (
-          <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold text-muted-foreground">
-            <span>🏆</span> Já somos mais de 100 membros
-          </div>
-        )}
       </section>
 
       {/* ===================== GRELHA BENTO ===================== */}
@@ -1039,54 +1047,6 @@ function Home() {
       </section>
 
       {/* ===================== COMO FUNCIONA — apenas para visitantes ===================== */}
-      {!user && <section id="como-funciona" className="lg:col-span-2">
-        <div className="mb-5 flex items-end justify-between">
-          <h2 className="font-display text-2xl md:text-3xl">Como funciona</h2>
-          <Link to="/como-funciona" className="text-xs font-semibold text-gold hover:text-gold/70 transition-smooth">
-            Guia completo →
-          </Link>
-        </div>
-
-        {/* 3 passos */}
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Step n="1" title="Vê os jogos">Consulta os jogos do dia e escolhe os que te interessam.</Step>
-          <Step n="2" title="Deixa a tua previsão">Vota nos mercados que quiseres até ao apito inicial.</Step>
-          <Step n="3" title="Compete e sobe">Soma pontos e sobe no ranking — geral ou entre amigos.</Step>
-        </div>
-
-        {/* Pontos rápidos */}
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {[
-            { label: "Resultado 1X2",    pts: "3–4 pts" },
-            { label: "Marcador exacto",  pts: "10 pts 🔥" },
-            { label: "BTTS / Golos",     pts: "2–3 pts" },
-            { label: "Combo especial",   pts: "4–5 pts" },
-          ].map(({ label, pts }) => (
-            <div key={label} className="rounded-xl border border-border bg-card/60 px-3 py-2.5 text-center">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-              <p className="mt-0.5 font-display text-sm text-gold">{pts}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* CTA final na secção — só para visitantes */}
-        {!user && (
-          <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-gold/5 p-5">
-            <div className="flex items-start gap-3">
-              <Users2 className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
-              <p className="text-sm text-muted-foreground">
-                Depois de votares desbloqueias as percentagens da comunidade — o que toda a gente palpitou. <span className="font-semibold text-foreground">O segredo é do clube.</span>
-              </p>
-            </div>
-            <Link to="/auth"
-              className="pressable shrink-0 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-smooth hover:scale-[1.02] text-center whitespace-nowrap"
-              style={{ background: activeComp ? activeComp.accent : "var(--wc-red)", boxShadow: activeComp ? `0 6px 18px -6px ${activeComp.glow}` : undefined }}>
-              Entrar grátis →
-            </Link>
-          </div>
-        )}
-
-      </section>}
 
 
       </div>{/* fim da grelha bento */}

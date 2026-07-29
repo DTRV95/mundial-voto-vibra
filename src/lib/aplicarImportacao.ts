@@ -64,10 +64,13 @@ export async function aplicarImportacao(
   for (const e of dados.equipas) {
     const idInterno = mapaEquipas.get(e.externalId);
     if (idInterno) {
-      await db.from("teams").update({
+      // Verificar o erro: sem isto, uma coluna em falta ou uma política
+      // RLS a bloquear passavam despercebidas e contavam como sucesso.
+      const { error } = await db.from("teams").update({
         name: e.nome, short_name: e.nomeCurto, monogram: e.monograma,
         crest_url: e.emblema, kind: "club", country: "Portugal",
       }).eq("id", idInterno);
+      if (error) { r.avisos.push(`Equipa ${e.nome}: ${error.message}`); continue; }
       r.equipasAtualizadas++;
     } else {
       const { data, error } = await db.from("teams").insert({

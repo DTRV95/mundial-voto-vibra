@@ -17,6 +17,8 @@ import { PickCompetitionsModal } from "@/components/PickCompetitionsModal";
 import { ChampionsAtmosphere } from "@/components/ChampionsAtmosphere";
 import { LigaAtmosphere } from "@/components/LigaAtmosphere";
 import { CompetitionAtmosphere } from "@/components/CompetitionAtmosphere";
+import { CartaoJornada, CartaoSemJornada } from "@/components/CartaoJornada";
+import { useJornadas, jornadaEmFoco } from "@/lib/useJornada";
 import { CompetitionArt, findCompetitionArt } from "@/components/CompetitionArt";
 import { useFollowing } from "@/lib/useFollow";
 // Substitui este ficheiro por src/assets/premio-camisola.jpg (a imagem da camisola)
@@ -53,37 +55,6 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { user } = useAuth();
-  const { data: todays = [] } = useQuery({
-    queryKey: ["matches", "today"],
-    queryFn: async (): Promise<MatchCardData[]> => {
-      const start = new Date(); start.setHours(0, 0, 0, 0);
-      const end = new Date(); end.setHours(23, 59, 59, 999);
-      const { data } = await supabase
-        .from("matches")
-        .select("id,kickoff_at,phase,voting_open,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code),predictions(count)")
-        .gte("kickoff_at", start.toISOString())
-        .lte("kickoff_at", end.toISOString())
-        .order("kickoff_at")
-        .limit(4);
-      return ((data as any) ?? []).map((m: any) => ({ ...m, votes_count: m.predictions?.[0]?.count ?? 0 }));
-    },
-  });
-
-  const { data: votedTodayIds = new Set<string>() } = useQuery({
-    queryKey: ["voted-today", user?.id],
-    enabled: !!user?.id && todays.length > 0,
-    queryFn: async () => {
-      const ids = todays.map(m => m.id);
-      const { data } = await supabase
-        .from("predictions")
-        .select("match_id")
-        .eq("user_id", user!.id)
-        .in("match_id", ids);
-      return new Set((data ?? []).map((p: any) => p.match_id));
-    },
-  });
-
-  const todaysWithVoted = todays.map(m => ({ ...m, already_voted: votedTodayIds.has(m.id) }));
 
   const { data: topLeaders = [] } = useQuery({
     queryKey: ["leaders", "home"],
@@ -205,34 +176,6 @@ function Home() {
     },
   });
 
-  const { data: pendingMatches = [] } = useQuery({
-    queryKey: ["pending-votes", user?.id],
-    enabled: !!user?.id,
-    queryFn: async () => {
-      const now = new Date();
-      const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
-      const tomorrowEnd = new Date(now); tomorrowEnd.setDate(tomorrowEnd.getDate() + 1); tomorrowEnd.setHours(23, 59, 59, 999);
-
-      const { data: matches } = await supabase
-        .from("matches")
-        .select("id,kickoff_at,voting_open,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
-        .gte("kickoff_at", now.toISOString())
-        .lte("kickoff_at", tomorrowEnd.toISOString())
-        .eq("voting_open", true)
-        .order("kickoff_at");
-
-      if (!matches || matches.length === 0) return [];
-
-      const { data: voted } = await supabase
-        .from("predictions")
-        .select("match_id")
-        .eq("user_id", user!.id)
-        .in("match_id", matches.map((m: any) => m.id));
-
-      const votedIds = new Set((voted ?? []).map((p: any) => p.match_id));
-      return (matches as any[]).filter(m => !votedIds.has(m.id));
-    },
-  });
 
   // Personal prediction results on finished matches
   const { data: myResults = [] } = useQuery({
@@ -269,6 +212,10 @@ function Home() {
   // Seletor de competição no card de Líderes (época 2026/27)
   // Competição ativa — partilhada com a sidebar e guardada entre visitas
   const { competitions, active: activeComp, setSlug: setHomeCompSlug } = useActiveCompetition();
+
+  // A jornada em curso — mesma fonte que a página de Jogos usa
+  const { data: jornadas = [] } = useJornadas(activeComp?.id, user?.id);
+  const jornadaFoco = jornadaEmFoco(jornadas);
   const [resultsExpanded, setResultsExpanded] = useState(false);
   const [feedShown, setFeedShown] = useState(6);
   const feedSentinelRef = useRef<HTMLButtonElement>(null);
@@ -739,170 +686,13 @@ function Home() {
       <div className="lg:col-span-2"><SeasonPreRegModal user={user} />
       <PickCompetitionsModal /></div>
 
-      {/* ===================== JOGOS POR VOTAR ===================== */}
-      {user && pendingMatches.length > 0 && (
-        <div className="">
-          <div className="relative overflow-hidden rounded-2xl transition-smooth"
-            style={{
-              background: activeComp
-                ? `linear-gradient(150deg, ${activeComp.accent} 0%, ${activeComp.deep} 100%)`
-                : "linear-gradient(150deg, oklch(0.55 0.20 142) 0%, oklch(0.30 0.10 142) 100%)",
-              boxShadow: activeComp
-                ? `0 1px 3px oklch(0 0 0 / 0.16), 0 10px 26px -8px ${activeComp.glow}, inset 0 1px 0 oklch(1 0 0 / 0.16)`
-                : "0 6px 24px -4px oklch(0.55 0.20 142 / 0.40)",
-            }}>
-            <div className="sheen absolute inset-0" />
-            <div className="px-5 py-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">Não percas pontos</p>
-                  <h3 className="font-display text-xl text-white leading-tight">
-                    {pendingMatches.length === 1
-                      ? "1 jogo por votar"
-                      : `${pendingMatches.length} jogos por votar`}
-                  </h3>
-                </div>
-                <Link to="/jogos"
-                  className="shrink-0 rounded-xl bg-white/15 border border-white/20 px-3 py-2 text-xs font-bold text-white hover:bg-white/25 transition-smooth">
-                  Ver todos →
-                </Link>
-              </div>
-              <div className="space-y-2">
-                {pendingMatches.slice(0, 3).map((m: any) => {
-                  const isToday = new Date(m.kickoff_at).toDateString() === new Date().toDateString();
-                  const time = new Date(m.kickoff_at).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
-                  return (
-                    <Link key={m.id} to="/jogo/$id" params={{ id: String(m.id) }}
-                      className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-2.5 hover:bg-white/20 transition-smooth">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <TeamBadge code={m.home?.code} flag={m.home?.flag} name={m.home?.name} size="sm" />
-                        <span className="text-xs font-semibold text-white truncate">{m.home?.name}</span>
-                        <span className="text-[10px] text-white/40 shrink-0">vs</span>
-                        <span className="text-xs font-semibold text-white truncate">{m.away?.name}</span>
-                        <TeamBadge code={m.away?.code} flag={m.away?.flag} name={m.away?.name} size="sm" />
-                      </div>
-                      {(() => {
-                        const mins = Math.max(0, Math.round((new Date(m.kickoff_at).getTime() - Date.now()) / 60000) - 5);
-                        const closingSoon = mins <= 180;
-                        const label = closingSoon
-                          ? (mins < 60 ? `⏰ Fecha em ${mins}min` : `⏰ Fecha em ${Math.floor(mins / 60)}h${String(mins % 60).padStart(2, "0")}`)
-                          : isToday ? `Hoje ${time}` : `Amanhã ${time}`;
-                        return (
-                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${closingSoon ? "bg-wc-red text-white animate-pulse" : "bg-white/20 text-white"}`}>
-                            {label}
-                          </span>
-                        );
-                      })()}
-                    </Link>
-                  );
-                })}
-                {pendingMatches.length > 3 && (
-                  <Link to="/jogos"
-                    className="flex items-center justify-center py-1.5 text-xs font-semibold text-white/60 hover:text-white transition-smooth">
-                    +{pendingMatches.length - 3} mais →
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-      {/* ===================== COUNTDOWN + CTA ===================== */}
-      <div className={`${nextMatch && !user ? "grid gap-3 sm:grid-cols-2" : ""}`}>
-        {nextMatch && (
-          <Countdown id={nextMatch.id} kickoff_at={nextMatch.kickoff_at} home={(nextMatch as any).home} away={(nextMatch as any).away} />
-        )}
-        {!user && (
-          <div className="relative overflow-hidden rounded-2xl"
-            style={{ background: "linear-gradient(135deg, oklch(0.20 0.06 270) 0%, oklch(0.28 0.10 300) 50%, oklch(0.22 0.08 250) 100%)", boxShadow: "0 6px 24px -4px oklch(0.20 0.06 270 / 0.6)" }}>
-            <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 80% 50%, white 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
-            <div className="absolute top-3 right-3 flex gap-1.5">
-              {["🇵🇹","🇧🇷","🇦🇷","🇫🇷","🏴󠁧󠁢󠁥󠁮󠁧󠁿"].map(f => <span key={f} className="text-base opacity-60">{f}</span>)}
-            </div>
-            <div className="relative p-5 text-white">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40 mb-1.5">Grátis · Sem cartão</p>
-              <h3 className="font-display text-[1.5rem] leading-tight">Quem sabe mais<br/>de futebol?</h3>
-              <ul className="mt-2.5 space-y-1 text-[12px] text-white/65">
-                <li className="flex items-center gap-1.5"><span className="text-gold">✓</span> Vota em cada jogo antes do apito</li>
-                <li className="flex items-center gap-1.5"><span className="text-gold">✓</span> Vê o que a comunidade palpitou</li>
-                <li className="flex items-center gap-1.5"><span className="text-gold">✓</span> Cria torneios com amigos e família</li>
-              </ul>
-              <div className="mt-4 flex gap-2">
-                <Link to="/auth"
-                  className="flex-1 rounded-xl bg-gold py-2.5 text-center text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.01] active:scale-95">
-                  Entrar grátis
-                </Link>
-                <a href="#como-funciona"
-                  className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold text-white/70 transition-smooth hover:border-white/40 hover:text-white">
-                  Como?
-                </a>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ===================== BANNER PERSUASÃO — visitantes ===================== */}
-      {!user && (
-        <div className="lg:col-span-2">
-          <div className="relative overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/8 via-transparent to-transparent px-5 py-4">
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 font-display text-6xl opacity-[0.06] select-none pointer-events-none">🏆</div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70 mb-1">Junta-te à comunidade</p>
-            <p className="font-display text-base leading-snug mb-0.5">Vota nestes jogos e vê se acertaste</p>
-            <p className="text-xs text-muted-foreground mb-3">Regista-te em segundos — é grátis, sem cartão, sem spam.</p>
-            <Link to="/auth"
-              className="pressable inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-smooth hover:scale-[1.02]"
-              style={{ background: activeComp ? activeComp.accent : "var(--wc-red)", boxShadow: activeComp ? `0 6px 18px -6px ${activeComp.glow}` : undefined }}>
-              Criar conta grátis <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </div>
-      )}
-
-
-      {/* ===================== BANNER PROGNÓSTICOS — todos os utilizadores ===================== */}
-      <div className="">
-        <div
-          className="relative overflow-hidden rounded-2xl"
-          style={{
-            background: "linear-gradient(135deg, oklch(0.18 0.06 260) 0%, oklch(0.22 0.08 280) 50%, oklch(0.18 0.05 250) 100%)",
-            boxShadow: "0 6px 28px -4px oklch(0.22 0.10 265 / 0.55)",
-          }}
-        >
-          {/* dot grid */}
-          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
-          {/* glow accent */}
-          <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-gold/20 blur-2xl pointer-events-none" />
-
-          <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-4">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gold/20 border border-gold/30">
-                <Target className="h-5 w-5 text-gold" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40 mb-1">Antes de votares</p>
-                <p className="font-display text-lg leading-tight text-white">Lê os prognósticos dos jogos</p>
-                <p className="text-xs text-white/55 mt-0.5">Análise de cada jogo para votares com mais confiança.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 sm:shrink-0">
-              <Link
-                to="/prognosticos"
-                className="flex-1 sm:flex-none rounded-xl border border-white/20 px-4 py-2.5 text-center text-sm font-bold text-white/80 transition-smooth hover:border-white/40 hover:text-white"
-              >
-                Ver análises
-              </Link>
-              <Link
-                to="/jogos"
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-background shadow-gold transition-smooth hover:scale-[1.02] active:scale-95"
-              >
-                Votar agora <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
-        </div>
+      {/* ===================== A TUA JORNADA ===================== */}
+      {/* Substitui tres blocos que diziam o mesmo: jogos por votar,
+          jogos de hoje e o banner de prognosticos. */}
+      <div>
+        {jornadaFoco
+          ? <CartaoJornada jornada={jornadaFoco} comp={activeComp} />
+          : <CartaoSemJornada comp={activeComp} />}
       </div>
 
       {/* ===================== BANNER TORNEIO — logado sem liga ===================== */}
@@ -1090,51 +880,6 @@ function Home() {
           </div>
         </div>
       )}
-
-      {/* ===================== JOGOS DE HOJE ===================== */}
-      <section className="relative">
-        <div className="mb-4 flex items-end justify-between">
-          <div>
-            <h2 className="font-display text-2xl md:text-3xl text-gray-900">Jogos de Hoje</h2>
-            <p className="text-xs text-gray-400">Dá a tua previsão antes do apito inicial.</p>
-          </div>
-          <Link to="/jogos" className="text-xs font-bold text-wc-red">Ver todos →</Link>
-        </div>
-        {todaysWithVoted.length === 0 ? (
-          <EmptyState
-            title="Sem jogos para hoje"
-            subtitle="Volta amanhã ou explora as próximas fases."
-          />
-        ) : (
-          <>
-            {/* Mobile — carrossel horizontal com scroll snap */}
-            <div className="md:hidden -mx-5 px-5">
-              <div
-                className="flex gap-3 overflow-x-auto pb-3"
-                style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}
-              >
-                {todaysWithVoted.map((m) => (
-                  <div key={m.id} style={{ scrollSnapAlign: "start", minWidth: "82vw", maxWidth: "82vw" }}>
-                    <MatchCard match={m} />
-                  </div>
-                ))}
-              </div>
-              {/* Indicador de scroll */}
-              {todaysWithVoted.length > 1 && (
-                <div className="flex justify-center gap-1.5 pt-1">
-                  {todaysWithVoted.map((_, i) => (
-                    <div key={i} className={`h-1 rounded-full bg-gold/40 ${i === 0 ? "w-4 bg-gold/80" : "w-1.5"}`} />
-                  ))}
-                </div>
-              )}
-            </div>
-            {/* Desktop — grid normal */}
-            <div className="hidden md:grid gap-3 md:grid-cols-2">
-              {todaysWithVoted.map((m) => <MatchCard key={m.id} match={m} />)}
-            </div>
-          </>
-        )}
-      </section>
 
       {/* ===================== RANKING + LIGAS + PRÉMIOS ===================== */}
       <section className="grid gap-4 sm:grid-cols-2 lg:col-span-2">

@@ -78,17 +78,19 @@ export function PageHeader({ eyebrow, title, subtitle, comp, acao }: {
  * Selectores de competição, com a cor de cada uma.
  * Estava copiado em quatro páginas, cada uma ligeiramente diferente.
  */
-export function CompetitionPicker({ competitions, activeId, onPick, extra }: {
+export function CompetitionPicker({ competitions, activeId, onPick, extra, compacto }: {
   competitions: Competition[];
   activeId: string | null | undefined;
   onPick: (slug: string) => void;
   /** Botão adicional à esquerda, ex.: "Total" nos rankings */
   extra?: { label: string; active: boolean; onClick: () => void };
+  /** Dentro da linha dos separadores — sem margens próprias */
+  compacto?: boolean;
 }) {
   if (competitions.length === 0) return null;
 
   return (
-    <div className="-mx-4 mb-4 overflow-x-auto px-4 md:mx-0 md:px-0">
+    <div className={compacto ? "" : "-mx-4 mb-4 overflow-x-auto px-4 md:mx-0 md:px-0"}>
       <div className="flex w-max gap-2">
         {extra && (
           <button onClick={extra.onClick}
@@ -104,7 +106,7 @@ export function CompetitionPicker({ competitions, activeId, onPick, extra }: {
           const on = c.id === activeId;
           return (
             <button key={c.id} onClick={() => onPick(c.slug)}
-              className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-bold transition-smooth"
+              className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border font-bold transition-smooth ${compacto ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm"}`}
               style={on
                 ? { borderColor: c.accent, background: c.accent, color: "#fff", boxShadow: `0 4px 18px ${c.glow}` }
                 : { borderColor: "var(--border)", color: "var(--muted-foreground)" }}>

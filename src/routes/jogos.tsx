@@ -1,13 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { MatchCard, type MatchCardData } from "@/components/MatchCard";
+import { MatchCard } from "@/components/MatchCard";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
-import { CalendarClock, CheckCircle2 } from "lucide-react";
+import { CalendarClock, CheckCircle2, Flame } from "lucide-react";
 import { PageTabs, ABAS_JOGAR } from "@/components/PageTabs";
 import { CompetitionAtmosphere, PageHeader, CompetitionPicker } from "@/components/CompetitionAtmosphere";
+import { useJornadas } from "@/lib/useJornada";
+
+/** As etiquetas que o admin pode pôr num jogo, por ordem de peso. */
+const ETIQUETA_DESTAQUE: Record<string, string> = {
+  classico: "O clássico da jornada",
+  derbi: "O dérbi da jornada",
+  decisivo: "Jogo decisivo",
+  destaque: "Jogo da jornada",
+};
+
+const PESO_ETIQUETA: Record<string, number> = {
+  classico: 4, derbi: 3, decisivo: 2, destaque: 1,
+};
+
+/**
+ * O jogo com a etiqueta mais forte fica em primeiro; sem etiquetas,
+ * manda a ordem que o admin definiu.
+ */
+function ordenarPorDestaque<T extends { highlight_tag: string | null; official_position: number | null }>(jogos: T[]): T[] {
+  return [...jogos].sort((a, b) =>
+    (PESO_ETIQUETA[b.highlight_tag ?? ""] ?? 0) - (PESO_ETIQUETA[a.highlight_tag ?? ""] ?? 0) ||
+    (a.official_position ?? 99) - (b.official_position ?? 99),
+  );
+}
 
 export const Route = createFileRoute("/jogos")({
   head: () => ({
@@ -23,85 +44,10 @@ export const Route = createFileRoute("/jogos")({
   component: Jogos,
 });
 
-interface JogoOficial extends MatchCardData {
-  round_id: string;
-  round_number: number | null;
-  official_position: number | null;
-}
-
 function Jogos() {
   const { user } = useAuth();
   const { competitions, active, setSlug } = useActiveCompetition();
-
-  // Só os jogos oficiais de jornadas publicadas da competição ativa
-  const { data: jogos = [], isLoading } = useQuery({
-    queryKey: ["jogos-oficiais", active?.id],
-    enabled: !!active?.id,
-    staleTime: 60_000,
-    queryFn: async (): Promise<JogoOficial[]> => {
-      const { data } = await (supabase as any)
-        .from("matches")
-        .select(
-          "id,kickoff_at,phase,status,voting_open,official_position," +
-          "home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)," +
-          "round:round_id!inner(id,number,label,status),predictions(count)"
-        )
-        .eq("competition_id", active!.id)
-        .eq("is_official", true)
-        .eq("round.status", "publicada")
-        .order("kickoff_at");
-
-      return ((data ?? []) as any[])
-        .filter((m) => m.home && m.away && m.round)
-        .map((m) => ({
-          id: m.id,
-          kickoff_at: m.kickoff_at,
-          phase: m.phase ?? "",
-          status: m.status,
-          voting_open: m.voting_open,
-          home: m.home,
-          away: m.away,
-          votes_count: m.predictions?.[0]?.count ?? 0,
-          is_official: true,
-          round_label: m.round.label ?? (m.round.number ? `Jornada ${m.round.number}` : null),
-          round_id: m.round.id,
-          round_number: m.round.number ?? null,
-          official_position: m.official_position ?? null,
-        }));
-    },
-  });
-
-  // IDs dos jogos em que o utilizador já votou
-  const { data: votedIds = new Set<string>() } = useQuery({
-    queryKey: ["voted-match-ids", user?.id],
-    enabled: !!user?.id,
-    staleTime: 60_000,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("predictions")
-        .select("match_id")
-        .eq("user_id", user!.id);
-      return new Set((data ?? []).map((p: any) => p.match_id));
-    },
-  });
-
-  // Agrupa por jornada, com a mais próxima primeiro
-  const jornadas = useMemo(() => {
-    const map = new Map<string, { label: string; numero: number | null; jogos: JogoOficial[] }>();
-    for (const j of jogos) {
-      const atual = map.get(j.round_id);
-      const jogo = { ...j, already_voted: votedIds.has(j.id) };
-      if (atual) atual.jogos.push(jogo);
-      else map.set(j.round_id, { label: j.round_label ?? "Jornada", numero: j.round_number, jogos: [jogo] });
-    }
-    return [...map.values()].map((r) => ({
-      ...r,
-      jogos: r.jogos.sort(
-        (a, b) => (a.official_position ?? 99) - (b.official_position ?? 99),
-      ),
-      votados: r.jogos.filter((m) => votedIds.has(m.id)).length,
-    }));
-  }, [jogos, votedIds]);
+  const { data: jornadas = [], isLoading } = useJornadas(active?.id, user?.id);
 
   return (
     <div className="px-4 pt-6 pb-10 md:px-8">
@@ -114,9 +60,9 @@ function Jogos() {
         comp={active}
       />
 
-      <PageTabs abas={ABAS_JOGAR} />
-
-      <CompetitionPicker competitions={competitions} activeId={active?.id} onPick={setSlug} />
+      <PageTabs abas={ABAS_JOGAR} direita={
+        <CompetitionPicker competitions={competitions} activeId={active?.id} onPick={setSlug} compacto />
+      } />
 
       {isLoading && (
         <div className="grid gap-3">
@@ -172,9 +118,30 @@ function Jogos() {
               </div>
             )}
 
-            <div className="grid gap-3 md:grid-cols-2">
-              {r.jogos.map((m) => <MatchCard key={m.id} match={m} />)}
-            </div>
+            {/* O jogo da jornada ocupa a largura toda — os cinco não
+                são iguais, e a página devia dizê-lo. */}
+            {(() => {
+              const [destaque, ...restantes] = ordenarPorDestaque(r.jogos);
+              return (
+                <>
+                  {destaque && (
+                    <div className="mb-3">
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <Flame className="h-3.5 w-3.5" style={{ color: active?.accent }} />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.18em]"
+                          style={{ color: active?.accent }}>
+                          {ETIQUETA_DESTAQUE[destaque.highlight_tag ?? ""] ?? "Jogo da jornada"}
+                        </span>
+                      </div>
+                      <MatchCard match={destaque} />
+                    </div>
+                  )}
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {restantes.map((m) => <MatchCard key={m.id} match={m} />)}
+                  </div>
+                </>
+              );
+            })()}
           </section>
         ))}
       </div>

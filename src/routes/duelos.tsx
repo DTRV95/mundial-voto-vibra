@@ -80,15 +80,19 @@ function Duelos() {
 
       <PageTabs abas={ABAS_SOCIAL} />
 
-      {/* Como funciona */}
-      <div className="mb-5 flex items-start gap-2 rounded-2xl border border-border bg-card/50 px-4 py-3">
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-        <div className="text-xs text-muted-foreground">
+      {/* Regras — recolhidas, para não roubarem o ecrã a quem já sabe */}
+      <details className="group mb-5 rounded-2xl border border-border bg-card/50">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-2.5 text-xs font-semibold text-muted-foreground">
+          <Info className="h-3.5 w-3.5" />
+          Como se ganham pontos nos duelos
+          <span className="ml-auto text-[10px] transition-transform group-open:rotate-180">▾</span>
+        </summary>
+        <div className="border-t border-border/60 px-4 py-3 text-xs text-muted-foreground">
           <p><span className="font-semibold text-foreground">Vitória 3 · Empate 1 · Derrota 0</span>, multiplicado pelo tipo de duelo:</p>
           <p className="mt-0.5">Jogo <span className="font-semibold text-foreground">×2</span> · Jornada <span className="font-semibold text-foreground">×3</span> · Mês <span className="font-semibold text-foreground">×6</span></p>
           <p className="mt-1">O ranking reinicia todos os meses. Contra o mesmo adversário só contam 2 duelos por mês.</p>
         </div>
-      </div>
+      </details>
 
       <div className="mb-5 flex gap-2">
         {([

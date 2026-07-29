@@ -79,9 +79,9 @@ function Classificacao() {
         comp={active}
       />
 
-      <PageTabs abas={ABAS_JOGAR} />
-
-      <CompetitionPicker competitions={competitions} activeId={active?.id} onPick={setSlug} />
+      <PageTabs abas={ABAS_JOGAR} direita={
+        <CompetitionPicker competitions={competitions} activeId={active?.id} onPick={setSlug} compacto />
+      } />
 
       {isLoading && <div className="shimmer h-96 rounded-2xl" />}
 

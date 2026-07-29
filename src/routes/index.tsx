@@ -462,7 +462,7 @@ function Home() {
       {RankSharePortal}
 
       {/* ===================== PAINEL DA COMPETIÇÃO ===================== */}
-      <section className="px-4 pt-4 md:px-6 md:pt-6 animate-fade-in">
+      <section className="px-4 pt-3 md:px-6 md:pt-4 animate-fade-in">
         <div className="surface edge-metal overflow-hidden rounded-3xl">
 
           {/* Tabs de competição */}
@@ -472,10 +472,10 @@ function Home() {
                 const on = c.slug === activeComp?.slug;
                 return (
                   <button key={c.slug} onClick={() => setHomeCompSlug(c.slug)}
-                    className="pressable relative flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-2xl px-3 py-2.5"
+                    className="pressable relative flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl px-3 py-2"
                     style={on ? {
-                      background: `linear-gradient(140deg, color-mix(in srgb, ${c.accent} 88%, white) 0%, ${c.accent} 48%, ${c.deep} 100%)`,
-                      boxShadow: `0 1px 2px oklch(0 0 0 / 0.18), 0 6px 16px -6px ${c.glow}, inset 0 1px 0 oklch(1 0 0 / 0.30)`,
+                      background: `linear-gradient(140deg, color-mix(in srgb, ${c.accent} 72%, white) 0%, ${c.accent} 45%, color-mix(in srgb, ${c.electric} 30%, ${c.deep}) 100%)`,
+                      boxShadow: `0 1px 2px oklch(0 0 0 / 0.18), 0 8px 22px -6px ${c.glow}, inset 0 1px 0 oklch(1 0 0 / 0.45)`,
                       transition: "background 400ms ease, box-shadow 400ms ease",
                     } : { background: "transparent", transition: "all 250ms ease" }}>
                     {on && <span className="pointer-events-none absolute inset-x-4 top-0 h-px"
@@ -519,10 +519,10 @@ function Home() {
             )}
 
             <div className="pointer-events-none absolute -right-6 top-1/2 h-44 w-44 -translate-y-1/2 rounded-full"
-              style={{ background: activeComp?.glow ?? "oklch(0.75 0.18 85 / 0.20)", filter: "blur(52px)", transition: "background 450ms ease" }} />
+              style={{ background: activeComp ? `color-mix(in srgb, ${activeComp.electric} 40%, transparent)` : "oklch(0.75 0.18 85 / 0.20)", filter: "blur(48px)", transition: "background 450ms ease" }} />
             {activeComp?.motif !== "stars" && <span className="watermark">7</span>}
 
-            <div className="relative flex flex-col gap-5 px-5 py-6 md:flex-row md:items-center md:justify-between md:px-8 md:py-7">
+            <div className="relative flex flex-col gap-3.5 px-5 py-4 md:flex-row md:items-center md:justify-between md:px-7 md:py-5">
               {/* Identidade */}
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -537,10 +537,10 @@ function Home() {
                     {"Época 2026/27"}
                   </span>
                 </div>
-                <h1 className="display-hero mt-2 leading-none text-white" style={{ fontSize: "clamp(1.9rem,4.8vw,2.8rem)" }}>
+                <h1 className="display-hero mt-1.5 leading-none text-white" style={{ fontSize: "clamp(1.55rem,3.8vw,2.2rem)" }}>
                   UMA GERAÇÃO
                 </h1>
-                <p className="mt-1.5 max-w-md text-sm transition-smooth"
+                <p className="mt-1 max-w-md text-[13px] transition-smooth"
                   style={{ color: activeComp ? `color-mix(in srgb, ${activeComp.tone} 80%, transparent)` : "oklch(1 0 0 / 0.70)" }}>
                   {user
                     ? "Vota em cada jornada, sobe no ranking e desafia os teus amigos."
@@ -552,18 +552,18 @@ function Home() {
               <div className="flex shrink-0 items-center gap-3 md:flex-col md:items-end md:gap-3">
                 {user && myDivision ? (
                   <div className="flex items-center gap-2.5">
-                    <div className="glass rounded-2xl px-4 py-2.5 text-center">
-                      <p className="font-display text-2xl leading-none tabular-nums emboss-gold">
+                    <div className="glass rounded-xl px-3.5 py-2 text-center">
+                      <p className="font-display text-xl leading-none tabular-nums emboss-gold">
                         <CountUpText value={myDivision.points} />
                       </p>
                       <p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/55">pontos</p>
                     </div>
-                    <div className="glass rounded-2xl px-4 py-2.5 text-center">
-                      <p className="font-display text-2xl leading-none text-white">#{myDivision.rank}º</p>
+                    <div className="glass rounded-xl px-3.5 py-2 text-center">
+                      <p className="font-display text-xl leading-none text-white">#{myDivision.rank}º</p>
                       <p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/55">global</p>
                     </div>
-                    <div className="glass hidden rounded-2xl px-4 py-2.5 text-center sm:block">
-                      <p className="font-display text-2xl leading-none text-white">{myDivision.emoji}</p>
+                    <div className="glass hidden rounded-xl px-3.5 py-2 text-center sm:block">
+                      <p className="font-display text-xl leading-none text-white">{myDivision.emoji}</p>
                       <p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/55">{myDivision.label}</p>
                     </div>
                   </div>
@@ -583,10 +583,10 @@ function Home() {
               {[
                 { label: "Previsões hoje", num: communityPulse?.todayVotes ?? 0, live: true },
                 { label: "Adeptos", num: communityPulse?.totalUsers ?? 0, live: false },
-                { label: "Jogos", num: 104, live: false },
+                { label: "Jogos oficiais", num: jornadaFoco?.jogos.length ?? 0, live: false },
               ].map((st, i) => (
-                <div key={st.label} className={`py-3 text-center text-white ${i === 1 ? "border-x border-white/10" : ""}`}>
-                  <div className="flex items-center justify-center gap-1.5 font-display text-lg leading-none tabular-nums md:text-xl">
+                <div key={st.label} className={`py-2 text-center text-white ${i === 1 ? "border-x border-white/10" : ""}`}>
+                  <div className="flex items-center justify-center gap-1.5 font-display text-base leading-none tabular-nums md:text-lg">
                     {st.live && st.num > 0 && (
                       <span className="relative flex h-1.5 w-1.5">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-green opacity-75" />

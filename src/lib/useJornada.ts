@@ -38,7 +38,7 @@ export function useJornadas(competitionId: string | null | undefined, userId?: s
         .from("matches")
         .select(
           "id,kickoff_at,phase,status,voting_open,official_position,highlight_tag," +
-          "home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)," +
+          "home:home_team_id(name,flag,code,monogram),away:away_team_id(name,flag,code,monogram)," +
           "round:round_id!inner(id,number,label,status),predictions(count)"
         )
         .eq("competition_id", competitionId)

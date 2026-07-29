@@ -98,9 +98,9 @@ export function CartaoJornada({ jornada, comp }: { jornada: Jornada; comp: Compe
               className={`flex shrink-0 items-center gap-1.5 rounded-xl px-2.5 py-1.5 transition-smooth ${
                 j.already_voted ? "bg-white/10" : "bg-black/20 hover:bg-black/30"
               }`}>
-              <TeamBadge code={j.home.code} flag={j.home.flag} name={j.home.name} size="sm" />
+              <TeamBadge code={j.home.code} flag={j.home.flag} name={j.home.name} monogram={(j.home as any).monogram} size="sm" />
               <span className="text-[10px] font-bold text-white/50">v</span>
-              <TeamBadge code={j.away.code} flag={j.away.flag} name={j.away.name} size="sm" />
+              <TeamBadge code={j.away.code} flag={j.away.flag} name={j.away.name} monogram={(j.away as any).monogram} size="sm" />
               {j.already_voted && <CheckCircle2 className="h-3 w-3 shrink-0 text-white/70" />}
             </Link>
           ))}

@@ -1,8 +1,12 @@
+import { ClubBadge } from "@/lib/clubBadge";
+
 interface TeamBadgeProps {
   code: string | null;
   flag: string | null;
   name: string;
   size?: "sm" | "md" | "lg";
+  /** Monograma do clube, vindo da base de dados */
+  monogram?: string | null;
 }
 
 // ISO 2-letter code by exact team name (Portuguese)
@@ -82,7 +86,7 @@ function resolveIso(code: string | null, name: string): string | null {
   return null;
 }
 
-export function TeamBadge({ code, flag: _flag, name, size = "md" }: TeamBadgeProps) {
+export function TeamBadge({ code, flag: _flag, name, size = "md", monogram }: TeamBadgeProps) {
   const sizeCls =
     size === "lg" ? "h-16 w-16 rounded-2xl" :
     size === "sm" ? "h-9 w-9 rounded-xl" :
@@ -92,6 +96,10 @@ export function TeamBadge({ code, flag: _flag, name, size = "md" }: TeamBadgePro
   const flagUrl = iso
     ? `https://flagcdn.com/w80/${iso}.png`
     : null;
+
+  // Sem bandeira, é um clube — leva o emblema da plataforma em vez da
+  // bola genérica que estava aqui antes.
+  if (!flagUrl) return <ClubBadge name={name} monogram={monogram} size={size} />;
 
   return (
     <div

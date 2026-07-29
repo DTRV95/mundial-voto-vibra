@@ -48,7 +48,7 @@ function Prognosticos() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("prognosticos")
-        .select("id,suggestion,summary,created_at,match:match_id(id,kickoff_at,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code),round:round_id(label))")
+        .select("id,suggestion,summary,created_at,match:match_id(id,kickoff_at,home:home_team_id(name,flag,code,monogram),away:away_team_id(name,flag,code,monogram),round:round_id(label))")
         .eq("published", true)
         .order("created_at", { ascending: false });
       return ((data ?? []) as any[]).sort((a, b) => {
@@ -170,7 +170,7 @@ function PrognosticoCard({ article }: { article: any }) {
       {match?.home && match?.away ? (
         <div className="flex items-center justify-between gap-2 px-4 py-4">
           <div className="flex flex-1 flex-col items-center gap-2">
-            <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} size="md" />
+            <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} monogram={(match.home as any).monogram} size="md" />
             <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">{match.home.name}</span>
           </div>
           <div className="flex flex-col items-center gap-1 px-2">
@@ -183,7 +183,7 @@ function PrognosticoCard({ article }: { article: any }) {
             <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">vs</span>
           </div>
           <div className="flex flex-1 flex-col items-center gap-2">
-            <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} size="md" />
+            <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} monogram={(match.away as any).monogram} size="md" />
             <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">{match.away.name}</span>
           </div>
         </div>

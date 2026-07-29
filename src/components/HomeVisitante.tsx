@@ -1,11 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Swords, Users, Trophy, Target, ShieldCheck, CalendarClock } from "lucide-react";
+import { ArrowRight, Users, Target, ShieldCheck } from "lucide-react";
 import type { Competition } from "@/lib/useCompetitions";
 import { useJornadas, jornadaEmFoco } from "@/lib/useJornada";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { formatTime } from "@/lib/format";
+import {
+  SeccaoFeature, EcraJornada, EcraTorneios, EcraDuelos, EcraDivisoes, EcraPrognosticos,
+} from "@/components/FeatureTelemovel";
 
 /**
  * A página de quem ainda não tem conta.
@@ -195,54 +198,87 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
         </section>
       )}
 
-      {/* ── O QUE TORNA ISTO DIFERENTE ──────────────────────── */}
-      <section className="px-5 pb-14 md:px-8">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="mb-2 text-center font-display text-3xl text-white md:text-4xl">
-            Não é só palpitar
-          </h2>
-          <p className="mx-auto mb-8 max-w-lg text-center text-sm text-white/60">
+      {/* ── AS FEATURES, UMA A UMA, COM O ECRÃ AO LADO ──────── */}
+      <div className="border-y border-white/8 bg-black/25">
+        <div className="px-5 pt-14 text-center md:px-8">
+          <h2 className="font-display text-3xl text-white md:text-5xl">Não é só palpitar</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-white/60">
             É competir com pessoas com nome, cara e conversa no grupo.
           </p>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Destaque
-              icone={Users}
-              cor={acento}
-              titulo="Torneios à tua medida"
-              texto="Cria um torneio, partilha um código de 6 letras e escolhe as regras: que competições contam, e se contam todos os jogos, só os dos grandes, ou só os do teu clube."
-              nota="Com chat próprio"
-              destaque
-            />
-            <Destaque
-              icone={Swords}
-              cor={eletrico}
-              titulo="Duelos 1 contra 1"
-              texto="Desafia qualquer adepto por um jogo, uma jornada ou o mês inteiro. Ganhas pontos num ranking à parte — e o confronto direto fica guardado para sempre."
-              nota="5–2 contra o teu cunhado, para a vida"
-              destaque
-            />
-            <Destaque
-              icone={Trophy}
-              cor="#FFB020"
-              titulo="Divisões que se sobem e descem"
-              texto="Da Liga do Zé Povinho à 1ª Liga. Cada mês é uma corrida nova, e os pódios ficam guardados no teu perfil como medalhas permanentes."
-            />
-            <Destaque
-              icone={CalendarClock}
-              cor={acento}
-              titulo="Cinco jogos. Cinco minutos."
-              texto="Nada de 300 jogos por época. Cinco por jornada, escolhidos a dedo, iguais para toda a gente. Ninguém ganha por ter mais tempo livre."
-            />
-            <Destaque
-              icone={Target}
-              cor={eletrico}
-              titulo="Prognósticos antes de votares"
-              texto="Análise de cada jogo oficial, para decidires com mais do que o coração."
-            />
-          </div>
         </div>
-      </section>
+
+        <SeccaoFeature
+          etiqueta="A jornada"
+          cor={acento}
+          titulo={<>Cinco jogos.<br />Cinco minutos.</>}
+          texto="Nada de 300 jogos por época. Cinco por jornada, escolhidos a dedo — e exatamente os mesmos para toda a gente. Ninguém ganha por ter mais tempo livre para votar."
+          pontos={[
+            "Dois destaques, dois equilibrados e um de rotação",
+            "Fecha 5 minutos antes do apito inicial",
+            "Quatro mercados por jogo, do 1X2 ao resultado exato",
+          ]}
+        >
+          <EcraJornada jornada={jornada} cor={acento} />
+        </SeccaoFeature>
+
+        <SeccaoFeature
+          etiqueta="Torneios privados"
+          cor="#FFB020"
+          inverter
+          titulo={<>O teu grupo,<br />as tuas regras.</>}
+          texto="Cria um torneio, partilha um código de 6 letras e decide como se joga. Cada grupo pode ter regras completamente diferentes."
+          pontos={[
+            "Escolhe que competições contam",
+            "Só os jogos dos grandes, ou só os do teu clube",
+            "Chat próprio e duelos lá dentro",
+          ]}
+        >
+          <EcraTorneios cor="#FFB020" />
+        </SeccaoFeature>
+
+        <SeccaoFeature
+          etiqueta="Duelos 1 contra 1"
+          cor={eletrico}
+          titulo={<>Um contra um.<br />Para a vida.</>}
+          texto="Desafia qualquer adepto por um jogo, uma jornada ou o mês inteiro. Ganhas pontos num ranking à parte — e o confronto direto fica guardado para sempre."
+          pontos={[
+            "Jogo ×2 · Jornada ×3 · Mês ×6",
+            "Ranking de duelos reinicia todos os meses",
+            "5–2 contra o teu cunhado, para sempre no histórico",
+          ]}
+        >
+          <EcraDuelos cor={eletrico} />
+        </SeccaoFeature>
+
+        <SeccaoFeature
+          etiqueta="Divisões e medalhas"
+          cor="#FFB020"
+          inverter
+          titulo={<>Sobe de divisão.<br />Ou desce.</>}
+          texto="Da Liga do Zé Povinho à 1ª Liga. Cada mês é uma corrida nova, e os pódios ficam no teu perfil como medalhas permanentes."
+          pontos={[
+            "Quatro divisões, por posição no ranking",
+            "Vencedor de cada mês, além da época",
+            "Medalhas que nunca se perdem",
+          ]}
+        >
+          <EcraDivisoes cor="#FFB020" />
+        </SeccaoFeature>
+
+        <SeccaoFeature
+          etiqueta="Prognósticos"
+          cor={acento}
+          titulo={<>Decide com mais<br />do que o coração.</>}
+          texto="Análise de cada jogo oficial antes de votares: probabilidades, contexto e uma sugestão. Usas se quiseres — ou segues o instinto."
+          pontos={[
+            "Probabilidades por mercado",
+            "Publicados antes de cada jornada",
+            "A um toque dos jogos",
+          ]}
+        >
+          <EcraPrognosticos jornada={jornada} cor={acento} />
+        </SeccaoFeature>
+      </div>
 
       {/* ── COMO SE COMEÇA ──────────────────────────────────── */}
       <section className="px-5 pb-14 md:px-8">
@@ -315,39 +351,6 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
           </div>
         </div>
       </section>
-      </div>
-    </div>
-  );
-}
-
-function Destaque({ icone: Icone, cor, titulo, texto, nota, destaque }: {
-  icone: React.ElementType;
-  cor: string;
-  titulo: string;
-  texto: string;
-  nota?: string;
-  /** Os dois diferenciais principais ocupam mais espaço em ecrã grande */
-  destaque?: boolean;
-}) {
-  return (
-    <div className={`cartao-eleva relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur-sm ${destaque ? "sm:col-span-2 lg:col-span-3" : ""}`}>
-      {/* Halo do canto, na cor do destaque */}
-      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full"
-        style={{ background: cor, filter: "blur(60px)", opacity: 0.22 }} />
-
-      <div className="relative">
-        <span className="grid h-11 w-11 place-items-center rounded-2xl border"
-          style={{ borderColor: `${cor}55`, background: `${cor}1f`, color: cor }}>
-          <Icone className="h-5 w-5" />
-        </span>
-        <h3 className="mt-3.5 font-display text-xl text-white">{titulo}</h3>
-        <p className="mt-1.5 text-sm leading-relaxed text-white/65">{texto}</p>
-        {nota && (
-          <span className="mt-3 inline-block rounded-full border px-2.5 py-1 text-[11px] font-bold"
-            style={{ borderColor: `${cor}44`, color: cor }}>
-            {nota}
-          </span>
-        )}
       </div>
     </div>
   );

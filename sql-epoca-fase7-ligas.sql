@@ -52,7 +52,7 @@ alter table public.pool_members
 
 -- Quem já lá estava conta desde que entrou (ou desde a criação da liga)
 update public.pool_members pm
-set conta_desde = coalesce(pm.conta_desde, pm.created_at, p.created_at)
+set conta_desde = coalesce(pm.conta_desde, pm.joined_at, p.created_at)
 from public.pools p
 where p.id = pm.pool_id and pm.conta_desde is null;
 

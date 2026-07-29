@@ -7,6 +7,7 @@ import { ArrowLeft, Trophy, Target, Percent, Users, Shield, ChevronDown, Chevron
 import { UserAvatar } from "@/components/AvatarPicker";
 import { PHASE_LABEL, formatDate } from "@/lib/format";
 import { TeamBadge } from "@/lib/teamColors.tsx";
+import { BadgeShelf } from "@/components/Badges";
 
 export const Route = createFileRoute("/adepto/$id")({
   component: PublicProfile,
@@ -152,6 +153,14 @@ function PublicProfile() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Medalhas permanentes */}
+        <div className="mt-6">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+            <Trophy className="h-4 w-4" /> Medalhas
+          </h2>
+          <BadgeShelf userId={profile.id} />
         </div>
       </div>
 

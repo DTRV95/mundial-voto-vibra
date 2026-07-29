@@ -23,6 +23,52 @@ const MEDAL_STYLES = [
   "border-amber-700/40 bg-amber-700/10",
 ];
 
+/** Classificação geral final do Mundial 2026, congelada para sempre. */
+function PodioMundial() {
+  const { data: podio = [] } = useQuery({
+    queryKey: ["mundial-2026-podio"],
+    staleTime: 600_000,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("mundial_2026_classificacao")
+        .select("user_id,rank,total_points")
+        .lte("rank", 10)
+        .order("rank");
+      if (!data || data.length === 0) return [];
+      const ids = data.map((r: any) => r.user_id) as string[];
+      const { data: perfis } = await supabase
+        .from("profiles").select("id,display_name,avatar_url").in("id", ids);
+      const mapa = Object.fromEntries((perfis ?? []).map((p: any) => [p.id, p]));
+      return data.map((r: any) => ({ ...r, profile: mapa[r.user_id] }));
+    },
+  });
+
+  if (podio.length === 0) return null;
+
+  return (
+    <div className="mb-6">
+      <div className="mb-3 flex items-center gap-2">
+        <Trophy className="h-4 w-4 text-gold" />
+        <h3 className="font-display text-lg">Classificação Final · Mundial 2026</h3>
+      </div>
+      <div className="space-y-2">
+        {podio.map((e: any) => (
+          <Link key={e.user_id} to="/adepto/$id" params={{ id: e.user_id }}
+            className={`flex items-center gap-3 rounded-2xl border px-4 py-3 transition-smooth hover:brightness-110 ${MEDAL_STYLES[e.rank - 1] ?? "border-border bg-card/60"}`}>
+            <span className="w-8 text-center text-2xl">{MEDALS[e.rank - 1] ?? `${e.rank}º`}</span>
+            <UserAvatar avatarUrl={e.profile?.avatar_url} name={e.profile?.display_name} size={8} className="shrink-0 rounded-full" />
+            <span className="flex-1 truncate font-semibold">{e.profile?.display_name ?? "—"}</span>
+            <div className="text-right">
+              <p className="font-display text-xl leading-none text-gold">{e.total_points}</p>
+              <p className="text-[10px] text-muted-foreground">pontos</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function HallOfFame({ data }: { data: any[] }) {
   if (data.length === 0) return (
     <div className="rounded-2xl border border-border bg-card/70 p-10 text-center">
@@ -537,7 +583,7 @@ function Rankings() {
       )}
 
       {/* ── HALL OF FAME ─────────────────────────────────── */}
-      {tab === "hof" && <HallOfFame data={hofData} />}
+      {tab === "hof" && <><PodioMundial /><HallOfFame data={hofData} /></>}
 
       <div className="mt-6 rounded-2xl border border-border bg-card/50 p-5 text-xs text-muted-foreground">
         <h3 className="mb-2 font-display text-base text-foreground">Critérios de desempate</h3>

@@ -11,6 +11,7 @@ import { TeamBadge } from "@/lib/teamColors.tsx";
 import { formatDate } from "@/lib/format";
 import { useNotifications, markChatRead, markRankSeen, markFollowSeen } from "@/lib/useNotifications";
 import { FollowButton } from "@/components/FollowButton";
+import { BadgeShelf } from "@/components/Badges";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({ meta: [{ title: "Perfil — Uma Geração" }] }),
@@ -423,6 +424,14 @@ function Perfil() {
           </div>
         </div>
       </div>
+
+      {/* Medalhas permanentes — pódios de época e de mês, para sempre */}
+      <section className="mb-8">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          <Trophy className="h-4 w-4" /> Medalhas
+        </h2>
+        <BadgeShelf userId={(profile as any)?.id} />
+      </section>
 
       {/* Badges */}
       <BadgesSection

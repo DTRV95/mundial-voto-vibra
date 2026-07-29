@@ -12,6 +12,8 @@ import { formatDate } from "@/lib/format";
 import { useNotifications, markChatRead, markRankSeen, markFollowSeen } from "@/lib/useNotifications";
 import { FollowButton } from "@/components/FollowButton";
 import { BadgeShelf } from "@/components/Badges";
+import { CartaoDnaCompacto } from "@/components/dna/CartaoDnaCompacto";
+import { DefinicoesDna } from "@/components/dna/DefinicoesDna";
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({ meta: [{ title: "Perfil — Uma Geração" }] }),
@@ -424,6 +426,13 @@ function Perfil() {
           </div>
         </div>
       </div>
+
+      {/* O teu DNA — cartão compacto que leva à página própria */}
+      <section className="mb-8">
+        <CartaoDnaCompacto userId={(profile as any)?.id} />
+      </section>
+
+      <DefinicoesDna userId={(profile as any)?.id} />
 
       {/* Medalhas permanentes — pódios de época e de mês, para sempre */}
       <section className="mb-8">

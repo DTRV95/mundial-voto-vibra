@@ -18,6 +18,7 @@ import { ChampionsAtmosphere } from "@/components/ChampionsAtmosphere";
 import { LigaAtmosphere } from "@/components/LigaAtmosphere";
 import { CompetitionAtmosphere } from "@/components/CompetitionAtmosphere";
 import { CartaoJornada, CartaoSemJornada } from "@/components/CartaoJornada";
+import { CartaoDnaCompacto } from "@/components/dna/CartaoDnaCompacto";
 import { HomeVisitante } from "@/components/HomeVisitante";
 import { useJornadas, jornadaEmFoco } from "@/lib/useJornada";
 import { CompetitionArt, findCompetitionArt } from "@/components/CompetitionArt";
@@ -657,6 +658,11 @@ function Home() {
           </Link>
         </div>
       )}
+
+      {/* ===================== O TEU DNA ===================== */}
+      {/* Abaixo da jornada e da divisão: a ação principal do site
+          continua a ser prever, o DNA é retenção e descoberta. */}
+      <div><CartaoDnaCompacto userId={user?.id} /></div>
 
       {/* ===================== MY POINTS PER MATCH ===================== */}
       {user && myResults.length > 0 && (

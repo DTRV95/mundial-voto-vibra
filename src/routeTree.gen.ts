@@ -18,6 +18,7 @@ import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as LigasRouteImport } from './routes/ligas'
 import { Route as JogosRouteImport } from './routes/jogos'
 import { Route as DuelosRouteImport } from './routes/duelos'
+import { Route as DnaRouteImport } from './routes/dna'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as ClassificacaoRouteImport } from './routes/classificacao'
@@ -73,6 +74,11 @@ const JogosRoute = JogosRouteImport.update({
 const DuelosRoute = DuelosRouteImport.update({
   id: '/duelos',
   path: '/duelos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DnaRoute = DnaRouteImport.update({
+  id: '/dna',
+  path: '/dna',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/classificacao': typeof ClassificacaoRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
+  '/dna': typeof DnaRoute
   '/duelos': typeof DuelosRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/classificacao': typeof ClassificacaoRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
+  '/dna': typeof DnaRoute
   '/duelos': typeof DuelosRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/classificacao': typeof ClassificacaoRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
+  '/dna': typeof DnaRoute
   '/duelos': typeof DuelosRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
@@ -208,6 +217,7 @@ export interface FileRouteTypes {
     | '/classificacao'
     | '/como-funciona'
     | '/cookies'
+    | '/dna'
     | '/duelos'
     | '/jogos'
     | '/ligas'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/classificacao'
     | '/como-funciona'
     | '/cookies'
+    | '/dna'
     | '/duelos'
     | '/jogos'
     | '/ligas'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/classificacao'
     | '/como-funciona'
     | '/cookies'
+    | '/dna'
     | '/duelos'
     | '/jogos'
     | '/ligas'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   ClassificacaoRoute: typeof ClassificacaoRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   CookiesRoute: typeof CookiesRoute
+  DnaRoute: typeof DnaRoute
   DuelosRoute: typeof DuelosRoute
   JogosRoute: typeof JogosRoute
   LigasRoute: typeof LigasRoute
@@ -353,6 +366,13 @@ declare module '@tanstack/react-router' {
       path: '/duelos'
       fullPath: '/duelos'
       preLoaderRoute: typeof DuelosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dna': {
+      id: '/dna'
+      path: '/dna'
+      fullPath: '/dna'
+      preLoaderRoute: typeof DnaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -443,6 +463,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClassificacaoRoute: ClassificacaoRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   CookiesRoute: CookiesRoute,
+  DnaRoute: DnaRoute,
   DuelosRoute: DuelosRoute,
   JogosRoute: JogosRoute,
   LigasRoute: LigasRoute,

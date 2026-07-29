@@ -123,3 +123,43 @@ export function ClubBadge({ name, monogram, size = "md" }: {
     </div>
   );
 }
+
+/**
+ * Nome de clube encurtado, para caber num telemóvel.
+ * "Sport Lisboa e Benfica" → "Benfica"
+ * "Sporting Clube de Portugal" → "Sporting"
+ * "Académico de Viseu FC" → "Académico Viseu"
+ */
+export function nomeCurto(nome: string): string {
+  const conhecidos: [RegExp, string][] = [
+    [/benfica/i, "Benfica"],
+    [/\bporto\b/i, "FC Porto"],
+    [/sporting clube de portugal|sporting cp/i, "Sporting"],
+    [/sporting.*braga|\bbraga\b/i, "SC Braga"],
+    [/vit[oó]ria.*guimar|guimar/i, "Vitória SC"],
+    [/académico de viseu|academico de viseu/i, "Ac. Viseu"],
+    [/estrela.*amadora/i, "Estrela"],
+    [/santa clara/i, "Santa Clara"],
+    [/nacional/i, "Nacional"],
+    [/famalic/i, "Famalicão"],
+    [/moreirense/i, "Moreirense"],
+    [/gil vicente/i, "Gil Vicente"],
+    [/casa pia/i, "Casa Pia"],
+    [/rio ave/i, "Rio Ave"],
+    [/estoril/i, "Estoril"],
+    [/arouca/i, "Arouca"],
+    [/alverca/i, "Alverca"],
+    [/tondela/i, "Tondela"],
+    [/naval|\bavs\b/i, "AVS"],
+  ];
+  for (const [padrao, curto] of conhecidos) {
+    if (padrao.test(nome)) return curto;
+  }
+
+  // Caso geral: tirar prefixos e sufixos de tipo de clube
+  const limpo = nome
+    .replace(/\b(FC|SC|SL|CD|CF|AC|AS|SS|CS|GD|UD|RC|SAD|Futebol|Clube|Sport|Sporting|Associa[çc][ãa]o|de|do|da|e)\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return limpo || nome;
+}

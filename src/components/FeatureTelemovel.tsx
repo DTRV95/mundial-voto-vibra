@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Check, Swords, Crown, Trophy, Target } from "lucide-react";
 import { Telemovel, EcraTopo } from "@/components/Telemovel";
 import { TeamBadge } from "@/lib/teamColors.tsx";
+import { nomeCurto } from "@/lib/clubBadge";
 import { formatTime } from "@/lib/format";
 import type { Jornada } from "@/lib/useJornada";
 
@@ -82,12 +83,12 @@ export function EcraJornada({ jornada, cor }: { jornada: Jornada | null; cor: st
       {/* Jogos reais */}
       <div className="space-y-1.5">
         {jogos.map(j => (
-          <div key={j.id} className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.05] px-2.5 py-2">
+          <div key={j.id} className="flex min-w-0 items-center gap-2 rounded-xl border border-white/8 bg-white/[0.05] px-2.5 py-2">
             <TeamBadge code={j.home.code} flag={j.home.flag} name={j.home.name}
               monogram={(j.home as any).monogram} crest={(j.home as any).crest_url} size="sm" />
             <div className="min-w-0 flex-1 text-center">
               <p className="truncate text-[9px] font-bold text-white/85">
-                {j.home.name} <span className="text-white/35">v</span> {j.away.name}
+                {nomeCurto(j.home.name)} <span className="text-white/35">v</span> {nomeCurto(j.away.name)}
               </p>
               <p className="text-[8px] text-white/40">{formatTime(j.kickoff_at)}</p>
             </div>
@@ -315,13 +316,13 @@ export function EcraPrognosticos({ jornada, cor }: { jornada: Jornada | null; co
             <div className="flex flex-1 flex-col items-center gap-1">
               <TeamBadge code={jogo.home.code} flag={jogo.home.flag} name={jogo.home.name}
                 monogram={(jogo.home as any).monogram} crest={(jogo.home as any).crest_url} size="sm" />
-              <span className="text-center text-[8px] font-bold text-white/80">{jogo.home.name}</span>
+              <span className="w-full truncate text-center text-[8px] font-bold text-white/80">{nomeCurto(jogo.home.name)}</span>
             </div>
             <span className="font-display text-sm text-white/60">{formatTime(jogo.kickoff_at)}</span>
             <div className="flex flex-1 flex-col items-center gap-1">
               <TeamBadge code={jogo.away.code} flag={jogo.away.flag} name={jogo.away.name}
                 monogram={(jogo.away as any).monogram} crest={(jogo.away as any).crest_url} size="sm" />
-              <span className="text-center text-[8px] font-bold text-white/80">{jogo.away.name}</span>
+              <span className="w-full truncate text-center text-[8px] font-bold text-white/80">{nomeCurto(jogo.away.name)}</span>
             </div>
           </div>
         ) : (

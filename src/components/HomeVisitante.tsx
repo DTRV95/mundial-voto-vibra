@@ -5,6 +5,7 @@ import { ArrowRight, Users, Target, ShieldCheck } from "lucide-react";
 import type { Competition } from "@/lib/useCompetitions";
 import { useJornadas, jornadaEmFoco } from "@/lib/useJornada";
 import { TeamBadge } from "@/lib/teamColors.tsx";
+import { nomeCurto } from "@/lib/clubBadge";
 import { formatTime } from "@/lib/format";
 import {
   SeccaoFeature, EcraJornada, EcraTorneios, EcraDuelos, EcraDivisoes, EcraPrognosticos,
@@ -172,12 +173,12 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
             <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
               {jornada.jogos.map(j => (
                 <div key={j.id}
-                  className="cartao-eleva flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3.5 py-3 backdrop-blur-sm">
+                  className="cartao-eleva flex min-w-0 items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-3 backdrop-blur-sm">
                   <TeamBadge code={j.home.code} flag={j.home.flag} name={j.home.name}
                     monogram={(j.home as any).monogram} crest={(j.home as any).crest_url} size="sm" />
                   <div className="min-w-0 flex-1 text-center">
                     <p className="truncate text-[11px] font-bold text-white/85">
-                      {j.home.name} <span className="text-white/35">v</span> {j.away.name}
+                      {nomeCurto(j.home.name)} <span className="text-white/35">v</span> {nomeCurto(j.away.name)}
                     </p>
                     <p className="text-[10px] text-white/45">{formatTime(j.kickoff_at)}</p>
                   </div>

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Target, Clock } from "lucide-react";
+import { PageTabs, ABAS_JOGAR } from "@/components/PageTabs";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { formatTime } from "@/lib/format";
 
@@ -83,6 +84,8 @@ function Prognosticos() {
           Análises dos jogos oficiais, antes de dares a tua previsão.
         </p>
       </header>
+
+      <PageTabs abas={ABAS_JOGAR} />
 
       {isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">

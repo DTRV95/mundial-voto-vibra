@@ -3,8 +3,9 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { Users, Plus, LogIn, Copy, Check, Trash2, Gift, HelpCircle, Clock, CalendarDays, Layers, Swords } from "lucide-react";
+import { Users, Plus, LogIn, Copy, Check, Trash2, Gift, HelpCircle, Clock, CalendarDays, Layers } from "lucide-react";
 import { toast } from "sonner";
+import { PageTabs, ABAS_SOCIAL } from "@/components/PageTabs";
 
 export const Route = createFileRoute("/ligas")({
   head: () => ({
@@ -228,20 +229,7 @@ function Ligas() {
       </div>
 
       <div className="px-5 pt-6 md:px-8">
-        {/* ── DUELOS 1v1 ─────────────────────────────────────── */}
-        <Link to="/duelos"
-          className="group mb-6 flex items-center justify-between gap-3 rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3 transition-smooth hover:border-gold/60">
-          <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gold/15 text-gold">
-              <Swords className="h-4 w-4" />
-            </span>
-            <div>
-              <p className="text-sm font-bold">Duelos 1 contra 1</p>
-              <p className="text-[11px] text-muted-foreground">Desafia um adepto por jornada ou pelo mês inteiro.</p>
-            </div>
-          </div>
-          <span className="shrink-0 text-sm font-bold text-gold transition-smooth group-hover:translate-x-0.5">→</span>
-        </Link>
+        <PageTabs abas={ABAS_SOCIAL} />
 
         {/* ── CRIAR TORNEIO ──────────────────────────────────── */}
         <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-sm">

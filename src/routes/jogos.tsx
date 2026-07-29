@@ -1,11 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
-import { CalendarClock, Target, CheckCircle2 } from "lucide-react";
+import { CalendarClock, CheckCircle2 } from "lucide-react";
+import { PageTabs, ABAS_JOGAR } from "@/components/PageTabs";
 
 export const Route = createFileRoute("/jogos")({
   head: () => ({
@@ -110,6 +111,8 @@ function Jogos() {
         </p>
       </header>
 
+      <PageTabs abas={ABAS_JOGAR} />
+
       {/* Competições */}
       {competitions.length > 1 && (
         <div className="mb-4 -mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
@@ -134,24 +137,6 @@ function Jogos() {
           </div>
         </div>
       )}
-
-      {/* Banner prognósticos */}
-      <Link
-        to="/prognosticos"
-        className="group mb-6 flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-border px-4 py-3 transition-smooth hover:border-wc-blue/40"
-        style={{ background: "linear-gradient(135deg, oklch(0.20 0.04 250 / 0.5) 0%, oklch(0.16 0.02 260 / 0.3) 100%)" }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/10">
-            <Target className="h-4 w-4 text-white/70" />
-          </div>
-          <div>
-            <p className="mb-0.5 text-[9px] font-bold uppercase leading-none tracking-widest text-white/40">Antes de votares</p>
-            <p className="text-sm font-bold leading-none text-white/90">Ver prognósticos</p>
-          </div>
-        </div>
-        <span className="shrink-0 text-xs font-bold text-white/50 transition-smooth group-hover:text-white/80">→</span>
-      </Link>
 
       {isLoading && (
         <div className="grid gap-3">

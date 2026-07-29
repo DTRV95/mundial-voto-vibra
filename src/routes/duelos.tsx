@@ -13,6 +13,7 @@ import {
 } from "@/lib/useDuelos";
 import { Swords, Trophy, History, Search, Check, X, Clock, Info } from "lucide-react";
 import { toast } from "sonner";
+import { PageTabs, ABAS_SOCIAL } from "@/components/PageTabs";
 
 export const Route = createFileRoute("/duelos")({
   head: () => ({
@@ -66,6 +67,8 @@ function Duelos() {
           Desafiar
         </button>
       </header>
+
+      <PageTabs abas={ABAS_SOCIAL} />
 
       {/* Como funciona */}
       <div className="mb-5 flex items-start gap-2 rounded-2xl border border-border bg-card/50 px-4 py-3">

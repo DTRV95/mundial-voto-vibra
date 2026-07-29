@@ -9,16 +9,40 @@ import { UserAvatar } from "@/components/AvatarPicker";
 import { useNotifications } from "@/lib/useNotifications";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
 
-const items = [
-  { to: "/",        label: "Home",     icon: Home },
-  { to: "/jogos",   label: "Jogos",    icon: CalendarClock },
-  { to: "/ligas",   label: "Torneios",    icon: Users },
-  { to: "/duelos",  label: "Duelos",      icon: Swords },
-  { to: "/prognosticos", label: "Prognósticos", icon: Target },
-  { to: "/classificacao", label: "Classificação", icon: Table2 },
-  { to: "/rankings",label: "Rankings", icon: Trophy },
-  { to: "/como-funciona", label: "Como Funciona", icon: HelpCircle },
-  { to: "/perfil",        label: "Perfil",        icon: User },
+/**
+ * A navegação segue o que se faz todas as semanas, não a lista de
+ * funcionalidades: jogar, competir, e a conta. As páginas de consulta
+ * (Prognósticos, Classificação) vivem em separadores dentro de Jogos,
+ * e os Duelos dentro de Torneios — é onde fazem sentido.
+ */
+const grupos = [
+  {
+    titulo: null,
+    itens: [{ to: "/", label: "Home", icon: Home }],
+  },
+  {
+    titulo: "Jogar",
+    itens: [
+      { to: "/jogos", label: "Jogos", icon: CalendarClock },
+      { to: "/prognosticos", label: "Prognósticos", icon: Target },
+      { to: "/classificacao", label: "Classificação", icon: Table2 },
+    ],
+  },
+  {
+    titulo: "Competir",
+    itens: [
+      { to: "/rankings", label: "Rankings", icon: Trophy },
+      { to: "/ligas", label: "Torneios", icon: Users },
+      { to: "/duelos", label: "Duelos", icon: Swords },
+    ],
+  },
+  {
+    titulo: null,
+    itens: [
+      { to: "/como-funciona", label: "Como Funciona", icon: HelpCircle },
+      { to: "/perfil", label: "Perfil", icon: User },
+    ],
+  },
 ];
 
 export function SideNav() {
@@ -72,24 +96,33 @@ export function SideNav() {
 
       {/* Nav links */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {items.map(({ to, label, icon: Icon }) => {
-          const active = to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
-          return (
-            <Link key={to} to={to}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-smooth ${
-                active ? "" : "text-muted-foreground hover:bg-accent hover:text-foreground"
-              }`}
-              style={active && comp
-                ? { background: `color-mix(in srgb, ${comp.accent} 14%, transparent)`, color: comp.accent }
-                : active ? { background: "color-mix(in srgb, var(--wc-red) 14%, transparent)", color: "var(--wc-red)" } : undefined}
-            >
-              <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.4 : 1.8} />
-              {label}
-              {active && <span className="ml-auto h-2 w-2 rounded-full"
-                style={{ background: comp ? comp.accent : "var(--wc-red)" }} />}
-            </Link>
-          );
-        })}
+        {grupos.map((grupo, gi) => (
+          <div key={gi} className={gi > 0 ? "pt-3" : undefined}>
+            {grupo.titulo && (
+              <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/50">
+                {grupo.titulo}
+              </p>
+            )}
+            {grupo.itens.map(({ to, label, icon: Icon }) => {
+              const active = to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
+              return (
+                <Link key={to} to={to}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-smooth ${
+                    active ? "" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  }`}
+                  style={active && comp
+                    ? { background: `color-mix(in srgb, ${comp.accent} 14%, transparent)`, color: comp.accent }
+                    : active ? { background: "color-mix(in srgb, var(--wc-red) 14%, transparent)", color: "var(--wc-red)" } : undefined}
+                >
+                  <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.4 : 1.8} />
+                  {label}
+                  {active && <span className="ml-auto h-2 w-2 rounded-full"
+                    style={{ background: comp ? comp.accent : "var(--wc-red)" }} />}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
 
         {isAdmin && (
           <>

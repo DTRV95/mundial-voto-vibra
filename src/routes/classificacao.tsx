@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Table2 } from "lucide-react";
+import { PageTabs, ABAS_JOGAR } from "@/components/PageTabs";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 
@@ -74,6 +75,8 @@ function Classificacao() {
           Calculada a partir de todos os resultados, não só dos jogos oficiais.
         </p>
       </header>
+
+      <PageTabs abas={ABAS_JOGAR} />
 
       {competitions.length > 1 && (
         <div className="mb-5 -mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">

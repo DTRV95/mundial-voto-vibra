@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { PHASE_LABEL } from "@/lib/format";
 import { ImportacaoPanel } from "@/components/ImportacaoPanel";
 import { JornadasAdmin } from "@/components/JornadasAdmin";
-import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil, X, ImageIcon, Eye, Newspaper, Target, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Trash2, MessageCircle, Mail, CheckCheck, Clock, Pencil, X, ImageIcon, Eye, Target, ChevronUp, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Uma Geração" }] }),
@@ -48,13 +48,13 @@ function Stats() {
   const { data: stats } = useQuery({
     queryKey: ["admin", "stats"],
     queryFn: async () => {
-      const [users, votes, matches, news] = await Promise.all([
+      const [users, votes, matches, prog] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("predictions").select("id", { count: "exact", head: true }),
         supabase.from("matches").select("id", { count: "exact", head: true }),
-        supabase.from("news").select("id", { count: "exact", head: true }).eq("published", true),
+        (supabase as any).from("prognosticos").select("id", { count: "exact", head: true }).eq("published", true),
       ]);
-      return { users: users.count ?? 0, votes: votes.count ?? 0, matches: matches.count ?? 0, news: news.count ?? 0 };
+      return { users: users.count ?? 0, votes: votes.count ?? 0, matches: matches.count ?? 0, prognosticos: prog.count ?? 0 };
     },
   });
   return (
@@ -62,7 +62,7 @@ function Stats() {
       <Stat label="Utilizadores" value={stats?.users ?? 0} />
       <Stat label="Previsões" value={stats?.votes ?? 0} />
       <Stat label="Jogos" value={stats?.matches ?? 0} />
-      <Stat label="Notícias" value={stats?.news ?? 0} icon={<Newspaper className="h-3.5 w-3.5 text-gold" />} />
+      <Stat label="Prognósticos" value={stats?.prognosticos ?? 0} icon={<Target className="h-3.5 w-3.5 text-gold" />} />
     </div>
   );
 }
@@ -78,7 +78,7 @@ function Stat({ label, value, icon }: { label: string; value: number; icon?: Rea
 }
 
 function Tabs() {
-  const [tab, setTab] = useState<"importacao" | "jornadas" | "matches" | "analysis" | "news" | "prognosticos" | "teams" | "prizes" | "suporte">("importacao");
+  const [tab, setTab] = useState<"importacao" | "jornadas" | "matches" | "analysis" | "prognosticos" | "teams" | "suporte">("importacao");
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["admin", "support-unread"],
@@ -97,10 +97,8 @@ function Tabs() {
     { k: "jornadas",     label: "🗓️ Jornadas" },
     { k: "matches",      label: "⚽ Resultados" },
     { k: "teams",        label: "👕 Equipas" },
-    { k: "news",         label: "📰 Notícias" },
     { k: "prognosticos", label: "🎯 Prognósticos" },
     { k: "analysis",     label: "🔬 ScoreLab" },
-    { k: "prizes",       label: "🎁 Prémios" },
     { k: "suporte",      label: "💬 Suporte", badge: unreadCount },
   ] as const;
   return (
@@ -124,10 +122,8 @@ function Tabs() {
       {tab === "jornadas"   && <JornadasAdmin />}
       {tab === "matches"  && <MatchesAdmin />}
       {tab === "analysis" && <AnalysisAdmin />}
-      {tab === "news"          && <NewsAdmin />}
       {tab === "prognosticos"  && <PrognosticosAdmin />}
       {tab === "teams"    && <TeamsAdmin />}
-      {tab === "prizes"   && <PrizesAdmin />}
       {tab === "suporte"  && <SuporteAdmin />}
     </>
   );
@@ -462,53 +458,6 @@ function ScoreSet({ match, onSubmit, disabled }: { match: any; onSubmit: (h: num
   );
 }
 
-function PrizesAdmin() {
-  const qc = useQueryClient();
-  const [phase, setPhase] = useState("grupos"); const [name, setName] = useState(""); const [desc, setDesc] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const { data: prizes = [] } = useQuery({
-    queryKey: ["admin", "prizes"],
-    queryFn: async () => (await supabase.from("prizes").select("*").order("phase")).data ?? [],
-  });
-  async function add() {
-    if (!name.trim()) return;
-    let image_url: string | null = null;
-    if (file) {
-      const path = `${Date.now()}-${file.name}`;
-      const up = await supabase.storage.from("prizes").upload(path, file);
-      if (up.error) { toast.error(up.error.message); return; }
-      const { data: pub } = supabase.storage.from("prizes").getPublicUrl(path);
-      image_url = pub.publicUrl;
-    }
-    const { error } = await supabase.from("prizes").insert({ phase: phase as any, name: name.trim(), description: desc || null, image_url });
-    if (error) toast.error(error.message); else { toast.success("Prémio criado"); setName(""); setDesc(""); setFile(null); qc.invalidateQueries({ queryKey: ["admin", "prizes"] }); }
-  }
-  async function del(id: string) {
-    await supabase.from("prizes").delete().eq("id", id);
-    qc.invalidateQueries({ queryKey: ["admin", "prizes"] });
-  }
-  return (
-    <Section>
-      <div className="grid grid-cols-2 gap-2">
-        <select value={phase} onChange={(e) => setPhase(e.target.value)} className={inputCls}>
-          {Object.entries(PHASE_LABEL).filter(([k]) => k !== "final").map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-        </select>
-        <input placeholder="Nome do prémio" value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
-      </div>
-      <textarea placeholder="Descrição" value={desc} onChange={(e) => setDesc(e.target.value)} className={`${inputCls} mt-2 min-h-[80px]`} />
-      <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-2 text-xs" />
-      <button onClick={add} className={`${btnCls} mt-2 w-full justify-center`}><Plus className="h-4 w-4" /> Adicionar prémio</button>
-      <ul className="mt-3 space-y-2">
-        {prizes.map((p: any) => (
-          <li key={p.id} className={rowItemCls}>
-            <span className="flex items-center gap-2">{p.image_url && <img src={p.image_url} className="h-10 w-10 rounded object-cover" />}<span><span className="block font-medium">{p.name}</span><span className="text-xs text-muted-foreground">{PHASE_LABEL[p.phase]}</span></span></span>
-            <button onClick={() => del(p.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
-          </li>
-        ))}
-      </ul>
-    </Section>
-  );
-}
 
 function AnalysisAdmin() {
   const qc = useQueryClient();
@@ -652,344 +601,6 @@ function NewsPreview({ article, onClose }: { article: any; onClose: () => void }
   );
 }
 
-function NewsAdmin() {
-  const qc = useQueryClient();
-  const [title, setTitle] = useState("");
-  const [excerpt, setExcerpt] = useState("");
-  const [content, setContent] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [imageCaption, setImageCaption] = useState("");
-  const [imagePosition, setImagePosition] = useState("50% 50%");
-  const [category, setCategory] = useState("noticia");
-  const [published, setPublished] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState(false);
-  const [matchId, setMatchId] = useState<string | null>(null);
-  const [matchSearch, setMatchSearch] = useState("");
-
-  const { data: allMatches = [] } = useQuery({
-    queryKey: ["admin", "matches-for-news"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("matches")
-        .select("id,kickoff_at,home:home_team_id(name,flag),away:away_team_id(name,flag)")
-        .order("kickoff_at");
-      return (data ?? []).filter((m: any) => m.home && m.away);
-    },
-  });
-
-  const { data: articles = [] } = useQuery({
-    queryKey: ["admin", "news"],
-    queryFn: async () => (await supabase.from("news").select("*").order("created_at", { ascending: false })).data ?? [],
-  });
-
-  function reset() {
-    setTitle(""); setExcerpt(""); setContent(""); setImageUrl("");
-    setImageCaption(""); setImagePosition("50% 50%"); setCategory("noticia"); setPublished(false); setEditId(null);
-    setMatchId(null); setMatchSearch("");
-  }
-
-  function loadEdit(a: any) {
-    setEditId(a.id); setTitle(a.title);
-    setExcerpt(a.excerpt ?? ""); setContent(a.content ?? ""); setImageUrl(a.image_url ?? "");
-    setImageCaption(a.image_caption ?? ""); setImagePosition(a.image_position ?? "50% 50%");
-    setCategory(a.category); setPublished(a.published);
-    setMatchId(a.match_id ?? null);
-  }
-
-  async function uploadImage(file: File) {
-    if (file.size > 5 * 1024 * 1024) { toast.error("Ficheiro demasiado grande (máx. 5 MB)"); return; }
-    setUploading(true);
-    try {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await supabase.storage.from("news-images").upload(path, file, { upsert: false });
-      if (error) { toast.error("Erro no upload: " + error.message); return; }
-      const { data: { publicUrl } } = supabase.storage.from("news-images").getPublicUrl(path);
-      setImageUrl(publicUrl);
-      toast.success("Imagem carregada!");
-    } catch (e: any) {
-      toast.error("Erro inesperado: " + e.message);
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function save() {
-    if (!title.trim()) { toast.error("Título obrigatório"); return; }
-    if (excerpt.length > EXCERPT_MAX) { toast.error(`Resumo demasiado longo (máx. ${EXCERPT_MAX} caracteres)`); return; }
-    const payload = {
-      title, excerpt: excerpt || null, content: content || null,
-      image_url: imageUrl || null, image_caption: imageCaption || null,
-      image_position: imageUrl ? imagePosition : null,
-      category, published,
-      match_id: category === "prognostico" ? matchId : null,
-    };
-    const { error } = editId
-      ? await supabase.from("news").update({ ...(payload as any), updated_at: new Date().toISOString() }).eq("id", editId)
-      : await supabase.from("news").insert(payload as any);
-    if (error) { toast.error(error.message); return; }
-    toast.success(editId ? "Artigo actualizado!" : "Artigo criado!");
-    reset(); qc.invalidateQueries({ queryKey: ["admin", "news"] });
-  }
-
-  async function del(id: string) {
-    if (!confirm("Eliminar artigo?")) return;
-    await supabase.from("news").delete().eq("id", id);
-    qc.invalidateQueries({ queryKey: ["admin", "news"] });
-  }
-
-  async function togglePublish(id: string, current: boolean) {
-    await supabase.from("news").update({ published: !current }).eq("id", id);
-    qc.invalidateQueries({ queryKey: ["admin", "news"] });
-  }
-
-  const excerptLeft = EXCERPT_MAX - excerpt.length;
-  const excerptOver = excerptLeft < 0;
-
-  return (
-    <Section>
-      <p className="mb-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-        {editId ? "Editar artigo" : "Novo artigo"}
-      </p>
-      <div className="space-y-3">
-
-        {/* Título */}
-        <input
-          placeholder="Título do artigo"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          className={`${inputCls} w-full`}
-        />
-
-        {/* Resumo com contador */}
-        <div>
-          <textarea
-            placeholder={`Resumo para a página principal (máx. ${EXCERPT_MAX} caracteres) — aparece nos resultados do Google`}
-            value={excerpt}
-            onChange={e => setExcerpt(e.target.value)}
-            rows={3}
-            className={`${inputCls} w-full resize-none ${excerptOver ? "border-destructive focus:border-destructive" : ""}`}
-          />
-          <div className={`mt-1 text-right text-[11px] ${excerptOver ? "text-destructive font-semibold" : "text-muted-foreground"}`}>
-            {excerptOver ? `${Math.abs(excerptLeft)} caracteres a mais` : `${excerptLeft} restantes`}
-          </div>
-        </div>
-
-        {/* Upload de imagem */}
-        <div>
-          <p className="mb-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Imagem de capa
-          </p>
-          {imageUrl ? (
-            <div className="rounded-xl border border-border overflow-hidden">
-              <div
-                className="relative h-64 cursor-grab active:cursor-grabbing select-none"
-                onMouseDown={e => {
-                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                  const startX = e.clientX; const startY = e.clientY;
-                  const [px, py] = imagePosition.split(" ").map(v => parseFloat(v));
-                  const onMove = (ev: MouseEvent) => {
-                    const dx = ((ev.clientX - startX) / rect.width) * -100;
-                    const dy = ((ev.clientY - startY) / rect.height) * -100;
-                    const nx = Math.max(0, Math.min(100, px + dx));
-                    const ny = Math.max(0, Math.min(100, py + dy));
-                    setImagePosition(`${nx.toFixed(1)}% ${ny.toFixed(1)}%`);
-                  };
-                  const onUp = () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
-                  window.addEventListener("mousemove", onMove);
-                  window.addEventListener("mouseup", onUp);
-                }}
-              >
-                <img
-                  src={imageUrl} alt="capa" draggable={false}
-                  className="h-full w-full object-cover pointer-events-none"
-                  style={{ objectPosition: imagePosition }}
-                />
-                <button
-                  type="button"
-                  onClick={() => { setImageUrl(""); setImageCaption(""); setImagePosition("50% 50%"); }}
-                  className="absolute right-2 top-2 rounded-full bg-background/80 p-1 text-foreground hover:bg-destructive hover:text-white transition-smooth z-10"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-background/70 px-2.5 py-1 text-[10px] text-muted-foreground backdrop-blur-sm pointer-events-none">
-                  ✥ arrasta para ajustar o enquadramento
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div
-              className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-input/50 py-8 transition-smooth hover:border-gold/40 ${uploading ? "opacity-60 pointer-events-none" : ""}`}
-              onClick={() => !uploading && document.getElementById("news-img-input")?.click()}
-            >
-              {uploading ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gold border-t-transparent" />
-                  A carregar...
-                </div>
-              ) : (
-                <>
-                  <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
-                  <span className="text-sm text-muted-foreground">Clica para fazer upload</span>
-                  <span className="text-xs text-muted-foreground/60">JPG, PNG, WebP — máx. 5 MB</span>
-                </>
-              )}
-              <input
-                id="news-img-input"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                onClick={e => { (e.target as HTMLInputElement).value = ""; }}
-                onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); }}
-              />
-            </div>
-          )}
-          {imageUrl && (
-            <input
-              placeholder="Crédito da fotografia (ex: © João Silva / Reuters)"
-              value={imageCaption}
-              onChange={e => setImageCaption(e.target.value)}
-              className={`${inputCls} w-full mt-2`}
-            />
-          )}
-        </div>
-
-        {/* Categoria + Publicar */}
-        <div className="flex gap-2">
-          <select value={category} onChange={e => setCategory(e.target.value)} className={`${inputCls} flex-1`}>
-            <option value="noticia">Notícia</option>
-            <option value="analise">Análise ScoreLab</option>
-            <option value="antevisao">Antevisão</option>
-            <option value="opiniao">Opinião</option>
-            <option value="prognostico">Prognóstico</option>
-          </select>
-          <label className="flex items-center gap-2 rounded-xl border border-border bg-input px-3 py-2 text-sm cursor-pointer">
-            <input type="checkbox" checked={published} onChange={e => setPublished(e.target.checked)} className="accent-gold" />
-            Publicar
-          </label>
-        </div>
-
-        {category === "prognostico" && (
-          <div className="rounded-xl border border-wc-red/30 bg-wc-red/5 p-3 space-y-2">
-            <p className="text-xs font-bold uppercase tracking-wider text-wc-red">Jogo associado</p>
-            {matchId && (() => {
-              const m = allMatches.find((m: any) => m.id === matchId) as any;
-              return m ? (
-                <div className="flex items-center justify-between rounded-lg bg-card border border-border px-3 py-2">
-                  <span className="text-sm font-semibold">
-                    {m.home.flag} {m.home.name} vs {m.away.name} {m.away.flag}
-                  </span>
-                  <button onClick={() => setMatchId(null)} className="text-xs text-muted-foreground hover:text-destructive">✕ Remover</button>
-                </div>
-              ) : null;
-            })()}
-            {!matchId && (
-              <>
-                <input
-                  placeholder="Pesquisar jogo..."
-                  value={matchSearch}
-                  onChange={e => setMatchSearch(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wc-red/40"
-                />
-                <div className="max-h-52 overflow-y-auto rounded-lg border border-border bg-background divide-y divide-border">
-                  {allMatches
-                    .filter((m: any) => {
-                      if (!matchSearch.trim()) return true;
-                      const q = matchSearch.toLowerCase();
-                      return m.home.name.toLowerCase().includes(q) || m.away.name.toLowerCase().includes(q);
-                    })
-                    .map((m: any) => (
-                      <button
-                        key={m.id}
-                        onClick={() => { setMatchId(m.id); setMatchSearch(""); }}
-                        className="flex w-full items-center justify-between px-3 py-2.5 text-left hover:bg-accent transition-smooth"
-                      >
-                        <span className="text-sm font-semibold">
-                          {m.home.flag} {m.home.name} <span className="text-muted-foreground font-normal">vs</span> {m.away.name} {m.away.flag}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground shrink-0 ml-2">
-                          {new Date(m.kickoff_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" })}
-                        </span>
-                      </button>
-                    ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Conteúdo */}
-        <textarea
-          placeholder="Conteúdo completo do artigo..."
-          value={content}
-          onChange={e => setContent(e.target.value)}
-          className={`${inputCls} w-full min-h-[200px] resize-y`}
-        />
-
-        {/* Ações */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setPreview(true)}
-            className="rounded-xl border border-border bg-card/60 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-smooth flex items-center gap-1.5"
-          >
-            <Eye className="h-4 w-4" /> Preview
-          </button>
-          <button onClick={save} disabled={uploading} className={`${btnCls} flex-1 justify-center`}>
-            {editId ? "Actualizar artigo" : "Criar artigo"}
-          </button>
-          {editId && (
-            <button onClick={reset} className="rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground">
-              Cancelar
-            </button>
-          )}
-        </div>
-      </div>
-
-      {preview && (
-        <NewsPreview
-          article={{ title, excerpt, content, image_url: imageUrl, image_caption: imageCaption, image_position: imagePosition, category }}
-          onClose={() => setPreview(false)}
-        />
-      )}
-
-      {articles.length > 0 && (
-        <ul className="mt-5 space-y-2">
-          {articles.map((a: any) => (
-            <li key={a.id} className={rowItemCls}>
-              {a.image_url && (
-                <img src={a.image_url} alt={a.title} className="h-10 w-14 rounded-lg object-cover shrink-0" />
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-sm">{a.title}</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{a.category}</span>
-                  <span className={`text-[10px] font-bold uppercase ${a.published ? "text-primary" : "text-muted-foreground"}`}>
-                    {a.published ? "• Publicado" : "Rascunho"}
-                  </span>
-                  {a.views > 0 && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-                      <Eye className="h-2.5 w-2.5" /> {a.views}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-2 ml-2 shrink-0">
-                <button onClick={() => togglePublish(a.id, a.published)}
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${a.published ? "bg-destructive/15 text-destructive" : "bg-primary/15 text-primary"}`}>
-                  {a.published ? "Despublicar" : "Publicar"}
-                </button>
-                <button onClick={() => loadEdit(a)} className="text-muted-foreground hover:text-foreground text-xs">Editar</button>
-                <button onClick={() => del(a.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Section>
-  );
-}
 
 // ── HELPER PARTILHADO: match picker ─────────────────────────────────────────
 function MatchPicker({ value, onChange }: { value: string | null; onChange: (id: string | null) => void }) {

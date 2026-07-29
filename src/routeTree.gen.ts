@@ -12,10 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SuporteRouteImport } from './routes/suporte'
 import { Route as RankingsRouteImport } from './routes/rankings'
+import { Route as PrognosticosRouteImport } from './routes/prognosticos'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
-import { Route as PremiosRouteImport } from './routes/premios'
 import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as LigasRouteImport } from './routes/ligas'
 import { Route as JogosRouteImport } from './routes/jogos'
 import { Route as GruposRouteImport } from './routes/grupos'
@@ -26,8 +25,6 @@ import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
-import { Route as NoticiasIdRouteImport } from './routes/noticias.$id'
 import { Route as LigaCodeRouteImport } from './routes/liga.$code'
 import { Route as JogoIdRouteImport } from './routes/jogo.$id'
 import { Route as EntrarCodeRouteImport } from './routes/entrar.$code'
@@ -48,24 +45,19 @@ const RankingsRoute = RankingsRouteImport.update({
   path: '/rankings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrognosticosRoute = PrognosticosRouteImport.update({
+  id: '/prognosticos',
+  path: '/prognosticos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PremiosRoute = PremiosRouteImport.update({
-  id: '/premios',
-  path: '/premios',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NoticiasRoute = NoticiasRouteImport.update({
-  id: '/noticias',
-  path: '/noticias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LigasRoute = LigasRouteImport.update({
@@ -118,16 +110,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => NoticiasRoute,
-} as any)
-const NoticiasIdRoute = NoticiasIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => NoticiasRoute,
-} as any)
 const LigaCodeRoute = LigaCodeRouteImport.update({
   id: '/liga/$code',
   path: '/liga/$code',
@@ -160,10 +142,9 @@ export interface FileRoutesByFullPath {
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
-  '/noticias': typeof NoticiasRouteWithChildren
   '/perfil': typeof PerfilRoute
-  '/premios': typeof PremiosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/prognosticos': typeof PrognosticosRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
@@ -171,8 +152,6 @@ export interface FileRoutesByFullPath {
   '/entrar/$code': typeof EntrarCodeRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
-  '/noticias/$id': typeof NoticiasIdRoute
-  '/noticias/': typeof NoticiasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -186,8 +165,8 @@ export interface FileRoutesByTo {
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
-  '/premios': typeof PremiosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/prognosticos': typeof PrognosticosRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
@@ -195,8 +174,6 @@ export interface FileRoutesByTo {
   '/entrar/$code': typeof EntrarCodeRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
-  '/noticias/$id': typeof NoticiasIdRoute
-  '/noticias': typeof NoticiasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -210,10 +187,9 @@ export interface FileRoutesById {
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
-  '/noticias': typeof NoticiasRouteWithChildren
   '/perfil': typeof PerfilRoute
-  '/premios': typeof PremiosRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/prognosticos': typeof PrognosticosRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
@@ -221,8 +197,6 @@ export interface FileRoutesById {
   '/entrar/$code': typeof EntrarCodeRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
-  '/noticias/$id': typeof NoticiasIdRoute
-  '/noticias/': typeof NoticiasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -237,10 +211,9 @@ export interface FileRouteTypes {
     | '/grupos'
     | '/jogos'
     | '/ligas'
-    | '/noticias'
     | '/perfil'
-    | '/premios'
     | '/privacidade'
+    | '/prognosticos'
     | '/rankings'
     | '/suporte'
     | '/termos'
@@ -248,8 +221,6 @@ export interface FileRouteTypes {
     | '/entrar/$code'
     | '/jogo/$id'
     | '/liga/$code'
-    | '/noticias/$id'
-    | '/noticias/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -263,8 +234,8 @@ export interface FileRouteTypes {
     | '/jogos'
     | '/ligas'
     | '/perfil'
-    | '/premios'
     | '/privacidade'
+    | '/prognosticos'
     | '/rankings'
     | '/suporte'
     | '/termos'
@@ -272,8 +243,6 @@ export interface FileRouteTypes {
     | '/entrar/$code'
     | '/jogo/$id'
     | '/liga/$code'
-    | '/noticias/$id'
-    | '/noticias'
   id:
     | '__root__'
     | '/'
@@ -286,10 +255,9 @@ export interface FileRouteTypes {
     | '/grupos'
     | '/jogos'
     | '/ligas'
-    | '/noticias'
     | '/perfil'
-    | '/premios'
     | '/privacidade'
+    | '/prognosticos'
     | '/rankings'
     | '/suporte'
     | '/termos'
@@ -297,8 +265,6 @@ export interface FileRouteTypes {
     | '/entrar/$code'
     | '/jogo/$id'
     | '/liga/$code'
-    | '/noticias/$id'
-    | '/noticias/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -312,10 +278,9 @@ export interface RootRouteChildren {
   GruposRoute: typeof GruposRoute
   JogosRoute: typeof JogosRoute
   LigasRoute: typeof LigasRoute
-  NoticiasRoute: typeof NoticiasRouteWithChildren
   PerfilRoute: typeof PerfilRoute
-  PremiosRoute: typeof PremiosRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  PrognosticosRoute: typeof PrognosticosRoute
   RankingsRoute: typeof RankingsRoute
   SuporteRoute: typeof SuporteRoute
   TermosRoute: typeof TermosRoute
@@ -348,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RankingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/prognosticos': {
+      id: '/prognosticos'
+      path: '/prognosticos'
+      fullPath: '/prognosticos'
+      preLoaderRoute: typeof PrognosticosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacidade': {
       id: '/privacidade'
       path: '/privacidade'
@@ -355,25 +327,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/premios': {
-      id: '/premios'
-      path: '/premios'
-      fullPath: '/premios'
-      preLoaderRoute: typeof PremiosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/perfil': {
       id: '/perfil'
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/noticias': {
-      id: '/noticias'
-      path: '/noticias'
-      fullPath: '/noticias'
-      preLoaderRoute: typeof NoticiasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ligas': {
@@ -446,20 +404,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/noticias/': {
-      id: '/noticias/'
-      path: '/'
-      fullPath: '/noticias/'
-      preLoaderRoute: typeof NoticiasIndexRouteImport
-      parentRoute: typeof NoticiasRoute
-    }
-    '/noticias/$id': {
-      id: '/noticias/$id'
-      path: '/$id'
-      fullPath: '/noticias/$id'
-      preLoaderRoute: typeof NoticiasIdRouteImport
-      parentRoute: typeof NoticiasRoute
-    }
     '/liga/$code': {
       id: '/liga/$code'
       path: '/liga/$code'
@@ -491,20 +435,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface NoticiasRouteChildren {
-  NoticiasIdRoute: typeof NoticiasIdRoute
-  NoticiasIndexRoute: typeof NoticiasIndexRoute
-}
-
-const NoticiasRouteChildren: NoticiasRouteChildren = {
-  NoticiasIdRoute: NoticiasIdRoute,
-  NoticiasIndexRoute: NoticiasIndexRoute,
-}
-
-const NoticiasRouteWithChildren = NoticiasRoute._addFileChildren(
-  NoticiasRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -516,10 +446,9 @@ const rootRouteChildren: RootRouteChildren = {
   GruposRoute: GruposRoute,
   JogosRoute: JogosRoute,
   LigasRoute: LigasRoute,
-  NoticiasRoute: NoticiasRouteWithChildren,
   PerfilRoute: PerfilRoute,
-  PremiosRoute: PremiosRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  PrognosticosRoute: PrognosticosRoute,
   RankingsRoute: RankingsRoute,
   SuporteRoute: SuporteRoute,
   TermosRoute: TermosRoute,

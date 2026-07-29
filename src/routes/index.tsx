@@ -452,18 +452,6 @@ function Home() {
     },
   });
 
-  const { data: featuredNewsList = [] } = useQuery({
-    queryKey: ["news", "featured"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("news")
-        .select("id,slug,title,excerpt,image_url,category,created_at")
-        .eq("published", true)
-        .order("created_at", { ascending: false })
-        .limit(4);
-      return data ?? [];
-    },
-  });
 
   const { data: myPools = [] } = useQuery({
     queryKey: ["my-pools", user?.id],
@@ -1010,8 +998,7 @@ function Home() {
             </div>
             <div className="flex items-center gap-2 sm:shrink-0">
               <Link
-                to="/noticias/"
-                search={{ prog: true } as any}
+                to="/prognosticos"
                 className="flex-1 sm:flex-none rounded-xl border border-white/20 px-4 py-2.5 text-center text-sm font-bold text-white/80 transition-smooth hover:border-white/40 hover:text-white"
               >
                 Ver análises
@@ -1464,91 +1451,6 @@ function Home() {
 
       </section>}
 
-      {/* ===================== NOTÍCIAS EM DESTAQUE ===================== */}
-      {featuredNewsList.length > 0 && (
-        <section className="lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-2xl md:text-3xl">Últimas Notícias</h2>
-            <Link to="/noticias" search={{} as any} className="text-xs font-semibold text-gold hover:text-gold/80 transition-smooth">
-              Ver todas →
-            </Link>
-          </div>
-
-          {/* Artigo principal */}
-          {(() => {
-            const main = featuredNewsList[0] as any;
-            const rest = featuredNewsList.slice(1) as any[];
-            return (
-              <>
-                <Link
-                  to="/noticias/$id"
-                  params={{ id: main.slug ?? main.id }}
-                  className="group mb-3 block overflow-hidden rounded-2xl border border-border bg-card transition-smooth hover:border-gold/40"
-                >
-                  {main.image_url ? (
-                    <div className="relative overflow-hidden h-52 md:h-64">
-                      <img src={main.image_url} alt={main.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                        style={{ objectPosition: main.image_position ?? "50% 50%" }} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <NewsCategory category={main.category} />
-                        <h3 className="mt-1.5 font-display text-xl md:text-2xl leading-snug text-white drop-shadow line-clamp-2">{main.title}</h3>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-5">
-                      <NewsCategory category={main.category} />
-                      <h3 className="mt-2 font-display text-xl leading-snug line-clamp-2">{main.title}</h3>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between border-t border-border/50 px-4 py-2.5">
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(main.created_at).toLocaleDateString("pt-PT", { day: "numeric", month: "long" })}
-                    </span>
-                    <span className="text-xs font-semibold text-gold group-hover:underline">Ler →</span>
-                  </div>
-                </Link>
-
-                {/* Grid dos restantes */}
-                {rest.length > 0 && (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    {rest.map((news: any) => (
-                      <Link
-                        key={news.id}
-                        to="/noticias/$id"
-                        params={{ id: news.slug ?? news.id }}
-                        className="group flex flex-row sm:flex-col overflow-hidden rounded-2xl border border-border bg-card transition-smooth hover:border-gold/40"
-                      >
-                        {news.image_url && (
-                          <div className="relative h-20 w-28 shrink-0 overflow-hidden sm:h-36 sm:w-full">
-                            <img src={news.image_url} alt={news.title}
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                              style={{ objectPosition: news.image_position ?? "50% 50%" }} />
-                            <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent sm:hidden" />
-                          </div>
-                        )}
-                        <div className="flex flex-1 flex-col justify-center p-3">
-                          <NewsCategory category={news.category} small />
-                          <h3 className="mt-1 font-display text-sm leading-snug line-clamp-2">{news.title}</h3>
-                          <p className="mt-1.5 text-[11px] text-muted-foreground">
-                            {new Date(news.created_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" })}
-                          </p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </>
-            );
-          })()}
-
-          <Link to="/noticias" search={{} as any}
-            className="mt-3 block w-full rounded-2xl border border-border py-2.5 text-center text-xs font-bold text-muted-foreground transition-smooth hover:border-gold/40 hover:text-gold">
-            Ver todas as notícias →
-          </Link>
-        </section>
-      )}
 
       </div>{/* fim da grelha bento */}
 
@@ -2269,7 +2171,6 @@ function SeasonPreRegModal({ user }: { user: any }) {
             ["epoca", "🏅 Palpites de época (campeão, top 4...)"],
             ["clube", "❤️ Clube do coração e rivalidades"],
             ["mensal", "📅 Vencedor do mês"],
-            ["premios", "🎁 Prémios reais"],
             ["notif", "🔔 Alertas da jornada"],
             ["stats", "📈 Estatísticas pessoais avançadas"],
           ].map(([k, l]) => (

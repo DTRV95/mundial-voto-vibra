@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarClock, Trophy, Gift, User, Shield, LogOut, Newspaper, Users, HelpCircle, Swords } from "lucide-react";
+import { Home, CalendarClock, Trophy, User, Shield, LogOut, Users, HelpCircle, Swords, Target } from "lucide-react";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,9 +14,8 @@ const items = [
   { to: "/jogos",   label: "Jogos",    icon: CalendarClock },
   { to: "/ligas",   label: "Torneios",    icon: Users },
   { to: "/duelos",  label: "Duelos",      icon: Swords },
-  { to: "/noticias",label: "Notícias", icon: Newspaper },
+  { to: "/prognosticos", label: "Prognósticos", icon: Target },
   { to: "/rankings",label: "Rankings", icon: Trophy },
-  { to: "/premios",       label: "Prémios",       icon: Gift },
   { to: "/como-funciona", label: "Como Funciona", icon: HelpCircle },
   { to: "/perfil",        label: "Perfil",        icon: User },
 ];

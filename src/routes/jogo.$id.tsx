@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
 import { toast } from "sonner";
+import { BotaoVerBancada, PainelBancada, DesfechoBancada, type LinhaBancada } from "@/components/dna/VerBancada";
 import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target, CalendarClock, Wand2, X } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { TeamBadge } from "@/lib/teamColors.tsx";
@@ -179,7 +180,13 @@ function JogoPage() {
   const status = match ? votingStatus(match) : null;
   const closed = !status || status.label === "Fechada";
   const hasVoted = !!myPrediction;
-  const showCommunity = hasVoted || closed;
+
+  // Contra a Bancada: a distribuição já não aparece só por teres
+  // votado. Ou consultaste de propósito, ou o jogo já fechou — e aí
+  // já não pode influenciar nada.
+  const bancadaVista = !!(myPrediction as any)?.bancada_vista_em;
+  const showCommunity = bancadaVista || closed;
+  const [linhasBancada, setLinhasBancada] = useState<LinhaBancada[] | null>(null);
 
   const [autoFilling, setAutoFilling] = useState(false);
 
@@ -239,10 +246,13 @@ function JogoPage() {
     if (autoFilling) return;
     setAutoFilling(true);
 
-    const commResult90  = community.map((c: any) => c.result_90);
-    const commBtts      = community.map((c: any) => c.btts);
-    const commTotal25   = community.map((c: any) => c.total_25);
-    const commQualifier = community.map((c: any) => c.qualifier);
+    // NÃO usar a comunidade aqui. Preencher com a opinião da maioria
+    // antes de votar esvaziaria por completo o Contra a Bancada — e
+    // seria uma forma de espreitar a bancada sem ficar marcado.
+    const commResult90: (string | null)[]  = [];
+    const commBtts: (string | null)[]      = [];
+    const commTotal25: (string | null)[]   = [];
+    const commQualifier: (string | null)[] = [];
 
     // Weights from ScoreLab or sensible defaults
     const wHome = analysis?.prob_home ?? 42;
@@ -451,6 +461,50 @@ function JogoPage() {
         </div>
       </header>
 
+      {/* Depois do jogo: como te saíste perante a bancada.
+          A distribuição já é pública, por isso calcula-se aqui. */}
+      {user && hasVoted && match?.home_score != null && match?.away_score != null
+        && myPrediction?.result_90 && (() => {
+        const casa = match.home_score as number;
+        const fora = match.away_score as number;
+        const votos = community.map((c: any) => c.result_90).filter(Boolean);
+        if (votos.length < 10) return null;
+        const comigo = votos.filter((v: string) => v === myPrediction.result_90).length;
+        const real = casa > fora ? "home" : casa < fora ? "away" : "draw";
+        return (
+          <div className="mt-4">
+            <DesfechoBancada
+              percentagemComigo={Math.round((comigo / votos.length) * 100)}
+              acertei={myPrediction.result_90 === real}
+              informada={bancadaVista}
+            />
+          </div>
+        );
+      })()}
+
+      {/* Contra a Bancada — só depois de haver previsão guardada, e
+          só se o jogo ainda não fechou. Depois de fechar, a
+          distribuição aparece sozinha nos mercados. */}
+      {user && hasVoted && !closed && !bancadaVista && (
+        <div className="mt-4">
+          <BotaoVerBancada matchId={id} aoRevelar={setLinhasBancada} />
+        </div>
+      )}
+
+      {linhasBancada && !closed && (
+        <div className="mt-3">
+          <PainelBancada
+            linhas={linhasBancada}
+            aMinha={{
+              r90: pred.result_90 ?? null,
+              btts: pred.btts ?? null,
+              t25: pred.total_25 ?? null,
+            }}
+            aoFechar={() => setLinhasBancada(null)}
+          />
+        </div>
+      )}
+
       {/* Auth prompt */}
       {!authLoading && !user && (
         <div className="mt-4 overflow-hidden rounded-2xl border border-gold/35 bg-gradient-to-r from-gold/8 to-transparent">
@@ -522,7 +576,7 @@ function JogoPage() {
               <button
                 onClick={autoFill}
                 disabled={autoFilling || closed}
-                title={closed ? "Votação fechada" : "Preencher automaticamente com base na comunidade"}
+                title={closed ? "Votação fechada" : "Preencher com base na análise ScoreLab"}
                 className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-all active:scale-95 ${
                   autoFilling
                     ? "border-gold/30 bg-gold/8 text-gold/50 cursor-wait"
@@ -564,7 +618,7 @@ function JogoPage() {
                     <div className="space-y-2">
                       <div className="flex items-start gap-2">
                         <span className="mt-0.5 shrink-0 text-gold">①</span>
-                        <p><span className="font-semibold text-foreground">Votos da comunidade</span> — se já existirem 3 ou mais votos, escolhe a opção mais votada.</p>
+                        <p><span className="font-semibold text-foreground">Sem espreitar a bancada</span> — o preenchimento usa só a análise, nunca as escolhas dos outros.</p>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="mt-0.5 shrink-0 text-gold">②</span>

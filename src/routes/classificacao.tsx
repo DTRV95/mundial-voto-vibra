@@ -34,6 +34,7 @@ interface Linha {
   nome: string;
   monograma: string | null;
   codigo: string | null;
+  emblema: string | null;
 }
 
 function Classificacao() {
@@ -55,7 +56,7 @@ function Classificacao() {
 
       const { data: equipas } = await (supabase as any)
         .from("teams")
-        .select("id,name,short_name,monogram,code")
+        .select("id,name,short_name,monogram,code,crest_url")
         .in("id", linhas.map(l => l.team_id));
       const mapa = new Map<string, any>((equipas ?? []).map((t: any) => [t.id, t]));
 
@@ -64,6 +65,7 @@ function Classificacao() {
         nome: mapa.get(l.team_id)?.short_name ?? mapa.get(l.team_id)?.name ?? "—",
         monograma: mapa.get(l.team_id)?.monogram ?? null,
         codigo: mapa.get(l.team_id)?.code ?? null,
+        emblema: mapa.get(l.team_id)?.crest_url ?? null,
       }));
     },
   });
@@ -125,7 +127,7 @@ function Classificacao() {
                   </td>
                   <td className="px-2 py-2.5">
                     <div className="flex items-center gap-2">
-                      <TeamBadge code={l.codigo} flag={null} name={l.nome} size="sm" />
+                      <TeamBadge code={l.codigo} flag={null} name={l.nome} monogram={l.monograma} crest={l.emblema} size="sm" />
                       <span className="truncate font-semibold">{l.nome}</span>
                     </div>
                   </td>

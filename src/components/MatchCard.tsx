@@ -9,8 +9,8 @@ export interface MatchCardData {
   phase: string;
   status?: string;
   voting_open: boolean;
-  home: { name: string; flag: string | null; code: string | null; monogram?: string | null };
-  away: { name: string; flag: string | null; code: string | null; monogram?: string | null };
+  home: { name: string; flag: string | null; code: string | null; monogram?: string | null; crest_url?: string | null };
+  away: { name: string; flag: string | null; code: string | null; monogram?: string | null; crest_url?: string | null };
   votes_count?: number;
   already_voted?: boolean;
   /** Etiqueta a mostrar no topo (ex: "Jornada 8"). Substitui a fase do Mundial. */
@@ -88,7 +88,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
         {/* Teams */}
         <div className="flex items-center justify-between gap-2 px-4 py-4">
           <div className="flex flex-1 flex-col items-center gap-2">
-            <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} monogram={(match.home as any).monogram} size="md" />
+            <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} monogram={(match.home as any).monogram} crest={(match.home as any).crest_url} size="md" />
             <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
               {match.home.name}
             </span>
@@ -107,7 +107,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
           </div>
 
           <div className="flex flex-1 flex-col items-center gap-2">
-            <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} monogram={(match.away as any).monogram} size="md" />
+            <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} monogram={(match.away as any).monogram} crest={(match.away as any).crest_url} size="md" />
             <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
               {match.away.name}
             </span>
@@ -196,7 +196,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
 
       <div className="flex items-center justify-between gap-2 px-4 py-4">
         <div className="flex flex-1 flex-col items-center gap-2">
-          <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} monogram={(match.home as any).monogram} size="md" />
+          <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} monogram={(match.home as any).monogram} crest={(match.home as any).crest_url} size="md" />
           <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
             {match.home.name}
           </span>
@@ -215,7 +215,7 @@ export function MatchCard({ match }: { match: MatchCardData }) {
         </div>
 
         <div className="flex flex-1 flex-col items-center gap-2">
-          <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} monogram={(match.away as any).monogram} size="md" />
+          <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} monogram={(match.away as any).monogram} crest={(match.away as any).crest_url} size="md" />
           <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
             {match.away.name}
           </span>

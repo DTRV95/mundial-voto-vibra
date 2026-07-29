@@ -36,7 +36,7 @@ function JogoPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("matches")
-        .select("id,kickoff_at,phase,voting_open,home_score,away_score,home:home_team_id(name,flag,code,monogram),away:away_team_id(name,flag,code,monogram)")
+        .select("id,kickoff_at,phase,voting_open,home_score,away_score,home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url)")
         .eq("id", id).maybeSingle();
       return data;
     },
@@ -77,7 +77,7 @@ function JogoPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("matches")
-        .select("id,kickoff_at,phase,status,voting_open,home:home_team_id(name,flag,code,monogram),away:away_team_id(name,flag,code,monogram),predictions(count)")
+        .select("id,kickoff_at,phase,status,voting_open,home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url),predictions(count)")
         .eq("voting_open", true)
         .neq("id", id)
         .order("kickoff_at")

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ClubBadge } from "@/lib/clubBadge";
 
 interface TeamBadgeProps {
@@ -7,6 +8,8 @@ interface TeamBadgeProps {
   size?: "sm" | "md" | "lg";
   /** Monograma do clube, vindo da base de dados */
   monogram?: string | null;
+  /** Emblema oficial do clube, vindo da importação */
+  crest?: string | null;
 }
 
 // ISO 2-letter code by exact team name (Portuguese)
@@ -86,7 +89,8 @@ function resolveIso(code: string | null, name: string): string | null {
   return null;
 }
 
-export function TeamBadge({ code, flag: _flag, name, size = "md", monogram }: TeamBadgeProps) {
+export function TeamBadge({ code, flag: _flag, name, size = "md", monogram, crest }: TeamBadgeProps) {
+  const [crestFalhou, setCrestFalhou] = useState(false);
   const sizeCls =
     size === "lg" ? "h-16 w-16 rounded-2xl" :
     size === "sm" ? "h-9 w-9 rounded-xl" :
@@ -97,8 +101,17 @@ export function TeamBadge({ code, flag: _flag, name, size = "md", monogram }: Te
     ? `https://flagcdn.com/w80/${iso}.png`
     : null;
 
-  // Sem bandeira, é um clube — leva o emblema da plataforma em vez da
-  // bola genérica que estava aqui antes.
+  // Clubes: emblema oficial quando existe. Se a imagem falhar, cai no
+  // emblema gerado — nunca se volta à bola genérica.
+  if (!flagUrl && crest && !crestFalhou) {
+    return (
+      <div className={`${sizeCls} grid shrink-0 place-items-center overflow-hidden`} title={name}>
+        <img src={crest} alt={name} loading="lazy"
+          className="h-full w-full object-contain p-0.5"
+          onError={() => setCrestFalhou(true)} />
+      </div>
+    );
+  }
   if (!flagUrl) return <ClubBadge name={name} monogram={monogram} size={size} />;
 
   return (

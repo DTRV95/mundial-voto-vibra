@@ -66,13 +66,13 @@ export async function aplicarImportacao(
     if (idInterno) {
       await db.from("teams").update({
         name: e.nome, short_name: e.nomeCurto, monogram: e.monograma,
-        kind: "club", country: "Portugal",
+        crest_url: e.emblema, kind: "club", country: "Portugal",
       }).eq("id", idInterno);
       r.equipasAtualizadas++;
     } else {
       const { data, error } = await db.from("teams").insert({
         name: e.nome, short_name: e.nomeCurto, monogram: e.monograma,
-        code: e.monograma, kind: "club", country: "Portugal",
+        code: e.monograma, crest_url: e.emblema, kind: "club", country: "Portugal",
         external_id: e.externalId,
       }).select("id").single();
       if (error) { r.avisos.push(`Equipa ${e.nome}: ${error.message}`); continue; }

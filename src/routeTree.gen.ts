@@ -19,6 +19,7 @@ import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as LigasRouteImport } from './routes/ligas'
 import { Route as JogosRouteImport } from './routes/jogos'
 import { Route as GruposRouteImport } from './routes/grupos'
+import { Route as DuelosRouteImport } from './routes/duelos'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as AvisoLegalRouteImport } from './routes/aviso-legal'
@@ -80,6 +81,11 @@ const JogosRoute = JogosRouteImport.update({
 const GruposRoute = GruposRouteImport.update({
   id: '/grupos',
   path: '/grupos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DuelosRoute = DuelosRouteImport.update({
+  id: '/duelos',
+  path: '/duelos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/aviso-legal': typeof AvisoLegalRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
+  '/duelos': typeof DuelosRoute
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/aviso-legal': typeof AvisoLegalRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
+  '/duelos': typeof DuelosRoute
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/aviso-legal': typeof AvisoLegalRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
+  '/duelos': typeof DuelosRoute
   '/grupos': typeof GruposRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
     | '/aviso-legal'
     | '/como-funciona'
     | '/cookies'
+    | '/duelos'
     | '/grupos'
     | '/jogos'
     | '/ligas'
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/aviso-legal'
     | '/como-funciona'
     | '/cookies'
+    | '/duelos'
     | '/grupos'
     | '/jogos'
     | '/ligas'
@@ -271,6 +282,7 @@ export interface FileRouteTypes {
     | '/aviso-legal'
     | '/como-funciona'
     | '/cookies'
+    | '/duelos'
     | '/grupos'
     | '/jogos'
     | '/ligas'
@@ -296,6 +308,7 @@ export interface RootRouteChildren {
   AvisoLegalRoute: typeof AvisoLegalRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   CookiesRoute: typeof CookiesRoute
+  DuelosRoute: typeof DuelosRoute
   GruposRoute: typeof GruposRoute
   JogosRoute: typeof JogosRoute
   LigasRoute: typeof LigasRoute
@@ -382,6 +395,13 @@ declare module '@tanstack/react-router' {
       path: '/grupos'
       fullPath: '/grupos'
       preLoaderRoute: typeof GruposRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/duelos': {
+      id: '/duelos'
+      path: '/duelos'
+      fullPath: '/duelos'
+      preLoaderRoute: typeof DuelosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -492,6 +512,7 @@ const rootRouteChildren: RootRouteChildren = {
   AvisoLegalRoute: AvisoLegalRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   CookiesRoute: CookiesRoute,
+  DuelosRoute: DuelosRoute,
   GruposRoute: GruposRoute,
   JogosRoute: JogosRoute,
   LigasRoute: LigasRoute,

@@ -27,7 +27,8 @@ where kind = 'club'
 alter table public.pools
   add column if not exists competition_ids uuid[],
   add column if not exists filtro_jogos    text not null default 'todos',
-  add column if not exists equipa_id       uuid references public.teams(id) on delete set null,
+  -- teams.id é text nesta base de dados, não uuid
+  add column if not exists equipa_id       text references public.teams(id) on delete set null,
   add column if not exists duelos_ativos   boolean not null default true;
 
 do $$

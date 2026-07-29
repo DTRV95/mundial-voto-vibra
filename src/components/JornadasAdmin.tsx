@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Star, Check, Send, Undo2, Calendar, AlertTriangle } from "lucide-react";
+import { Star, Check, Send, Undo2, Calendar, AlertTriangle, Wand2 } from "lucide-react";
 import { useCompetitions } from "@/lib/useCompetitions";
+import { useContextoSugestao, sugerirCinco, ROTULO_CATEGORIA } from "@/lib/sugerirJogos";
 
 const MAX_OFICIAIS = 5;
 
@@ -111,6 +112,8 @@ function EditorJornada({ jornadaId, competitionId, onVoltar }: {
 }) {
   const qc = useQueryClient();
   const [aGravar, setAGravar] = useState(false);
+  /** Porque é que cada jogo foi sugerido — só para o admin ver */
+  const [razoes, setRazoes] = useState<Map<string, string>>(new Map());
 
   const { data: jornada } = useQuery({
     queryKey: ["admin-round", jornadaId],
@@ -126,12 +129,14 @@ function EditorJornada({ jornadaId, competitionId, onVoltar }: {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,is_official,official_position,highlight_tag,status,home:home_team_id(name,short_name,monogram),away:away_team_id(name,short_name,monogram)")
+        .select("id,kickoff_at,is_official,official_position,highlight_tag,status,home_team_id,away_team_id,home:home_team_id(name,short_name,monogram,is_grande),away:away_team_id(name,short_name,monogram,is_grande)")
         .eq("round_id", jornadaId)
         .order("kickoff_at");
       return data ?? [];
     },
   });
+
+  const { data: contexto } = useContextoSugestao(competitionId, jornada?.season_id);
 
   const oficiais = jogos.filter((j: any) => j.is_official)
     .sort((a: any, b: any) => (a.official_position ?? 99) - (b.official_position ?? 99));
@@ -154,6 +159,47 @@ function EditorJornada({ jornadaId, competitionId, onVoltar }: {
     }
     qc.invalidateQueries({ queryKey: ["admin-round-matches", jornadaId] });
     qc.invalidateQueries({ queryKey: ["admin-rounds-count", competitionId] });
+  }
+
+  /**
+   * Propõe 5 jogos: 2 de destaque, 2 equilibrados, 1 de rotação.
+   * Só preenche a seleção — publicar continua a ser um ato teu.
+   */
+  async function sugerir() {
+    if (publicada) { toast.error("Jornada publicada. Despublica primeiro."); return; }
+    if (!contexto) { toast.error("Ainda a carregar os dados de apoio."); return; }
+
+    const candidatos = (jogos as any[]).map(j => ({
+      id: j.id,
+      kickoff_at: j.kickoff_at,
+      home_team_id: j.home_team_id,
+      away_team_id: j.away_team_id,
+      home: { name: j.home?.name ?? "", short_name: j.home?.short_name ?? null, is_grande: !!j.home?.is_grande },
+      away: { name: j.away?.name ?? "", short_name: j.away?.short_name ?? null, is_grande: !!j.away?.is_grande },
+    }));
+
+    const escolhidos = sugerirCinco(candidatos, {
+      ...contexto,
+      jornadaAtual: jornada?.number ?? 1,
+    });
+
+    if (escolhidos.length === 0) { toast.error("Sem jogos nesta jornada."); return; }
+
+    setAGravar(true);
+    const db = supabase as any;
+    // Limpa a seleção anterior e aplica a nova, pela ordem sugerida
+    await db.from("matches").update({ is_official: false, official_position: null }).eq("round_id", jornadaId);
+    for (let i = 0; i < escolhidos.length; i++) {
+      await db.from("matches")
+        .update({ is_official: true, official_position: i + 1 })
+        .eq("id", escolhidos[i].id);
+    }
+
+    setRazoes(new Map(escolhidos.map(e => [e.id, `${ROTULO_CATEGORIA[e.categoria!]} — ${e.razao}`])));
+    qc.invalidateQueries({ queryKey: ["admin-round-matches", jornadaId] });
+    qc.invalidateQueries({ queryKey: ["admin-rounds-count", competitionId] });
+    setAGravar(false);
+    toast.success("5 jogos propostos. Confirma ou troca o que quiseres.");
   }
 
   async function marcarDestaque(jogo: any, tag: string | null) {
@@ -209,6 +255,13 @@ function EditorJornada({ jornadaId, competitionId, onVoltar }: {
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
+          {!publicada && (
+            <button onClick={sugerir} disabled={aGravar || jogos.length === 0}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-xs font-bold text-gold disabled:opacity-40"
+              title="2 de destaque + 2 equilibrados + 1 de rotação">
+              <Wand2 className="h-3.5 w-3.5" /> Sugerir 5
+            </button>
+          )}
           {publicada ? (
             <button onClick={despublicar} disabled={aGravar}
               className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-xs font-bold disabled:opacity-50">
@@ -272,6 +325,9 @@ function EditorJornada({ jornadaId, competitionId, onVoltar }: {
                 </p>
                 {j.highlight_tag && (
                   <span className="text-[10px] font-bold uppercase tracking-wider text-gold">{j.highlight_tag}</span>
+                )}
+                {razoes.has(j.id) && (
+                  <p className="truncate text-[10px] text-muted-foreground">{razoes.get(j.id)}</p>
                 )}
               </div>
 

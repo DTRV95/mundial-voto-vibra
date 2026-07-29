@@ -256,9 +256,12 @@ function Rankings() {
   });
 
   // Divisões — pontos calculados das vistas (nunca guardados)
+  // Se a competição escolhida não tiver meses (ex.: Champions antes do
+  // sorteio), volta à época em vez de mostrar uma lista vazia.
+  const porMesDisponivel = periodo === "mes" && !!mes;
   const porEpoca = useRanking(activeComp?.id ?? null);
-  const porMes = useRankingMes(periodo === "mes" ? mes?.id : null);
-  const fonte = periodo === "mes" ? porMes : porEpoca;
+  const porMes = useRankingMes(porMesDisponivel ? mes!.id : null);
+  const fonte = porMesDisponivel ? porMes : porEpoca;
 
   const allUsers = useMemo(
     () => (fonte.data ?? []).map((r: LinhaRanking) => ({ ...r, division: getDivision(r.rank) })),
@@ -268,8 +271,8 @@ function Rankings() {
 
   // Posição de ontem no mesmo ranking — alimenta a seta de tendência
   const escopo = escopoDe(
-    periodo === "mes"
-      ? { monthId: mes?.id }
+    porMesDisponivel
+      ? { monthId: mes!.id }
       : { competitionId: activeComp?.id },
   );
   const { data: anteriores } = useTendencia(escopo);
@@ -493,7 +496,7 @@ function Rankings() {
               <div className={`rounded-2xl border ${div.border} ${div.bg} p-4`}>
                 <p className="text-xs text-muted-foreground mb-1">
                   A tua divisão · {compSlug === "total" ? "Total" : activeComp?.short}
-                  {periodo === "mes" && mes ? ` · ${mes.label}` : ""}
+                  {porMesDisponivel ? ` · ${mes!.label}` : ""}
                 </p>
                 <div className="flex items-center gap-3">
                   <span className="text-4xl">{div.emoji}</span>

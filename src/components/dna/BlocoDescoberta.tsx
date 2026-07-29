@@ -46,6 +46,32 @@ function useJaVistas(userId: string | undefined) {
 function escolher(dna: DnaCompleto, vistas: Set<string>): Descoberta | null {
   const candidatas: Descoberta[] = [];
 
+  // Prioridade 2 — Visionário da Jornada
+  if (dna.visionario) {
+    const v = dna.visionario;
+    candidatas.push({
+      chave: `visionario:${v.round_id}`,
+      etiqueta: "Visionário da Jornada",
+      titulo: v.nivel === "excecional"
+        ? "Viste o que quase ninguém viu"
+        : "Foste contra a maioria — e acertaste",
+      detalhe: `Apenas ${v.percentagem}% da comunidade previu este resultado na ${v.label}.`,
+    });
+  }
+
+  // Prioridade 3 — momento decisivo da última jornada
+  if (dna.momento && dna.momento.tipo !== "sem-participacao") {
+    const m = dna.momento;
+    candidatas.push({
+      chave: `momento:${m.round_id}`,
+      etiqueta: m.tipo === "equilibrada" ? m.label : "O jogo que mudou a tua jornada",
+      titulo: m.tipo === "ganho" ? `Subiste ${m.posicoes} lugares`
+            : m.tipo === "perda" ? `Perdeste ${Math.abs(m.posicoes ?? 0)} lugares`
+            : "Jornada equilibrada",
+      detalhe: m.narrativa,
+    });
+  }
+
   if (dna.talisma) {
     candidatas.push({
       chave: `talisma:${dna.talisma.team_id}`,

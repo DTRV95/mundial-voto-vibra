@@ -14,8 +14,27 @@ import {
  * em milissegundos — as vistas são somas sobre índices.
  */
 
+export interface MomentoDecisivo {
+  round_id: string;
+  label: string;
+  tipo: "ganho" | "perda" | "equilibrada" | "sem-participacao";
+  posicoes: number | null;
+  narrativa: string;
+}
+
+export interface Visionario {
+  round_id: string;
+  label: string;
+  percentagem: number;
+  nivel: string;
+}
+
 export interface DnaCompleto {
   atribuicao: Atribuicao | null;
+  /** Último momento decisivo apurado */
+  momento: MomentoDecisivo | null;
+  /** Última distinção de Visionário */
+  visionario: Visionario | null;
   talisma: (Relacao & { nome: string; crest: string | null }) | null;
   fantasma: (Relacao & { nome: string; crest: string | null }) | null;
   /** Comparação com o clube do coração, quando definido */
@@ -48,7 +67,8 @@ export function useDnaCompleto(userId: string | undefined) {
 
       const prog = progresso.data;
       if (!prog || prog.previsoes_avaliadas === 0) {
-        return { atribuicao: null, talisma: null, fantasma: null, clube: null, bancada: null };
+        return { atribuicao: null, momento: null, visionario: null,
+                 talisma: null, fantasma: null, clube: null, bancada: null };
       }
 
       // ── Mercados, somados em todas as competições ──────────
@@ -180,8 +200,35 @@ export function useDnaCompleto(userId: string | undefined) {
         }
       }
 
+      // ── Narrativa da última jornada ────────────────────────
+      const [momentoRes, visRes] = await Promise.all([
+        db.from("round_moments")
+          .select("round_id,tipo,posicoes,narrativa,criado_em,rounds(label)")
+          .eq("user_id", userId).order("criado_em", { ascending: false }).limit(1).maybeSingle(),
+        db.from("round_visionaries")
+          .select("round_id,percentagem,nivel,criado_em,rounds(label)")
+          .eq("user_id", userId).eq("principal", true)
+          .order("criado_em", { ascending: false }).limit(1).maybeSingle(),
+      ]);
+
+      const mom = momentoRes.data;
+      const vis = visRes.data;
+
       return {
         atribuicao,
+        momento: mom ? {
+          round_id: mom.round_id,
+          label: mom.rounds?.label ?? "Jornada",
+          tipo: mom.tipo,
+          posicoes: mom.posicoes ?? null,
+          narrativa: mom.narrativa,
+        } : null,
+        visionario: vis ? {
+          round_id: vis.round_id,
+          label: vis.rounds?.label ?? "Jornada",
+          percentagem: vis.percentagem,
+          nivel: vis.nivel,
+        } : null,
         talisma: juntaNome(talisma),
         fantasma: juntaNome(fantasma),
         clube: comparacaoClube,

@@ -12,12 +12,14 @@ import type { Competition } from "@/lib/useCompetitions";
  * o progresso e, quando existir, uma observação verdadeira sobre o
  * estilo de escolha. Nunca mostra um perfil inventado.
  */
-export function BlocoDna({ progresso, observacao, perfil, traco, comp }: {
+export function BlocoDna({ progresso, observacao, perfil, traco, porque, comp }: {
   progresso: ProgressoDna;
   observacao: string | null;
   /** null enquanto não houver amostra para atribuir */
   perfil: PerfilId | null;
   traco: PerfilId | null;
+  /** A razão real da atribuição, vinda do motor */
+  porque?: string | null;
   comp: Competition | null;
 }) {
   const [aberto, setAberto] = useState(false);
@@ -117,6 +119,7 @@ export function BlocoDna({ progresso, observacao, perfil, traco, comp }: {
 
             {aberto && (
               <div className="mt-3 space-y-2 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-white/70">
+                {porque && <p className="text-white/85">{porque}</p>}
                 {acerto !== null && (
                   <p>
                     Acertaste em <strong className="text-white">{acerto}%</strong> dos

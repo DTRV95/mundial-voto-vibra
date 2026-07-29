@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { SimboloPerfil } from "@/components/dna/SimboloPerfil";
 import { PERFIS, MINIMO_PRIMEIRO_PERFIL, type PerfilId } from "@/lib/dnaPerfis";
 import { useProgressoDna } from "@/lib/useDna";
+import { useDnaCompleto } from "@/lib/useDnaCompleto";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
 
 /**
@@ -12,13 +13,15 @@ import { useActiveCompetition } from "@/lib/useActiveCompetition";
  * atual, e uma ação. Nada mais entra aqui — é a regra que impede
  * o cartão de crescer até virar uma segunda página de DNA.
  */
-export function CartaoDnaCompacto({ userId, perfil }: {
+export function CartaoDnaCompacto({ userId, perfil: perfilDado }: {
   userId: string | undefined;
-  /** null enquanto não houver amostra */
+  /** Passar só se já se tiver o perfil calculado; senão vai buscá-lo */
   perfil?: PerfilId | null;
 }) {
   const { active: comp } = useActiveCompetition();
   const { data: progresso, isLoading } = useProgressoDna(userId);
+  const { data: dna } = useDnaCompleto(userId);
+  const perfil = perfilDado ?? dna?.atribuicao?.perfil ?? null;
 
   if (!userId || isLoading || !progresso) return null;
 

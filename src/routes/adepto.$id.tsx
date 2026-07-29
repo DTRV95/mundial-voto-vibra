@@ -8,6 +8,7 @@ import { UserAvatar } from "@/components/AvatarPicker";
 import { PHASE_LABEL, formatDate } from "@/lib/format";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { BadgeShelf } from "@/components/Badges";
+import { DnaPublico } from "@/components/dna/DnaPublico";
 
 export const Route = createFileRoute("/adepto/$id")({
   component: PublicProfile,
@@ -153,6 +154,12 @@ function PublicProfile() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* DNA público — não aparece se a pessoa o tiver privado,
+            e sem qualquer indicação de que o escondeu. */}
+        <div className="mt-6">
+          <DnaPublico userId={id} />
         </div>
 
         {/* Medalhas permanentes */}

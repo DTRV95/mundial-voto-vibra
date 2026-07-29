@@ -4,6 +4,8 @@ import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { CompetitionAtmosphere, PageHeader } from "@/components/CompetitionAtmosphere";
 import { BlocoDna } from "@/components/dna/BlocoDna";
 import { useProgressoDna, useObservacaoInicial } from "@/lib/useDna";
+import { useDnaCompleto } from "@/lib/useDnaCompleto";
+import { BlocoDescoberta } from "@/components/dna/BlocoDescoberta";
 import { Dna } from "lucide-react";
 
 export const Route = createFileRoute("/dna")({
@@ -25,6 +27,7 @@ function Dna_() {
   const { active: comp } = useActiveCompetition();
   const { data: progresso, isLoading } = useProgressoDna(user?.id);
   const { data: observacao } = useObservacaoInicial(user?.id);
+  const { data: dna } = useDnaCompleto(user?.id);
 
   if (!user) {
     return (
@@ -61,20 +64,23 @@ function Dna_() {
         {isLoading && <div className="shimmer h-64 rounded-3xl" />}
 
         {!isLoading && progresso && (
-          <BlocoDna
-            progresso={progresso}
-            observacao={observacao ?? null}
-            // Fase A: o motor de atribuição chega na Fase B.
-            // Até lá, nunca se mostra um perfil — só o progresso real.
-            perfil={null}
-            traco={null}
-            comp={comp}
-          />
+          <div className="space-y-4">
+            <BlocoDna
+              progresso={progresso}
+              observacao={observacao ?? null}
+              perfil={dna?.atribuicao?.perfil ?? null}
+              traco={dna?.atribuicao?.traco ?? null}
+              porque={dna?.atribuicao?.porque ?? null}
+              comp={comp}
+            />
+
+            {/* Bloco 3 — só existe quando houver descoberta verdadeira */}
+            {dna && <BlocoDescoberta userId={user.id} dna={dna} comp={comp} />}
+          </div>
         )}
 
-        {/* Os blocos "O teu mês" e "A última descoberta" ainda não
-            existem: não teriam conteúdo verdadeiro. Aparecem quando
-            houver dados, não antes. */}
+        {/* O bloco "O teu mês" (rival e missão) chega na Fase E,
+            com o primeiro mês fechado. */}
       </div>
     </div>
   );

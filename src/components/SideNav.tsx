@@ -25,7 +25,7 @@ const grupos = [
     itens: [
       { to: "/jogos", label: "Jogos", icon: CalendarClock },
       { to: "/prognosticos", label: "Prognósticos", icon: Target },
-      { to: "/classificacao", label: "Classificação", icon: Table2 },
+      { to: "/classificacao", label: "Tabela", icon: Table2 },
     ],
   },
   {

@@ -70,9 +70,9 @@ function Classificacao() {
   return (
     <div className="px-4 pt-6 pb-10 md:px-8">
       <header className="mb-5">
-        <h1 className="font-display text-3xl md:text-4xl">Classificação</h1>
+        <h1 className="font-display text-3xl md:text-4xl">Tabela classificativa</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
-          Calculada a partir de todos os resultados, não só dos jogos oficiais.
+          A classificação das equipas na competição. Para a classificação dos adeptos, vê os Rankings.
         </p>
       </header>
 

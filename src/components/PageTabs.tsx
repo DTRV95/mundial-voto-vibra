@@ -17,7 +17,7 @@ export interface Aba {
 export const ABAS_JOGAR: Aba[] = [
   { to: "/jogos", label: "A tua jornada" },
   { to: "/prognosticos", label: "Prognósticos" },
-  { to: "/classificacao", label: "Classificação" },
+  { to: "/classificacao", label: "Tabela" },
 ];
 
 /** Competir com pessoas concretas. */

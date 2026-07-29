@@ -6,6 +6,10 @@ import { BlocoDna } from "@/components/dna/BlocoDna";
 import { useProgressoDna, useObservacaoInicial } from "@/lib/useDna";
 import { useDnaCompleto } from "@/lib/useDnaCompleto";
 import { BlocoDescoberta } from "@/components/dna/BlocoDescoberta";
+import { BlocoMes } from "@/components/dna/BlocoMes";
+import { useMes, useResumos } from "@/lib/useMes";
+import { ResumoMensalCartoes } from "@/components/dna/ResumoMensal";
+import { useState } from "react";
 import { Dna } from "lucide-react";
 
 export const Route = createFileRoute("/dna")({
@@ -28,6 +32,11 @@ function Dna_() {
   const { data: progresso, isLoading } = useProgressoDna(user?.id);
   const { data: observacao } = useObservacaoInicial(user?.id);
   const { data: dna } = useDnaCompleto(user?.id);
+  const { data: mes } = useMes(user?.id);
+  const { data: resumos = [] } = useResumos(user?.id);
+
+  // O resumo mais recente ainda por ver tem prioridade máxima
+  const [resumoAberto, setResumoAberto] = useState<string | null>(null);
 
   if (!user) {
     return (
@@ -74,14 +83,38 @@ function Dna_() {
               comp={comp}
             />
 
+            {/* Bloco 2 — rival e missão, tratados como uma coisa só */}
+            {mes && <BlocoMes mes={mes} comp={comp} />}
+
             {/* Bloco 3 — só existe quando houver descoberta verdadeira */}
             {dna && <BlocoDescoberta userId={user.id} dna={dna} comp={comp} />}
+
+            {resumos.length > 0 && (
+              <div className="flex items-center justify-center gap-4 pt-1 text-xs">
+                <button onClick={() => setResumoAberto(resumos[0].cycleId)}
+                  className="font-semibold text-muted-foreground transition-smooth hover:text-foreground">
+                  Ver o resumo de {resumos[0].label}
+                </button>
+                <span className="text-muted-foreground/40">·</span>
+                <Link to="/dna/historico"
+                  className="font-semibold text-muted-foreground transition-smooth hover:text-foreground">
+                  Histórico
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
-        {/* O bloco "O teu mês" (rival e missão) chega na Fase E,
-            com o primeiro mês fechado. */}
+
       </div>
+
+      {resumoAberto && resumos.find(r => r.cycleId === resumoAberto) && (
+        <ResumoMensalCartoes
+          resumo={resumos.find(r => r.cycleId === resumoAberto)!}
+          comp={comp}
+          aoFechar={() => setResumoAberto(null)}
+        />
+      )}
     </div>
   );
 }

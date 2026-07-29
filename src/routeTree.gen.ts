@@ -29,6 +29,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LigaCodeRouteImport } from './routes/liga.$code'
 import { Route as JogoIdRouteImport } from './routes/jogo.$id'
 import { Route as EntrarCodeRouteImport } from './routes/entrar.$code'
+import { Route as DnaHistoricoRouteImport } from './routes/dna.historico'
 import { Route as AdeptoIdRouteImport } from './routes/adepto.$id'
 
 const TermosRoute = TermosRouteImport.update({
@@ -131,6 +132,11 @@ const EntrarCodeRoute = EntrarCodeRouteImport.update({
   path: '/entrar/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DnaHistoricoRoute = DnaHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => DnaRoute,
+} as any)
 const AdeptoIdRoute = AdeptoIdRouteImport.update({
   id: '/adepto/$id',
   path: '/adepto/$id',
@@ -145,7 +151,7 @@ export interface FileRoutesByFullPath {
   '/classificacao': typeof ClassificacaoRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
-  '/dna': typeof DnaRoute
+  '/dna': typeof DnaRouteWithChildren
   '/duelos': typeof DuelosRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
   '/adepto/$id': typeof AdeptoIdRoute
+  '/dna/historico': typeof DnaHistoricoRoute
   '/entrar/$code': typeof EntrarCodeRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
@@ -168,7 +175,7 @@ export interface FileRoutesByTo {
   '/classificacao': typeof ClassificacaoRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
-  '/dna': typeof DnaRoute
+  '/dna': typeof DnaRouteWithChildren
   '/duelos': typeof DuelosRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
   '/adepto/$id': typeof AdeptoIdRoute
+  '/dna/historico': typeof DnaHistoricoRoute
   '/entrar/$code': typeof EntrarCodeRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
@@ -192,7 +200,7 @@ export interface FileRoutesById {
   '/classificacao': typeof ClassificacaoRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/cookies': typeof CookiesRoute
-  '/dna': typeof DnaRoute
+  '/dna': typeof DnaRouteWithChildren
   '/duelos': typeof DuelosRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
   '/adepto/$id': typeof AdeptoIdRoute
+  '/dna/historico': typeof DnaHistoricoRoute
   '/entrar/$code': typeof EntrarCodeRoute
   '/jogo/$id': typeof JogoIdRoute
   '/liga/$code': typeof LigaCodeRoute
@@ -228,6 +237,7 @@ export interface FileRouteTypes {
     | '/suporte'
     | '/termos'
     | '/adepto/$id'
+    | '/dna/historico'
     | '/entrar/$code'
     | '/jogo/$id'
     | '/liga/$code'
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/suporte'
     | '/termos'
     | '/adepto/$id'
+    | '/dna/historico'
     | '/entrar/$code'
     | '/jogo/$id'
     | '/liga/$code'
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/suporte'
     | '/termos'
     | '/adepto/$id'
+    | '/dna/historico'
     | '/entrar/$code'
     | '/jogo/$id'
     | '/liga/$code'
@@ -287,7 +299,7 @@ export interface RootRouteChildren {
   ClassificacaoRoute: typeof ClassificacaoRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   CookiesRoute: typeof CookiesRoute
-  DnaRoute: typeof DnaRoute
+  DnaRoute: typeof DnaRouteWithChildren
   DuelosRoute: typeof DuelosRoute
   JogosRoute: typeof JogosRoute
   LigasRoute: typeof LigasRoute
@@ -445,6 +457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntrarCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dna/historico': {
+      id: '/dna/historico'
+      path: '/historico'
+      fullPath: '/dna/historico'
+      preLoaderRoute: typeof DnaHistoricoRouteImport
+      parentRoute: typeof DnaRoute
+    }
     '/adepto/$id': {
       id: '/adepto/$id'
       path: '/adepto/$id'
@@ -455,6 +474,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface DnaRouteChildren {
+  DnaHistoricoRoute: typeof DnaHistoricoRoute
+}
+
+const DnaRouteChildren: DnaRouteChildren = {
+  DnaHistoricoRoute: DnaHistoricoRoute,
+}
+
+const DnaRouteWithChildren = DnaRoute._addFileChildren(DnaRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -463,7 +492,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClassificacaoRoute: ClassificacaoRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   CookiesRoute: CookiesRoute,
-  DnaRoute: DnaRoute,
+  DnaRoute: DnaRouteWithChildren,
   DuelosRoute: DuelosRoute,
   JogosRoute: JogosRoute,
   LigasRoute: LigasRoute,

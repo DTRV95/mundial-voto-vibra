@@ -35,9 +35,9 @@ function JogoPage() {
     queryKey: ["match", id],
     staleTime: 60_000,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,phase,voting_open,home_score,away_score,home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url)")
+        .select("id,kickoff_at,phase,voting_open,is_official,home_score,away_score,round:round_id(label),home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url)")
         .eq("id", id).maybeSingle();
       return data;
     },
@@ -76,9 +76,10 @@ function JogoPage() {
     queryKey: ["next-open-matches", id],
     staleTime: 60_000,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("matches")
         .select("id,kickoff_at,phase,status,voting_open,home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url),predictions(count)")
+        .eq("is_official", true)
         .eq("voting_open", true)
         .neq("id", id)
         .order("kickoff_at")
@@ -502,6 +503,21 @@ function JogoPage() {
             }}
             aoFechar={() => setLinhasBancada(null)}
           />
+        </div>
+      )}
+
+      {/* Jogo que não conta para o ranking. A página aceita qualquer id,
+          e sem isto parecia um jogo normal em que se podia votar. */}
+      {match && (match as any).is_official === false && (
+        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-border bg-card/60 px-4 py-3">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-bold">Este jogo não conta para o ranking</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Em cada jornada só contam 5 jogos oficiais.{" "}
+              <Link to="/jogos" className="underline underline-offset-2">Ver os desta jornada</Link>
+            </p>
+          </div>
         </div>
       )}
 

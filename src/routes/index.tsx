@@ -193,11 +193,11 @@ function Home() {
     queryKey: ["my-results", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data: finished } = await supabase
+      const { data: finished } = await (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,phase,home_score,away_score,qualifier,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .select("id,kickoff_at,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .eq("is_official", true)
         .not("home_score", "is", null)
-        .neq("phase", "grupos")
         .order("kickoff_at", { ascending: false })
         .limit(40);
       if (!finished?.length) return [];
@@ -265,9 +265,10 @@ function Home() {
       // For following users: also include correct predictions on finished matches
       let finishedPredEvents: any[] = [];
       if (followingIds.length > 0) {
-        const { data: recentMatches } = await supabase
+        const { data: recentMatches } = await (supabase as any)
           .from("matches")
           .select("id,kickoff_at,home_score,away_score,home:home_team_id(name,flag),away:away_team_id(name,flag)")
+          .eq("is_official", true)
           .not("home_score", "is", null)
           .gte("kickoff_at", sevenDaysAgo)
           .order("kickoff_at", { ascending: false })
@@ -331,10 +332,11 @@ function Home() {
 
         const openMatchIds = [...new Set((recentVotes ?? []).map((v: any) => v.match_id))];
         if (openMatchIds.length > 0) {
-          const { data: openMatches } = await supabase
+          const { data: openMatches } = await (supabase as any)
             .from("matches")
             .select("id,home:home_team_id(name,flag),away:away_team_id(name,flag)")
             .in("id", openMatchIds)
+            .eq("is_official", true)
             .eq("voting_open", true);
           const openMatchMap = Object.fromEntries((openMatches ?? []).map((m: any) => [m.id, m]));
           for (const v of (recentVotes ?? [])) {
@@ -430,9 +432,10 @@ function Home() {
   const { data: nextMatch } = useQuery({
     queryKey: ["matches", "next"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("matches")
         .select("id,kickoff_at,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .eq("is_official", true)
         .gt("kickoff_at", new Date().toISOString())
         .eq("status", "scheduled")
         .order("kickoff_at")

@@ -183,15 +183,16 @@ function LigaPage() {
       const end = new Date(); end.setHours(23, 59, 59, 999);
 
       // jogos de hoje
-      const { data: todayMatches } = await supabase
+      const { data: todayMatches } = await (supabase as any)
         .from("matches")
         .select("id")
+        .eq("is_official", true)
         .gte("kickoff_at", start.toISOString())
         .lte("kickoff_at", end.toISOString());
 
       if (!todayMatches || todayMatches.length === 0) return new Set<string>();
 
-      const matchIds = todayMatches.map(m => m.id);
+      const matchIds = (todayMatches as any[]).map(m => m.id);
       const memberIds = ranking.map(r => r.id);
 
       const { data: preds } = await supabase
@@ -231,9 +232,10 @@ function LigaPage() {
       const since = pool!.created_at && pool!.created_at > threeDaysAgo ? pool!.created_at : threeDaysAgo;
       const now = new Date().toISOString();
 
-      const { data: matches } = await supabase
+      const { data: matches } = await (supabase as any)
         .from("matches")
         .select("id,kickoff_at,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code),status")
+        .eq("is_official", true)
         .gte("kickoff_at", since)
         .lte("kickoff_at", now)
         .order("kickoff_at", { ascending: false })
@@ -241,7 +243,7 @@ function LigaPage() {
 
       if (!matches || matches.length === 0) return [];
 
-      const matchIds = matches.map(m => m.id);
+      const matchIds = (matches as any[]).map(m => m.id);
       const memberIds = ranking.map(r => r.id);
 
       const { data: preds } = await supabase
@@ -261,7 +263,7 @@ function LigaPage() {
               member: ranking.find(r => r.id === p.user_id),
             }))
             .filter(p => p.member),
-        })).filter(m => m.predictions.length > 0);
+        })).filter((m: any) => m.predictions.length > 0);
     },
   });
 
@@ -1022,7 +1024,7 @@ function copyLink() {
               <UserAvatar avatarUrl={addTarget.avatar_url} name={addTarget.display_name} size={10} className="rounded-full" />
               <div>
                 <p className="font-display text-lg">{addTarget.display_name}</p>
-                <p className="text-sm text-muted-foreground">{addTarget.total_points} pontos globais</p>
+                <p className="text-sm text-muted-foreground">Vai entrar no torneio</p>
               </div>
             </div>
             <p className="mb-5 text-sm text-muted-foreground">

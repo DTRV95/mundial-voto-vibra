@@ -18,6 +18,7 @@ function EntrarPage() {
   // Fetch pool info by code
   const { data: pool, isLoading: poolLoading, isError } = useQuery({
     queryKey: ["pool-invite", code],
+    staleTime: 60_000,
     retry: false,
     queryFn: async () => {
       const { data, error } = await (supabase as any)
@@ -33,6 +34,7 @@ function EntrarPage() {
   // Check if user is already a member
   const { data: isMember, isLoading: memberLoading } = useQuery({
     queryKey: ["pool-invite-member", pool?.id, user?.id],
+    staleTime: 60_000,
     enabled: !!pool && !!user,
     queryFn: async () => {
       const { data } = await (supabase as any)

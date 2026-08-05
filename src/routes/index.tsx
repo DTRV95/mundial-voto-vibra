@@ -17,6 +17,7 @@ import { PickCompetitionsModal } from "@/components/PickCompetitionsModal";
 import { ChampionsAtmosphere } from "@/components/ChampionsAtmosphere";
 import { LigaAtmosphere } from "@/components/LigaAtmosphere";
 import { CompetitionAtmosphere } from "@/components/CompetitionAtmosphere";
+import { divisaoDe } from "@/lib/divisoes";
 import { CartaoJornada, CartaoSemJornada } from "@/components/CartaoJornada";
 import { CartaoDnaCompacto } from "@/components/dna/CartaoDnaCompacto";
 import { HomeVisitante } from "@/components/HomeVisitante";
@@ -84,6 +85,7 @@ function Home() {
 
   const { data: myStreak } = useQuery({
     queryKey: ["my-streak", user?.id],
+    staleTime: 60_000,
     enabled: !!user?.id,
     queryFn: async () => {
       const { data } = await supabase
@@ -119,6 +121,7 @@ function Home() {
 
   const { data: topPools = [] } = useQuery({
     queryKey: ["pools", "ranking"],
+    staleTime: 60_000,
     queryFn: async () => {
       const { data: pools } = await supabase
         .from("pools")
@@ -165,6 +168,7 @@ function Home() {
 
   const { data: myDivision } = useQuery({
     queryKey: ["my-division-home", user?.id],
+    staleTime: 60_000,
     enabled: !!user?.id,
     queryFn: async () => {
       const { data: me } = await supabase
@@ -176,13 +180,7 @@ function Home() {
         .from("v_divisao").select("posicao,pontos")
         .eq("user_id", user!.id).maybeSingle();
       const rank = d?.posicao ?? 999;
-      const DIVISIONS = [
-        { label: "1ª Liga",            emoji: "🏆", min: 1,  max: 10,  border: "border-cyan-400/40",    bg: "bg-cyan-400/10",    text: "text-cyan-400" },
-        { label: "2ª Liga",            emoji: "⚽", min: 11, max: 25,  border: "border-yellow-400/40",  bg: "bg-yellow-400/10",  text: "text-yellow-400" },
-        { label: "Distrital",          emoji: "🟡", min: 26, max: 50,  border: "border-slate-400/40",   bg: "bg-slate-400/10",   text: "text-slate-400" },
-        { label: "Liga do Zé Povinho", emoji: "🟢", min: 51, max: Infinity, border: "border-green-700/40", bg: "bg-green-700/10", text: "text-green-600" },
-      ];
-      const div = DIVISIONS.find(d => rank >= d.min && rank <= d.max) ?? DIVISIONS[3];
+      const div = divisaoDe(rank);
       return { rank, points: d?.pontos ?? 0, streak: (me as any)?.vote_streak ?? 0, maxStreak: (me as any)?.max_vote_streak ?? 0, ...div };
     },
   });
@@ -381,6 +379,7 @@ function Home() {
   const myLeaderEntry = topLeaders.find((u: any) => u.id === user?.id);
   const { data: myLeaderRank } = useQuery({
     queryKey: ["my-rank-home", user?.id],
+    staleTime: 60_000,
     enabled: !!user?.id && !myLeaderEntry && topLeaders.length > 0,
     queryFn: async () => {
       const { data: me } = await supabase
@@ -399,6 +398,7 @@ function Home() {
 
   const { data: myPools = [] } = useQuery({
     queryKey: ["my-pools", user?.id],
+    staleTime: 60_000,
     enabled: !!user,
     queryFn: async () => {
       const { data: memberships } = await supabase
@@ -431,6 +431,7 @@ function Home() {
 
   const { data: nextMatch } = useQuery({
     queryKey: ["matches", "next"],
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("matches")

@@ -14,6 +14,7 @@ import { FollowButton } from "@/components/FollowButton";
 import { BadgeShelf } from "@/components/Badges";
 import { CartaoDnaCompacto } from "@/components/dna/CartaoDnaCompacto";
 import { useEstatisticas, usePosicaoGeral } from "@/lib/useEstatisticas";
+import { divisaoDe } from "@/lib/divisoes";
 import { DefinicoesDna } from "@/components/dna/DefinicoesDna";
 
 export const Route = createFileRoute("/perfil")({
@@ -50,6 +51,7 @@ function Perfil() {
 
   const { data: history = [] } = useQuery({
     queryKey: ["history", user?.id], enabled: !!user?.id,
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await supabase
         .from("predictions")
@@ -63,6 +65,7 @@ function Perfil() {
 
   const { data: myPools = [] } = useQuery({
     queryKey: ["my-pools", user?.id], enabled: !!user?.id,
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await supabase
         .from("pool_members")
@@ -74,6 +77,7 @@ function Perfil() {
 
   const { data: phaseResults = [] } = useQuery({
     queryKey: ["phase-results", user?.id], enabled: !!user?.id,
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("phase_results")
@@ -88,13 +92,7 @@ function Perfil() {
   const { data: stats } = useEstatisticas(user?.id);
   const { data: myGlobalRank } = usePosicaoGeral(user?.id);
 
-  const DIVISIONS = [
-    { label: "1ª Liga", min: 1, max: 10 },
-    { label: "2ª Liga", min: 11, max: 25 },
-    { label: "Distrital", min: 26, max: 50 },
-    { label: "Liga do Zé Povinho", min: 51, max: Infinity },
-  ];
-  const myRankDivision = DIVISIONS.find(d => (myGlobalRank ?? 999) >= d.min && (myGlobalRank ?? 999) <= d.max)?.label ?? "Liga do Zé Povinho";
+  const myRankDivision = divisaoDe(myGlobalRank).label;
 
   const { share: shareMyRank, Portal: RankSharePortal } = useRankShare({
     displayName: profile?.display_name ?? "Adepto",

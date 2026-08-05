@@ -47,6 +47,7 @@ function Admin() {
 function Stats() {
   const { data: stats } = useQuery({
     queryKey: ["admin", "stats"],
+    staleTime: 60_000,
     queryFn: async () => {
       const [users, votes, matches, prog] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
@@ -82,6 +83,7 @@ function Tabs() {
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["admin", "support-unread"],
+    staleTime: 60_000,
     queryFn: async () => {
       const { count } = await supabase
         .from("support_messages")
@@ -139,10 +141,12 @@ function TeamsAdmin() {
   const [teamPending, setTeamPending] = useState(false);
   const { data: teams = [] } = useQuery({
     queryKey: ["admin", "teams"],
+    staleTime: 60_000,
     queryFn: async () => (await supabase.from("teams").select("*,group:group_id(name)").order("name")).data ?? [],
   });
   const { data: groups = [] } = useQuery({
     queryKey: ["admin", "groups"],
+    staleTime: 60_000,
     queryFn: async () => (await supabase.from("groups").select("*").order("name")).data ?? [],
   });
   async function add() {
@@ -226,10 +230,12 @@ function MatchesAdmin() {
   const [kickoff, setKickoff] = useState(""); const [phase, setPhase] = useState("grupos");
   const { data: teams = [] } = useQuery({
     queryKey: ["admin", "teams"],
+    staleTime: 60_000,
     queryFn: async () => (await supabase.from("teams").select("id,name").order("name")).data ?? [],
   });
   const { data: matches = [] } = useQuery({
     queryKey: ["admin", "matches"],
+    staleTime: 60_000,
     queryFn: async () => (await supabase.from("matches")
       .select("id,kickoff_at,phase,voting_open,home_score,away_score,qualifier,is_official,round_id,rounds(label),home:home_team_id(name,short_name),away:away_team_id(name,short_name)")
       .order("kickoff_at")).data ?? [],
@@ -474,6 +480,7 @@ function AnalysisAdmin() {
 
   const { data: matches = [] } = useQuery({
     queryKey: ["admin", "matches"],
+    staleTime: 60_000,
     queryFn: async () => (await supabase.from("matches")
       .select("id,kickoff_at,home:home_team_id(name),away:away_team_id(name)")
       .order("kickoff_at")).data ?? [],
@@ -481,6 +488,7 @@ function AnalysisAdmin() {
 
   const { data: existing } = useQuery({
     queryKey: ["admin", "analysis", matchId],
+    staleTime: 60_000,
     enabled: !!matchId,
     queryFn: async () => {
       const { data } = await supabase.from("match_analysis").select("*").eq("match_id", matchId).maybeSingle();
@@ -607,6 +615,7 @@ function MatchPicker({ value, onChange }: { value: string | null; onChange: (id:
   const [search, setSearch] = useState("");
   const { data: matches = [] } = useQuery({
     queryKey: ["admin", "all-matches-picker"],
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await supabase
         .from("matches")
@@ -683,6 +692,7 @@ function PrognosticosAdmin() {
 
   const { data: list = [] } = useQuery({
     queryKey: ["admin", "prognosticos"],
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("prognosticos")
@@ -890,6 +900,7 @@ function SuporteAdmin() {
   const qc = useQueryClient();
   const { data: messages = [] } = useQuery({
     queryKey: ["admin", "support-messages"],
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await supabase
         .from("support_messages")

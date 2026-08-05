@@ -7,6 +7,7 @@ import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 import { FollowButton } from "@/components/FollowButton";
 import { useCompetitions } from "@/lib/useCompetitions";
+import { DIVISOES, divisaoDe, faixaDe } from "@/lib/divisoes";
 import { CompetitionAtmosphere, PageHeader, CompetitionPicker } from "@/components/CompetitionAtmosphere";
 import {
   useRanking, useRankingMes, useMeses, mesAtual, useTendencia, escopoDe,
@@ -145,16 +146,9 @@ export const Route = createFileRoute("/rankings")({
   component: Rankings,
 });
 
-const DIVISIONS = [
-  { key: "primeira", label: "1ª Liga",   emoji: "🏆", min: 1,  max: 10,  color: "from-cyan-400 to-blue-500",    border: "border-cyan-400/40",   bg: "bg-cyan-400/10",   text: "text-cyan-400" },
-  { key: "segunda",  label: "2ª Liga",   emoji: "⚽", min: 11, max: 25,  color: "from-yellow-400 to-amber-500", border: "border-gold/40",       bg: "bg-gold/10",       text: "text-gold" },
-  { key: "distrital",label: "Distrital", emoji: "🟡", min: 26, max: 50,  color: "from-slate-300 to-slate-500",  border: "border-slate-400/40",  bg: "bg-slate-400/10",  text: "text-slate-400" },
-  { key: "regional", label: "Liga do Zé Povinho", emoji: "🟢", min: 51, max: Infinity, color: "from-green-700 to-emerald-800", border: "border-green-700/40", bg: "bg-green-700/10", text: "text-green-600" },
-] as const;
 
-function getDivision(rank: number) {
-  return DIVISIONS.find(d => rank >= d.min && rank <= d.max) ?? DIVISIONS[3];
-}
+
+
 
 function Rankings() {
   const search = useSearch({ from: "/rankings" });
@@ -265,7 +259,7 @@ function Rankings() {
   const fonte = porMesDisponivel ? porMes : porEpoca;
 
   const allUsers = useMemo(
-    () => (fonte.data ?? []).map((r: LinhaRanking) => ({ ...r, division: getDivision(r.rank) })),
+    () => (fonte.data ?? []).map((r: LinhaRanking) => ({ ...r, division: divisaoDe(r.rank) })),
     [fonte.data],
   );
   const loadingUsers = fonte.isLoading;
@@ -501,19 +495,19 @@ function Rankings() {
           })()}
 
           {/* Todas as divisões */}
-          {DIVISIONS.map(div => {
+          {DIVISOES.map(div => {
             const members = allUsers.filter(u => u.rank >= div.min && u.rank <= div.max);
             if (members.length === 0) return null;
             return (
               <div key={div.key} className={`overflow-hidden rounded-2xl border ${div.border}`}>
                 {/* Header da divisão */}
                 <div className={`flex items-center gap-3 px-4 py-3`}
-                  style={{ background: div.key === "primeira" ? "linear-gradient(90deg,#0d1a2e,#0a1f3a)" : div.key === "segunda" ? "linear-gradient(90deg,#1a1500,#2a1f00)" : div.key === "distrital" ? "linear-gradient(90deg,#111,#1a1a1a)" : "linear-gradient(90deg,#0a1a0d,#0d1f10)" }}>
+                  style={{ background: div.header }}>
                   <span className="text-2xl">{div.emoji}</span>
                   <div className="flex-1">
                     <p className={`font-display text-lg ${div.text}`}>{div.label}</p>
                     <p className="text-[11px] text-muted-foreground">
-                      {div.max === Infinity ? `${div.min}º em diante` : `${div.min}º ao ${div.max}º`} · {members.length} adepto{members.length !== 1 ? "s" : ""}
+                      {faixaDe(div)} · {members.length} adepto{members.length !== 1 ? "s" : ""}
                     </p>
                   </div>
                 </div>

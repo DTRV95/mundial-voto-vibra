@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
 import { Users, Plus, LogIn, Copy, Check, Trash2, Gift, HelpCircle, Clock, CalendarDays, Layers } from "lucide-react";
 import { toast } from "sonner";
+import { SITE_URL } from "@/lib/site";
 import { PageTabs, ABAS_SOCIAL } from "@/components/PageTabs";
 
 export const Route = createFileRoute("/ligas")({
@@ -53,6 +54,7 @@ function Ligas() {
   // Ligas onde o utilizador é membro
   const { data: myPools = [] } = useQuery({
     queryKey: ["my-pools", user?.id],
+    staleTime: 60_000,
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase
@@ -66,6 +68,7 @@ function Ligas() {
   // Contagem de membros por liga
   const { data: memberCounts = {} } = useQuery({
     queryKey: ["pool-counts", myPools.map((p: any) => p.id)],
+    staleTime: 60_000,
     enabled: myPools.length > 0,
     queryFn: async () => {
       const ids = myPools.map((p: any) => p.id);
@@ -161,7 +164,7 @@ function Ligas() {
   });
 
   function copyLink(code: string, poolId: string) {
-    const url = `${"https://geracao2026.com"}/liga/${code}`;
+    const url = `${SITE_URL}/liga/${code}`;
     if (navigator.share) {
       navigator.share({ title: "Junta-te ao meu torneio!", text: "Vota comigo nos jogos da jornada 🏆", url });
     } else {
@@ -173,7 +176,7 @@ function Ligas() {
   }
 
   function shareWhatsApp(code: string, name: string) {
-    const url = `${"https://geracao2026.com"}/liga/${code}`;
+    const url = `${SITE_URL}/liga/${code}`;
     const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${name}" no Uma Geração!\nVota nos jogos da jornada e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }

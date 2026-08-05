@@ -22,6 +22,7 @@ function PublicProfile() {
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["public-profile", id],
+    staleTime: 60_000,
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
@@ -34,6 +35,7 @@ function PublicProfile() {
 
   const { data: recentPredictions = [] } = useQuery({
     queryKey: ["public-predictions", id],
+    staleTime: 60_000,
     enabled: !!profile,
     queryFn: async () => {
       const now = new Date().toISOString();
@@ -52,6 +54,7 @@ function PublicProfile() {
 
   const { data: leagues = [] } = useQuery({
     queryKey: ["public-leagues", id],
+    staleTime: 60_000,
     enabled: !!profile,
     queryFn: async () => {
       const { data } = await supabase

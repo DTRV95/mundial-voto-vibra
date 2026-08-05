@@ -8,6 +8,7 @@ import { descreverConfig, useClubes } from "@/lib/useLigaConfig";
 import { useCompetitions } from "@/lib/useCompetitions";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
+import { SITE_URL } from "@/lib/site";
 import { UserAvatar } from "@/components/AvatarPicker";
 
 export const Route = createFileRoute("/liga/$code")({
@@ -75,6 +76,7 @@ function LigaPage() {
 
   const { data: pool, isLoading, isError } = useQuery({
     queryKey: ["pool", code],
+    staleTime: 60_000,
     retry: false,
     queryFn: async () => {
       const { data, error } = await (supabase as any)
@@ -89,6 +91,7 @@ function LigaPage() {
 
   const { data: isMember } = useQuery({
     queryKey: ["pool-member", pool?.id, user?.id],
+    staleTime: 60_000,
     enabled: !!pool && !!user,
     queryFn: async () => {
       const { data } = await supabase
@@ -103,6 +106,7 @@ function LigaPage() {
 
   const { data: memberPhaseResults = {} } = useQuery({
     queryKey: ["pool-member-phase-results", pool?.id],
+    staleTime: 60_000,
     enabled: !!pool,
     queryFn: async () => {
       const { data: members } = await supabase.from("pool_members").select("user_id").eq("pool_id", pool!.id);
@@ -123,6 +127,7 @@ function LigaPage() {
 
   const { data: phaseWinner } = useQuery({
     queryKey: ["pool-phase-winner", pool?.id],
+    staleTime: 60_000,
     enabled: !!pool,
     queryFn: async () => {
       const { data } = await (supabase as any)
@@ -141,6 +146,7 @@ function LigaPage() {
 
   const { data: ranking = [] } = useQuery({
     queryKey: ["pool-ranking", pool?.id],
+    staleTime: 60_000,
     enabled: !!pool,
     queryFn: async () => {
       // Pontos somados das previsões, já com as regras da liga aplicadas
@@ -177,6 +183,7 @@ function LigaPage() {
 
   const { data: votedTodayIds = new Set<string>() } = useQuery({
     queryKey: ["pool-voted-today", pool?.id],
+    staleTime: 60_000,
     enabled: !!pool && ranking.length > 0,
     queryFn: async () => {
       const start = new Date(); start.setHours(0, 0, 0, 0);
@@ -208,6 +215,7 @@ function LigaPage() {
   // Rank global de cada membro
   const { data: globalRanks = {} } = useQuery({
     queryKey: ["pool-global-ranks", pool?.id],
+    staleTime: 60_000,
     enabled: !!pool && ranking.length > 0,
     queryFn: async () => {
       // v_divisao já traz a posição calculada da mesma fonte que os
@@ -225,6 +233,7 @@ function LigaPage() {
   // Previsões do grupo — jogos iniciados nos últimos 3 dias
   const { data: groupPredictions = [] } = useQuery({
     queryKey: ["pool-group-preds", pool?.id],
+    staleTime: 60_000,
     enabled: !!pool && !!isMember && ranking.length > 0,
     queryFn: async () => {
       const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
@@ -324,6 +333,7 @@ function LigaPage() {
 
   const { data: searchResults = [] } = useQuery({
     queryKey: ["user-search", addSearch],
+    staleTime: 60_000,
     enabled: addSearch.trim().length >= 2,
     queryFn: async () => {
       const memberIds = new Set(ranking.map((r: any) => r.id));
@@ -370,7 +380,7 @@ function copyLink() {
   }
 
   function shareWhatsApp() {
-    const url = `${"https://geracao2026.com"}/entrar/${pool?.code}`;
+    const url = `${SITE_URL}/entrar/${pool?.code}`;
     const text = encodeURIComponent(`🏆 Junta-te ao meu torneio "${pool?.name}" no Uma Geração!\nVota nos jogos da jornada e compete comigo: ${url}`);
     window.open(`https://wa.me/?text=${text}`, "_blank");
   }

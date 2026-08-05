@@ -54,6 +54,7 @@ function JogoPage() {
 
   const { data: myPrediction } = useQuery({
     queryKey: ["prediction", id, user?.id],
+    staleTime: 60_000,
     enabled: !!user?.id,
     queryFn: async () => {
       const { data } = await supabase.from("predictions").select("*").eq("match_id", id).eq("user_id", user!.id).maybeSingle();
@@ -92,6 +93,7 @@ function JogoPage() {
 
   const { data: nextVotedIds = new Set<string>() } = useQuery({
     queryKey: ["next-voted-ids", user?.id, id],
+    staleTime: 60_000,
     enabled: !!user?.id && nextMatches.length > 0,
     queryFn: async () => {
       const ids = nextMatches.map((m: any) => m.id);

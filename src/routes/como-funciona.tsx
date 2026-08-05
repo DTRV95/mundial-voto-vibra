@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trophy, Target, Star, Users, ChevronRight, HelpCircle, TrendingUp, Swords, CalendarClock } from "lucide-react";
+import { DIVISOES, faixaDe } from "@/lib/divisoes";
 
 export const Route = createFileRoute("/como-funciona")({
   head: () => ({
@@ -175,12 +176,7 @@ function ComoFunciona() {
           Consoante a tua posição no ranking, ficas colocado numa divisão:
         </p>
         <div className="mb-4 divide-y divide-border overflow-hidden rounded-xl border border-border bg-background/40">
-          {[
-            { emoji: "🏆", label: "1ª Liga", desc: "Top 10" },
-            { emoji: "⚽", label: "2ª Liga", desc: "Posições 11 a 25" },
-            { emoji: "🟡", label: "Distrital", desc: "Posições 26 a 50" },
-            { emoji: "🟢", label: "Liga do Zé Povinho", desc: "A partir da posição 51" },
-          ].map(({ emoji, label, desc }) => (
+          {DIVISOES.map(d => ({ emoji: d.emoji, label: d.label, desc: faixaDe(d) })).map(({ emoji, label, desc }) => (
             <div key={label} className="flex items-center gap-3 px-3 py-2.5">
               <span className="text-lg">{emoji}</span>
               <div>

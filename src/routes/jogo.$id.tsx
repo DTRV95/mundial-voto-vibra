@@ -67,7 +67,7 @@ function JogoPage() {
     staleTime: 60_000,
     queryFn: async () => {
       const { data } = await supabase.from("predictions")
-        .select("result_90,btts,total_25,double_chance,combo_15,exact_home,exact_away,qualifier")
+        .select("result_90,btts,total_25,exact_home,exact_away,qualifier")
         .eq("match_id", id);
       return data ?? [];
     },
@@ -350,14 +350,12 @@ function JogoPage() {
     };
     const bttsLabels: Record<string, string> = { yes: "Ambas marcam", no: "Nem ambas marcam" };
     const total25Labels: Record<string, string> = { over: "+2.5 golos", under: "-2.5 golos" };
-    const total35Labels: Record<string, string> = { over: "+3.5 golos", under: "-3.5 golos" };
 
     const lines: string[] = [`🏆 A minha previsão para ${homeName} vs ${awayName}:`];
 
     if (pred.result_90) lines.push(`⚽ ${result90Labels[pred.result_90] ?? pred.result_90}`);
     if (pred.btts) lines.push(`🎯 ${bttsLabels[pred.btts] ?? pred.btts}`);
     if (pred.total_25) lines.push(`📊 ${total25Labels[pred.total_25] ?? pred.total_25}`);
-    if (pred.total_35) lines.push(`📊 ${total35Labels[pred.total_35] ?? pred.total_35}`);
     if (pred.exact_home != null && pred.exact_away != null) {
       lines.push(`🔢 Resultado exato: ${pred.exact_home}-${pred.exact_away}`);
     }
@@ -380,9 +378,7 @@ function JogoPage() {
       user_id: user.id, match_id: id,
       result_90: pred.result_90 ?? null, btts: pred.btts ?? null,
       total_25: pred.total_25 ?? null,
-      double_chance: pred.double_chance ?? null,
       exact_home: pred.exact_home ?? null, exact_away: pred.exact_away ?? null,
-      combo_15: pred.combo_15 ?? null,
       qualifier: pred.qualifier ?? null,
     } as any;
     const { error } = await supabase.from("predictions").upsert(payload, { onConflict: "user_id,match_id" });
@@ -702,13 +698,7 @@ function JogoPage() {
 
         {match.phase !== "grupos" && (
           <MarketCard
-            title={
-              match.phase === "final"
-                ? ([home.name, away.name].includes("França") && [home.name, away.name].includes("Inglaterra")
-                    ? "Ficar em 3º lugar"
-                    : "Campeão do Mundo")
-                : "Qualificar"
-            }
+            title={match.phase === "final" ? "Vencedor da final" : "Quem se apura"}
             closed={closed} pts="4 pts"
             communityCount={community.length} showCommunity={showCommunity}>
             <VoteOptions value={pred.qualifier} disabled={closed}

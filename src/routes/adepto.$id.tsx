@@ -41,7 +41,7 @@ function PublicProfile() {
       const now = new Date().toISOString();
       const { data } = await supabase
         .from("predictions")
-        .select("id,result_90,btts,total_25,total_35,exact_home,exact_away,points,created_at,match:match_id(kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
+        .select("id,result_90,btts,total_25,exact_home,exact_away,points,created_at,match:match_id(kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
         .eq("user_id", id)
         .order("created_at", { ascending: false });
       // só mostra jogos que já começaram; se match for null (RLS) mostra na mesma
@@ -245,7 +245,6 @@ function PredictionsList({ predictions }: { predictions: any[] }) {
                 {p.result_90 && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">{RESULT_LABEL[p.result_90] ?? p.result_90}</span>}
                 {p.btts && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">{BTTS_LABEL[p.btts] ?? p.btts}</span>}
                 {p.total_25 && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">2.5 {GOALS_LABEL[p.total_25] ?? p.total_25}</span>}
-                {p.total_35 && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">3.5 {GOALS_LABEL[p.total_35] ?? p.total_35}</span>}
                 {p.exact_home != null && p.exact_away != null && (
                   <span className="rounded-full bg-wc-blue/20 px-2 py-0.5 text-[10px] font-bold text-wc-blue">{p.exact_home}–{p.exact_away}</span>
                 )}

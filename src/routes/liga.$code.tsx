@@ -69,7 +69,6 @@ function LigaPage() {
   const [addTarget, setAddTarget] = useState<{ id: string; display_name: string; avatar_url: string | null } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showAllMembers, setShowAllMembers] = useState(false);
-  const [showPhaseHistory, setShowPhaseHistory] = useState(false);
   const pollRef = useRef<HTMLDivElement>(null);
 
   const EMOJIS = ["⚽", "🍺", "👨‍👩‍👧", "💼", "🏆", "🎮", "🎓", "🏋️", "🎉", "🔥", "💪", "🤝", "🦁", "🐉", "🌍"];
@@ -101,46 +100,6 @@ function LigaPage() {
         .eq("user_id", user!.id)
         .maybeSingle();
       return !!data;
-    },
-  });
-
-  const { data: memberPhaseResults = {} } = useQuery({
-    queryKey: ["pool-member-phase-results", pool?.id],
-    staleTime: 60_000,
-    enabled: !!pool,
-    queryFn: async () => {
-      const { data: members } = await supabase.from("pool_members").select("user_id").eq("pool_id", pool!.id);
-      if (!members || members.length === 0) return {};
-      const userIds = members.map((m: any) => m.user_id);
-      const { data } = await (supabase as any)
-        .from("phase_results")
-        .select("user_id,phase,rank,total_points")
-        .in("user_id", userIds);
-      const map: Record<string, Record<string, { rank: number; total_points: number }>> = {};
-      for (const r of data ?? []) {
-        if (!map[r.user_id]) map[r.user_id] = {};
-        map[r.user_id][r.phase] = { rank: r.rank, total_points: r.total_points };
-      }
-      return map;
-    },
-  });
-
-  const { data: phaseWinner } = useQuery({
-    queryKey: ["pool-phase-winner", pool?.id],
-    staleTime: 60_000,
-    enabled: !!pool,
-    queryFn: async () => {
-      const { data } = await (supabase as any)
-        .from("pool_phase_winners")
-        .select("phase,pool_points,user_id")
-        .eq("pool_id", pool!.id)
-        .order("created_at", { ascending: false });
-      if (!data || data.length === 0) return null;
-      const userIds = data.map((d: any) => d.user_id);
-      const { data: profiles } = await supabase
-        .from("profiles").select("id,display_name,avatar_url").in("id", userIds);
-      const profileMap = Object.fromEntries((profiles ?? []).map((p: any) => [p.id, p]));
-      return data.map((d: any) => ({ ...d, profile: profileMap[d.user_id] }));
     },
   });
 
@@ -257,7 +216,7 @@ function LigaPage() {
 
       const { data: preds } = await supabase
         .from("predictions")
-        .select("user_id,match_id,result_90,btts,total_25,total_35,exact_home,exact_away,points")
+        .select("user_id,match_id,result_90,btts,total_25,exact_home,exact_away,points")
         .in("match_id", matchIds)
         .in("user_id", memberIds);
 
@@ -535,107 +494,6 @@ function copyLink() {
       </div>
       </div>
 
-      {/* ── CAMPEÕES POR FASE ────────────────────────────────── */}
-      {phaseWinner && phaseWinner.length > 0 && (
-        <div className="mx-5 mt-5 md:mx-8 space-y-2">
-          {phaseWinner.map((w: any) => {
-            const PHASE_LABEL: Record<string, string> = {
-              grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos",
-              quartos: "Quartos", meias: "Meias-Finais", final: "Final",
-            };
-            return (
-              <div key={w.phase} className="flex items-center gap-3 rounded-2xl border border-gold/30 bg-gold/5 px-4 py-3">
-                <span className="text-2xl">🏆</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gold/70">{PHASE_LABEL[w.phase] ?? w.phase} · Campeão</p>
-                  <p className="text-sm font-bold text-foreground truncate">{w.profile?.display_name ?? "—"}</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="font-display text-lg text-gold leading-none">{w.pool_points}</p>
-                  <p className="text-[10px] text-muted-foreground">pts</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* ── RESULTADOS FASE ANTERIOR ────────────────────────── */}
-      {isMember && Object.keys(memberPhaseResults).length > 0 && (
-        (() => {
-          const PHASE_LABELS: Record<string, string> = {
-            grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos",
-            quartos: "Quartos", meias: "Meias-Finais", final: "Final",
-          };
-          // collect all phases present
-          const phases = Array.from(
-            new Set(Object.values(memberPhaseResults as Record<string, any>).flatMap(p => Object.keys(p)))
-          ) as string[];
-          if (phases.length === 0) return null;
-
-          return (
-            <div className="mx-5 mt-4 md:mx-8">
-              <button
-                onClick={() => setShowPhaseHistory(v => !v)}
-                className="w-full flex items-center justify-between rounded-2xl border border-border bg-card/60 px-4 py-3 text-left transition-smooth hover:border-wc-blue/40"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-base">📊</span>
-                  <span className="text-sm font-semibold">Resultados por Fase</span>
-                  <span className="rounded-full bg-wc-blue/15 px-2 py-0.5 text-[9px] font-bold text-wc-blue">{phases.length} fase{phases.length > 1 ? "s" : ""}</span>
-                </div>
-                {showPhaseHistory ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-              </button>
-
-              {showPhaseHistory && (
-                <div className="mt-2 space-y-4">
-                  {phases.map(phase => {
-                    // build sorted list for this phase from members in this pool
-                    const entries = (ranking as any[])
-                      .map(r => {
-                        const pr = (memberPhaseResults as any)[r.id]?.[phase];
-                        return pr ? { ...r, phaseRank: pr.rank, phasePoints: pr.total_points } : null;
-                      })
-                      .filter(Boolean)
-                      .sort((a: any, b: any) => a.phaseRank - b.phaseRank);
-
-                    if (entries.length === 0) return null;
-
-                    return (
-                      <div key={phase} className="overflow-hidden rounded-2xl border border-border bg-card/50">
-                        <div className="flex items-center gap-2 border-b border-border px-4 py-2.5 bg-card/80">
-                          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{PHASE_LABELS[phase] ?? phase}</span>
-                        </div>
-                        <div className="divide-y divide-border/50">
-                          {entries.map((entry: any, i: number) => {
-                            const isMe = entry.id === user?.id;
-                            const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : null;
-                            return (
-                              <div key={entry.id} className={`flex items-center gap-3 px-4 py-2.5 ${isMe ? "bg-wc-red/5" : ""}`}>
-                                <span className={`w-6 shrink-0 text-center text-xs font-bold ${isMe ? "text-wc-red" : "text-muted-foreground"}`}>
-                                  {medal ?? `${i + 1}º`}
-                                </span>
-                                <UserAvatar avatarUrl={entry.avatar_url} name={entry.display_name} size={7} className="rounded-full shrink-0" />
-                                <span className={`flex-1 truncate text-sm ${isMe ? "font-bold text-wc-red" : "font-medium"}`}>
-                                  {entry.display_name}
-                                  {isMe && <span className="ml-1 text-[9px] font-bold uppercase tracking-wider text-wc-red">Tu</span>}
-                                </span>
-                                <span className="shrink-0 font-display text-base text-gold">{entry.phasePoints}</span>
-                                <span className="shrink-0 text-[10px] text-muted-foreground">pts</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })()
-      )}
-
       {/* ── CONVITE (não autenticado) ─────────────────────────── */}
       {!user && !loading && (
         <div className="mx-5 mt-5 md:mx-8 overflow-hidden rounded-2xl border border-border bg-muted/40 p-5">
@@ -825,11 +683,6 @@ function copyLink() {
                         {globalRanks[r.id] && (
                           <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-gold/15 px-1.5 py-0.5 text-[9px] font-bold text-gold">
                             #{globalRanks[r.id]}º global
-                          </span>
-                        )}
-                        {(memberPhaseResults as any)[r.id]?.["grupos"] && (
-                          <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-wc-blue/15 px-1.5 py-0.5 text-[9px] font-bold text-wc-blue">
-                            GR #{(memberPhaseResults as any)[r.id]["grupos"].rank}º
                           </span>
                         )}
                         {votedTodayIds.has(r.id) && (
@@ -1529,11 +1382,6 @@ function MatchPredCard({ match, predictions, currentUserId }: { match: any; pred
                   {p.total_25 && (
                     <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
                       2.5 {GOALS_LABEL[p.total_25] ?? p.total_25}
-                    </span>
-                  )}
-                  {p.total_35 && (
-                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">
-                      3.5 {GOALS_LABEL[p.total_35] ?? p.total_35}
                     </span>
                   )}
                   {p.exact_home != null && p.exact_away != null && (

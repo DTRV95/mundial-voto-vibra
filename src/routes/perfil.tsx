@@ -55,7 +55,7 @@ function Perfil() {
     queryFn: async () => {
       const { data } = await supabase
         .from("predictions")
-        .select("id,points,result_90,btts,total_25,total_35,double_chance,exact_home,exact_away,created_at,match:match_id(id,kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
+        .select("id,points,result_90,btts,total_25,exact_home,exact_away,created_at,match:match_id(id,kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(200);
@@ -75,19 +75,6 @@ function Perfil() {
     },
   });
 
-  const { data: phaseResults = [] } = useQuery({
-    queryKey: ["phase-results", user?.id], enabled: !!user?.id,
-    staleTime: 60_000,
-    queryFn: async () => {
-      const { data } = await (supabase as any)
-        .from("phase_results")
-        .select("phase,rank,total_points,predictions_made")
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false });
-      return data ?? [];
-    },
-  });
-
   // Fonte única: as mesmas somas que alimentam os rankings.
   const { data: stats } = useEstatisticas(user?.id);
   const { data: myGlobalRank } = usePosicaoGeral(user?.id);
@@ -100,7 +87,7 @@ function Perfil() {
     totalPoints: stats?.pontos ?? 0,
     totalUsers: 0,
     division: myRankDivision,
-    phase: "Mata-Mata",
+    phase: "Época 2026/27",
   });
 
   // Edição de nome
@@ -190,10 +177,10 @@ function Perfil() {
   ).length;
   const correctGames = finishedGames.filter(isCorrectResult).length;
   const errorGames = finishedGames.filter((h: any) => !isCorrectResult(h) && h.result_90).length;
-  // totalPoints: prefer sum from phase_results (scored by backend), fall back to predictions.points
-  const totalPointsFromPhases = phaseResults.reduce((s: number, r: any) => s + (r.total_points ?? 0), 0);
-  const totalPointsFromPreds  = finishedGames.reduce((s: number, h: any) => s + (h.points ?? 0), 0);
-  const totalPoints = totalPointsFromPhases > 0 ? totalPointsFromPhases : totalPointsFromPreds;
+  // Uma só fonte: a soma de predictions.points que alimenta os rankings.
+  // O histórico local está limitado a 200 previsões, por isso serve apenas
+  // de recurso enquanto as estatísticas não chegam.
+  const totalPoints = stats?.pontos ?? finishedGames.reduce((s: number, h: any) => s + (h.points ?? 0), 0);
   const avgPoints = correctGames > 0 ? (totalPoints / correctGames).toFixed(1) : "—";
   const currentStreak = (profile as any)?.vote_streak ?? 0;
   const maxStreak = (profile as any)?.max_vote_streak ?? 0;
@@ -219,7 +206,6 @@ function Perfil() {
     "Placar exato":    { correct: 0, total: 0, options: [] },
     "Ambas marcam":    { correct: 0, total: 0, options: [mkOpt("Sim"), mkOpt("Não")] },
     "+/- 2.5 golos":   { correct: 0, total: 0, options: [mkOpt("Mais de 2.5"), mkOpt("Menos de 2.5")] },
-    "+/- 3.5 golos":   { correct: 0, total: 0, options: [mkOpt("Mais de 3.5"), mkOpt("Menos de 3.5")] },
   };
 
   for (const h of finishedGames as any[]) {
@@ -259,17 +245,6 @@ function Perfil() {
       mkt.total++;
       const predictedOver = h.total_25 === "over";
       const actualOver = totalGoals > 2;
-      const correct = predictedOver === actualOver;
-      if (correct) mkt.correct++;
-      const optIdx = predictedOver ? 0 : 1;
-      mkt.options[optIdx].total++;
-      if (correct) mkt.options[optIdx].correct++;
-    }
-    if (h.total_35) {
-      const mkt = mktData["+/- 3.5 golos"];
-      mkt.total++;
-      const predictedOver = h.total_35 === "over";
-      const actualOver = totalGoals > 3;
       const correct = predictedOver === actualOver;
       if (correct) mkt.correct++;
       const optIdx = predictedOver ? 0 : 1;
@@ -435,44 +410,12 @@ function Perfil() {
 
       {/* Badges */}
       <BadgesSection
-        phaseResults={phaseResults as any[]}
         exactScores={exactScores}
         bestCorrectStreak={bestCorrectStreak}
         maxStreak={maxStreak}
         totalPredictions={stats?.previsoes ?? 0}
         acc={acc}
       />
-
-      {/* Resultados por fase */}
-      {phaseResults.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-            <Trophy className="h-4 w-4" /> Resultados por Fase
-          </h2>
-          <div className="space-y-3">
-            {(phaseResults as any[]).map((r: any) => {
-              const maxPts = Math.max(...(phaseResults as any[]).map((x: any) => x.total_points ?? 0), 1);
-              const pct = Math.round(((r.total_points ?? 0) / maxPts) * 100);
-              const label = ({ grupos: "Fase de Grupos", ronda32: "16 Avos", oitavos: "Oitavos", quartos: "Quartos", meias: "Meias-Finais", final: "Final" } as Record<string,string>)[r.phase as string] ?? r.phase;
-              return (
-                <div key={r.phase} className="rounded-2xl border border-border/60 bg-card/60 px-4 py-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
-                      <span className="rounded-full bg-gold/10 border border-gold/25 px-2 py-0.5 text-[10px] font-bold text-gold">#{r.rank}º</span>
-                    </div>
-                    <span className="font-display text-xl text-gold">{r.total_points} <span className="text-xs font-sans text-muted-foreground">pts</span></span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-border/50 overflow-hidden">
-                    <div className="h-full rounded-full bg-gold" style={{ width: `${pct}%` }} />
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mt-1.5">{r.predictions_made} previsões feitas</p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
 
       {/* Gráfico de evolução de pontos */}
       <PointsEvolutionChart history={history as any[]} />
@@ -911,19 +854,12 @@ interface BadgeDef {
 }
 
 function BadgesSection({
-  phaseResults, exactScores, bestCorrectStreak, maxStreak, totalPredictions, acc,
+  exactScores, bestCorrectStreak, maxStreak, totalPredictions, acc,
 }: {
-  phaseResults: any[]; exactScores: number; bestCorrectStreak: number;
+  exactScores: number; bestCorrectStreak: number;
   maxStreak: number; totalPredictions: number; acc: number;
 }) {
   const badges: BadgeDef[] = [];
-
-  const gruposResult = phaseResults.find((r: any) => r.phase === "grupos");
-  if (gruposResult) {
-    if (gruposResult.rank === 1)  badges.push({ emoji: "🥇", label: "Campeão da Fase de Grupos", desc: "1.º lugar no ranking global", color: "bg-gold/10 border-gold/30" });
-    else if (gruposResult.rank <= 3) badges.push({ emoji: "🥈", label: "Pódio da Fase de Grupos", desc: `Top 3 global — ${gruposResult.rank}º lugar`, color: "bg-gold/8 border-gold/20" });
-    else if (gruposResult.rank <= 10) badges.push({ emoji: "🏅", label: "Top 10 Fase de Grupos", desc: `${gruposResult.rank}º lugar no ranking global`, color: "bg-wc-blue/10 border-wc-blue/25" });
-  }
 
   if (exactScores >= 1)  badges.push({ emoji: "🎯", label: "Atirador de Elite", desc: `${exactScores} placar${exactScores > 1 ? "es" : ""} exato${exactScores > 1 ? "s" : ""}`, color: "bg-wc-red/10 border-wc-red/25" });
   if (exactScores >= 5)  badges.push({ emoji: "🔥", label: "Francotirador", desc: "5+ placares exatos", color: "bg-wc-red/10 border-wc-red/25" });

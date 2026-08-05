@@ -201,7 +201,7 @@ function Home() {
       if (!finished?.length) return [];
       const { data: preds } = await supabase
         .from("predictions")
-        .select("match_id,points,exact_home,exact_away,result_90,btts,total_25,double_chance,combo_15,qualifier")
+        .select("match_id,points,exact_home,exact_away,result_90,btts,total_25,qualifier")
         .eq("user_id", user!.id)
         .in("match_id", (finished as any[]).map(m => m.id));
       const predMap = Object.fromEntries(((preds ?? []) as any[]).map(p => [p.match_id, p]));
@@ -1250,28 +1250,18 @@ function MatchBreakdownDrawer({ match, onClose }: { match: any; onClose: () => v
   const qualifier = h > a ? "home" : h < a ? "away" : match.qualifier;
   const btts = h > 0 && a > 0 ? "yes" : "no";
   const t25 = total > 2 ? "over" : "under";
-  const d1x = res90 === "home" || res90 === "draw";
-  const dx2 = res90 === "away" || res90 === "draw";
-
-  const KNOCKOUT_PHASES = new Set(["ronda32","oitavos","quartos","meias","final"]);
+  const KNOCKOUT_PHASES = new Set(["oitavos","quartos","meias","final"]);
   const isKnockout = KNOCKOUT_PHASES.has(match.phase);
 
   const res90Labels: Record<string,string> = { home: match.home?.name, draw: "Empate", away: match.away?.name };
   const boolLabel = (v: string) => v === "yes" ? "Sim" : "Não";
   const ouLabel = (v: string) => v === "over" ? "Mais" : "Menos";
-  const dcLabel = (v: string) => v === "1x" ? `${match.home?.name} ou Empate` : `${match.away?.name} ou Empate`;
-  const comboLabel = (v: string) => {
-    const [dc, ou] = v.split("_");
-    return `${dc === "1x" ? `${match.home?.name}/Empate` : `${match.away?.name}/Empate`} + ${ou === "over" ? "Mais" : "Menos"} 1.5`;
-  };
 
   type Row = { label: string; voted: string; correct: boolean; pts: number } | null;
   const rows: Row[] = [
     pred.result_90 ? { label: "Resultado 90 min", voted: res90Labels[pred.result_90] ?? pred.result_90, correct: pred.result_90 === res90, pts: res90 === "draw" ? 4 : 3 } : null,
     pred.btts ? { label: "Ambas marcam", voted: boolLabel(pred.btts), correct: pred.btts === btts, pts: 2 } : null,
     pred.total_25 ? { label: "Total 2.5 golos", voted: ouLabel(pred.total_25), correct: pred.total_25 === t25, pts: 2 } : null,
-    pred.double_chance ? { label: "Dupla hipótese", voted: dcLabel(pred.double_chance), correct: (pred.double_chance === "1x" && d1x) || (pred.double_chance === "x2" && dx2), pts: 1 } : null,
-    pred.combo_15 ? { label: "Combinação 1.5", voted: comboLabel(pred.combo_15), correct: (() => { const [dc,ou] = pred.combo_15.split("_"); const dcOk = dc === "1x" ? d1x : dx2; const ouOk = ou === "over" ? total > 1 : total <= 1; return dcOk && ouOk; })(), pts: 4 } : null,
     pred.exact_home != null && pred.exact_away != null ? { label: "Resultado exato", voted: `${pred.exact_home}–${pred.exact_away}`, correct: pred.exact_home === h && pred.exact_away === a, pts: 10 } : null,
     isKnockout && pred.qualifier ? { label: "Qualificar", voted: pred.qualifier === "home" ? match.home?.name : match.away?.name, correct: pred.qualifier === qualifier, pts: 4 } : null,
   ].filter(Boolean);

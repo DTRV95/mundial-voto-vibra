@@ -3,6 +3,8 @@ import { useState } from "react";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { BoletimJogo } from "@/components/BoletimJogo";
 import { TalaoJornada } from "@/components/TalaoJornada";
+import { LideresCompeticao } from "@/components/LideresCompeticao";
+import { useCompetitions } from "@/lib/useCompetitions";
 
 /**
  * Estaleiro de obra.
@@ -89,6 +91,7 @@ const PREVISAO_PERFEITA = {
 
 function PreVisualizacao() {
   const [chave, setChave] = useState(0);
+  const { data: competicoes = [] } = useCompetitions();
 
   return (
     <div className="mx-auto max-w-3xl px-4 pt-6 pb-16 md:px-8">
@@ -144,6 +147,12 @@ function PreVisualizacao() {
         >
           Repetir a sequência
         </button>
+      </Bloco>
+
+      <Bloco titulo="As tabelas de líderes" nota="Uma por competição, cada uma nas suas cores. Aqui aparecem vazias porque ainda ninguém marcou pontos — é esse o aspeto real de hoje.">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {competicoes.map(c => <LideresCompeticao key={c.id} comp={c} />)}
+        </div>
       </Bloco>
 
       <p className="mt-10 border-l-2 border-border pl-4 text-xs text-muted-foreground">

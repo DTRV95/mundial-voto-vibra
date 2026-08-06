@@ -7,6 +7,7 @@ import { ShareButton, usePodiumShare, useRankShare } from "@/components/ShareCar
 
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { BoletimJogo } from "@/components/BoletimJogo";
+import { LideresCompeticao } from "@/components/LideresCompeticao";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { PushNotificationPrompt } from "@/components/PushNotificationPrompt";
@@ -679,18 +680,17 @@ function Home() {
       {/* ===================== MY POINTS PER MATCH ===================== */}
       {user && myResults.length > 0 && (
         <div className="animate-enter delay-100 lg:col-span-2">
-          <div className="overflow-hidden rounded-2xl border border-gold/30 bg-card"
-            style={{ boxShadow: "0 2px 16px oklch(0.75 0.18 85 / 0.10), 0 0 0 1px oklch(0.75 0.18 85 / 0.20)" }}>
-            {/* Gold stripe */}
-            <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/60">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div className="flex items-center gap-2">
-                <Swords className="h-3.5 w-3.5 text-gold" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gold">Os meus pontos</span>
+                <Swords className="h-4 w-4 text-muted-foreground" />
+                <span className="font-display text-xl uppercase leading-none">Os meus pontos</span>
               </div>
               {myDivision && (
-                <span className="font-display text-sm text-gold-metallic">{myDivision.points} pts</span>
+                <span className="font-display text-2xl leading-none tabular-nums text-gold">
+                  {myDivision.points}
+                  <span className="ml-1 font-sans text-[10px] font-bold uppercase tracking-widest text-muted-foreground">pts</span>
+                </span>
               )}
             </div>
             {/* Match rows */}
@@ -699,7 +699,7 @@ function Home() {
                 const pts = m.pred?.points ?? 0;
                 return (
                   <button key={m.id} onClick={() => !m.noVote && setSelectedResult(m)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 transition-smooth text-left ${m.noVote ? "opacity-70 cursor-default" : "hover:bg-gold/5"}`}>
+                    className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-smooth ${m.noVote ? "cursor-default opacity-70" : "hover:bg-accent/50"}`}>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 text-sm">
                         <span>{m.home?.flag}</span>
@@ -720,7 +720,7 @@ function Home() {
                         <>
                           <span className="text-[10px] font-semibold text-muted-foreground/50">Ver detalhe</span>
                           <div className={`rounded-xl px-3 py-1 text-sm font-bold tabular-nums ${
-                            pts > 0 ? "bg-gold/15 text-gold border border-gold/30" : "bg-muted text-muted-foreground/40 border border-border"
+                            pts > 0 ? "border border-wc-green/30 bg-wc-green/12 text-wc-green" : "border border-border bg-muted text-muted-foreground/40"
                           }`}>
                             {pts > 0 ? `+${pts}` : "—"}
                           </div>
@@ -734,7 +734,7 @@ function Home() {
             {/* Expand / collapse */}
             {myResults.length > 5 && (
               <button onClick={() => setResultsExpanded(v => !v)}
-                className="w-full border-t border-border/60 py-2.5 text-xs font-bold text-gold hover:bg-gold/5 transition-smooth">
+                className="w-full border-t border-border py-2.5 text-xs font-bold text-muted-foreground transition-smooth hover:bg-accent/50 hover:text-foreground">
                 {resultsExpanded ? "Mostrar menos ↑" : `Ver todos os jogos (${myResults.length}) ↓`}
               </button>
             )}
@@ -905,82 +905,12 @@ function Home() {
 
       {/* ===================== RANKING + LIGAS + PRÉMIOS ===================== */}
       <section className="grid gap-4 sm:grid-cols-2 lg:col-span-2">
-        {/* Ranking — veste a cor da competição escolhida */}
-        <div className="relative overflow-hidden rounded-2xl transition-smooth"
-          style={{
-            background: activeComp
-              ? `linear-gradient(160deg, color-mix(in srgb, ${activeComp.accent} 42%, #0d1017) 0%, color-mix(in srgb, ${activeComp.accent} 16%, #0d1017) 60%, #0d1017 100%)`
-              : "linear-gradient(160deg, oklch(0.24 0.09 148) 0%, oklch(0.17 0.05 160) 60%, oklch(0.14 0.03 200) 100%)",
-            boxShadow: activeComp
-              ? `0 12px 36px -8px color-mix(in srgb, ${activeComp.accent} 45%, transparent), inset 0 1px 0 oklch(1 0 0 / 0.10)`
-              : "0 12px 36px -8px oklch(0.55 0.20 142 / 0.40), inset 0 1px 0 oklch(1 0 0 / 0.10)",
-          }}>
-          {/* Halo suave da cor da competição */}
-          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full transition-smooth"
-            style={{ background: activeComp ? `color-mix(in srgb, ${activeComp.accent} 55%, transparent)` : "oklch(0.65 0.18 148 / 0.28)", filter: "blur(50px)" }} />
-
-          <div className="relative text-white">
-            {/* Cabeçalho */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-white/15 ring-1 ring-white/15">
-                  <BarChart3 className="h-5 w-5 text-white" />
-                </div>
-                <div className="leading-tight">
-                  <h3 className="font-display text-xl">Líderes</h3>
-                  {activeComp && <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/50">{activeComp.name}</p>}
-                </div>
-              </div>
-              <Link to="/rankings" className="text-xs font-bold text-white/70 hover:text-white transition-smooth">Ver rankings →</Link>
-            </div>
-
-            {/* Linhas da tabela */}
-            {topLeaders.length === 0 ? (
-              <p className="px-5 py-4 text-sm text-white/70">Ainda sem dados — sê o primeiro a marcar pontos.</p>
-            ) : (
-              <ol>
-                {(topLeaders as any[]).map((u, i) => (
-                  <li key={i} className={`flex items-center justify-between px-5 py-3 transition-smooth hover:bg-white/[0.04] ${i < topLeaders.length - 1 ? "border-b border-white/10" : ""}`}>
-                    <span className="flex items-center gap-3">
-                      <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${
-                        i === 0 ? "bg-gold text-background shadow-gold" : "bg-white/15 text-white"
-                      }`}>{i + 1}</span>
-                      <Link to="/adepto/$id" params={{ id: u.id }} className="font-semibold text-sm hover:underline underline-offset-2">
-                        {u.display_name ?? "Adepto"}
-                      </Link>
-                    </span>
-                    <span className="font-display text-lg tabular-nums text-gold-metallic">{u.total_points} <span className="text-xs font-sans font-semibold text-white/50">pts</span></span>
-                  </li>
-                ))}
-                {(myLeaderRank || myLeaderEntry) && user && (
-                  <>
-                    <li className="px-5 py-1 text-center text-[10px] text-white/30 tracking-widest border-t border-white/10">· · ·</li>
-                    <li className="flex items-center justify-between px-5 py-3 bg-white/10 border-t border-white/20">
-                      <span className="flex items-center gap-3">
-                        <span className="grid h-7 w-7 place-items-center rounded-full bg-gold text-background text-xs font-bold">
-                          {myLeaderEntry ? (topLeaders as any[]).indexOf(myLeaderEntry) + 1 : myLeaderRank?.rank}
-                        </span>
-                        <span className="font-semibold text-sm">{myLeaderEntry?.display_name ?? myLeaderRank?.display_name ?? "Tu"} <span className="text-[10px] text-gold font-bold">Tu</span></span>
-                      </span>
-                      <span className="flex items-center gap-2">
-                        <button onClick={shareRank} title="Partilhar classificação" className="grid h-7 w-7 place-items-center rounded-full bg-white/15 text-white hover:bg-white/30 transition-smooth">
-                          <Share2 className="h-3.5 w-3.5" />
-                        </button>
-                        <span className="font-display text-lg">{myLeaderEntry?.total_points ?? myLeaderRank?.total_points ?? 0} <span className="text-xs font-sans opacity-70">pts</span></span>
-                      </span>
-                    </li>
-                  </>
-                )}
-              </ol>
-            )}
-            <Link
-              to="/rankings"
-              className="flex items-center justify-center gap-1.5 border-t border-white/20 px-5 py-3 text-xs font-semibold text-white/70 hover:text-white transition-smooth"
-            >
-              Ver classificação completa →
-            </Link>
-          </div>
-        </div>
+        {/* Uma tabela por competição, cada uma vestida de si. Ver a Liga
+            e a Champions ao mesmo tempo diz mais do que um quadro que
+            muda de cor conforme o seletor. */}
+        {competitions.map(c => (
+          <LideresCompeticao key={c.id} comp={c} userId={user?.id} onPartilhar={shareRank} />
+        ))}
 
         {/* Ranking de Torneios — card moderno */}
         <div className="relative overflow-hidden rounded-2xl transition-smooth"
@@ -1070,175 +1000,6 @@ function Home() {
       </div>{/* fim da grelha bento */}
 
     </div>
-  );
-}
-
-const NEWS_CATEGORY: Record<string, { label: string; cls: string }> = {
-  analise:   { label: "Análise ScoreLab", cls: "text-gold" },
-  antevisao: { label: "Antevisão",        cls: "text-primary" },
-  noticia:   { label: "Notícia",          cls: "text-muted-foreground" },
-  opiniao:   { label: "Opinião",          cls: "text-muted-foreground" },
-};
-
-function NewsCategory({ category, small = false }: { category: string; small?: boolean }) {
-  const c = NEWS_CATEGORY[category] ?? NEWS_CATEGORY.noticia;
-  return (
-    <p className={`font-bold uppercase tracking-widest ${small ? "text-[10px]" : "text-[10px]"} ${c.cls}`}>
-      {category === "analise" && <TrendingUp className="inline h-2.5 w-2.5 mr-0.5 -mt-0.5" />}
-      {c.label}
-    </p>
-  );
-}
-
-function Step({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
-  return (
-    <div className="edge raise rounded-2xl p-5">
-      <div className="mb-2 grid h-8 w-8 place-items-center rounded-full bg-gold font-display text-background">{n}</div>
-      <h3 className="font-display text-lg">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{children}</p>
-    </div>
-  );
-}
-
-function EmptyState({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    <div className="rounded-2xl border border-dashed border-border bg-card/40 p-8 text-center">
-      <p className="font-display text-lg">{title}</p>
-      <p className="text-sm text-muted-foreground">{subtitle}</p>
-    </div>
-  );
-}
-
-
-const DEADLINE = new Date("2026-06-28T23:59:00");
-
-
-function ResultCard({ r, mobile = false }: { r: any; mobile?: boolean }) {
-  const isExact = r.isExact;
-  const isCorrect = r.isCorrect;
-  const datePart = new Date(r.kickoff_at).toLocaleDateString("pt-PT", { day: "numeric", month: "short" });
-
-  return (
-    <Link
-      to="/jogo/$id"
-      params={{ id: r.id }}
-      style={mobile ? { scrollSnapAlign: "start", minWidth: "72vw", maxWidth: "72vw" } : undefined}
-      className={`group relative shrink-0 md:shrink flex flex-col overflow-hidden rounded-2xl border px-4 py-4 transition-smooth hover:scale-[1.01] ${
-        isExact
-          ? "border-gold/50 bg-gradient-to-br from-gold/15 via-gold/5 to-transparent"
-          : isCorrect
-            ? "border-wc-green/40 bg-gradient-to-br from-wc-green/12 via-wc-green/4 to-transparent"
-            : "border-border bg-card/60"
-      }`}
-    >
-      {/* Top: badge + date */}
-      <div className="flex items-center justify-between mb-3">
-        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-          isExact
-            ? "bg-gold/20 text-gold border border-gold/30"
-            : isCorrect
-              ? "bg-wc-green/20 text-wc-green border border-wc-green/30"
-              : "bg-muted text-muted-foreground border border-border"
-        }`}>
-          {isExact ? <Zap className="h-2.5 w-2.5" /> : isCorrect ? <CheckCircle2 className="h-2.5 w-2.5" /> : <XCircle className="h-2.5 w-2.5" />}
-          {isExact ? "Placard exato" : isCorrect ? "Acertei" : "Errei"}
-        </span>
-        <span className="text-[10px] text-muted-foreground">{datePart}</span>
-      </div>
-
-      {/* Teams row */}
-      <div className="flex items-center gap-2 mb-3">
-        <div className="flex flex-1 items-center gap-2 min-w-0">
-          <span className="text-2xl leading-none shrink-0">{r.home?.flag ?? "🏳️"}</span>
-          <span className="text-sm font-semibold truncate text-foreground">{r.home?.name}</span>
-        </div>
-        <div className={`shrink-0 rounded-xl px-3 py-1 font-display text-xl text-foreground ${
-          isExact ? "bg-gold/15" : isCorrect ? "bg-wc-green/15" : "bg-muted"
-        }`}>
-          {r.home_score}–{r.away_score}
-        </div>
-        <div className="flex flex-1 items-center gap-2 min-w-0 justify-end">
-          <span className="text-sm font-semibold truncate text-foreground text-right">{r.away?.name}</span>
-          <span className="text-2xl leading-none shrink-0">{r.away?.flag ?? "🏳️"}</span>
-        </div>
-      </div>
-
-      {/* Points / Ver jogo */}
-      <div className="flex items-center justify-between mt-auto">
-        {(r.pred.points ?? 0) > 0 ? (
-          <span className={`text-sm font-bold ${isExact ? "text-gold" : "text-wc-green"}`}>
-            +{r.pred.points} pts
-          </span>
-        ) : (
-          <span className="text-xs text-muted-foreground">0 pts</span>
-        )}
-        <span className="text-xs font-semibold text-muted-foreground group-hover:text-foreground transition-smooth">Ver jogo →</span>
-      </div>
-    </Link>
-  );
-}
-
-function Countdown({ id, kickoff_at, home, away }: { id: string; kickoff_at: string; home: any; away: any }) {
-  const [diff, setDiff] = useState(new Date(kickoff_at).getTime() - Date.now());
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setDiff(new Date(kickoff_at).getTime() - Date.now());
-    }, 1000);
-    return () => clearInterval(t);
-  }, [kickoff_at]);
-
-  if (diff <= 0) return null;
-
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-
-  const pad = (n: number) => String(n).padStart(2, "0");
-
-  const goldGrad = {
-    background: "linear-gradient(180deg, oklch(0.90 0.12 92), oklch(0.72 0.16 75))",
-    WebkitBackgroundClip: "text" as const,
-    WebkitTextFillColor: "transparent" as const,
-    backgroundClip: "text" as const,
-  };
-
-  return (
-    <Link to="/jogo/$id" params={{ id }} className="block overflow-hidden rounded-2xl border border-gold/20 bg-gradient-to-r from-card/80 via-gold/5 to-card/80 px-4 py-3 hover:border-gold/40 transition-smooth">
-      {/* Linha superior — label + equipas */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          <Timer className="h-3.5 w-3.5 text-gold" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Próximo jogo</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <TeamBadge code={home?.code ?? null} flag={home?.flag ?? null} name={home?.name ?? ""} size="sm" />
-          <span className="text-[10px] font-bold text-muted-foreground/50">vs</span>
-          <TeamBadge code={away?.code ?? null} flag={away?.flag ?? null} name={away?.name ?? ""} size="sm" />
-        </div>
-      </div>
-      {/* Cronómetro compacto */}
-      <div className="mt-2 flex items-end gap-0.5">
-        {h > 0 && (
-          <>
-            <div className="text-center">
-              <div className="font-display text-3xl leading-none" style={goldGrad}>{pad(h)}</div>
-              <div className="text-[9px] uppercase tracking-widest text-muted-foreground">h</div>
-            </div>
-            <span className="font-display text-xl text-gold/30 mb-3">:</span>
-          </>
-        )}
-        <div className="text-center">
-          <div className="font-display text-3xl leading-none" style={goldGrad}>{pad(m)}</div>
-          <div className="text-[9px] uppercase tracking-widest text-muted-foreground">min</div>
-        </div>
-        <span className="font-display text-xl text-gold/30 mb-3">:</span>
-        <div className="text-center">
-          <div className="font-display text-3xl leading-none" style={goldGrad}>{pad(s)}</div>
-          <div className="text-[9px] uppercase tracking-widest text-muted-foreground">seg</div>
-        </div>
-      </div>
-    </Link>
   );
 }
 

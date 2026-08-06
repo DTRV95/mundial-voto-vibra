@@ -14,6 +14,7 @@ import { Route as SuporteRouteImport } from './routes/suporte'
 import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as PrognosticosRouteImport } from './routes/prognosticos'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as PreVisualizacaoRouteImport } from './routes/pre-visualizacao'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as LigasRouteImport } from './routes/ligas'
 import { Route as JogosRouteImport } from './routes/jogos'
@@ -55,6 +56,11 @@ const PrognosticosRoute = PrognosticosRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreVisualizacaoRoute = PreVisualizacaoRouteImport.update({
+  id: '/pre-visualizacao',
+  path: '/pre-visualizacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
+  '/pre-visualizacao': typeof PreVisualizacaoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/prognosticos': typeof PrognosticosRoute
   '/rankings': typeof RankingsRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
+  '/pre-visualizacao': typeof PreVisualizacaoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/prognosticos': typeof PrognosticosRoute
   '/rankings': typeof RankingsRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
+  '/pre-visualizacao': typeof PreVisualizacaoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/prognosticos': typeof PrognosticosRoute
   '/rankings': typeof RankingsRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/jogos'
     | '/ligas'
     | '/perfil'
+    | '/pre-visualizacao'
     | '/privacidade'
     | '/prognosticos'
     | '/rankings'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/jogos'
     | '/ligas'
     | '/perfil'
+    | '/pre-visualizacao'
     | '/privacidade'
     | '/prognosticos'
     | '/rankings'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/jogos'
     | '/ligas'
     | '/perfil'
+    | '/pre-visualizacao'
     | '/privacidade'
     | '/prognosticos'
     | '/rankings'
@@ -304,6 +316,7 @@ export interface RootRouteChildren {
   JogosRoute: typeof JogosRoute
   LigasRoute: typeof LigasRoute
   PerfilRoute: typeof PerfilRoute
+  PreVisualizacaoRoute: typeof PreVisualizacaoRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   PrognosticosRoute: typeof PrognosticosRoute
   RankingsRoute: typeof RankingsRoute
@@ -350,6 +363,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pre-visualizacao': {
+      id: '/pre-visualizacao'
+      path: '/pre-visualizacao'
+      fullPath: '/pre-visualizacao'
+      preLoaderRoute: typeof PreVisualizacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -497,6 +517,7 @@ const rootRouteChildren: RootRouteChildren = {
   JogosRoute: JogosRoute,
   LigasRoute: LigasRoute,
   PerfilRoute: PerfilRoute,
+  PreVisualizacaoRoute: PreVisualizacaoRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   PrognosticosRoute: PrognosticosRoute,
   RankingsRoute: RankingsRoute,

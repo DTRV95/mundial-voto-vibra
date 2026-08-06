@@ -9,6 +9,7 @@ import { BotaoVerBancada, PainelBancada, DesfechoBancada, type LinhaBancada } fr
 import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target, CalendarClock, Wand2, X } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { TeamBadge } from "@/lib/teamColors.tsx";
+import { BoletimJogo } from "@/components/BoletimJogo";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 
 export const Route = createFileRoute("/jogo/$id")({
@@ -37,7 +38,7 @@ function JogoPage() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,phase,voting_open,is_official,home_score,away_score,round:round_id(label),home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url)")
+        .select("id,kickoff_at,phase,voting_open,is_official,home_score,away_score,qualifier,round:round_id(label),home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url)")
         .eq("id", id).maybeSingle();
       return data;
     },
@@ -460,6 +461,23 @@ function JogoPage() {
         </div>
       </header>
 
+      {/* O boletim. Primeira coisa depois do apito final — os pontos
+          caíram, e é aqui que se vê de onde vieram. */}
+      {user && myPrediction && match?.home_score != null && match?.away_score != null && (
+        <div className="mt-4">
+          <BoletimJogo
+            pred={myPrediction as any}
+            jogo={{
+              home_score: match.home_score as number,
+              away_score: match.away_score as number,
+              qualifier: (match as any).qualifier ?? null,
+              phase: (match as any).phase ?? null,
+            }}
+            equipas={{ casa: home.name, fora: away.name }}
+          />
+        </div>
+      )}
+
       {/* Depois do jogo: como te saíste perante a bancada.
           A distribuição já é pública, por isso calcula-se aqui. */}
       {user && hasVoted && match?.home_score != null && match?.away_score != null
@@ -669,7 +687,7 @@ function JogoPage() {
             ]}
             onChange={(v) => set("result_90", v)} />
           {showCommunity && <CommunityLine votes={community.map(c => c.result_90)}
-            labels={{ home: home.name, draw: "Empate", away: away.name }} total={community.length} animate={justVoted} />}
+            labels={{ home: home.name, draw: "Empate", away: away.name }} total={community.length} animate={justVoted} minha={pred.result_90 ?? null} />}
         </MarketCard>
 
         <MarketCard title="Ambas as equipas marcam" closed={closed} pts="2 pts"
@@ -681,7 +699,7 @@ function JogoPage() {
             ]}
             onChange={(v) => set("btts", v)} />
           {showCommunity && <CommunityLine votes={community.map(c => c.btts)}
-            labels={{ yes: "Sim", no: "Não" }} total={community.length} animate={justVoted} />}
+            labels={{ yes: "Sim", no: "Não" }} total={community.length} animate={justVoted} minha={pred.btts ?? null} />}
         </MarketCard>
 
         <MarketCard title="Total de golos" closed={closed} pts="2 pts"
@@ -693,7 +711,7 @@ function JogoPage() {
             ]}
             onChange={(v) => set("total_25", v)} />
           {showCommunity && <CommunityLine votes={community.map(c => c.total_25)}
-            labels={{ over: "Mais de 2.5", under: "Menos de 2.5" }} total={community.length} animate={justVoted} />}
+            labels={{ over: "Mais de 2.5", under: "Menos de 2.5" }} total={community.length} animate={justVoted} minha={pred.total_25 ?? null} />}
         </MarketCard>
 
         {match.phase !== "grupos" && (
@@ -708,7 +726,7 @@ function JogoPage() {
               ]}
               onChange={(v) => set("qualifier", v)} />
             {showCommunity && <CommunityLine votes={community.map((c: any) => c.qualifier)}
-              labels={{ home: home.name, away: away.name }} total={community.length} animate={justVoted} />}
+              labels={{ home: home.name, away: away.name }} total={community.length} animate={justVoted} minha={pred.qualifier ?? null} />}
           </MarketCard>
         )}
 
@@ -1045,18 +1063,31 @@ function VoteOptions({ value, options, onChange, disabled, grid = 0 }: {
   );
 }
 
-function CommunityLine({ votes, labels, total, animate = false }: {
-  votes: (string | null)[]; labels: Record<string, string>; total: number; animate?: boolean;
+/**
+ * A distribuição da bancada, com a tua fatia marcada.
+ *
+ * Saber que 62% votou casa é uma estatística. Saber que és um de 34
+ * contra 210 é outra coisa — é tomar partido. É por isso que a tua
+ * barra tem anel, tem nome e tem a linha por baixo a dizer-te em que
+ * lado da bancada estás.
+ */
+function CommunityLine({ votes, labels, total, animate = false, minha = null }: {
+  votes: (string | null)[]; labels: Record<string, string>; total: number;
+  animate?: boolean;
+  /** A tua escolha neste mercado. */
+  minha?: string | null;
 }) {
   const filtered = votes.filter(Boolean) as string[];
   const n = filtered.length || 1;
   const counts: Record<string, number> = {};
   filtered.forEach((v) => (counts[v] = (counts[v] ?? 0) + 1));
 
-  const parts = Object.entries(labels).map(([k, label]) => {
-    const pct = Math.round(((counts[k] ?? 0) / n) * 100);
-    return { key: k, label, pct };
-  });
+  const parts = Object.entries(labels).map(([k, label]) => ({
+    key: k,
+    label,
+    votos: counts[k] ?? 0,
+    pct: Math.round(((counts[k] ?? 0) / n) * 100),
+  }));
 
   const maxPct = Math.max(...parts.map(p => p.pct));
   const [revealed, setRevealed] = useState(!animate);
@@ -1067,41 +1098,65 @@ function CommunityLine({ votes, labels, total, animate = false }: {
     return () => clearTimeout(t);
   }, [animate]);
 
+  const aMinha = minha ? parts.find(p => p.key === minha) : null;
+  const contra = aMinha ? filtered.length - aMinha.votos : 0;
+
   return (
     <div className={`rounded-xl border px-3 py-2.5 transition-all duration-300 ${animate ? "border-gold/30 bg-gold/5" : "border-border/50 bg-secondary/20"}`}>
       <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-1.5">
           <Users2 className="h-3 w-3 text-muted-foreground shrink-0" />
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Opinião da Comunidade
+            A bancada
           </span>
         </div>
         <span className="text-[11px] font-bold text-gold">{total} {total === 1 ? "voto" : "votos"}</span>
       </div>
       <div className="space-y-2">
-        {parts.map(({ label, pct }, i) => {
+        {parts.map(({ key, label, pct }, i) => {
           const isTop = pct === maxPct && pct > 0;
+          const eMinha = key === minha;
           return (
             <div key={label} className="flex items-center gap-2">
-              <span className="text-[11px] text-muted-foreground w-20 shrink-0 truncate">
+              <span className={`text-[11px] w-20 shrink-0 truncate ${eMinha ? "font-bold text-foreground" : "text-muted-foreground"}`}>
                 {isTop && <span className="mr-0.5">🏆</span>}{label}
               </span>
-              <div className="flex-1 h-2 rounded-full bg-border/50 overflow-hidden">
+              <div className={`flex-1 h-2.5 rounded-full bg-border/50 overflow-hidden ${
+                eMinha ? "ring-2 ring-wc-red/45 ring-offset-1 ring-offset-card" : ""
+              }`}>
                 <div
-                  className={`h-full rounded-full ${isTop ? "bg-gold" : "bg-muted-foreground/40"}`}
+                  className={`h-full rounded-full ${
+                    eMinha ? "bg-wc-red" : isTop ? "bg-gold" : "bg-muted-foreground/40"
+                  }`}
                   style={{
                     width: revealed ? `${pct}%` : "0%",
                     transition: `width ${500 + i * 120}ms cubic-bezier(0.16,1,0.3,1)`,
                   }}
                 />
               </div>
-              <span className={`text-xs font-bold w-9 text-right tabular-nums ${isTop ? "text-gold" : "text-muted-foreground"}`}>
+              <span className={`text-xs font-bold w-9 text-right tabular-nums ${
+                eMinha ? "text-wc-red" : isTop ? "text-gold" : "text-muted-foreground"
+              }`}>
                 {pct}%
               </span>
             </div>
           );
         })}
       </div>
+
+      {aMinha && aMinha.votos > 0 && (
+        <p className="mt-2.5 border-t border-border/50 pt-2 text-[11px] text-muted-foreground">
+          {contra === 0 ? (
+            <>A bancada inteira está contigo em <span className="font-bold text-wc-red">{aMinha.label}</span>.</>
+          ) : (
+            <>
+              És <span className="font-bold text-wc-red">1 de {aMinha.votos}</span> em{" "}
+              <span className="font-bold text-wc-red">{aMinha.label}</span>.{" "}
+              {contra} {contra === 1 ? "diz" : "dizem"} o contrário.
+            </>
+          )}
+        </p>
+      )}
     </div>
   );
 }

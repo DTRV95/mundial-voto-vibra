@@ -6,6 +6,7 @@ import { ArrowRight, BarChart3, Users2, Users, Sparkles, Timer, TrendingUp, Chec
 import { ShareButton, usePodiumShare, useRankShare } from "@/components/ShareCard";
 
 import { TeamBadge } from "@/lib/teamColors.tsx";
+import { BoletimJogo } from "@/components/BoletimJogo";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { PushNotificationPrompt } from "@/components/PushNotificationPrompt";
@@ -1242,81 +1243,33 @@ function Countdown({ id, kickoff_at, home, away }: { id: string; kickoff_at: str
 }
 
 function MatchBreakdownDrawer({ match, onClose }: { match: any; onClose: () => void }) {
-  const pred = match.pred ?? {};
-  const h = match.home_score ?? 0;
-  const a = match.away_score ?? 0;
-  const total = h + a;
-  const res90 = h > a ? "home" : h < a ? "away" : "draw";
-  const qualifier = h > a ? "home" : h < a ? "away" : match.qualifier;
-  const btts = h > 0 && a > 0 ? "yes" : "no";
-  const t25 = total > 2 ? "over" : "under";
-  const KNOCKOUT_PHASES = new Set(["oitavos","quartos","meias","final"]);
-  const isKnockout = KNOCKOUT_PHASES.has(match.phase);
-
-  const res90Labels: Record<string,string> = { home: match.home?.name, draw: "Empate", away: match.away?.name };
-  const boolLabel = (v: string) => v === "yes" ? "Sim" : "Não";
-  const ouLabel = (v: string) => v === "over" ? "Mais" : "Menos";
-
-  type Row = { label: string; voted: string; correct: boolean; pts: number } | null;
-  const rows: Row[] = [
-    pred.result_90 ? { label: "Resultado 90 min", voted: res90Labels[pred.result_90] ?? pred.result_90, correct: pred.result_90 === res90, pts: res90 === "draw" ? 4 : 3 } : null,
-    pred.btts ? { label: "Ambas marcam", voted: boolLabel(pred.btts), correct: pred.btts === btts, pts: 2 } : null,
-    pred.total_25 ? { label: "Total 2.5 golos", voted: ouLabel(pred.total_25), correct: pred.total_25 === t25, pts: 2 } : null,
-    pred.exact_home != null && pred.exact_away != null ? { label: "Resultado exato", voted: `${pred.exact_home}–${pred.exact_away}`, correct: pred.exact_home === h && pred.exact_away === a, pts: 10 } : null,
-    isKnockout && pred.qualifier ? { label: "Qualificar", voted: pred.qualifier === "home" ? match.home?.name : match.away?.name, correct: pred.qualifier === qualifier, pts: 4 } : null,
-  ].filter(Boolean);
-
-  const totalPts = pred.points ?? 0;
-
   return createPortal(
     <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div className="relative z-10 rounded-t-3xl border-t border-gold/30 bg-card overflow-hidden"
+      <div className="relative z-10 overflow-hidden rounded-t-3xl border-t border-gold/30 bg-card"
         onClick={e => e.stopPropagation()}>
-        {/* Gold stripe */}
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, transparent 0%, #c8960c 50%, transparent 100%)" }} />
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1">
+        <div className="flex justify-center pt-3 pb-2">
           <div className="h-1 w-10 rounded-full bg-border" />
         </div>
-        {/* Header */}
-        <div className="px-5 pb-3 flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <span>{match.home?.flag}</span>
-              <span>{match.home?.name}</span>
-              <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-bold tabular-nums">{h}–{a}</span>
-              <span>{match.away?.name}</span>
-              <span>{match.away?.flag}</span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">Detalhes da tua previsão</p>
-          </div>
-          <div className={`rounded-xl px-3 py-1.5 text-center border ${totalPts > 0 ? "bg-gold/15 border-gold/30" : "bg-muted border-border"}`}>
-            <p className={`font-display text-xl leading-none ${totalPts > 0 ? "text-gold" : "text-muted-foreground"}`}>{totalPts > 0 ? `+${totalPts}` : "0"}</p>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">pts</p>
-          </div>
+        <div className="px-4 pb-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            {match.home?.name} — {match.away?.name}
+          </p>
         </div>
-        {/* Market rows */}
-        <div className="divide-y divide-border/40 mx-5 mb-6 rounded-2xl border border-border/60 overflow-hidden">
-          {(rows as NonNullable<Row>[]).map((row, i) => (
-            <div key={i} className="flex items-center gap-3 px-4 py-3">
-              <div className={`shrink-0 h-5 w-5 rounded-full flex items-center justify-center ${row.correct ? "bg-wc-green/20" : "bg-destructive/20"}`}>
-                {row.correct
-                  ? <CheckCircle2 className="h-3.5 w-3.5 text-wc-green" />
-                  : <XCircle className="h-3.5 w-3.5 text-destructive" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-muted-foreground leading-none mb-0.5">{row.label}</p>
-                <p className="text-sm font-semibold text-foreground truncate">{row.voted}</p>
-              </div>
-              <span className={`shrink-0 text-sm font-bold ${row.correct ? "text-gold" : "text-muted-foreground/40"}`}>
-                {row.correct ? `+${row.pts}` : "—"}
-              </span>
-            </div>
-          ))}
-          {rows.length === 0 && (
-            <div className="px-4 py-6 text-center text-sm text-muted-foreground">Sem previsões registadas</div>
-          )}
+        <div className="px-4 pb-6">
+          {/* O mesmo boletim da pagina do jogo. As contas de quanto vale
+              cada mercado vivem num sitio so, em `mercados.ts`. */}
+          <BoletimJogo
+            pred={match.pred ?? {}}
+            jogo={{
+              home_score: match.home_score ?? 0,
+              away_score: match.away_score ?? 0,
+              qualifier: match.qualifier ?? null,
+              phase: match.phase ?? null,
+            }}
+            equipas={{ casa: match.home?.name ?? "Casa", fora: match.away?.name ?? "Fora" }}
+            animar={false}
+          />
         </div>
       </div>
     </div>,

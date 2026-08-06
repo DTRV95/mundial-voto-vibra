@@ -89,6 +89,7 @@ const TAMANHOS = {
   sm: { caixa: "h-9 w-9 rounded-xl", texto: "text-[10px]" },
   md: { caixa: "h-14 w-14 rounded-2xl", texto: "text-sm" },
   lg: { caixa: "h-16 w-16 rounded-2xl", texto: "text-base" },
+  xl: { caixa: "h-20 w-20 rounded-3xl", texto: "text-xl" },
 } as const;
 
 /**
@@ -98,7 +99,7 @@ const TAMANHOS = {
 export function ClubBadge({ name, monogram, size = "md" }: {
   name: string;
   monogram?: string | null;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }) {
   const { primaria, secundaria, texto } = coresDoClube(name);
   const sigla = (monogram && monogram.length >= 2 ? monogram : monogramaDe(name)).slice(0, 3);

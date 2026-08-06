@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/lib/useAuth";
 import { MatchCard } from "@/components/MatchCard";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
-import { CalendarClock, CheckCircle2, Flame } from "lucide-react";
+import { CalendarClock, CheckCircle2 } from "lucide-react";
 import { PageTabs, ABAS_JOGAR } from "@/components/PageTabs";
 import { CompetitionAtmosphere, PageHeader, CompetitionPicker } from "@/components/CompetitionAtmosphere";
 import { useJornadas } from "@/lib/useJornada";
@@ -83,25 +83,30 @@ function Jogos() {
       <div className="space-y-8">
         {jornadas.map((r) => (
           <section key={r.label}>
-            <div className="mb-3 flex items-center gap-3">
-              <div className="rounded-xl border border-border bg-card/60 px-3 py-1.5">
-                <p className="text-xs font-bold uppercase tracking-wider" style={{ color: active?.accent }}>
-                  {r.label}
+            <div className="mb-3 flex items-end gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                  {active?.short}
                 </p>
-                <p className="text-[11px] text-muted-foreground">{active?.short}</p>
+                <h2 className="font-display text-3xl uppercase leading-none md:text-4xl"
+                  style={{ color: active?.accent }}>
+                  {r.label}
+                </h2>
               </div>
-              <div className="h-px flex-1 bg-border" />
+              <div className="mb-1.5 h-px flex-1 bg-border" />
               {user ? (
-                <span className="flex items-center gap-1.5 text-xs font-semibold">
+                <span className="mb-0.5 flex shrink-0 items-center gap-1.5">
                   {r.votados === r.jogos.length && (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-wc-green" />
+                    <CheckCircle2 className="h-4 w-4 text-wc-green" />
                   )}
-                  <span className={r.votados === r.jogos.length ? "text-wc-green" : "text-muted-foreground"}>
-                    {r.votados} de {r.jogos.length} previsões
+                  <span className={`font-display text-2xl leading-none tabular-nums ${
+                    r.votados === r.jogos.length ? "text-wc-green" : "text-foreground"
+                  }`}>
+                    {r.votados}<span className="text-muted-foreground">/{r.jogos.length}</span>
                   </span>
                 </span>
               ) : (
-                <span className="text-xs text-muted-foreground">{r.jogos.length} jogos</span>
+                <span className="mb-1 shrink-0 text-xs text-muted-foreground">{r.jogos.length} jogos</span>
               )}
             </div>
 
@@ -126,14 +131,11 @@ function Jogos() {
                 <>
                   {destaque && (
                     <div className="mb-3">
-                      <div className="mb-1.5 flex items-center gap-2">
-                        <Flame className="h-3.5 w-3.5" style={{ color: active?.accent }} />
-                        <span className="text-[10px] font-bold uppercase tracking-[0.18em]"
-                          style={{ color: active?.accent }}>
-                          {ETIQUETA_DESTAQUE[destaque.highlight_tag ?? ""] ?? "Jogo da jornada"}
-                        </span>
-                      </div>
-                      <MatchCard match={destaque} />
+                      <MatchCard
+                        match={destaque}
+                        destaque
+                        etiqueta={ETIQUETA_DESTAQUE[destaque.highlight_tag ?? ""] ?? "Jogo da jornada"}
+                      />
                     </div>
                   )}
                   <div className="grid gap-3 md:grid-cols-2">

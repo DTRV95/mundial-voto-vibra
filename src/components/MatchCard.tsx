@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Clock, Users2, CheckCircle2, Swords } from "lucide-react";
-import { formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
+import { Users2, CheckCircle2, Flame } from "lucide-react";
+import { formatTime } from "@/lib/format";
 import { TeamBadge } from "@/lib/teamColors.tsx";
+import { coresDoClube, nomeCurto } from "@/lib/clubBadge";
+import { useContagem, type Urgencia } from "@/lib/useContagem";
 
 export interface MatchCardData {
   id: string;
@@ -13,246 +15,186 @@ export interface MatchCardData {
   away: { name: string; flag: string | null; code: string | null; monogram?: string | null; crest_url?: string | null };
   votes_count?: number;
   already_voted?: boolean;
-  /** Etiqueta a mostrar no topo (ex: "Jornada 8"). Substitui a fase do Mundial. */
+  /** Etiqueta a mostrar no topo (ex: "Jornada 8"). */
   round_label?: string | null;
   /** Jogo oficial — conta para o ranking */
   is_official?: boolean;
 }
 
-const KNOCKOUT_PHASES = new Set(["ronda32", "oitavos", "quartos", "meias", "final"]);
+/** Cor e tom da contagem decrescente. O vermelho é só para o fim. */
+const TOM_URGENCIA: Record<Urgencia, { cor: string; fundo: string; borda: string; pulsa: boolean }> = {
+  longe:    { cor: "var(--muted-foreground)", fundo: "transparent",            borda: "var(--border)",            pulsa: false },
+  hoje:     { cor: "var(--foreground)",       fundo: "oklch(0 0 0 / 0.04)",    borda: "var(--border)",            pulsa: false },
+  proximo:  { cor: "var(--gold)",             fundo: "oklch(0.66 0.13 82 / 0.12)", borda: "oklch(0.66 0.13 82 / 0.35)", pulsa: false },
+  iminente: { cor: "var(--wc-red)",           fundo: "oklch(0.58 0.24 27 / 0.12)", borda: "oklch(0.58 0.24 27 / 0.40)", pulsa: true },
+  fechado:  { cor: "var(--muted-foreground)", fundo: "transparent",            borda: "var(--border)",            pulsa: false },
+};
 
-export function MatchCard({ match }: { match: MatchCardData }) {
+/**
+ * O cartão de um jogo, vestido com as cores dos dois clubes.
+ *
+ * Antes eram todos dourados — o dérbi da jornada tinha exatamente o mesmo
+ * peso que o quinto jogo. Agora o dourado está reservado ao destaque e o
+ * resto veste-se de quem joga.
+ */
+export function MatchCard({ match, destaque = false, etiqueta }: {
+  match: MatchCardData;
+  /** O jogo da jornada — ocupa mais espaço e leva a moldura dourada. */
+  destaque?: boolean;
+  /** Texto da fita de destaque ("O clássico da jornada"). */
+  etiqueta?: string;
+}) {
+  const contagem = useContagem(match.kickoff_at);
+
   if (!match.home || !match.away) return null;
-  const status = votingStatus(match);
-  const isKnockout = match.is_official || KNOCKOUT_PHASES.has(match.phase);
-  const isThirdPlace = match.phase === "final"
-    && [match.home.name, match.away.name].includes("França")
-    && [match.home.name, match.away.name].includes("Inglaterra");
-  const phaseLabel = match.round_label ?? (isThirdPlace ? "3º Lugar" : (PHASE_LABEL[match.phase] ?? match.phase));
 
-  const statusCls =
-    match.status === "live"
-      ? "bg-wc-red/20 text-wc-red border-wc-red/30"
-      : status.tone === "primary"
-        ? "bg-wc-green/15 text-wc-green border-wc-green/30"
-        : status.tone === "gold"
-          ? isKnockout ? "bg-gold/20 text-gold border-gold/40" : "bg-wc-red/15 text-wc-red border-wc-red/30"
-          : "bg-muted text-muted-foreground border-border";
+  const aoVivo = match.status === "live";
+  const fechado = contagem.urgencia === "fechado" || !match.voting_open;
 
-  if (isKnockout) {
-    return (
-      <Link
-        to="/jogo/$id"
-        params={{ id: match.id }}
-        onClick={() => { try { sessionStorage.setItem("jogos_return", "1"); } catch {} }}
-        className="group block overflow-hidden rounded-2xl bg-card border border-gold/30 transition-smooth"
-        style={{
-          boxShadow: "0 2px 16px oklch(0.75 0.18 85 / 0.10), 0 0 0 1px oklch(0.75 0.18 85 / 0.20)",
-          transition: "transform 240ms cubic-bezier(0.16,1,0.3,1), box-shadow 240ms ease",
-        }}
-        onMouseEnter={e => {
-          (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 40px oklch(0.75 0.18 85 / 0.22), 0 0 0 1.5px oklch(0.75 0.18 85 / 0.45)";
-        }}
-        onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 16px oklch(0.75 0.18 85 / 0.10), 0 0 0 1px oklch(0.75 0.18 85 / 0.20)";
-        }}
-      >
-        {/* Gold accent stripe */}
-        <div className="h-1 w-full rounded-t-2xl" style={{ background: "linear-gradient(90deg, transparent 0%, oklch(0.75 0.18 85) 50%, transparent 100%)" }} />
+  const casa = coresDoClube(match.home.name).primaria;
+  const fora = coresDoClube(match.away.name).primaria;
 
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-4 pt-3 pb-0">
-          <div className="flex items-center gap-1.5">
-            <Swords className="h-3 w-3 text-gold" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-gold">
-              {phaseLabel}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            {match.status === "live" && (
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-red opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-wc-red" />
-              </span>
-            )}
-            <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-              match.status === "live" ? "bg-wc-red/10 text-wc-red border-wc-red/30" : statusCls
-            }`}>
-              {match.status === "live" ? "Ao Vivo" : status.label}
-            </span>
-          </div>
-        </div>
+  const tom = TOM_URGENCIA[aoVivo ? "iminente" : contagem.urgencia];
+  const rotulo = match.round_label ?? "";
 
-        {/* Teams */}
-        <div className="flex items-center justify-between gap-2 px-4 py-4">
-          <div className="flex flex-1 flex-col items-center gap-2">
-            <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} monogram={(match.home as any).monogram} crest={(match.home as any).crest_url} size="md" />
-            <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
-              {match.home.name}
-            </span>
-          </div>
+  const tamEmblema = destaque ? "xl" : "lg";
 
-          <div className="flex flex-col items-center gap-1 px-2">
-            <div className="flex items-center gap-1 text-gold">
-              <Clock className="h-3.5 w-3.5" />
-              <span className="font-display text-2xl tabular-nums md:text-3xl">
-                {formatTime(match.kickoff_at)}
-              </span>
-            </div>
-            <span className="rounded-full bg-gold/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-gold">
-              vs
-            </span>
-          </div>
-
-          <div className="flex flex-1 flex-col items-center gap-2">
-            <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} monogram={(match.away as any).monogram} crest={(match.away as any).crest_url} size="md" />
-            <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
-              {match.away.name}
-            </span>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div className={`flex items-center justify-between border-t px-4 py-2.5 ${
-          match.already_voted
-            ? "border-gold/20 bg-gold/5"
-            : "border-border bg-muted/40"
-        }`}>
-          <div className="flex items-center gap-1.5">
-            {match.already_voted ? (
-              <>
-                <CheckCircle2 className="h-3.5 w-3.5 text-gold" />
-                <span className="text-xs font-bold text-gold">Previsão feita</span>
-              </>
-            ) : (
-              <>
-                <Users2 className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  <span className="font-bold tabular-nums text-foreground">{(match.votes_count ?? 0).toLocaleString("pt-PT")}</span>
-                  {" "}previsões
-                </span>
-                {(match.votes_count ?? 0) > 0 && (
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-60" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold" />
-                  </span>
-                )}
-              </>
-            )}
-          </div>
-          <span className={`text-xs font-bold transition-smooth group-hover:underline ${
-            match.already_voted ? "text-gold" : "text-gold"
-          }`}>
-            {match.already_voted ? "Ver Comunidade →" : "Dar Previsão →"}
-          </span>
-        </div>
-      </Link>
-    );
-  }
-
-  // ── Fase de Grupos — mesmo estilo dourado ──────────────────────
   return (
     <Link
       to="/jogo/$id"
       params={{ id: match.id }}
       onClick={() => { try { sessionStorage.setItem("jogos_return", "1"); } catch {} }}
-      className="group block overflow-hidden rounded-2xl bg-card border border-gold/30 transition-smooth"
-      style={{
-        boxShadow: "0 2px 16px rgba(200,150,12,0.10), 0 0 0 1px rgba(200,150,12,0.20)",
-        transition: "transform 240ms cubic-bezier(0.16,1,0.3,1), box-shadow 240ms ease",
-      }}
-      onMouseEnter={e => {
-        (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 40px rgba(200,150,12,0.22), 0 0 0 1.5px rgba(200,150,12,0.45)";
-      }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 16px rgba(200,150,12,0.10), 0 0 0 1px rgba(200,150,12,0.20)";
-      }}
+      className={`group relative isolate block overflow-hidden rounded-3xl border bg-card cartao-eleva ${
+        destaque ? "border-gold/45 edge-metal" : "border-border"
+      }`}
+      style={destaque ? { boxShadow: "0 8px 34px oklch(0.66 0.13 82 / 0.16)" } : undefined}
     >
-      {/* Gold accent stripe */}
-      <div className="h-1 w-full rounded-t-2xl" style={{ background: "linear-gradient(90deg, transparent 0%, #c8960c 50%, transparent 100%)" }} />
+      {/* As cores dos dois clubes, uma de cada lado. Fica por baixo de
+          tudo e é suave o suficiente para o texto continuar legível
+          nos dois temas. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10"
+        style={{
+          background:
+            `radial-gradient(115% 130% at 0% 50%, ${casa}2E 0%, ${casa}0A 42%, transparent 66%),` +
+            `radial-gradient(115% 130% at 100% 50%, ${fora}2E 0%, ${fora}0A 42%, transparent 66%)`,
+        }}
+      />
 
-      <div className="flex items-center justify-between px-4 pt-3 pb-0">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-gold/80">
-          {phaseLabel}
+      {/* Fita superior: metade de cada clube, com o corte ao meio */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-[3px]"
+        style={{
+          background:
+            `linear-gradient(90deg, ${casa} 0%, ${casa} 44%, transparent 48%, transparent 52%, ${fora} 56%, ${fora} 100%)`,
+        }}
+      />
+
+      {destaque && etiqueta && (
+        <div className="flex items-center justify-center gap-1.5 border-b border-gold/25 bg-gold/10 py-1.5">
+          <Flame className="h-3 w-3 text-gold" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-gold">{etiqueta}</span>
+        </div>
+      )}
+
+      {/* Cabeçalho: jornada à esquerda, quanto falta à direita */}
+      <div className="flex items-center justify-between gap-2 px-4 pt-3">
+        <span className="truncate text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          {rotulo}
         </span>
-        <div className="flex items-center gap-2">
-          {match.status === "live" && (
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-wc-red opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-wc-red" />
+        <span
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold tabular-nums"
+          style={{ color: tom.cor, background: tom.fundo, borderColor: tom.borda }}
+        >
+          {(tom.pulsa || aoVivo) && (
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70" style={{ background: tom.cor }} />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: tom.cor }} />
             </span>
           )}
-          <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-            match.status === "live" ? "bg-wc-red/20 text-wc-red border-wc-red/30" : statusCls
-          }`}>
-            {match.status === "live" ? "Ao Vivo" : status.label}
-          </span>
-        </div>
+          {aoVivo ? "Ao vivo" : contagem.texto}
+        </span>
       </div>
 
-      <div className="flex items-center justify-between gap-2 px-4 py-4">
-        <div className="flex flex-1 flex-col items-center gap-2">
-          <TeamBadge code={match.home.code} flag={match.home.flag} name={match.home.name} monogram={(match.home as any).monogram} crest={(match.home as any).crest_url} size="md" />
-          <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
-            {match.home.name}
+      {/* As equipas */}
+      <div className={`flex items-center gap-2 px-4 ${destaque ? "py-6" : "py-4"}`}>
+        <Lado nome={match.home.name} equipa={match.home} tamanho={tamEmblema} destaque={destaque} />
+
+        <div className="flex shrink-0 flex-col items-center gap-1 px-1">
+          <span className={`font-display leading-none tabular-nums text-foreground ${destaque ? "text-4xl md:text-5xl" : "text-3xl"}`}>
+            {formatTime(match.kickoff_at)}
           </span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">vs</span>
         </div>
 
-        <div className="flex flex-col items-center gap-1 px-2">
-          <div className="flex items-center gap-1 text-gold">
-            <Clock className="h-3.5 w-3.5" />
-            <span className="font-display text-2xl tabular-nums md:text-3xl">
-              {formatTime(match.kickoff_at)}
-            </span>
-          </div>
-          <span className="rounded-full bg-gold/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-gold">
-            vs
-          </span>
-        </div>
-
-        <div className="flex flex-1 flex-col items-center gap-2">
-          <TeamBadge code={match.away.code} flag={match.away.flag} name={match.away.name} monogram={(match.away as any).monogram} crest={(match.away as any).crest_url} size="md" />
-          <span className="text-center text-xs font-bold leading-tight text-foreground md:text-sm">
-            {match.away.name}
-          </span>
-        </div>
+        <Lado nome={match.away.name} equipa={match.away} tamanho={tamEmblema} destaque={destaque} />
       </div>
 
-      <div className={`flex items-center justify-between border-t px-4 py-2.5 ${
-        match.already_voted
-          ? "border-wc-green/20 bg-wc-green/5"
-          : "border-gold/10 bg-muted/30"
+      {/* A última hora esvazia-se à vista */}
+      {contagem.urgencia === "iminente" && !aoVivo && (
+        <div className="mx-4 mb-2 h-[3px] overflow-hidden rounded-full bg-border">
+          <div
+            className="h-full rounded-full bg-wc-red transition-all duration-1000 ease-linear"
+            style={{ width: `${Math.round((1 - contagem.progresso) * 100)}%` }}
+          />
+        </div>
+      )}
+
+      {/* Rodapé */}
+      <div className={`flex items-center justify-between gap-2 border-t px-4 py-2.5 ${
+        match.already_voted ? "border-wc-green/25 bg-wc-green/5" : "border-border/70 bg-muted/25"
       }`}>
-        <div className="flex items-center gap-1.5">
+        <span className="flex min-w-0 items-center gap-1.5">
           {match.already_voted ? (
             <>
-              <CheckCircle2 className="h-3.5 w-3.5 text-wc-green" />
-              <span className="text-xs font-bold text-wc-green">Previsão feita</span>
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-wc-green" />
+              <span className="truncate text-xs font-bold text-wc-green">Previsão feita</span>
             </>
           ) : (
             <>
-              <Users2 className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
-                <span className="font-bold tabular-nums text-foreground">{(match.votes_count ?? 0).toLocaleString("pt-PT")}</span>
-                {" "}previsões
+              <Users2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <span className="truncate text-xs text-muted-foreground">
+                <span className="font-bold tabular-nums text-foreground">
+                  {(match.votes_count ?? 0).toLocaleString("pt-PT")}
+                </span>{" "}
+                {match.votes_count === 1 ? "previsão" : "previsões"}
               </span>
-              {(match.votes_count ?? 0) > 0 && (
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold" />
-                </span>
-              )}
             </>
           )}
-        </div>
-        <span className={`text-xs font-bold transition-smooth group-hover:underline ${match.already_voted ? "text-wc-green" : "text-gold"}`}>
-          {match.already_voted ? "Ver Comunidade →" : "Dar Previsão →"}
+        </span>
+        <span className={`shrink-0 text-xs font-bold transition-smooth group-hover:translate-x-0.5 ${
+          match.already_voted ? "text-wc-green" : fechado ? "text-muted-foreground" : "text-gold"
+        }`}>
+          {match.already_voted ? "Ver a bancada →" : fechado ? "Ver jogo →" : "Dar previsão →"}
         </span>
       </div>
     </Link>
+  );
+}
+
+function Lado({ nome, equipa, tamanho, destaque }: {
+  nome: string;
+  equipa: MatchCardData["home"];
+  tamanho: "lg" | "xl";
+  destaque: boolean;
+}) {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
+      <TeamBadge
+        code={equipa.code}
+        flag={equipa.flag}
+        name={nome}
+        monogram={equipa.monogram}
+        crest={equipa.crest_url}
+        size={tamanho}
+      />
+      <span className={`w-full truncate text-center font-display uppercase leading-none tracking-wide text-foreground ${
+        destaque ? "text-lg md:text-2xl" : "text-base md:text-lg"
+      }`}>
+        {nomeCurto(nome)}
+      </span>
+    </div>
   );
 }

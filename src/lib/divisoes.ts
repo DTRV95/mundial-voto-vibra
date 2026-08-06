@@ -63,3 +63,42 @@ export function divisaoDe(posicao: number | null | undefined): Divisao {
 export function faixaDe(d: Divisao): string {
   return d.max === Infinity ? `${d.min}º em diante` : `${d.min}º ao ${d.max}º`;
 }
+
+/**
+ * Quantos lugares marcamos de cada lado da fronteira entre divisões.
+ *
+ * Atenção ao que isto NÃO é: não há apuramento mensal, nem promoção,
+ * nem despromoção. As divisões são faixas da classificação geral — o
+ * 10º está na 1ª Liga e o 11º está na 2ª, e trocam de divisão no
+ * instante em que trocam de posição. Isto marca só quem está encostado
+ * à fronteira, para se ver o que está em jogo.
+ */
+export const LUGARES_FRONTEIRA = 3;
+
+/**
+ * Numa divisão só faz sentido marcar as pontas se houver gente que
+ * caiba no meio. Abaixo disto, a tabela ficava toda pintada.
+ */
+const MINIMO_PARA_ZONAS = LUGARES_FRONTEIRA * 2 + 2;
+
+export type Zona = "subida" | "descida" | null;
+
+/**
+ * Se esta posição está encostada à divisão de cima ou à de baixo.
+ *
+ * A primeira divisão não tem para onde subir e a última não tem para
+ * onde cair — e a tabela não deve fingir que têm.
+ *
+ * @param indice posição dentro da divisão, a começar em zero
+ * @param total  quantos adeptos tem a divisão
+ */
+export function zonaDe(divisao: Divisao, indice: number, total: number): Zona {
+  if (total < MINIMO_PARA_ZONAS) return null;
+
+  const primeira = divisao.key === DIVISOES[0].key;
+  const ultima = divisao.key === DIVISOES[DIVISOES.length - 1].key;
+
+  if (!primeira && indice < LUGARES_FRONTEIRA) return "subida";
+  if (!ultima && indice >= total - LUGARES_FRONTEIRA) return "descida";
+  return null;
+}

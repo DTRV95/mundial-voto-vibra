@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 import { BoletimJogo } from "@/components/BoletimJogo";
+import { TalaoJornada } from "@/components/TalaoJornada";
 
 /**
  * Estaleiro de obra.
@@ -102,6 +103,15 @@ function PreVisualizacao() {
           quando a época arrancar.
         </p>
       </header>
+
+      <Bloco titulo="O talão da jornada" nota="Os cinco jogos como um objeto só. O carimbo aparece quando o talão fecha — carrega para alternar.">
+        <div className="space-y-3">
+          <TalaoJornada label="Jornada 8" competicao="Liga Portugal" accent="#E10014" autenticado
+            jogos={[CLASSICO, ...OUTROS].map((j, i) => ({ ...j, already_voted: i < 2 }))} />
+          <TalaoJornada label="Jornada 7" competicao="Liga Portugal" accent="#E10014" autenticado
+            jogos={[CLASSICO, ...OUTROS].map(j => ({ ...j, already_voted: true }))} />
+        </div>
+      </Bloco>
 
       <Bloco titulo="O jogo da jornada" nota="Largura total, moldura dourada, e a contagem na última hora a contar segundos. Recarrega para a ver reiniciar.">
         <MatchCard match={{ ...CLASSICO, id: `${CLASSICO.id}-${chave}` }} destaque etiqueta="O clássico da jornada" />

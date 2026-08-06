@@ -7,7 +7,7 @@ import { UserAvatar } from "@/components/AvatarPicker";
 import { useAuth } from "@/lib/useAuth";
 import { FollowButton } from "@/components/FollowButton";
 import { useCompetitions } from "@/lib/useCompetitions";
-import { DIVISOES, divisaoDe, faixaDe } from "@/lib/divisoes";
+import { DIVISOES, divisaoDe, faixaDe, zonaDe } from "@/lib/divisoes";
 import { CompetitionAtmosphere, PageHeader, CompetitionPicker } from "@/components/CompetitionAtmosphere";
 import {
   useRanking, useRankingMes, useMeses, mesAtual, useTendencia, escopoDe,
@@ -510,21 +510,33 @@ function Rankings() {
                       {faixaDe(div)} · {members.length} adepto{members.length !== 1 ? "s" : ""}
                     </p>
                   </div>
+                  <Legenda div={div} total={members.length} />
                 </div>
                 {/* Membros */}
                 <div className="divide-y divide-border/50">
                   {(expandedDivs[div.key] ? members : members.slice(0, 25)).map((u, i) => {
                     const isMe = u.user_id === user?.id;
-                    const isTop3 = i < 3;
-                    const isBottom3 = i >= members.length - 3 && members.length > 3;
+                    const zona = zonaDe(div, i, members.length);
+                    const zonaAnterior = i === 0 ? "inicio" : zonaDe(div, i - 1, members.length);
+                    // A linha que separa a zona do resto da tabela, como
+                    // numa classificação a sério.
+                    const corte = i > 0 && zona !== zonaAnterior && (zona || zonaAnterior);
                     return (
-                      <div key={u.user_id} className={`flex items-center gap-3 px-4 py-2.5 ${
-                        isMe ? div.bg : isTop3 ? "bg-wc-green/5" : isBottom3 ? "bg-wc-red/5" : ""
+                      <div key={u.user_id} className={`relative flex items-center gap-3 py-2.5 pl-5 pr-4 ${
+                        isMe ? div.bg : zona === "subida" ? "bg-wc-green/[0.05]" : zona === "descida" ? "bg-wc-red/[0.05]" : ""
+                      } ${corte ? "border-t-2 border-dashed" : ""} ${
+                        corte && (zona === "descida" || zonaAnterior === "descida") ? "border-t-wc-red/35" : corte ? "border-t-wc-green/35" : ""
                       }`}>
+                        {/* A calha lateral: verde sobe, vermelho desce */}
+                        {zona && (
+                          <span className={`absolute inset-y-0 left-0 w-[3px] ${
+                            zona === "subida" ? "bg-wc-green" : "bg-wc-red"
+                          }`} />
+                        )}
                         <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${
                           i === 0 ? `bg-gradient-to-b ${div.color} text-white` :
-                          isTop3 ? "bg-wc-green/20 text-wc-green" :
-                          isBottom3 ? "bg-wc-red/20 text-wc-red" :
+                          zona === "subida" ? "bg-wc-green/20 text-wc-green" :
+                          zona === "descida" ? "bg-wc-red/20 text-wc-red" :
                           "bg-secondary text-muted-foreground"
                         }`}>
                           {i === 0 ? <Crown className="h-3.5 w-3.5" /> : i + 1}
@@ -575,6 +587,37 @@ function Rankings() {
           <li>Quem submeteu primeiro a previsão.</li>
         </ol>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Diz o que as calhas verdes e vermelhas significam. Uma cor sem
+ * explicação é decoração.
+ *
+ * O texto é deliberadamente "à porta de subir" e não "sobe": não há
+ * apuramento nenhum ao fim do mês. Quem passa o 10º lugar muda de
+ * divisão nesse instante.
+ */
+function Legenda({ div, total }: { div: (typeof DIVISOES)[number]; total: number }) {
+  const temSubida = zonaDe(div, 0, total) === "subida";
+  const temDescida = zonaDe(div, total - 1, total) === "descida";
+  if (!temSubida && !temDescida) return null;
+
+  return (
+    <div className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
+      {temSubida && (
+        <span className="flex items-center gap-1.5 text-[10px] font-semibold text-wc-green">
+          <span className="h-2.5 w-[3px] rounded-full bg-wc-green" />
+à porta de subir
+        </span>
+      )}
+      {temDescida && (
+        <span className="flex items-center gap-1.5 text-[10px] font-semibold text-wc-red">
+          <span className="h-2.5 w-[3px] rounded-full bg-wc-red" />
+a cair
+        </span>
+      )}
     </div>
   );
 }

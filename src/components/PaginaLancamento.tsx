@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { ArrowDown, Bell, Check, Crown, Swords, Target, Trophy, Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * A homepage de geracao2026.com enquanto a época nova não arranca.
@@ -27,7 +29,80 @@ const CIANO = "#00FAFF";
 const DOURADO = "#FFB020";
 const FUNDO = "#080B12";
 
+
+/* ══════════════════════════════════════════════════════════
+   Emblemas reais
+   ══════════════════════════════════════════════════════════ */
+
+interface Clube { id: string; name: string; crest_url: string | null }
+
+/**
+ * Os emblemas oficiais dos clubes, da tabela `teams`.
+ *
+ * Se a consulta falhar ou vier vazia, a página não parte: os ecrãs
+ * caem nos discos com as cores do clube e a fita simplesmente não
+ * aparece. Um anúncio não pode ficar refém de uma query.
+ */
+function useClubes() {
+  return useQuery({
+    queryKey: ["clubes-lancamento"],
+    staleTime: 600_000,
+    retry: 1,
+    queryFn: async (): Promise<Clube[]> => {
+      const { data, error } = await (supabase as any)
+        .from("teams")
+        .select("id,name,crest_url")
+        .not("crest_url", "is", null)
+        .limit(40);
+      if (error) return [];
+      return (data ?? []) as Clube[];
+    },
+  });
+}
+
+/** Encontra um clube pelo nome, à maneira tolerante. */
+function acharClube(clubes: Clube[], chave: string): Clube | undefined {
+  const k = chave.toLowerCase();
+  return clubes.find(c => c.name?.toLowerCase().includes(k));
+}
+
+/**
+ * O emblema de um clube: o oficial quando existe, e um disco com as
+ * cores do clube quando não existe. Nunca uma bola genérica.
+ */
+function Emblema({ crest, cor, tamanho = 18, titulo }: {
+  crest?: string | null; cor: string; tamanho?: number; titulo?: string;
+}) {
+  const [falhou, setFalhou] = useState(false);
+
+  if (crest && !falhou) {
+    return (
+      <img
+        src={crest}
+        alt={titulo ?? ""}
+        title={titulo}
+        loading="lazy"
+        width={tamanho}
+        height={tamanho}
+        onError={() => setFalhou(true)}
+        className="lp-emblema"
+        style={{ width: tamanho, height: tamanho }}
+      />
+    );
+  }
+
+  return (
+    <span
+      className="lp-emblema-cor"
+      title={titulo}
+      style={{ width: tamanho, height: tamanho, background: cor }}
+    />
+  );
+}
+
 export function PaginaLancamento() {
+  const { data: clubes = [] } = useClubes();
+
   return (
     <div className="lp-raiz">
       <EstilosLocais />
@@ -54,7 +129,7 @@ export function PaginaLancamento() {
           ]}
           cor={VERMELHO}
         >
-          <EcraJornada />
+          <EcraJornada clubes={clubes} />
         </Feature>
 
         <Feature
@@ -102,6 +177,7 @@ export function PaginaLancamento() {
         </Feature>
 
         <Dna />
+        <FitaEmblemas clubes={clubes} />
         <Fecho />
       </div>
     </div>
@@ -286,13 +362,13 @@ function EcraTopo({ titulo, cor }: { titulo: string; cor: string }) {
 
 /** As cores dos clubes são um facto público, e é o que dá vida às maquetas. */
 const JOGOS = [
-  { casa: "Benfica", fora: "FC Porto", cc: "#C8102E", cf: "#00428C", hora: "18:00", feito: true },
-  { casa: "SC Braga", fora: "Sporting", cc: "#B4141E", cf: "#0A7D3E", hora: "20:30", feito: true },
-  { casa: "Vitória SC", fora: "Casa Pia", cc: "#111111", cf: "#C8102E", hora: "15:30", feito: false },
-  { casa: "Arouca", fora: "Estoril", cc: "#F5C518", cf: "#F5D000", hora: "18:00", feito: false },
+  { casa: "Benfica",    chaveCasa: "benfica",  fora: "FC Porto", chaveFora: "porto",    cc: "#C8102E", cf: "#00428C", hora: "18:00", feito: true },
+  { casa: "SC Braga",   chaveCasa: "braga",    fora: "Sporting", chaveFora: "sporting c", cc: "#B4141E", cf: "#0A7D3E", hora: "20:30", feito: true },
+  { casa: "Vitória SC", chaveCasa: "guimar",   fora: "Casa Pia", chaveFora: "casa pia",  cc: "#111111", cf: "#C8102E", hora: "15:30", feito: false },
+  { casa: "Arouca",     chaveCasa: "arouca",   fora: "Estoril",  chaveFora: "estoril",   cc: "#F5C518", cf: "#F5D000", hora: "18:00", feito: false },
 ];
 
-function EcraJornada() {
+function EcraJornada({ clubes }: { clubes: Clube[] }) {
   return (
     <>
       <EcraTopo titulo="A tua jornada" cor={VERMELHO} />
@@ -312,8 +388,8 @@ function EcraJornada() {
       {JOGOS.map(j => (
         <div key={j.casa} className="lp-jogo">
           <span className="lp-jogo-cores">
-            <span style={{ background: j.cc }} />
-            <span style={{ background: j.cf }} />
+            <Emblema crest={acharClube(clubes, j.chaveCasa)?.crest_url} cor={j.cc} titulo={j.casa} />
+            <Emblema crest={acharClube(clubes, j.chaveFora)?.crest_url} cor={j.cf} titulo={j.fora} />
           </span>
           <span className="lp-jogo-nomes">
             {j.casa} <em>—</em> {j.fora}
@@ -447,6 +523,34 @@ function Dna() {
         </div>
       </section>
     </Revelar>
+  );
+}
+
+/**
+ * A fita de emblemas a passar, como na homepage da época nova.
+ *
+ * A lista é duplicada e a animação anda exatamente metade da largura:
+ * assim o ciclo fecha sem salto. Sem emblemas nenhuns, a fita não
+ * aparece — é decoração, não pode ser um vazio no meio da página.
+ */
+function FitaEmblemas({ clubes }: { clubes: Clube[] }) {
+  const comEmblema = clubes.filter(c => c.crest_url);
+  if (comEmblema.length < 6) return null;
+
+  const dobrada = [...comEmblema, ...comEmblema];
+
+  return (
+    <div className="lp-fita" aria-hidden>
+      <div className="lp-fita-linha" style={{ width: `${dobrada.length * 76}px` }}>
+        {dobrada.map((c, i) => (
+          <span key={`${c.id}-${i}`} className="lp-fita-item">
+            <img src={c.crest_url!} alt="" loading="lazy" />
+          </span>
+        ))}
+      </div>
+      <span className="lp-fita-veu lp-fita-veu-e" />
+      <span className="lp-fita-veu lp-fita-veu-d" />
+    </div>
   );
 }
 
@@ -674,9 +778,9 @@ function EstilosLocais() {
 .lp-talao-barras span { flex: 1; height: 4px; border-radius: 999px; }
 
 .lp-jogo { display: flex; align-items: center; gap: 8px; padding: 9px 8px; border-radius: 12px; background: rgba(255,255,255,.04); margin-bottom: 6px; }
-.lp-jogo-cores { display: flex; flex-shrink: 0; }
-.lp-jogo-cores span { width: 14px; height: 14px; border-radius: 999px; border: 1.5px solid #0b0e14; }
-.lp-jogo-cores span:last-child { margin-left: -5px; }
+/* Emblemas a sério não se sobrepõem — ao contrário dos discos de cor,
+   perdiam a forma. Ficam lado a lado, com um respiro entre eles. */
+.lp-jogo-cores { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .lp-jogo-nomes { flex: 1; min-width: 0; font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lp-jogo-nomes em { font-style: normal; color: rgba(255,255,255,.3); }
 .lp-jogo-estado { flex-shrink: 0; font-size: 10px; font-weight: 700; color: rgba(255,255,255,.45); font-variant-numeric: tabular-nums; }
@@ -724,6 +828,19 @@ function EstilosLocais() {
 .lp-dna-corpo { margin: 16px auto 0; max-width: 34rem; font-size: .95rem; line-height: 1.7; color: rgba(255,255,255,.65); }
 .lp-dna-nota { margin: 16px auto 0; max-width: 34rem; font-size: .82rem; color: rgba(255,255,255,.4); }
 
+.lp-emblema { object-fit: contain; flex-shrink: 0; border-radius: 3px; }
+.lp-emblema-cor { display: block; flex-shrink: 0; border-radius: 999px; border: 1.5px solid #0b0e14; }
+
+.lp-fita { position: relative; overflow: hidden; padding: 8px 0 24px; mask-image: none; }
+.lp-fita-linha { display: flex; align-items: center; gap: 28px; animation: lp-fita-anda 42s linear infinite; }
+.lp-fita-item { flex-shrink: 0; width: 48px; height: 48px; display: grid; place-items: center; opacity: .5; transition: opacity .3s ease; }
+.lp-fita-item img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.lp-fita:hover .lp-fita-item { opacity: .8; }
+@keyframes lp-fita-anda { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.lp-fita-veu { position: absolute; top: 0; bottom: 0; width: 90px; pointer-events: none; }
+.lp-fita-veu-e { left: 0; background: linear-gradient(90deg, ${FUNDO}, transparent); }
+.lp-fita-veu-d { right: 0; background: linear-gradient(270deg, ${FUNDO}, transparent); }
+
 .lp-fecho { padding: 16px 20px 96px; text-align: center; }
 .lp-fecho-titulo { margin: 0; font-family: "Bebas Neue", "Oswald", Impact, sans-serif; font-weight: 400; font-size: 2rem; line-height: 1; text-transform: uppercase; }
 @media (min-width: 768px) { .lp-fecho-titulo { font-size: 3rem; } }
@@ -733,6 +850,7 @@ function EstilosLocais() {
 @media (prefers-reduced-motion: reduce) {
   .lp-raiz *, .lp-raiz *::before, .lp-raiz *::after { animation: none !important; transition: none !important; }
   .lp-revelar { opacity: 1; transform: none; }
+  .lp-fita-linha { animation: none !important; }
 }
 `}</style>
   );

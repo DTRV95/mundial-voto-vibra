@@ -5,6 +5,7 @@ import {
   HeadContent,
   Scripts,
   Link,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "../lib/useAuth";
@@ -303,15 +304,35 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <MaintenanceGuard>
-          <AppShell>
-            <Outlet />
-          </AppShell>
+          <Envolucro />
           <Toaster theme="dark" position="top-center" richColors />
           <MaintenanceNotice />
           {/* Ronda32WelcomeModal desativado — obsoleto após o Mundial */}
         </MaintenanceGuard>
       </AuthProvider>
     </QueryClientProvider>
+  );
+}
+
+/**
+ * A página de lançamento é a mesma para toda a gente — com sessão
+ * iniciada ou sem ela — e ocupa o ecrã todo.
+ *
+ * Dentro do `AppShell` ficava espremida: quem tem sessão levava com ela
+ * ao lado da barra lateral do Mundial, num container estreito, e quem
+ * não tem via-a rodeada da moldura de um site que já acabou. O anúncio
+ * de uma época nova não deve ser servido dentro do cenário da anterior.
+ */
+function Envolucro() {
+  const rota = useRouterState({ select: s => s.location.pathname });
+  const semMoldura = rota === "/";
+
+  if (semMoldura) return <Outlet />;
+
+  return (
+    <AppShell>
+      <Outlet />
+    </AppShell>
   );
 }
 

@@ -118,6 +118,10 @@ export function PaginaLancamento() {
       <div className="lp-conteudo">
         <Hero />
 
+        {/* A novidade maior vem primeiro. E o que distingue esta epoca
+            da anterior, e quem faz scroll uma vez so tem de a ver. */}
+        <Dna />
+
         <Feature
           etiqueta="Todas as semanas"
           titulo={<>Cinco jogos.<br />Os mesmos para toda a gente.</>}
@@ -176,7 +180,6 @@ export function PaginaLancamento() {
           <EcraDivisoes />
         </Feature>
 
-        <Dna />
         <FitaEmblemas clubes={clubes} />
         <Fecho />
       </div>
@@ -815,8 +818,8 @@ function EstilosLocais() {
 .lp-div-tu { flex-shrink: 0; font-size: 10px; font-weight: 700; }
 .lp-tendencia { display: flex; align-items: center; gap: 7px; padding: 9px 12px; border-radius: 12px; background: rgba(255,255,255,.04); font-size: 11px; color: rgba(255,255,255,.7); margin-top: 4px; }
 
-.lp-dna-seccao { padding: 64px 20px; }
-@media (min-width: 768px) { .lp-dna-seccao { padding: 96px 32px; } }
+.lp-dna-seccao { padding: 24px 20px 48px; }
+@media (min-width: 768px) { .lp-dna-seccao { padding: 32px 32px 64px; } }
 .lp-dna {
   max-width: 48rem; margin: 0 auto; padding: 32px; text-align: center;
   border: 1px solid ${CIANO}33; border-radius: 26px;

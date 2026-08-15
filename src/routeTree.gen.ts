@@ -18,6 +18,7 @@ import { Route as PreVisualizacaoRouteImport } from './routes/pre-visualizacao'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as LigasRouteImport } from './routes/ligas'
 import { Route as JogosRouteImport } from './routes/jogos'
+import { Route as EmBreveRouteImport } from './routes/em-breve'
 import { Route as DuelosRouteImport } from './routes/duelos'
 import { Route as DnaRouteImport } from './routes/dna'
 import { Route as CookiesRouteImport } from './routes/cookies'
@@ -76,6 +77,11 @@ const LigasRoute = LigasRouteImport.update({
 const JogosRoute = JogosRouteImport.update({
   id: '/jogos',
   path: '/jogos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmBreveRoute = EmBreveRouteImport.update({
+  id: '/em-breve',
+  path: '/em-breve',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DuelosRoute = DuelosRouteImport.update({
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/cookies': typeof CookiesRoute
   '/dna': typeof DnaRouteWithChildren
   '/duelos': typeof DuelosRoute
+  '/em-breve': typeof EmBreveRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/cookies': typeof CookiesRoute
   '/dna': typeof DnaRouteWithChildren
   '/duelos': typeof DuelosRoute
+  '/em-breve': typeof EmBreveRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/cookies': typeof CookiesRoute
   '/dna': typeof DnaRouteWithChildren
   '/duelos': typeof DuelosRoute
+  '/em-breve': typeof EmBreveRoute
   '/jogos': typeof JogosRoute
   '/ligas': typeof LigasRoute
   '/perfil': typeof PerfilRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/dna'
     | '/duelos'
+    | '/em-breve'
     | '/jogos'
     | '/ligas'
     | '/perfil'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/dna'
     | '/duelos'
+    | '/em-breve'
     | '/jogos'
     | '/ligas'
     | '/perfil'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/dna'
     | '/duelos'
+    | '/em-breve'
     | '/jogos'
     | '/ligas'
     | '/perfil'
@@ -313,6 +325,7 @@ export interface RootRouteChildren {
   CookiesRoute: typeof CookiesRoute
   DnaRoute: typeof DnaRouteWithChildren
   DuelosRoute: typeof DuelosRoute
+  EmBreveRoute: typeof EmBreveRoute
   JogosRoute: typeof JogosRoute
   LigasRoute: typeof LigasRoute
   PerfilRoute: typeof PerfilRoute
@@ -391,6 +404,13 @@ declare module '@tanstack/react-router' {
       path: '/jogos'
       fullPath: '/jogos'
       preLoaderRoute: typeof JogosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/em-breve': {
+      id: '/em-breve'
+      path: '/em-breve'
+      fullPath: '/em-breve'
+      preLoaderRoute: typeof EmBreveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/duelos': {
@@ -514,6 +534,7 @@ const rootRouteChildren: RootRouteChildren = {
   CookiesRoute: CookiesRoute,
   DnaRoute: DnaRouteWithChildren,
   DuelosRoute: DuelosRoute,
+  EmBreveRoute: EmBreveRoute,
   JogosRoute: JogosRoute,
   LigasRoute: LigasRoute,
   PerfilRoute: PerfilRoute,

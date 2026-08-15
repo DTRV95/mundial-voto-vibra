@@ -118,6 +118,11 @@ export function PaginaLancamento() {
       <div className="lp-conteudo">
         <Hero />
 
+        {/* Os clubes logo a seguir a data: e a prova mais rapida de que
+            isto e sobre futebol a serio, e passa antes de qualquer
+            promessa por escrito. */}
+        <FitaEmblemas clubes={clubes} />
+
         {/* A novidade maior vem primeiro. E o que distingue esta epoca
             da anterior, e quem faz scroll uma vez so tem de a ver. */}
         <Dna />
@@ -180,7 +185,6 @@ export function PaginaLancamento() {
           <EcraDivisoes />
         </Feature>
 
-        <FitaEmblemas clubes={clubes} />
         <Fecho />
       </div>
     </div>
@@ -834,7 +838,7 @@ function EstilosLocais() {
 .lp-emblema { object-fit: contain; flex-shrink: 0; border-radius: 3px; }
 .lp-emblema-cor { display: block; flex-shrink: 0; border-radius: 999px; border: 1.5px solid #0b0e14; }
 
-.lp-fita { position: relative; overflow: hidden; padding: 8px 0 24px; mask-image: none; }
+.lp-fita { position: relative; overflow: hidden; padding: 4px 0 12px; }
 .lp-fita-linha { display: flex; align-items: center; gap: 28px; animation: lp-fita-anda 42s linear infinite; }
 .lp-fita-item { flex-shrink: 0; width: 48px; height: 48px; display: grid; place-items: center; opacity: .5; transition: opacity .3s ease; }
 .lp-fita-item img { max-width: 100%; max-height: 100%; object-fit: contain; }

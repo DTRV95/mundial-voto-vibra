@@ -5,7 +5,7 @@ interface TeamBadgeProps {
   code: string | null;
   flag: string | null;
   name: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   /** Monograma do clube, vindo da base de dados */
   monogram?: string | null;
   /** Emblema oficial do clube, vindo da importação */
@@ -95,6 +95,7 @@ export function TeamBadge({ code, flag: _flag, name, size = "md", monogram, cres
     size === "xl" ? "h-20 w-20 rounded-3xl" :
     size === "lg" ? "h-16 w-16 rounded-2xl" :
     size === "sm" ? "h-9 w-9 rounded-xl" :
+    size === "xs" ? "h-5 w-5 rounded-md" :
                    "h-14 w-14 rounded-2xl";
 
   const iso = resolveIso(code, name);

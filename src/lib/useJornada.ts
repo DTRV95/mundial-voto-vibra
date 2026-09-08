@@ -39,11 +39,16 @@ export function useJornadas(competitionId: string | null | undefined, userId?: s
         .select(
           "id,kickoff_at,phase,status,voting_open,official_position,highlight_tag," +
           "home:home_team_id(name,flag,code,monogram,crest_url,estadio),away:away_team_id(name,flag,code,monogram,crest_url)," +
-          "round:round_id!inner(id,number,label,status)"
+          "round:round_id!inner(id,number,label,status,apurada_em)"
         )
         .eq("competition_id", competitionId)
         .eq("is_official", true)
         .eq("round.status", "publicada")
+        // Uma jornada apurada está fechada: os pontos foram dados e não
+        // há nada a fazer nela. Sem isto, a página acumulava todas as
+        // jornadas da época — e a Jornada 1, de agosto, aparecia ao lado
+        // da que está a decorrer.
+        .is("round.apurada_em", null)
         .order("kickoff_at");
 
       const linhas = ((data ?? []) as any[]).filter(m => m.home && m.away && m.round);

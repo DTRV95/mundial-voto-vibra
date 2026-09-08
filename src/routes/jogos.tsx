@@ -57,7 +57,14 @@ function Jogos() {
       <PageHeader
         eyebrow={active?.name}
         title="A tua jornada"
-        subtitle="8 jogos oficiais — os mesmos para toda a gente."
+        subtitle={
+          // O número vem da jornada que está aberta, não de uma
+          // constante: as jornadas antigas foram publicadas com cinco
+          // jogos e dizer-lhes "oito" era mentira.
+          jornadas.length > 0
+            ? `${jornadas[0].jogos.length} jogos oficiais — os mesmos para toda a gente.`
+            : "Os jogos oficiais da jornada, os mesmos para toda a gente."
+        }
         comp={active}
       />
 

@@ -1,11 +1,20 @@
 import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
-import { coresDoClube, nomeCurto } from "@/lib/clubBadge";
+import { nomeCurto } from "@/lib/clubBadge";
+import { TeamBadge } from "@/lib/teamColors.tsx";
+
+interface EquipaDoTalao {
+  name: string;
+  code?: string | null;
+  flag?: string | null;
+  monogram?: string | null;
+  crest_url?: string | null;
+}
 
 interface JogoDoTalao {
   id: string;
-  home: { name: string };
-  away: { name: string };
+  home: EquipaDoTalao;
+  away: EquipaDoTalao;
   already_voted?: boolean;
 }
 
@@ -80,30 +89,32 @@ export function TalaoJornada({ label, competicao, jogos, accent, autenticado }: 
           a previsão está dada. */}
       <div className="flex flex-wrap gap-2 px-4 pb-3">
         {jogos.map(j => {
-          const casa = coresDoClube(j.home.name).primaria;
-          const fora = coresDoClube(j.away.name).primaria;
           const feito = !!j.already_voted;
           return (
             <Link
               key={j.id}
               to="/jogo/$id"
               params={{ id: j.id }}
-              title={`${nomeCurto(j.home.name)} — ${nomeCurto(j.away.name)}`}
-              className={`group inline-flex min-w-0 items-center gap-2 rounded-full border py-1 pl-1 pr-2.5 transition-smooth ${
+              title={`${j.home.name} — ${j.away.name}`}
+              className={`group inline-flex min-w-0 items-center gap-1.5 rounded-full border py-1 pl-1.5 pr-2.5 transition-smooth ${
                 feito
                   ? "border-wc-green/35 bg-wc-green/10"
                   : "border-border bg-secondary/40 hover:border-foreground/25"
               }`}
             >
-              <span
-                className="grid h-5 w-5 shrink-0 place-items-center rounded-full"
-                style={{ background: `linear-gradient(135deg, ${casa} 0%, ${casa} 48%, ${fora} 52%, ${fora} 100%)` }}
-              >
-                {feito && <Check className="h-3 w-3 text-white drop-shadow" strokeWidth={3.5} />}
+              {/* Os emblemas a sério, os dois. Eram dois meios-círculos
+                  com as cores dos clubes — bastava para distinguir, mas
+                  um emblema reconhece-se sem se ler nada. */}
+              <span className="flex shrink-0 items-center -space-x-1">
+                <TeamBadge code={j.home.code ?? null} flag={j.home.flag ?? null} name={j.home.name}
+                  monogram={j.home.monogram} crest={j.home.crest_url} size="xs" />
+                <TeamBadge code={j.away.code ?? null} flag={j.away.flag ?? null} name={j.away.name}
+                  monogram={j.away.monogram} crest={j.away.crest_url} size="xs" />
               </span>
               <span className={`truncate text-[11px] font-semibold ${feito ? "text-wc-green" : "text-muted-foreground"}`}>
                 {nomeCurto(j.home.name)}—{nomeCurto(j.away.name)}
               </span>
+              {feito && <Check className="h-3 w-3 shrink-0 text-wc-green" strokeWidth={3.5} />}
             </Link>
           );
         })}

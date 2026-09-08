@@ -55,7 +55,7 @@ function Perfil() {
     queryFn: async () => {
       const { data } = await supabase
         .from("predictions")
-        .select("id,points,result_90,btts,total_25,exact_home,exact_away,created_at,match:match_id(id,kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
+        .select("id,points,result_90,btts,total_25,exact_home,exact_away,created_at,match:match_id(id,kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url))")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(200);
@@ -645,12 +645,12 @@ function Perfil() {
           <Link to="/jogo/$id" params={{ id: (bestGame as any).match?.id }}
             className="flex items-center justify-between rounded-2xl border border-gold/30 bg-gold/10 p-4 transition-smooth hover:border-gold/60">
             <div className="flex items-center gap-3">
-              <TeamBadge code={(bestGame as any).match?.home?.code} flag={(bestGame as any).match?.home?.flag} name={(bestGame as any).match?.home?.name ?? ""} size="sm" />
+              <TeamBadge code={(bestGame as any).match?.home?.code} flag={(bestGame as any).match?.home?.flag} name={(bestGame as any).match?.home?.name ?? ""} monogram={(bestGame as any).match?.home?.monogram} crest={(bestGame as any).match?.home?.crest_url} size="sm" />
               <div>
                 <p className="font-semibold text-sm">{(bestGame as any).match?.home?.name} vs {(bestGame as any).match?.away?.name}</p>
                 <p className="text-xs text-muted-foreground">{formatDate((bestGame as any).match?.kickoff_at)}</p>
               </div>
-              <TeamBadge code={(bestGame as any).match?.away?.code} flag={(bestGame as any).match?.away?.flag} name={(bestGame as any).match?.away?.name ?? ""} size="sm" />
+              <TeamBadge code={(bestGame as any).match?.away?.code} flag={(bestGame as any).match?.away?.flag} name={(bestGame as any).match?.away?.name ?? ""} monogram={(bestGame as any).match?.away?.monogram} crest={(bestGame as any).match?.away?.crest_url} size="sm" />
             </div>
             <div className="text-right">
               <p className="font-display text-2xl text-gold">{(bestGame as any).points}</p>
@@ -693,9 +693,9 @@ function Perfil() {
                         }`}>
                         {hasResult && <div className={`absolute left-0 top-0 bottom-0 w-1 ${isCorrect ? "bg-wc-green" : "bg-border/50"}`} />}
                         <div className="pl-1 flex items-center gap-1 shrink-0">
-                          <TeamBadge code={h.match?.home?.code} flag={h.match?.home?.flag} name={h.match?.home?.name ?? ""} size="sm" />
+                          <TeamBadge code={h.match?.home?.code} flag={h.match?.home?.flag} name={h.match?.home?.name ?? ""} monogram={h.match?.home?.monogram} crest={h.match?.home?.crest_url} size="sm" />
                           <span className="text-[10px] text-muted-foreground">vs</span>
-                          <TeamBadge code={h.match?.away?.code} flag={h.match?.away?.flag} name={h.match?.away?.name ?? ""} size="sm" />
+                          <TeamBadge code={h.match?.away?.code} flag={h.match?.away?.flag} name={h.match?.away?.name ?? ""} monogram={h.match?.away?.monogram} crest={h.match?.away?.crest_url} size="sm" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold truncate">{h.match?.home?.name} vs {h.match?.away?.name}</p>

@@ -41,7 +41,7 @@ function PublicProfile() {
       const now = new Date().toISOString();
       const { data } = await supabase
         .from("predictions")
-        .select("id,result_90,btts,total_25,exact_home,exact_away,points,created_at,match:match_id(kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code))")
+        .select("id,result_90,btts,total_25,exact_home,exact_away,points,created_at,match:match_id(kickoff_at,phase,status,home_score,away_score,home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url))")
         .eq("user_id", id)
         .order("created_at", { ascending: false });
       // só mostra jogos que já começaram; se match for null (RLS) mostra na mesma
@@ -221,12 +221,12 @@ function PredictionsList({ predictions }: { predictions: any[] }) {
                 <div className="flex items-center gap-2 min-w-0">
                   {match ? (
                     <>
-                      <TeamBadge code={match.home?.code} flag={match.home?.flag} name={match.home?.name} size="sm" />
+                      <TeamBadge code={match.home?.code} flag={match.home?.flag} name={match.home?.name} monogram={match.home?.monogram} crest={match.home?.crest_url} size="sm" />
                       <span className="text-xs font-semibold truncate">{match.home?.name ?? "?"}</span>
                       {finished && <span className="text-xs font-bold text-foreground shrink-0">{match.home_score}–{match.away_score}</span>}
                       {!finished && <span className="text-[10px] text-muted-foreground shrink-0">vs</span>}
                       <span className="text-xs font-semibold truncate">{match.away?.name ?? "?"}</span>
-                      <TeamBadge code={match.away?.code} flag={match.away?.flag} name={match.away?.name} size="sm" />
+                      <TeamBadge code={match.away?.code} flag={match.away?.flag} name={match.away?.name} monogram={match.away?.monogram} crest={match.away?.crest_url} size="sm" />
                     </>
                   ) : (
                     <span className="text-xs text-muted-foreground">Jogo sem dados</span>

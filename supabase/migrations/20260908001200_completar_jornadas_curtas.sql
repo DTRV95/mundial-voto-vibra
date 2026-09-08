@@ -1,0 +1,17 @@
+-- Completar jornadas que ficaram curtas. APLICADA a 2026-09-08.
+--
+-- A Champions Jornada 1 estava aberta com cinco jogos, publicada antes
+-- de o número passar para oito. Como ainda não havia uma única
+-- previsão, refez-se a escolha inteira — e ganhou-se com isso: os
+-- grandes europeus já estavam marcados, e a seleção passou a ter
+-- Real Madrid–Inter e Liverpool–Atlético, que na primeira volta não
+-- entravam.
+--
+-- `completar_jogos_oficiais` é para a próxima vez, quando já houver
+-- previsões e limpar a seleção deitar fora o trabalho de quem votou:
+-- só ACRESCENTA até ao número da competição, com o mesmo critério, e
+-- nunca mexe nos que já lá estão.
+--
+-- `publicar_jornadas_proximas` chama-a antes de publicar seja o que
+-- for: se alguém mudar o `jogos_por_jornada` a meio da época, as
+-- jornadas abertas completam-se sozinhas na passagem seguinte.

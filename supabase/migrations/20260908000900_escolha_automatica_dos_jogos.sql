@@ -1,0 +1,43 @@
+-- Os cinco jogos deixam de ser escolhidos à mão. APLICADA a 2026-09-08.
+--
+-- `escolher_jogos_oficiais(round_id)` pontua cada jogo da jornada e
+-- marca os cinco melhores. `publicar_jornadas_proximas()` corre de hora
+-- a hora, procura a próxima jornada em rascunho que arranca dentro de
+-- cinco dias, escolhe e publica.
+--
+-- A ideia de partida era "quem estiver nos cinco primeiros entra".
+-- Sozinha, essa regra dá sempre a mesma jornada: Benfica, Porto e
+-- Sporting todas as semanas, e quem é do Arouca nunca vê o seu clube.
+-- Por isso um dos pesos é negativo.
+--
+--   +3.0  qualidade   — posição na tabela; sem tabela ainda, o país
+--                       do clube pela ordem do ranking da UEFA
+--   +2.5  clássico    — os dois são grandes
+--   +2.0  clube português, só em competições internacionais
+--   +1.0  duelo direto — 3º contra 5º vale mais que 3º contra 18º
+--   -1.0  proporção de jornadas em que já apareceram
+--   -0.8  saiu na jornada anterior
+--
+-- Duas correções feitas depois do primeiro ensaio:
+--
+--   A rotação esmagava tudo. Os grandes tinham jogado nas cinco
+--   jornadas oficiais e levavam penalização máxima; a Jornada 6 saía
+--   Rio Ave–Estrela. Passou a ser proporcional e a pesar menos.
+--
+--   Na Champions à primeira jornada não há tabela, e `is_grande` só
+--   está marcado nos clubes portugueses: saíam AEK–LASK e PSG–Slovan
+--   à frente de Real Madrid–Inter. Daí o país como recurso.
+--
+-- Só entram jogos por começar (15 min de folga) e por terminar: uma
+-- jornada pode ser publicada já a decorrer, e um cartão com a votação
+-- fechada à nascença não serve a ninguém.
+--
+-- Nunca mexe numa jornada onde alguém já escolheu à mão. Quem quiser
+-- mandar, manda, e a automação afasta-se.
+--
+-- LIMITE CONHECIDO: à primeira jornada de uma competição internacional
+-- não há como distinguir o Como do Real Madrid — ambos são italianos e
+-- espanhóis de primeiro nível e ficam empatados. A partir da segunda
+-- jornada a classificação verdadeira resolve. Marcar `is_grande` nos
+-- históricos europeus resolveria já, mas é um juízo sobre clubes e
+-- fica por decidir.

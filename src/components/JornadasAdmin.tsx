@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Star, Check, Send, Undo2, Calendar, AlertTriangle, Wand2 } from "lucide-react";
 import { useCompetitions } from "@/lib/useCompetitions";
-import { useContextoSugestao, sugerirCinco, ROTULO_CATEGORIA } from "@/lib/sugerirJogos";
 
 const MAX_OFICIAIS = 5;
 
@@ -136,70 +135,124 @@ function EditorJornada({ jornadaId, competitionId, onVoltar }: {
     },
   });
 
-  const { data: contexto } = useContextoSugestao(competitionId, jornada?.season_id);
+  // Quantas previsões há em cada jogo. Vem da vista própria: desde que
+  // as previsões dos outros deixaram de ser legíveis antes de votarmos,
+  // nem o admin as consegue contar diretamente.
+  const { data: votos } = useQuery({
+    queryKey: ["admin-round-votes", jornadaId],
+    staleTime: 30_000,
+    queryFn: async () => {
+      const ids = (jogos as any[]).map(j => j.id);
+      if (ids.length === 0) return new Map<string, number>();
+      const { data } = await (supabase as any)
+        .from("v_votos_jogo").select("match_id,votos").in("match_id", ids);
+      return new Map<string, number>(((data ?? []) as any[]).map(v => [v.match_id, v.votos ?? 0]));
+    },
+  });
 
   const oficiais = jogos.filter((j: any) => j.is_official)
     .sort((a: any, b: any) => (a.official_position ?? 99) - (b.official_position ?? 99));
   const publicada = jornada?.status === "publicada";
 
+  /**
+   * Troca um jogo da seleção oficial.
+   *
+   * Funciona com a jornada publicada — desde que as jornadas passaram a
+   * abrir sozinhas, obrigar a despublicar para trocar um jogo era pedir
+   * que se fechasse a votação a toda a gente por causa de uma troca.
+   * Aqui a votação do jogo acompanha a decisão: entra, abre; sai, fecha.
+   */
   async function alternarOficial(jogo: any) {
-    if (publicada) { toast.error("Jornada publicada. Despublica primeiro."); return; }
     const db = supabase as any;
+    const jaComecou = new Date(jogo.kickoff_at).getTime() <= Date.now() + 5 * 60_000;
+    const comVotos = votos?.get(jogo.id) ?? 0;
 
     if (jogo.is_official) {
-      await db.from("matches").update({ is_official: false, official_position: null }).eq("id", jogo.id);
+      // Tirar um jogo em que já se votou deita fora o valor dessas
+      // previsões. Quem o faz tem de saber quantas são.
+      if (comVotos > 0) {
+        const certeza = window.confirm(
+          `Já há ${comVotos} ${comVotos === 1 ? "previsão" : "previsões"} neste jogo.\n\n` +
+          "Se o tirares dos oficiais, essas previsões deixam de contar para os pontos. " +
+          "As previsões não se apagam, mas o jogo deixa de valer.\n\nQueres mesmo tirar?",
+        );
+        if (!certeza) return;
+      }
+      await db.from("matches")
+        .update({ is_official: false, official_position: null, voting_open: false })
+        .eq("id", jogo.id);
+      toast.success("Jogo retirado dos oficiais.");
     } else {
       if (oficiais.length >= MAX_OFICIAIS) {
         toast.error(`Já tens ${MAX_OFICIAIS} jogos oficiais. Retira um primeiro.`);
         return;
       }
+      if (jaComecou) {
+        toast.error("Esse jogo já começou — ninguém conseguiria votar nele.");
+        return;
+      }
       const usadas = new Set(oficiais.map((o: any) => o.official_position));
       let pos = 1; while (usadas.has(pos)) pos++;
-      await db.from("matches").update({ is_official: true, official_position: pos }).eq("id", jogo.id);
+      await db.from("matches")
+        .update({ is_official: true, official_position: pos, voting_open: publicada })
+        .eq("id", jogo.id);
+      toast.success(publicada ? "Jogo adicionado. Votação aberta." : "Jogo adicionado.");
     }
     qc.invalidateQueries({ queryKey: ["admin-round-matches", jornadaId] });
+    qc.invalidateQueries({ queryKey: ["admin-round-votes", jornadaId] });
     qc.invalidateQueries({ queryKey: ["admin-rounds-count", competitionId] });
   }
 
   /**
-   * Propõe 5 jogos: 2 de destaque, 2 equilibrados, 1 de rotação.
-   * Só preenche a seleção — publicar continua a ser um ato teu.
+   * Propõe os 5 jogos.
+   *
+   * Chama a MESMA função que publica as jornadas sozinha, de
+   * madrugada. Antes havia dois critérios a decidir a mesma coisa —
+   * um aqui em TypeScript e outro no SQL — e o que o admin via ao
+   * carregar no botão não era o que sairia sem ninguém a ver.
+   *
+   * Perdeu-se a explicação por jogo que a versão antiga dava. Vale a
+   * troca: uma sugestão que mente sobre o que vai acontecer é pior do
+   * que uma sugestão calada.
    */
   async function sugerir() {
-    if (publicada) { toast.error("Jornada publicada. Despublica primeiro."); return; }
-    if (!contexto) { toast.error("Ainda a carregar os dados de apoio."); return; }
-
-    const candidatos = (jogos as any[]).map(j => ({
-      id: j.id,
-      kickoff_at: j.kickoff_at,
-      home_team_id: j.home_team_id,
-      away_team_id: j.away_team_id,
-      home: { name: j.home?.name ?? "", short_name: j.home?.short_name ?? null, is_grande: !!j.home?.is_grande },
-      away: { name: j.away?.name ?? "", short_name: j.away?.short_name ?? null, is_grande: !!j.away?.is_grande },
-    }));
-
-    const escolhidos = sugerirCinco(candidatos, {
-      ...contexto,
-      jornadaAtual: jornada?.number ?? 1,
-    });
-
-    if (escolhidos.length === 0) { toast.error("Sem jogos nesta jornada."); return; }
+    if (publicada) {
+      const total = [...(votos?.values() ?? [])].reduce((a, b) => a + b, 0);
+      if (total > 0 && !window.confirm(
+        `Esta jornada já tem ${total} ${total === 1 ? "previsão" : "previsões"}.\n\n` +
+        "Refazer a seleção troca os jogos e essas previsões deixam de contar. Continuar?",
+      )) return;
+    }
 
     setAGravar(true);
     const db = supabase as any;
-    // Limpa a seleção anterior e aplica a nova, pela ordem sugerida
-    await db.from("matches").update({ is_official: false, official_position: null }).eq("round_id", jornadaId);
-    for (let i = 0; i < escolhidos.length; i++) {
-      await db.from("matches")
-        .update({ is_official: true, official_position: i + 1 })
-        .eq("id", escolhidos[i].id);
+
+    // A função recusa-se a mexer numa jornada que já tenha escolhas,
+    // de propósito — para a automação nunca atropelar ninguém. Aqui o
+    // pedido é explícito, por isso limpa-se primeiro.
+    await db.from("matches")
+      .update({ is_official: false, official_position: null, voting_open: false })
+      .eq("round_id", jornadaId);
+
+    const { data: quantos, error } = await db.rpc("escolher_jogos_oficiais", { p_round_id: jornadaId });
+    if (error) { toast.error(error.message); setAGravar(false); return; }
+
+    if (publicada) {
+      await db.from("matches").update({ voting_open: true })
+        .eq("round_id", jornadaId).eq("is_official", true);
     }
 
-    setRazoes(new Map(escolhidos.map(e => [e.id, `${ROTULO_CATEGORIA[e.categoria!]} — ${e.razao}`])));
+    setRazoes(new Map());
     qc.invalidateQueries({ queryKey: ["admin-round-matches", jornadaId] });
+    qc.invalidateQueries({ queryKey: ["admin-round-votes", jornadaId] });
     qc.invalidateQueries({ queryKey: ["admin-rounds-count", competitionId] });
     setAGravar(false);
-    toast.success("5 jogos propostos. Confirma ou troca o que quiseres.");
+
+    if ((quantos ?? 0) < 5) {
+      toast.error(`Só deu para escolher ${quantos ?? 0} jogos — vê se há jogos suficientes por começar.`);
+    } else {
+      toast.success("5 jogos escolhidos. Troca o que quiseres.");
+    }
   }
 
   async function marcarDestaque(jogo: any, tag: string | null) {

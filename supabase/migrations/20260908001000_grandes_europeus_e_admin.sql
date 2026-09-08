@@ -1,0 +1,16 @@
+-- Grandes europeus e escolha manual. APLICADA a 2026-09-08.
+--
+-- 1. `is_grande` marcado em onze clubes europeus. Resolve o limite da
+--    escolha automática: à primeira jornada de uma prova europeia não
+--    há classificação, e sem isto o Como e o Real Madrid ficavam
+--    empatados. É uma lista assumida, não um critério objetivo —
+--    "ganhou a Taça dos Campeões" metia o Aston Villa e deixava de
+--    fora o Atlético. Muda-se com um update:
+--
+--      update public.teams set is_grande = true where name = 'SSC Napoli';
+--
+-- 2. `escolher_jogos_oficiais` passou a ter travão de admin e ficou
+--    acessível a quem tem sessão. O botão "sugerir" do /admin chama-a
+--    em vez de ter o seu próprio algoritmo em TypeScript: havia dois
+--    critérios a decidir a mesma coisa, e o que o admin via não era o
+--    que a jornada publicava sozinha de madrugada.

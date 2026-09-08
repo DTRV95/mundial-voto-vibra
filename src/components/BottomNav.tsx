@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarClock, Trophy, Users, User } from "lucide-react";
+import { House, CalendarDays, Trophy, UsersRound, CircleUser } from "lucide-react";
 import { useAuth } from "@/lib/useAuth";
 import { useNotifications } from "@/lib/useNotifications";
 import { UserAvatar } from "@/components/AvatarPicker";
@@ -8,9 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRef } from "react";
 
 const NAV_ITEMS = [
-  { to: "/",         label: "Home",     icon: Home },
-  { to: "/jogos",    label: "Jogos",    icon: CalendarClock },
-  { to: "/ligas",    label: "Torneios", icon: Users },
+  { to: "/",         label: "Home",     icon: House },
+  { to: "/jogos",    label: "Jogos",    icon: CalendarDays },
+  { to: "/ligas",    label: "Torneios", icon: UsersRound },
   { to: "/rankings", label: "Rankings", icon: Trophy },
 ];
 
@@ -83,7 +83,7 @@ export function BottomNav() {
                   <UserAvatar avatarUrl={profile.avatar_url} name={profile.display_name} size={6}
                     className={`rounded-full ring-2 transition-all ${profileActive ? "ring-wc-red/60" : "ring-transparent"}`} />
                 ) : (
-                  <User className="h-6 w-6" strokeWidth={profileActive ? 2.4 : 1.6} />
+                  <CircleUser className="h-6 w-6" strokeWidth={profileActive ? 2.4 : 1.6} />
                 )}
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-wc-red text-[9px] font-bold text-white ring-1 ring-background animate-glow">

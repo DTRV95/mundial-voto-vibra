@@ -10,13 +10,16 @@ import { UserAvatar } from "./AvatarPicker";
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { useNotifications } from "@/lib/useNotifications";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { MenuMobile } from "@/components/MenuMobile";
 import { supabase } from "@/integrations/supabase/client";
-import { Shield, HelpCircle } from "lucide-react";
+import { ShieldCheck as Shield, CircleHelp as HelpCircle, Menu } from "lucide-react";
 import logoSvg from "@/assets/logo.svg";
 import { FeedbackModal } from "./FeedbackModal";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
+  const [menuAberto, setMenuAberto] = useState(false);
   const isAdmin = useIsAdmin(user?.id);
   // While loading, keep UI stable — don't flash between logged-in and logged-out states.
   const loggedIn = !loading && !!user;
@@ -65,13 +68,27 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* ── MOBILE header ─────────────────────────────────── */}
       <header className="sticky top-[3px] z-40 border-b border-border bg-background/90 backdrop-blur-xl shadow-elegant md:hidden">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logoSvg} alt="Logo" className="h-8 w-8" />
-            <div className="leading-tight">
-              <div className="font-display text-base tracking-wide text-foreground">UMA GERAÇÃO</div>
-              <div className="text-[11px] uppercase tracking-widest text-muted-foreground">Época 2026/27</div>
-            </div>
-          </Link>
+          {/* O logótipo abre o menu. Continua a levar à Home num toque,
+              porque é a primeira entrada lá dentro — e passa a dar
+              acesso à Classificação, aos Duelos e ao DNA, que no
+              telemóvel não tinham por onde ser alcançados. */}
+          <button
+            onClick={() => setMenuAberto(true)}
+            aria-label="Abrir menu"
+            aria-expanded={menuAberto}
+            className="flex items-center gap-2 rounded-xl py-0.5 pr-2 text-left transition-smooth active:scale-[0.98]"
+          >
+            <span className="relative">
+              <img src={logoSvg} alt="" className="h-8 w-8" />
+              <span className="absolute -bottom-0.5 -right-0.5 grid h-3.5 w-3.5 place-items-center rounded-full border border-background bg-foreground/85">
+                <Menu className="h-2 w-2 text-background" strokeWidth={3} />
+              </span>
+            </span>
+            <span className="leading-tight">
+              <span className="block font-display text-base tracking-wide text-foreground">UMA GERAÇÃO</span>
+              <span className="block text-[11px] uppercase tracking-widest text-muted-foreground">Época 2026/27</span>
+            </span>
+          </button>
           <div className="flex items-center gap-2">
             <Link to="/como-funciona" className="grid h-8 w-8 place-items-center rounded-full border border-border text-muted-foreground hover:border-gold/40 hover:text-gold transition-smooth">
               <HelpCircle className="h-4.5 w-4.5" />
@@ -110,6 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className={`${loggedIn ? "md:ml-56" : ""}`}>
         <Footer />
       </div>
+      <MenuMobile aberto={menuAberto} fechar={() => setMenuAberto(false)} />
       <BottomNav />
       <OnboardingModal />
       <CookieBanner />

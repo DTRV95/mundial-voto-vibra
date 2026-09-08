@@ -74,7 +74,7 @@ export function TalaoJornada({ label, competicao, jogos, accent, autenticado }: 
               {feitos}<span className="text-muted-foreground/60">/{jogos.length}</span>
             </p>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-              previsões
+              {completo ? "completo" : "esta semana"}
             </p>
           </div>
         ) : (

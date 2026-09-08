@@ -20,7 +20,7 @@ export const ROTULO_DUELO: Record<TipoDuelo, string> = {
 
 export const EXPLICACAO_DUELO: Record<TipoDuelo, string> = {
   jogo: "Quem fizer mais pontos neste jogo.",
-  jornada: "Quem fizer mais pontos nos 8 jogos da jornada.",
+  jornada: "Quem fizer mais pontos nos 5 jogos da jornada.",
   mes: "Quem fizer mais pontos no mês inteiro.",
 };
 

@@ -97,7 +97,7 @@ export function EcraJornada({ jornada, cor }: { jornada: Jornada | null; cor: st
           </div>
         ))}
         {jogos.length === 0 && (
-          <p className="py-8 text-center text-[10px] text-white/35">Os 8 jogos da jornada</p>
+          <p className="py-8 text-center text-[10px] text-white/35">Os 5 jogos da jornada</p>
         )}
       </div>
 

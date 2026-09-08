@@ -5,4 +5,4 @@
  * que manda na escolha automática. Isto é só o valor de recurso para
  * o ecrã, enquanto a competição não é conhecida.
  */
-export const JOGOS_POR_JORNADA = 8;
+export const JOGOS_POR_JORNADA = 5;

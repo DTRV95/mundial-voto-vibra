@@ -7,6 +7,7 @@ import { ShareButton, usePodiumShare, useRankShare } from "@/components/ShareCar
 
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { BoletimJogo } from "@/components/BoletimJogo";
+import { OQueTensHoje } from "@/components/OQueTensHoje";
 import { LideresCompeticao } from "@/components/LideresCompeticao";
 import { supabase } from "@/integrations/supabase/client";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Uma Geração — Vota, compara e vibra com a comunidade" },
-      { name: "description", content: "Faz a tua previsão nos 8 jogos oficiais de cada jornada da Liga Portugal e da Champions, e compete nos rankings." },
+      { name: "description", content: "Faz a tua previsão nos 5 jogos oficiais de cada jornada da Liga Portugal e da Champions, e compete nos rankings." },
       { property: "og:title", content: "Uma Geração — Liga Portugal e Champions" },
       { property: "og:description", content: "Faz as tuas previsões, desafia amigos para duelos e vibra com cada jornada." },
       { property: "og:url", content: `${SITE}/` },
@@ -641,6 +642,16 @@ function Home() {
       {/* ===================== PRÉ-REGISTO NOVA ÉPOCA ===================== */}
       <div className="lg:col-span-2"><SeasonPreRegModal user={user} />
       <PickCompetitionsModal /></div>
+
+      {/* ===================== O QUE HÁ PARA HOJE ===================== */}
+      {/* Antes do resto: uma jornada é uma semana e ninguém a resolve de
+          uma vez. Isto mostra só o que joga hoje, e some quando não há
+          nada — não ter nada para fazer também é uma resposta. */}
+      {user && (
+        <div className="lg:col-span-2">
+          <OQueTensHoje userId={user.id} />
+        </div>
+      )}
 
       {/* ===================== A TUA JORNADA ===================== */}
       {/* Substitui tres blocos que diziam o mesmo: jogos por votar,

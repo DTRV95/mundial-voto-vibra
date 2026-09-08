@@ -1,0 +1,15 @@
+-- De volta a cinco jogos. APLICADA a 2026-09-08.
+--
+-- Oito jogos vezes cinco decisões davam quarenta escolhas por jornada,
+-- em oito páginas. Foi o que as pessoas sentiram quando disseram que se
+-- cansavam só de pensar em votar — e a conta era minha.
+--
+-- `jogos_por_jornada` volta a 5, mas SÓ das próximas jornadas em
+-- diante. As que já estavam abertas ficam com os oito: cortá-las tirava
+-- do oficial jogos em que já se tinha votado, e esses votos passariam a
+-- valer zero.
+--
+-- REPOSIÇÃO. A zeragem anterior apagou 20 previsões que não devia — o
+-- pedido era zerar as pontuações, não o trabalho de quem votou. Foram
+-- repostas de `backup_teste_20260908_predictions`, com `on conflict do
+-- nothing` para não atropelar nada votado entretanto.

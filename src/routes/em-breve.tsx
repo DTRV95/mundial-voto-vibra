@@ -31,7 +31,7 @@ export const Route = createFileRoute("/em-breve")({
   head: () => ({
     meta: [
       { title: "Uma Geração — a nova época chega a 1 de outubro" },
-      { name: "description", content: "Liga Portugal e Champions, 8 jogos por jornada, divisões, duelos e torneios entre amigos. A nova versão do Uma Geração chega a 1 de outubro de 2026." },
+      { name: "description", content: "Liga Portugal e Champions, 5 jogos por jornada, divisões, duelos e torneios entre amigos. A nova versão do Uma Geração chega a 1 de outubro de 2026." },
       { property: "og:title", content: "Uma Geração — 1 de outubro" },
       { property: "og:description", content: "A nova época está a chegar. Liga Portugal e Champions, cinco jogos por jornada, e uma plataforma que te conhece." },
       { property: "og:url", content: "https://geracao2026.com" },
@@ -137,7 +137,7 @@ function EmBreve() {
         <Revelar>
           <SeccaoFeature
             etiqueta="Todas as semanas"
-            titulo={<>Oito jogos.<br />Os mesmos para toda a gente.</>}
+            titulo={<>Cinco jogos.<br />Os mesmos para toda a gente.</>}
             texto="Em cada jornada há cinco jogos oficiais escolhidos a dedo. Dás a tua previsão antes do apito e ganhas pontos pelo que acertares — resultado, golos, ambas marcam e o placar certo."
             pontos={[
               "Liga Portugal e Champions, a época inteira",

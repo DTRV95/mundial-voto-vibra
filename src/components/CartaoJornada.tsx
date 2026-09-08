@@ -128,7 +128,7 @@ export function CartaoSemJornada({ comp }: { comp: Competition | null }) {
       <p className="font-display text-lg">Ainda não há jornada aberta</p>
       <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
         Assim que a próxima jornada de {comp?.name ?? "competição"} for publicada,
-        os 8 jogos aparecem aqui para votares.
+        os 5 jogos aparecem aqui para votares.
       </p>
     </div>
   );

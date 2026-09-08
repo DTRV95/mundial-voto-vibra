@@ -588,7 +588,7 @@ function JogoPage() {
           <div>
             <p className="text-sm font-bold">Este jogo não conta para o ranking</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Em cada jornada só contam 8 jogos oficiais.{" "}
+              Em cada jornada só contam 5 jogos oficiais.{" "}
               <Link to="/jogos" className="underline underline-offset-2">Ver os desta jornada</Link>
             </p>
           </div>

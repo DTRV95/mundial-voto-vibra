@@ -76,8 +76,8 @@ function Classificacao() {
 
       <PageHeader
         eyebrow={active?.name}
-        title="Tabela classificativa"
-        subtitle="A classificação das equipas. Para a classificação dos adeptos, vê os Rankings."
+        title="Classificação"
+        subtitle="Como estão as equipas na competição. Para a classificação dos adeptos, vê os Rankings."
         comp={active}
       />
 

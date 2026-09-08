@@ -1,0 +1,14 @@
+-- A sincronização passa a cobrir todos os jogos. APLICADA a 2026-09-08.
+--
+-- Começou por olhar só para os cinco jogos oficiais de cada jornada.
+-- Mas a classificação real da Liga precisa dos 306 jogos da época —
+-- com cinco, dava uma tabela a fingir.
+--
+-- Agora atualiza todos, com os oficiais em primeiro lugar (se a quota
+-- acabar a meio, são esses que têm de estar feitos). Os pontos
+-- continuam a sair apenas dos oficiais: quem trata disso é o
+-- `pontuar_jogos_terminados`, que filtra por `is_official`.
+--
+-- Vai à API em grupos de 25, no máximo 4 por passagem — o plano
+-- gratuito dá 10 pedidos por minuto e a passagem seguinte é 15
+-- minutos depois.

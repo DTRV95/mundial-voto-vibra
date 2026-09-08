@@ -5,9 +5,11 @@ import { toast } from "sonner";
 import { Star, Check, Send, Undo2, Calendar, AlertTriangle, Wand2 } from "lucide-react";
 import { useCompetitions } from "@/lib/useCompetitions";
 
-const MAX_OFICIAIS = 5;
+import { JOGOS_POR_JORNADA } from "@/lib/jornada";
 
-/** Gestão das jornadas oficiais: escolher os 5 jogos e publicar. */
+const MAX_OFICIAIS = JOGOS_POR_JORNADA;
+
+/** Gestão das jornadas oficiais: escolher os jogos e publicar. */
 export function JornadasAdmin() {
   const { data: competicoes = [] } = useCompetitions();
   const [slug, setSlug] = useState("liga-portugal");
@@ -204,7 +206,7 @@ function EditorJornada({ jornadaId, competitionId, onVoltar }: {
   }
 
   /**
-   * Propõe os 5 jogos.
+   * Propõe os jogos da jornada.
    *
    * Chama a MESMA função que publica as jornadas sozinha, de
    * madrugada. Antes havia dois critérios a decidir a mesma coisa —
@@ -251,7 +253,7 @@ function EditorJornada({ jornadaId, competitionId, onVoltar }: {
     if ((quantos ?? 0) < 5) {
       toast.error(`Só deu para escolher ${quantos ?? 0} jogos — vê se há jogos suficientes por começar.`);
     } else {
-      toast.success("5 jogos escolhidos. Troca o que quiseres.");
+      toast.success(`${MAX_OFICIAIS} jogos escolhidos. Troca o que quiseres.`);
     }
   }
 

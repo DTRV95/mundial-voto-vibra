@@ -38,7 +38,7 @@ function JogoPage() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,phase,voting_open,is_official,home_score,away_score,qualifier,round:round_id(label),home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url)")
+        .select("id,kickoff_at,phase,voting_open,is_official,home_score,away_score,qualifier,round:round_id(label),home:home_team_id(name,flag,code,monogram,crest_url,estadio),away:away_team_id(name,flag,code,monogram,crest_url)")
         .eq("id", id).maybeSingle();
       return data;
     },
@@ -80,7 +80,7 @@ function JogoPage() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,phase,status,voting_open,home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url)")
+        .select("id,kickoff_at,phase,status,voting_open,home:home_team_id(name,flag,code,monogram,crest_url,estadio),away:away_team_id(name,flag,code,monogram,crest_url)")
         .eq("is_official", true)
         .eq("voting_open", true)
         .neq("id", id)
@@ -445,7 +445,7 @@ function JogoPage() {
 
           {/* Teams + score */}
           <div className="relative flex items-center justify-between gap-2 pb-6">
-            <TeamBlock flag={home.flag} name={home.name} code={home.code} />
+            <TeamBlock flag={home.flag} name={home.name} code={home.code} monogram={home.monogram} crest={home.crest_url} />
             <div className="flex flex-col items-center gap-1 shrink-0">
               {match.home_score != null && match.away_score != null ? (
                 <>
@@ -462,13 +462,16 @@ function JogoPage() {
                 </>
               )}
             </div>
-            <TeamBlock flag={away.flag} name={away.name} code={away.code} />
+            <TeamBlock flag={away.flag} name={away.name} code={away.code} monogram={away.monogram} crest={away.crest_url} />
           </div>
         </div>
         {/* bottom info bar */}
         <div className="flex items-center gap-2 bg-muted/40 border-t border-border/50 px-4 py-2 text-[11px] text-muted-foreground">
           <Info className="h-3.5 w-3.5 text-gold shrink-0" />
-          Todas as previsões são para o tempo regulamentar (90 minutos).
+          <span className="min-w-0 truncate">
+            {(home as any).estadio ? `${(home as any).estadio} · ` : ""}
+            Todas as previsões são para o tempo regulamentar (90 minutos).
+          </span>
         </div>
       </header>
 
@@ -541,7 +544,7 @@ function JogoPage() {
           <div>
             <p className="text-sm font-bold">Este jogo não conta para o ranking</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Em cada jornada só contam 5 jogos oficiais.{" "}
+              Em cada jornada só contam 8 jogos oficiais.{" "}
               <Link to="/jogos" className="underline underline-offset-2">Ver os desta jornada</Link>
             </p>
           </div>
@@ -973,10 +976,17 @@ function PrognosticoCard({ prog }: { prog: any }) {
 
 /* ── Components ─────────────────────────────────────────── */
 
-function TeamBlock({ flag, name, code }: { flag: string | null; name: string; code?: string | null }) {
+function TeamBlock({ flag, name, code, monogram, crest }: {
+  flag: string | null; name: string; code?: string | null;
+  monogram?: string | null; crest?: string | null;
+}) {
   return (
     <div className="flex flex-1 flex-col items-center gap-2 min-w-0">
-      <TeamBadge code={code ?? null} flag={flag} name={name} size="lg" />
+      {/* O `crest` faltava aqui: a consulta trazia-o, o componente
+          nunca o recebia, e o emblema oficial nunca chegava a aparecer
+          nesta página — caía sempre no emblema gerado. */}
+      <TeamBadge code={code ?? null} flag={flag} name={name}
+        monogram={monogram} crest={crest} size="lg" />
       <span className="text-xs font-bold text-center text-white leading-tight line-clamp-2 px-1">{name}</span>
     </div>
   );

@@ -8,7 +8,7 @@ export const Route = createFileRoute("/como-funciona")({
       { title: "Como Funciona — Uma Geração" },
       { name: "description", content: "Como funcionam as previsões, os pontos, os duelos 1v1, as divisões mensais e os torneios privados do Uma Geração." },
       { property: "og:title", content: "Como Funciona — Uma Geração" },
-      { property: "og:description", content: "Guia completo: 5 jogos por jornada, duelos, divisões e torneios privados." },
+      { property: "og:description", content: "Guia completo: 8 jogos por jornada, duelos, divisões e torneios privados." },
       { property: "og:url", content: "https://geracao2026.com/como-funciona" },
     ],
     links: [{ rel: "canonical", href: "https://geracao2026.com/como-funciona" }],
@@ -63,9 +63,9 @@ function ComoFunciona() {
         <div className="flex items-start gap-3 p-4">
           <span className="shrink-0 text-2xl">⚽</span>
           <div>
-            <p className="text-sm font-bold text-gold">5 jogos por jornada. Os mesmos para toda a gente.</p>
+            <p className="text-sm font-bold text-gold">8 jogos por jornada. Os mesmos para toda a gente.</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Em cada jornada da Liga Portugal e da Champions escolhemos 5 jogos oficiais — dois de destaque,
+              Em cada jornada da Liga Portugal e da Champions escolhemos 8 jogos oficiais — dois de destaque,
               dois equilibrados e um para dar palco a quem aparece menos. Toda a gente joga exatamente os mesmos.
               Ninguém ganha por ter mais tempo livre para votar.
             </p>
@@ -76,7 +76,7 @@ function ComoFunciona() {
       {/* Passos */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { n: "1", label: "Vê os 5 jogos" },
+          { n: "1", label: "Vê os 8 jogos" },
           { n: "2", label: "Faz a previsão" },
           { n: "3", label: "Sobe no ranking" },
         ].map(({ n, label }) => (
@@ -131,7 +131,7 @@ function ComoFunciona() {
         </p>
         <div className="mb-3 divide-y divide-border overflow-hidden rounded-xl border border-border bg-background/40">
           <PointRow label="Duelo de jogo" pts="×2" note="Quem fizer mais pontos num jogo à escolha" />
-          <PointRow label="Duelo de jornada" pts="×3" note="Quem fizer mais pontos nos 5 jogos da jornada" />
+          <PointRow label="Duelo de jornada" pts="×3" note="Quem fizer mais pontos nos 8 jogos da jornada" />
           <PointRow label="Duelo de mês" pts="×6" note="Quem fizer mais pontos no mês inteiro" />
         </div>
         <ul className="space-y-2 text-sm text-muted-foreground">
@@ -157,7 +157,7 @@ function ComoFunciona() {
         <ul className="space-y-2.5 text-sm">
           {[
             "Os pontos só são atribuídos depois de o jogo terminar.",
-            "Só contam os 5 jogos oficiais de cada jornada — os outros jogos não pontuam.",
+            "Só contam os 8 jogos oficiais de cada jornada — os outros jogos não pontuam.",
             "Quanto mais difícil a previsão, mais pontos vale.",
             "Não há penalização por errar — o pior que pode acontecer é ficares a zero.",
             "Podes ver o detalhe de cada previsão no histórico do teu perfil.",

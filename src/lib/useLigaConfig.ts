@@ -18,7 +18,7 @@ export const ROTULO_FILTRO: Record<FiltroJogos, string> = {
 };
 
 export const EXPLICACAO_FILTRO: Record<FiltroJogos, string> = {
-  todos: "Contam os 5 jogos oficiais de cada jornada.",
+  todos: "Contam os 8 jogos oficiais de cada jornada.",
   grandes: "Contam só os jogos com Benfica, FC Porto ou Sporting CP.",
   equipa: "Contam só os jogos do clube que escolheres.",
 };

@@ -11,8 +11,8 @@ export interface MatchCardData {
   phase: string;
   status?: string;
   voting_open: boolean;
-  home: { name: string; flag: string | null; code: string | null; monogram?: string | null; crest_url?: string | null };
-  away: { name: string; flag: string | null; code: string | null; monogram?: string | null; crest_url?: string | null };
+  home: { name: string; flag: string | null; code: string | null; monogram?: string | null; crest_url?: string | null; estadio?: string | null };
+  away: { name: string; flag: string | null; code: string | null; monogram?: string | null; crest_url?: string | null; estadio?: string | null };
   votes_count?: number;
   already_voted?: boolean;
   /** Etiqueta a mostrar no topo (ex: "Jornada 8"). */
@@ -101,8 +101,16 @@ export function MatchCard({ match, destaque = false, etiqueta }: {
 
       {/* Cabeçalho: jornada à esquerda, quanto falta à direita */}
       <div className="flex items-center justify-between gap-2 px-4 pt-3">
-        <span className="truncate text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
           {rotulo}
+          {/* O campo onde se joga. Não há fotografias de estádios que
+              se possam usar sem licença; o nome é o que existe, e num
+              dérbi diz-te logo de que lado da cidade é. */}
+          {match.home.estadio && (
+            <span className="hidden font-normal normal-case tracking-normal text-muted-foreground/60 sm:inline">
+              {" · "}{match.home.estadio}
+            </span>
+          )}
         </span>
         <span
           className="inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold tabular-nums"

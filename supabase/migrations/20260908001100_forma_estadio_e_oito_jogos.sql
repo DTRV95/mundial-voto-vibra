@@ -1,0 +1,19 @@
+-- Forma das equipas, estádios, e 8 jogos por jornada. APLICADA a 2026-09-08.
+--
+-- `v_forma_equipa` — os últimos cinco resultados de cada equipa e o
+-- que fazem em casa e fora. A classificação só dava totais, e uma
+-- tabela sem forma esconde metade da história: quem está a 12 pontos
+-- pode vir de quatro derrotas seguidas.
+--
+-- `teams.estadio` — o nome do estádio, da football-data. Não há
+-- fotografias: nenhuma fonte de imagens de estádios se pode usar sem
+-- licença, por isso ficou o nome.
+--
+-- `competitions.jogos_por_jornada` — de 5 para 8. Fica numa coluna e
+-- não espalhado pelo código, porque a Liga tem 9 jogos por jornada e
+-- a Champions 18.
+--
+-- AVISO: na Liga, 8 de 9 quase não é escolha. Toda a gente entra
+-- quase todas as semanas e a rotação perde efeito. E se um dos oito
+-- for adiado, a jornada fica à espera dele para fechar — a Liga adia
+-- jogos com frequência. Com 5 de 9 havia folga para os evitar.

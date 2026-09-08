@@ -95,7 +95,7 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
           </h1>
 
           <p className="mx-auto mt-5 max-w-xl text-base text-white/70 md:text-lg">
-            Cinco jogos por jornada, os mesmos para toda a gente. Cria o teu torneio,
+            Oito jogos por jornada, os mesmos para toda a gente. Cria o teu torneio,
             desafia quem quiseres para um duelo, e prova quem percebe mesmo de futebol.
           </p>
 
@@ -166,7 +166,7 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
                 </h2>
               </div>
               <span className="hidden shrink-0 text-xs text-white/50 sm:block">
-                Os mesmos 5 jogos para toda a gente
+                Os mesmos 8 jogos para toda a gente
               </span>
             </div>
 
@@ -211,7 +211,7 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
         <SeccaoFeature
           etiqueta="A jornada"
           cor={acento}
-          titulo={<>Cinco jogos.<br />Cinco minutos.</>}
+          titulo={<>Oito jogos.<br />Cinco minutos.</>}
           texto="Nada de 300 jogos por época. Cinco por jornada, escolhidos a dedo — e exatamente os mesmos para toda a gente. Ninguém ganha por ter mais tempo livre para votar."
           pontos={[
             "Dois destaques, dois equilibrados e um de rotação",
@@ -319,7 +319,7 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
                   </p>
                   <p className="font-display text-2xl text-white">{c.emoji} {c.name}</p>
                   <p className="mt-1 text-xs" style={{ color: c.tone }}>
-                    5 jogos oficiais por jornada · ranking próprio
+                    8 jogos oficiais por jornada · ranking próprio
                   </p>
                 </div>
               </div>

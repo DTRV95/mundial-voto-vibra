@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "robots", content: "index, follow" },
       { property: "og:site_name", content: "Uma Geração" },
       { property: "og:title", content: "Uma Geração — Vota, compara e vibra com a comunidade" },
-      { property: "og:description", content: "Faz as tuas previsões nos 5 jogos de cada jornada, desafia amigos para duelos e sobe nas divisões." },
+      { property: "og:description", content: "Faz as tuas previsões nos 8 jogos de cada jornada, desafia amigos para duelos e sobe nas divisões." },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "pt_PT" },
       { property: "og:url", content: "https://geracao2026.com/" },

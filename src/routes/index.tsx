@@ -35,7 +35,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Uma Geração — Vota, compara e vibra com a comunidade" },
-      { name: "description", content: "Faz a tua previsão nos 5 jogos oficiais de cada jornada da Liga Portugal e da Champions, e compete nos rankings." },
+      { name: "description", content: "Faz a tua previsão nos 8 jogos oficiais de cada jornada da Liga Portugal e da Champions, e compete nos rankings." },
       { property: "og:title", content: "Uma Geração — Liga Portugal e Champions" },
       { property: "og:description", content: "Faz as tuas previsões, desafia amigos para duelos e vibra com cada jornada." },
       { property: "og:url", content: `${SITE}/` },
@@ -189,14 +189,21 @@ function Home() {
 
 
   // Personal prediction results on finished matches
+  // Competição ativa — partilhada com a sidebar e guardada entre visitas.
+  // Fica aqui em cima porque tudo o que se segue é filtrado por ela.
+  const { competitions, active: activeComp, setSlug: setHomeCompSlug } = useActiveCompetition();
+
   const { data: myResults = [] } = useQuery({
-    queryKey: ["my-results", user?.id],
-    enabled: !!user?.id,
+    queryKey: ["my-results", user?.id, activeComp?.id],
+    enabled: !!user?.id && !!activeComp?.id,
     queryFn: async () => {
       const { data: finished } = await (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,home_score,away_score,home:home_team_id(name,flag,code),away:away_team_id(name,flag,code)")
+        .select("id,kickoff_at,home_score,away_score,competition_id," +
+                "home:home_team_id(name,flag,code,monogram,crest_url)," +
+                "away:away_team_id(name,flag,code,monogram,crest_url)")
         .eq("is_official", true)
+        .eq("competition_id", activeComp!.id)
         .not("home_score", "is", null)
         .order("kickoff_at", { ascending: false })
         .limit(40);
@@ -219,10 +226,6 @@ function Home() {
   });
 
   const [selectedResult, setSelectedResult] = useState<any>(null);
-
-  // Seletor de competição no card de Líderes (época 2026/27)
-  // Competição ativa — partilhada com a sidebar e guardada entre visitas
-  const { competitions, active: activeComp, setSlug: setHomeCompSlug } = useActiveCompetition();
 
   // A jornada em curso — mesma fonte que a página de Jogos usa
   const { data: jornadas = [] } = useJornadas(activeComp?.id, user?.id);
@@ -685,6 +688,11 @@ function Home() {
               <div className="flex items-center gap-2">
                 <Swords className="h-4 w-4 text-muted-foreground" />
                 <span className="font-display text-xl uppercase leading-none">Os meus pontos</span>
+                {activeComp && (
+                  <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {activeComp.short}
+                  </span>
+                )}
               </div>
               {myDivision && (
                 <span className="font-display text-2xl leading-none tabular-nums text-gold">
@@ -702,13 +710,15 @@ function Home() {
                     className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-smooth ${m.noVote ? "cursor-default opacity-70" : "hover:bg-accent/50"}`}>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 text-sm">
-                        <span>{m.home?.flag}</span>
+                        <TeamBadge code={m.home?.code ?? null} flag={m.home?.flag ?? null}
+                          name={m.home?.name ?? ""} monogram={m.home?.monogram} crest={m.home?.crest_url} size="sm" />
                         <span className="font-semibold text-foreground truncate">{m.home?.name}</span>
                         <span className="shrink-0 rounded-md bg-secondary px-1.5 py-0.5 text-[11px] font-bold text-foreground tabular-nums">
                           {m.home_score}–{m.away_score}
                         </span>
                         <span className="font-semibold text-foreground truncate">{m.away?.name}</span>
-                        <span>{m.away?.flag}</span>
+                        <TeamBadge code={m.away?.code ?? null} flag={m.away?.flag ?? null}
+                          name={m.away?.name ?? ""} monogram={m.away?.monogram} crest={m.away?.crest_url} size="sm" />
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">

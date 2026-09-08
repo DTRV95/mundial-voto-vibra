@@ -12,7 +12,7 @@ interface JogoDoTalao {
 /**
  * O talão da jornada.
  *
- * Cinco jogos numa lista são cinco tarefas. Cinco jogos num talão são
+ * Uma lista de jogos são tarefas soltas. Os mesmos jogos num talão são
  * uma coisa só, que ou está completa ou não está — e é isso que faz
  * voltar para dar a quinta previsão.
  *

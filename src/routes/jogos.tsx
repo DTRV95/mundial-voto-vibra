@@ -35,9 +35,9 @@ export const Route = createFileRoute("/jogos")({
   head: () => ({
     meta: [
       { title: "A tua jornada — Uma Geração" },
-      { name: "description", content: "Os 5 jogos oficiais de cada jornada. Dá a tua previsão antes do apito inicial e sobe no ranking." },
+      { name: "description", content: "Os 8 jogos oficiais de cada jornada. Dá a tua previsão antes do apito inicial e sobe no ranking." },
       { property: "og:title", content: "A tua jornada — Uma Geração" },
-      { property: "og:description", content: "Os 5 jogos oficiais de cada jornada. Dá a tua previsão e compara com a comunidade." },
+      { property: "og:description", content: "Os 8 jogos oficiais de cada jornada. Dá a tua previsão e compara com a comunidade." },
       { property: "og:url", content: "https://geracao2026.com/jogos" },
     ],
     links: [{ rel: "canonical", href: "https://geracao2026.com/jogos" }],
@@ -57,7 +57,7 @@ function Jogos() {
       <PageHeader
         eyebrow={active?.name}
         title="A tua jornada"
-        subtitle="5 jogos oficiais — os mesmos para toda a gente."
+        subtitle="8 jogos oficiais — os mesmos para toda a gente."
         comp={active}
       />
 
@@ -76,7 +76,7 @@ function Jogos() {
           <CalendarClock className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" />
           <p className="font-display text-lg">Ainda não há jornada aberta</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Assim que a próxima jornada de {active?.name ?? "competição"} for publicada, os 5 jogos aparecem aqui.
+            Assim que a próxima jornada de {active?.name ?? "competição"} for publicada, os 8 jogos aparecem aqui.
           </p>
         </div>
       )}

@@ -1,0 +1,19 @@
+-- Travão de ritmo da sincronização. APLICADA a 2026-09-08.
+--
+-- A Edge Function é chamada com a chave anónima, que é pública — está
+-- no bundle do site. Invocá-la não expõe nem escreve nada de errado:
+-- só copia resultados oficiais. O risco é a quota: o plano gratuito da
+-- football-data dá 10 pedidos por minuto, e alguém a chamar em ciclo
+-- deixava os jogos por atualizar.
+--
+-- `sync_estado` guarda a última execução e o último resultado. A função
+-- sai sem tocar na API se correu há menos de um minuto. O cron corre de
+-- 15 em 15, portanto nunca lhe toca.
+--
+-- Escolheu-se a chave anónima em vez da de serviço de propósito: a de
+-- serviço ignora o RLS e não tinha de existir fora do sítio dela. Aqui
+-- só serve de porta; quem manda é o corpo da função.
+--
+-- Segredos no Vault: `url_sincronizacao` e `chave_chamada` (ambos já
+-- guardados). Falta apenas o secret FOOTBALL_DATA_KEY nas Edge
+-- Functions.

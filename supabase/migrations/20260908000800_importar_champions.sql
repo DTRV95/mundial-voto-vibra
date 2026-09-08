@@ -1,0 +1,17 @@
+-- Importação da Champions. APLICADA a 2026-09-08.
+--
+-- Feita pela Edge Function `importar-competicao`, com
+-- {"codigo":"CL","epoca":2026,"slug":"champions"}.
+-- Trouxe 36 clubes (todos com emblema), 8 jornadas da fase de liga e
+-- 144 jogos.
+--
+-- A função existe porque o importador do /admin tinha dois defeitos que
+-- só se veem quando há mais do que uma competição:
+--
+--  1. Procurava as jornadas só por época e tipo, sem filtrar a
+--     competição. A Jornada 1 da Champions era "encontrada" como sendo
+--     a Jornada 1 da Liga, e os jogos das duas caíam na mesma jornada.
+--
+--  2. Escrevia country = 'Portugal' em todos os clubes.
+--
+-- Ambos corrigidos também no código da aplicação, no mesmo commit.

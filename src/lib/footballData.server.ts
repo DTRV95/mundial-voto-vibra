@@ -41,6 +41,7 @@ async function apiGet<T>(path: string): Promise<T> {
 // ── Formatos da API que nos interessam ──────────────────────
 
 export interface ApiTeam {
+  area?: { name?: string };
   id: number;
   name: string;         // "Sport Lisboa e Benfica"
   shortName?: string;   // "Benfica"

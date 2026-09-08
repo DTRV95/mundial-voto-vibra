@@ -11,7 +11,7 @@ import { getTeams, getMatches, getCompetition, FootballDataError } from "@/lib/f
 
 export interface ImportPayload {
   competicao: { codigo: string; nome: string; inicio: string; fim: string; jornadaAtual: number | null };
-  equipas: { externalId: string; nome: string; nomeCurto: string; monograma: string; emblema: string | null }[];
+  equipas: { externalId: string; nome: string; nomeCurto: string; monograma: string; emblema: string | null; pais: string | null }[];
   jogos: {
     externalId: string;
     casaExternalId: string;
@@ -63,6 +63,7 @@ export const buscarImportacao = createServerFn({ method: "POST" })
             nomeCurto: t.shortName ?? t.name,
             monograma: monogramaDe(t),
             emblema: t.crest ?? null,
+            pais: t.area?.name ?? null,
           })),
           jogos: matches.matches.map(m => ({
             externalId: String(m.id),

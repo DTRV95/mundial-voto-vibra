@@ -71,14 +71,14 @@ export async function aplicarImportacao(
       // RLS a bloquear passavam despercebidas e contavam como sucesso.
       const { error } = await db.from("teams").update({
         name: e.nome, short_name: e.nomeCurto, monogram: e.monograma,
-        crest_url: e.emblema, kind: "club", country: "Portugal",
+        crest_url: e.emblema, kind: "club", country: e.pais ?? null,
       }).eq("id", idInterno);
       if (error) { r.avisos.push(`Equipa ${e.nome}: ${error.message}`); continue; }
       r.equipasAtualizadas++;
     } else {
       const { data, error } = await db.from("teams").insert({
         name: e.nome, short_name: e.nomeCurto, monogram: e.monograma,
-        code: e.monograma, crest_url: e.emblema, kind: "club", country: "Portugal",
+        code: e.monograma, crest_url: e.emblema, kind: "club", country: e.pais ?? null,
         external_id: e.externalId,
       }).select("id").single();
       if (error) { r.avisos.push(`Equipa ${e.nome}: ${error.message}`); continue; }
@@ -129,8 +129,14 @@ export async function aplicarImportacao(
     if (!atual || j.dataHora < atual) jornadas.set(j.jornada, j.dataHora);
   }
 
+  // Filtrar TAMBÉM por competição. Sem isto, a Jornada 1 da Champions
+  // era "encontrada" como sendo a Jornada 1 da Liga, e os jogos das
+  // duas competições caíam na mesma jornada.
   const { data: jornadasExistentes } = await db.from("rounds")
-    .select("id,number").eq("season_id", seasonId).eq("kind", "jornada");
+    .select("id,number")
+    .eq("season_id", seasonId)
+    .eq("competition_id", competitionId)
+    .eq("kind", "jornada");
   const mapaJornadas = new Map<number, string>(
     (jornadasExistentes ?? []).map((x: any) => [x.number, x.id])
   );

@@ -1,0 +1,20 @@
+-- Classificação completa e zeragem para testes. APLICADA a 2026-09-08.
+--
+-- A vista `classificacao` só produzia linhas para quem já tinha jogado.
+-- Na Champions, com dois jogos feitos, a tabela tinha 4 equipas em vez
+-- de 36 — e no primeiro dia de uma competição estava vazia, como se a
+-- prova não existisse. Passa a partir das equipas e a juntar-lhes os
+-- jogos, com toda a gente a zero. É o mesmo erro que já tinha aparecido
+-- nas divisões dos adeptos, onde só aparecia quem tinha pontuado.
+--
+-- Entre equipas empatadas em tudo manda o nome, para a ordem parecer
+-- decidida em vez de acidental.
+--
+-- ZERAGEM. Apagadas as 20 previsões dos jogos oficiais, os momentos de
+-- jornada, visionários, snapshots, missões e duelos; `apurada_em` das
+-- jornadas e `pontuado_em` dos jogos voltaram a null, para poderem ser
+-- apurados de novo quando houver previsões a sério.
+--
+-- Guardado antes em `backup_teste_20260908_*`. Os 3133 registos do
+-- Mundial ficaram intactos — não contam para nada porque as vistas
+-- filtram por jogo oficial.

@@ -4,6 +4,7 @@ import { formatTime } from "@/lib/format";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { coresDoClube, nomeCurto } from "@/lib/clubBadge";
 import { useContagem, type Urgencia } from "@/lib/useContagem";
+import { VotoRapido } from "@/components/VotoRapido";
 
 export interface MatchCardData {
   id: string;
@@ -19,6 +20,8 @@ export interface MatchCardData {
   round_label?: string | null;
   /** Jogo oficial — conta para o ranking */
   is_official?: boolean;
+  /** O que a pessoa já escolheu no resultado, se escolheu */
+  minha_escolha?: string | null;
 }
 
 /** Cor e tom da contagem decrescente. O vermelho é só para o fim. */
@@ -37,12 +40,14 @@ const TOM_URGENCIA: Record<Urgencia, { cor: string; fundo: string; borda: string
  * peso que o quinto jogo. Agora o dourado está reservado ao destaque e o
  * resto veste-se de quem joga.
  */
-export function MatchCard({ match, destaque = false, etiqueta }: {
+export function MatchCard({ match, destaque = false, etiqueta, votoRapido = false }: {
   match: MatchCardData;
   /** O jogo da jornada — ocupa mais espaço e leva a moldura dourada. */
   destaque?: boolean;
   /** Texto da fita de destaque ("O clássico da jornada"). */
   etiqueta?: string;
+  /** Mostra os três botões de resultado no próprio cartão. */
+  votoRapido?: boolean;
 }) {
   const contagem = useContagem(match.kickoff_at);
 
@@ -150,6 +155,21 @@ export function MatchCard({ match, destaque = false, etiqueta }: {
         </div>
       )}
 
+      {/* Votar aqui mesmo. O cartão continua a levar ao jogo para quem
+          quiser os outros mercados — isto tira-lhe é a obrigação. */}
+      {votoRapido && !fechado && !aoVivo && (
+        <div className="px-4 pb-3">
+          <VotoRapido
+            matchId={match.id}
+            casa={match.home.name}
+            fora={match.away.name}
+            escolhaAtual={match.minha_escolha}
+            corCasa={casa}
+            corFora={fora}
+          />
+        </div>
+      )}
+
       {/* Rodapé */}
       <div className={`flex items-center justify-between gap-2 border-t px-4 py-2.5 ${
         match.already_voted ? "border-wc-green/25 bg-wc-green/5" : "border-border/70 bg-muted/25"
@@ -175,7 +195,10 @@ export function MatchCard({ match, destaque = false, etiqueta }: {
         <span className={`shrink-0 text-xs font-bold transition-smooth group-hover:translate-x-0.5 ${
           match.already_voted ? "text-wc-green" : fechado ? "text-muted-foreground" : "text-gold"
         }`}>
-          {match.already_voted ? "Ver a bancada →" : fechado ? "Ver jogo →" : "Dar previsão →"}
+          {match.already_voted
+            ? "Ver a bancada →"
+            : fechado ? "Ver jogo →"
+            : votoRapido ? "Mais mercados →" : "Dar previsão →"}
         </span>
       </div>
     </Link>

@@ -70,13 +70,15 @@ export function useJornadas(competitionId: string | null | undefined, userId?: s
 
       // Em que jogos é que este utilizador já votou
       let votados = new Set<string>();
+      let escolhas = new Map<string, string | null>();
       if (userId) {
         const { data: preds } = await supabase
           .from("predictions")
-          .select("match_id")
+          .select("match_id,result_90")
           .eq("user_id", userId)
           .in("match_id", linhas.map(m => m.id));
         votados = new Set((preds ?? []).map((p: any) => p.match_id));
+        escolhas = new Map((preds ?? []).map((p: any) => [p.match_id, p.result_90 ?? null]));
       }
 
       const mapa = new Map<string, Jornada>();
@@ -91,6 +93,7 @@ export function useJornadas(competitionId: string | null | undefined, userId?: s
           away: m.away,
           votes_count: votos.get(m.id) ?? 0,
           already_voted: votados.has(m.id),
+          minha_escolha: escolhas.get(m.id) ?? null,
           is_official: true,
           round_label: m.round.label ?? (m.round.number ? `Jornada ${m.round.number}` : null),
           round_id: m.round.id,

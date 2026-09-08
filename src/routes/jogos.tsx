@@ -113,11 +113,12 @@ function Jogos() {
                         match={destaque}
                         destaque
                         etiqueta={ETIQUETA_DESTAQUE[destaque.highlight_tag ?? ""] ?? "Jogo da jornada"}
+                        votoRapido={!!user}
                       />
                     </div>
                   )}
                   <div className="grid gap-3 md:grid-cols-2">
-                    {restantes.map((m) => <MatchCard key={m.id} match={m} />)}
+                    {restantes.map((m) => <MatchCard key={m.id} match={m} votoRapido={!!user} />)}
                   </div>
                 </>
               );

@@ -428,62 +428,67 @@ function JogoPage() {
       </div>
 
       {/* Cabeçalho do jogo.
-          Era um retângulo verde com uma grelha por cima — um relvado
-          desenhado à pressa, igual para todos os jogos, e sobra do
-          Mundial. Agora é um estádio à noite vestido dos dois clubes:
-          os holofotes vêm de cima, a cor de cada equipa entra pelo seu
-          lado, e o relvado com as faixas do corte fica em baixo.
+          A primeira tentativa foi um estádio à noite com holofotes e
+          relvado. Não resultou: os cones de luz ficaram uns riscos e as
+          faixas do corte umas arranhadelas por cima de tudo. Demasiada
+          coisa a competir num espaço pequeno.
 
-          Não há fotografia nenhuma aqui. Não existe fonte de imagens
-          de estádios que se possa usar sem licença, e uma foto errada
-          ou repetida seria pior do que isto. */}
+          Esta é outra ideia, e mais simples: a rede da baliza. Um
+          quadriculado fino atrás de cada emblema, mais denso nas
+          bordas e desvanecido ao centro, com a cor do clube por trás.
+          É a textura mais reconhecível do futebol e não precisa de
+          fotografia nenhuma. */}
       <header className="relative mt-3 overflow-hidden rounded-3xl">
-        {/* A fita dos dois clubes, cortada ao meio */}
         <div className="h-1 w-full" style={{
           background: `linear-gradient(90deg, ${corCasa} 0%, ${corCasa} 44%, transparent 48%, transparent 52%, ${corFora} 56%, ${corFora} 100%)`,
         }} />
 
-        <div className="relative isolate px-5 pt-5" style={{ background: "#070A10" }}>
+        <div className="relative isolate px-4 pt-4 pb-6 md:px-6" style={{ background: "#0A0E15" }}>
 
-          {/* ── O estádio ──────────────────────────────────── */}
           <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-            {/* Holofotes: dois cones de luz vindos do topo */}
-            <div className="absolute -top-1/2 left-[8%] h-[160%] w-[42%] -rotate-12"
-              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.16), transparent 62%)", filter: "blur(26px)" }} />
-            <div className="absolute -top-1/2 right-[8%] h-[160%] w-[42%] rotate-12"
-              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.16), transparent 62%)", filter: "blur(26px)" }} />
-
-            {/* A cor de cada clube entra pelo seu lado */}
+            {/* A cor de cada clube, forte junto à sua baliza */}
             <div className="absolute inset-0" style={{
               background:
-                `radial-gradient(75% 95% at 0% 45%, ${corCasa}55 0%, ${corCasa}18 38%, transparent 68%),` +
-                `radial-gradient(75% 95% at 100% 45%, ${corFora}55 0%, ${corFora}18 38%, transparent 68%)`,
+                `radial-gradient(58% 100% at 0% 50%, ${corCasa} 0%, ${corCasa}66 26%, transparent 62%),` +
+                `radial-gradient(58% 100% at 100% 50%, ${corFora} 0%, ${corFora}66 26%, transparent 62%)`,
+              opacity: 0.5,
             }} />
 
-            {/* A bancada: um pontilhado fino que sugere gente sem a desenhar */}
-            <div className="absolute inset-x-0 top-0 h-[55%] opacity-[0.16]" style={{
-              backgroundImage: "radial-gradient(rgba(255,255,255,0.7) 0.5px, transparent 0.6px)",
-              backgroundSize: "7px 7px",
+            {/* As redes. Duas famílias de linhas cruzadas, presas a
+                cada lado e a esbater-se para o meio — como uma baliza
+                vista de trás. */}
+            <div className="absolute inset-y-0 left-0 w-1/2" style={{
+              backgroundImage:
+                "repeating-linear-gradient(62deg, rgba(255,255,255,0.22) 0 1px, transparent 1px 15px)," +
+                "repeating-linear-gradient(-62deg, rgba(255,255,255,0.22) 0 1px, transparent 1px 15px)",
+              WebkitMaskImage: "linear-gradient(90deg, rgba(0,0,0,0.85), transparent 88%)",
+              maskImage: "linear-gradient(90deg, rgba(0,0,0,0.85), transparent 88%)",
+            }} />
+            <div className="absolute inset-y-0 right-0 w-1/2" style={{
+              backgroundImage:
+                "repeating-linear-gradient(-62deg, rgba(255,255,255,0.22) 0 1px, transparent 1px 15px)," +
+                "repeating-linear-gradient(62deg, rgba(255,255,255,0.22) 0 1px, transparent 1px 15px)",
+              WebkitMaskImage: "linear-gradient(270deg, rgba(0,0,0,0.85), transparent 88%)",
+              maskImage: "linear-gradient(270deg, rgba(0,0,0,0.85), transparent 88%)",
             }} />
 
-            {/* O relvado, com as faixas do corte a abrir em perspetiva */}
-            <div className="absolute inset-x-0 bottom-0 h-[38%]" style={{
-              background: "linear-gradient(180deg, transparent, rgba(10,40,22,0.55) 45%, rgba(8,32,18,0.85) 100%)",
+            {/* Um escurecido ao centro, para o relógio respirar */}
+            <div className="absolute inset-0" style={{
+              background: "radial-gradient(42% 80% at 50% 50%, rgba(10,14,21,0.92) 0%, rgba(10,14,21,0.55) 55%, transparent 78%)",
             }} />
-            <div className="absolute inset-x-0 bottom-0 h-[38%] opacity-[0.10]" style={{
-              backgroundImage: "repeating-linear-gradient(97deg, rgba(255,255,255,0.9) 0 2px, transparent 2px 46px)",
+            {/* E de cima para baixo, para o texto do topo assentar */}
+            <div className="absolute inset-0" style={{
+              background: "linear-gradient(180deg, rgba(10,14,21,0.75) 0%, transparent 30%, transparent 70%, rgba(10,14,21,0.6) 100%)",
             }} />
-            {/* A linha do meio-campo */}
-            <div className="absolute bottom-0 left-1/2 h-[38%] w-px -translate-x-1/2 bg-white/10" />
           </div>
 
           {/* Jornada + estado da votação */}
-          <div className="relative mb-5 flex items-center justify-between gap-2">
-            <span className="truncate text-[11px] font-bold uppercase tracking-[0.2em] text-white/45">
+          <div className="relative mb-4 flex items-center justify-between gap-2">
+            <span className="truncate text-[10px] font-bold uppercase tracking-[0.24em] text-white/55">
               {(match as any).round?.label
                 ?? ((match as any).round?.number ? `Jornada ${(match as any).round.number}` : "Jogo")}
             </span>
-            <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+            <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm ${
               status?.tone === "primary" ? "border-wc-green/50 bg-wc-green/15 text-wc-green"
                 : status?.tone === "gold" ? "border-gold/50 bg-gold/15 text-gold"
                 : "border-red-500/50 bg-red-500/15 text-red-400"
@@ -491,25 +496,33 @@ function JogoPage() {
           </div>
 
           {/* As equipas */}
-          <div className="relative flex items-center justify-between gap-2 pb-7">
-            <TeamBlock flag={home.flag} name={home.name} code={home.code} monogram={home.monogram} crest={home.crest_url} />
-            <div className="flex shrink-0 flex-col items-center gap-1 px-1">
+          <div className="relative flex items-center justify-between gap-1">
+            <TeamBlock flag={home.flag} name={home.name} code={home.code}
+              monogram={home.monogram} crest={home.crest_url} cor={corCasa} />
+
+            <div className="flex shrink-0 flex-col items-center px-1">
               {match.home_score != null && match.away_score != null ? (
                 <>
                   <div className="font-display text-5xl leading-none tabular-nums text-white md:text-6xl">
-                    {match.home_score}<span className="mx-2 text-white/25">:</span>{match.away_score}
+                    {match.home_score}<span className="mx-1.5 text-white/25">:</span>{match.away_score}
                   </div>
-                  <div className="mt-1 text-[9px] font-bold uppercase tracking-[0.18em] text-gold">Resultado final</div>
-                  <div className="mt-0.5 text-[9px] uppercase tracking-widest text-white/30">{formatDate(match.kickoff_at)}</div>
+                  <div className="mt-2 text-[9px] font-bold uppercase tracking-[0.2em] text-gold">Final</div>
                 </>
               ) : (
                 <>
-                  <div className="font-display text-4xl leading-none text-white md:text-5xl">{formatTime(match.kickoff_at)}</div>
-                  <div className="mt-1 text-[9px] uppercase tracking-widest text-white/40">{formatDate(match.kickoff_at)}</div>
+                  <div className="font-display text-[2.75rem] leading-none text-white md:text-5xl">
+                    {formatTime(match.kickoff_at)}
+                  </div>
+                  <div className="mt-1.5 h-px w-8 bg-white/20" />
+                  <div className="mt-1.5 max-w-[7rem] text-center text-[9px] uppercase leading-tight tracking-widest text-white/45">
+                    {formatDate(match.kickoff_at)}
+                  </div>
                 </>
               )}
             </div>
-            <TeamBlock flag={away.flag} name={away.name} code={away.code} monogram={away.monogram} crest={away.crest_url} />
+
+            <TeamBlock flag={away.flag} name={away.name} code={away.code}
+              monogram={away.monogram} crest={away.crest_url} cor={corFora} />
           </div>
         </div>
         {/* bottom info bar */}
@@ -1023,18 +1036,25 @@ function PrognosticoCard({ prog }: { prog: any }) {
 
 /* ── Components ─────────────────────────────────────────── */
 
-function TeamBlock({ flag, name, code, monogram, crest }: {
+function TeamBlock({ flag, name, code, monogram, crest, cor }: {
   flag: string | null; name: string; code?: string | null;
-  monogram?: string | null; crest?: string | null;
+  monogram?: string | null; crest?: string | null; cor?: string;
 }) {
   return (
-    <div className="flex flex-1 flex-col items-center gap-2 min-w-0">
-      {/* O `crest` faltava aqui: a consulta trazia-o, o componente
-          nunca o recebia, e o emblema oficial nunca chegava a aparecer
-          nesta página — caía sempre no emblema gerado. */}
-      <TeamBadge code={code ?? null} flag={flag} name={name}
-        monogram={monogram} crest={crest} size="xl" />
-      <span className="w-full truncate px-1 text-center font-display text-lg uppercase leading-none text-white md:text-2xl">
+    <div className="flex min-w-0 flex-1 flex-col items-center gap-2.5">
+      {/* Um halo da cor do clube por trás do emblema: destaca-o da
+          rede sem lhe pôr moldura nenhuma. */}
+      <span className="relative grid place-items-center">
+        {cor && (
+          <span aria-hidden className="absolute h-[115%] w-[115%] rounded-full"
+            style={{ background: cor, filter: "blur(22px)", opacity: 0.5 }} />
+        )}
+        <span className="relative">
+          <TeamBadge code={code ?? null} flag={flag} name={name}
+            monogram={monogram} crest={crest} size="xl" />
+        </span>
+      </span>
+      <span className="w-full truncate px-0.5 text-center font-display text-base uppercase leading-none text-white md:text-xl">
         {nomeCurto(name)}
       </span>
     </div>

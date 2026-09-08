@@ -1,5 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, CalendarClock, Trophy, User, Shield, LogOut, Users, HelpCircle, Swords, Target, Table2, Dna } from "lucide-react";
+import { House, CalendarDays, Trophy, CircleUser, ShieldCheck, LogOut, UsersRound, CircleHelp, Swords, ListOrdered, Dna } from "lucide-react";
+
+// O cadeado do painel de administração usa o mesmo ícone do grupo.
+const Shield = ShieldCheck;
 import { useAuth, useIsAdmin } from "@/lib/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -12,27 +15,26 @@ import { useActiveCompetition } from "@/lib/useActiveCompetition";
 /**
  * A navegação segue o que se faz todas as semanas, não a lista de
  * funcionalidades: jogar, competir, e a conta. As páginas de consulta
- * (Prognósticos, Classificação) vivem em separadores dentro de Jogos,
+ * (a Classificação) vivem em separadores dentro de Jogos,
  * e os Duelos dentro de Torneios — é onde fazem sentido.
  */
 const grupos = [
   {
     titulo: null,
-    itens: [{ to: "/", label: "Home", icon: Home }],
+    itens: [{ to: "/", label: "Home", icon: House }],
   },
   {
     titulo: "Jogar",
     itens: [
-      { to: "/jogos", label: "Jogos", icon: CalendarClock },
-      { to: "/prognosticos", label: "Prognósticos", icon: Target },
-      { to: "/classificacao", label: "Classificação", icon: Table2 },
+      { to: "/jogos", label: "Jogos", icon: CalendarDays },
+      { to: "/classificacao", label: "Classificação", icon: ListOrdered },
     ],
   },
   {
     titulo: "Competir",
     itens: [
       { to: "/rankings", label: "Rankings", icon: Trophy },
-      { to: "/ligas", label: "Torneios", icon: Users },
+      { to: "/ligas", label: "Torneios", icon: UsersRound },
       { to: "/duelos", label: "Duelos", icon: Swords },
       { to: "/dna", label: "O teu DNA", icon: Dna },
     ],
@@ -40,8 +42,8 @@ const grupos = [
   {
     titulo: null,
     itens: [
-      { to: "/como-funciona", label: "Como Funciona", icon: HelpCircle },
-      { to: "/perfil", label: "Perfil", icon: User },
+      { to: "/como-funciona", label: "Como Funciona", icon: CircleHelp },
+      { to: "/perfil", label: "Perfil", icon: CircleUser },
     ],
   },
 ];

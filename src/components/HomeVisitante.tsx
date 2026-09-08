@@ -266,19 +266,7 @@ export function HomeVisitante({ competitions, activeComp, totalAdeptos, previsoe
           <EcraDivisoes cor="#FFB020" />
         </SeccaoFeature>
 
-        <SeccaoFeature
-          etiqueta="Prognósticos"
-          cor={acento}
-          titulo={<>Decide com mais<br />do que o coração.</>}
-          texto="Análise de cada jogo oficial antes de votares: probabilidades, contexto e uma sugestão. Usas se quiseres — ou segues o instinto."
-          pontos={[
-            "Probabilidades por mercado",
-            "Publicados antes de cada jornada",
-            "A um toque dos jogos",
-          ]}
-        >
-          <EcraPrognosticos jornada={jornada} cor={acento} />
-        </SeccaoFeature>
+        
       </div>
 
       {/* ── COMO SE COMEÇA ──────────────────────────────────── */}

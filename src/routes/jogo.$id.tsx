@@ -119,22 +119,6 @@ function JogoPage() {
     },
   });
 
-  const { data: prognostico } = useQuery({
-    queryKey: ["prognostico", id],
-    staleTime: 300_000,
-    queryFn: async () => {
-      const { data } = await (supabase as any)
-        .from("prognosticos")
-        .select("id,suggestion,summary,bullet_points,main_trend,attention_point")
-        .eq("match_id", id)
-        .eq("published", true)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return data ?? null;
-    },
-  });
-
   const { data: topScorers = [] } = useQuery({
     queryKey: ["match-top-scorers", id],
     staleTime: 120_000,
@@ -667,8 +651,6 @@ function JogoPage() {
         </div>
       )}
 
-      {/* ── Prognóstico editorial ── */}
-      {prognostico && <PrognosticoCard prog={prognostico} />}
 
       {/* ── Markets ── */}
       <section className="mt-4 space-y-3">
@@ -960,81 +942,6 @@ function JogoPage() {
     </div>
   );
 }
-
-/* ── Prognóstico ─────────────────────────────────────────── */
-
-function PrognosticoCard({ prog }: { prog: any }) {
-  const [open, setOpen] = useState(false);
-  const bullets: string[] = Array.isArray(prog.bullet_points) ? prog.bullet_points : [];
-
-  return (
-    <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card"
-      style={{ boxShadow: "0 2px 12px oklch(0 0 0 / 0.18)" }}>
-      {/* Header com gradiente escuro */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="flex w-full items-center justify-between px-4 py-3.5 transition-smooth hover:brightness-110"
-        style={{ background: "linear-gradient(135deg, oklch(0.22 0.04 250) 0%, oklch(0.18 0.06 270) 100%)" }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/10">
-            <Target className="h-4 w-4 text-white/80" />
-          </div>
-          <div className="text-left">
-            <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/40 leading-none mb-1">Prognóstico</p>
-            <p className="text-sm font-bold text-white leading-none">{prog.suggestion}</p>
-          </div>
-        </div>
-        <ChevronDown className={`h-4 w-4 text-white/40 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-      </button>
-
-      {open && (
-        <div className="px-4 py-4 space-y-4">
-          {/* Resumo */}
-          {prog.summary && (
-            <div>
-              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Resumo</p>
-              <p className="text-sm text-foreground/85 leading-relaxed">{prog.summary}</p>
-            </div>
-          )}
-
-          {/* Pontos Essenciais */}
-          {bullets.length > 0 && (
-            <div>
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pontos Essenciais</p>
-              <ul className="space-y-2">
-                {bullets.map((b, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-foreground/85">
-                    <span className="mt-2 h-1 w-4 shrink-0 rounded-full bg-wc-blue/60" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Tendência Principal */}
-          {prog.main_trend && (
-            <div className="rounded-xl border border-wc-green/25 bg-wc-green/5 px-3 py-3">
-              <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-wc-green">Tendência Principal</p>
-              <p className="text-sm text-foreground/85 leading-relaxed">{prog.main_trend}</p>
-            </div>
-          )}
-
-          {/* Ponto de Atenção */}
-          {prog.attention_point && (
-            <div className="rounded-xl border border-gold/30 bg-gold/8 px-3 py-3">
-              <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gold">Ponto de Atenção</p>
-              <p className="text-sm text-foreground/85 leading-relaxed">{prog.attention_point}</p>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ── Components ─────────────────────────────────────────── */
 
 function TeamBlock({ flag, name, code, monogram, crest, cor }: {
   flag: string | null; name: string; code?: string | null;

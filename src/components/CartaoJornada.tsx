@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { CheckCircle2, Clock, Target } from "lucide-react";
+import { CheckCircle2, Clock } from "lucide-react";
 import type { Competition } from "@/lib/useCompetitions";
 import type { Jornada } from "@/lib/useJornada";
 import { TeamBadge } from "@/lib/teamColors.tsx";
@@ -109,15 +109,9 @@ export function CartaoJornada({ jornada, comp }: { jornada: Jornada; comp: Compe
         {/* Ação */}
         <div className="flex items-center gap-2">
           <Link to="/jogos"
-            className="flex-1 rounded-xl bg-white px-4 py-2.5 text-center text-sm font-bold transition-smooth hover:scale-[1.01]"
+            className="w-full rounded-xl bg-white px-4 py-2.5 text-center text-sm font-bold transition-smooth hover:scale-[1.01]"
             style={{ color: comp?.deep ?? "#1a1a1a" }}>
             {completa ? "Rever as minhas previsões" : porFazer === total ? "Fazer as previsões" : `Faltam ${porFazer}`}
-          </Link>
-          <Link to="/prognosticos"
-            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/25 px-3 py-2.5 text-sm font-bold text-white/90 transition-smooth hover:bg-white/10"
-            title="Análises antes de votares">
-            <Target className="h-4 w-4" />
-            <span className="hidden sm:inline">Prognósticos</span>
           </Link>
         </div>
       </div>

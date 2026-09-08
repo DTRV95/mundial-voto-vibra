@@ -16,7 +16,6 @@ export interface Aba {
 /** Jogar — tudo o que gira à volta da jornada. */
 export const ABAS_JOGAR: Aba[] = [
   { to: "/jogos", label: "A tua jornada" },
-  { to: "/prognosticos", label: "Prognósticos" },
   { to: "/classificacao", label: "Classificação" },
 ];
 

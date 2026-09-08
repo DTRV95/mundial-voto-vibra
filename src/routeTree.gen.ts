@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SuporteRouteImport } from './routes/suporte'
 import { Route as RankingsRouteImport } from './routes/rankings'
-import { Route as PrognosticosRouteImport } from './routes/prognosticos'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PreVisualizacaoRouteImport } from './routes/pre-visualizacao'
 import { Route as PerfilRouteImport } from './routes/perfil'
@@ -47,11 +46,6 @@ const SuporteRoute = SuporteRouteImport.update({
 const RankingsRoute = RankingsRouteImport.update({
   id: '/rankings',
   path: '/rankings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrognosticosRoute = PrognosticosRouteImport.update({
-  id: '/prognosticos',
-  path: '/prognosticos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -171,7 +165,6 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof PerfilRoute
   '/pre-visualizacao': typeof PreVisualizacaoRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/prognosticos': typeof PrognosticosRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
@@ -197,7 +190,6 @@ export interface FileRoutesByTo {
   '/perfil': typeof PerfilRoute
   '/pre-visualizacao': typeof PreVisualizacaoRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/prognosticos': typeof PrognosticosRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
@@ -224,7 +216,6 @@ export interface FileRoutesById {
   '/perfil': typeof PerfilRoute
   '/pre-visualizacao': typeof PreVisualizacaoRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/prognosticos': typeof PrognosticosRoute
   '/rankings': typeof RankingsRoute
   '/suporte': typeof SuporteRoute
   '/termos': typeof TermosRoute
@@ -252,7 +243,6 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/pre-visualizacao'
     | '/privacidade'
-    | '/prognosticos'
     | '/rankings'
     | '/suporte'
     | '/termos'
@@ -278,7 +268,6 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/pre-visualizacao'
     | '/privacidade'
-    | '/prognosticos'
     | '/rankings'
     | '/suporte'
     | '/termos'
@@ -304,7 +293,6 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/pre-visualizacao'
     | '/privacidade'
-    | '/prognosticos'
     | '/rankings'
     | '/suporte'
     | '/termos'
@@ -331,7 +319,6 @@ export interface RootRouteChildren {
   PerfilRoute: typeof PerfilRoute
   PreVisualizacaoRoute: typeof PreVisualizacaoRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
-  PrognosticosRoute: typeof PrognosticosRoute
   RankingsRoute: typeof RankingsRoute
   SuporteRoute: typeof SuporteRoute
   TermosRoute: typeof TermosRoute
@@ -362,13 +349,6 @@ declare module '@tanstack/react-router' {
       path: '/rankings'
       fullPath: '/rankings'
       preLoaderRoute: typeof RankingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/prognosticos': {
-      id: '/prognosticos'
-      path: '/prognosticos'
-      fullPath: '/prognosticos'
-      preLoaderRoute: typeof PrognosticosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -540,7 +520,6 @@ const rootRouteChildren: RootRouteChildren = {
   PerfilRoute: PerfilRoute,
   PreVisualizacaoRoute: PreVisualizacaoRoute,
   PrivacidadeRoute: PrivacidadeRoute,
-  PrognosticosRoute: PrognosticosRoute,
   RankingsRoute: RankingsRoute,
   SuporteRoute: SuporteRoute,
   TermosRoute: TermosRoute,

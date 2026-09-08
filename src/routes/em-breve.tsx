@@ -200,21 +200,7 @@ function EmBreve() {
           </SeccaoFeature>
         </Revelar>
 
-        <Revelar>
-          <SeccaoFeature
-            etiqueta="Antes de votares"
-            titulo={<>Prognósticos para cada jogo.</>}
-            texto="Análise do confronto, forma das equipas e o que costuma acontecer neste tipo de jogo. Lês, decides, e votas — ou ignoras tudo e vais pelo instinto."
-            pontos={[
-              "Uma análise por jogo oficial",
-              "Probabilidades e tendências",
-              "A opinião da comunidade, se a quiseres ver",
-            ]}
-            cor={AZUL === "#183059" ? CIANO : AZUL}
-          >
-            <EcraPrognosticos jornada={null} cor={CIANO} />
-          </SeccaoFeature>
-        </Revelar>
+        
 
         {/* ── O DNA — a novidade maior, por isso leva bloco próprio ── */}
         <Revelar>

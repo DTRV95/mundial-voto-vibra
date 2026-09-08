@@ -7,6 +7,7 @@ import { PageTabs, ABAS_JOGAR } from "@/components/PageTabs";
 import { CompetitionAtmosphere, PageHeader, CompetitionPicker } from "@/components/CompetitionAtmosphere";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
 import { TeamBadge } from "@/lib/teamColors.tsx";
+import { nomeCurto } from "@/lib/clubBadge";
 
 export const Route = createFileRoute("/classificacao")({
   head: () => ({
@@ -148,8 +149,21 @@ function Classificacao() {
           <Table2 className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" />
           <p className="font-display text-lg">Ainda sem jogos disputados</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            A classificação de {active?.name ?? "competição"} aparece aqui a partir da primeira jornada.
+            Ainda não há jogos terminados {active?.name ? `da ${active.name}` : ""}.
+            A tabela aparece aqui assim que a primeira jornada acabar.
           </p>
+        </div>
+      )}
+
+      {tabela.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider"
+            style={{ background: `${active?.accent ?? "#888"}1F`, color: active?.accent }}>
+            {active?.emoji} {active?.name}
+          </span>
+          <span className="text-[11px] text-muted-foreground">
+            {tabela.length} equipas
+          </span>
         </div>
       )}
 
@@ -169,20 +183,20 @@ function Classificacao() {
 
       {tabela.length > 0 && (
         <div className="overflow-x-auto rounded-2xl border border-border bg-card/70">
-          <table className="w-full min-w-[560px] text-sm">
+          <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-[10px] uppercase tracking-wider text-muted-foreground">
                 <th className="px-3 py-2.5 text-left font-bold">#</th>
                 <th className="px-2 py-2.5 text-left font-bold">Equipa</th>
-                <th className="px-2 py-2.5 text-center font-bold">J</th>
-                <th className="px-2 py-2.5 text-center font-bold">V</th>
-                <th className="px-2 py-2.5 text-center font-bold">E</th>
-                <th className="px-2 py-2.5 text-center font-bold">D</th>
-                <th className="px-2 py-2.5 text-center font-bold">GM</th>
-                <th className="px-2 py-2.5 text-center font-bold">GS</th>
-                <th className="px-2 py-2.5 text-center font-bold">DG</th>
-                <th className="px-3 py-2.5 text-center font-bold">Pts</th>
-                <th className="px-3 py-2.5 text-left font-bold">Forma</th>
+                <th className="px-1.5 py-2.5 text-center font-bold">J</th>
+                <th className="hidden px-2 py-2.5 text-center font-bold sm:table-cell">V</th>
+                <th className="hidden px-2 py-2.5 text-center font-bold sm:table-cell">E</th>
+                <th className="hidden px-2 py-2.5 text-center font-bold sm:table-cell">D</th>
+                <th className="hidden px-2 py-2.5 text-center font-bold md:table-cell">GM</th>
+                <th className="hidden px-2 py-2.5 text-center font-bold md:table-cell">GS</th>
+                <th className="px-1.5 py-2.5 text-center font-bold">DG</th>
+                <th className="px-2 py-2.5 text-center font-bold">Pts</th>
+                <th className="hidden px-3 py-2.5 text-left font-bold sm:table-cell">Forma</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -198,26 +212,33 @@ function Classificacao() {
                       {l.posicao}
                     </span>
                   </td>
-                  <td className="px-2 py-2.5">
-                    <div className="flex items-center gap-2">
+                  <td className="max-w-0 px-1.5 py-2.5">
+                    <div className="flex min-w-0 items-center gap-2">
                       <TeamBadge code={l.codigo} flag={null} name={l.nome} monogram={l.monograma} crest={l.emblema} size="sm" />
-                      <span className="truncate font-semibold">{l.nome}</span>
+                      <div className="min-w-0">
+                        <span className="block truncate font-semibold">{nomeCurto(l.nome)}</span>
+                        {/* No telemóvel não há coluna para a forma: fica
+                            aqui por baixo do nome, em miniatura. */}
+                        <span className="mt-1 block sm:hidden">
+                          <Forma forma={l.forma} mini />
+                        </span>
+                      </div>
                     </div>
                   </td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-muted-foreground">{d.jogos}</td>
-                  <td className="px-2 py-2.5 text-center tabular-nums">{d.vitorias}</td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-muted-foreground">{d.empates}</td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-muted-foreground">{d.derrotas}</td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-muted-foreground">{d.golos_marcados}</td>
-                  <td className="px-2 py-2.5 text-center tabular-nums text-muted-foreground">{d.golos_sofridos}</td>
-                  <td className="px-2 py-2.5 text-center tabular-nums">
+                  <td className="px-1.5 py-2.5 text-center tabular-nums text-muted-foreground">{d.jogos}</td>
+                  <td className="hidden px-2 py-2.5 text-center tabular-nums sm:table-cell">{d.vitorias}</td>
+                  <td className="hidden px-2 py-2.5 text-center tabular-nums text-muted-foreground sm:table-cell">{d.empates}</td>
+                  <td className="hidden px-2 py-2.5 text-center tabular-nums text-muted-foreground sm:table-cell">{d.derrotas}</td>
+                  <td className="hidden px-2 py-2.5 text-center tabular-nums text-muted-foreground md:table-cell">{d.golos_marcados}</td>
+                  <td className="hidden px-2 py-2.5 text-center tabular-nums text-muted-foreground md:table-cell">{d.golos_sofridos}</td>
+                  <td className="px-1.5 py-2.5 text-center tabular-nums">
                     {(() => { const dg = d.golos_marcados - d.golos_sofridos;
                               return dg > 0 ? `+${dg}` : dg; })()}
                   </td>
-                  <td className="px-3 py-2.5 text-center">
+                  <td className="px-2 py-2.5 text-center">
                     <span className="font-display text-lg text-gold">{d.pontos}</span>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="hidden px-3 py-2.5 sm:table-cell">
                     <Forma forma={l.forma} />
                   </td>
                 </tr>
@@ -237,7 +258,7 @@ function Classificacao() {
  * A letra fica lá dentro de propósito: só cor não chega a quem não
  * distingue verde de vermelho.
  */
-function Forma({ forma }: { forma: string | null }) {
+function Forma({ forma, mini = false }: { forma: string | null; mini?: boolean }) {
   if (!forma) return <span className="text-[11px] text-muted-foreground/40">—</span>;
 
   const cor: Record<string, string> = {
@@ -248,10 +269,12 @@ function Forma({ forma }: { forma: string | null }) {
   const titulo: Record<string, string> = { V: "Vitória", E: "Empate", D: "Derrota" };
 
   return (
-    <span className="flex items-center gap-1">
+    <span className={`flex items-center ${mini ? "gap-0.5" : "gap-1"}`}>
       {forma.split("").map((r, i) => (
         <span key={i} title={titulo[r] ?? r}
-          className={`grid h-5 w-5 place-items-center rounded-md text-[10px] font-bold ${cor[r] ?? "bg-muted"}`}>
+          className={`grid place-items-center rounded font-bold ${
+            mini ? "h-3 w-3 text-[7px]" : "h-5 w-5 rounded-md text-[10px]"
+          } ${cor[r] ?? "bg-muted"}`}>
           {r}
         </span>
       ))}

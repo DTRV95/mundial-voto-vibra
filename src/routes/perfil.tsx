@@ -264,7 +264,7 @@ function Perfil() {
   }
 
   return (
-    <div className="px-5 pt-6 pb-24 md:pb-10 md:px-8 max-w-2xl mx-auto">
+    <div className="mx-auto max-w-2xl px-5 pb-12 pt-6 md:px-8">
       {RankSharePortal}
 
       {avatarOpen && (

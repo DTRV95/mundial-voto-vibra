@@ -6,6 +6,7 @@ import { useState } from "react";
 import { PageTabs, ABAS_JOGAR } from "@/components/PageTabs";
 import { CompetitionAtmosphere, PageHeader, CompetitionPicker } from "@/components/CompetitionAtmosphere";
 import { useActiveCompetition } from "@/lib/useActiveCompetition";
+import type { Competition } from "@/lib/useCompetitions";
 import { TeamBadge } from "@/lib/teamColors.tsx";
 import { nomeCurto } from "@/lib/clubBadge";
 
@@ -53,7 +54,7 @@ const LADO_VAZIO: Lado = {
   golos_marcados: 0, golos_sofridos: 0, pontos: 0,
 };
 
-type Vista = "geral" | "casa" | "fora";
+type Vista = "geral" | "casa" | "fora" | "forma";
 
 function Classificacao() {
   const { competitions, active, setSlug } = useActiveCompetition();
@@ -112,7 +113,7 @@ function Classificacao() {
    * feitos só desse lado. Uma equipa forte em casa e frágil fora não
    * tem a mesma posição nas três vistas — é esse o objetivo.
    */
-  const linhas = vista === "geral"
+  const linhas = (vista === "geral" || vista === "forma")
     ? tabela
     : [...tabela]
         .map(l => ({ ...l, lado: vista === "casa" ? l.casa : l.fora }))
@@ -122,7 +123,7 @@ function Classificacao() {
           b.lado.golos_marcados - a.lado.golos_marcados)
         .map((l, i) => ({ ...l, posicao: i + 1 }));
 
-  const dados = (l: any): Lado => vista === "geral"
+  const dados = (l: any): Lado => (vista === "geral" || vista === "forma")
     ? { jogos: l.jogos, vitorias: l.vitorias, empates: l.empates, derrotas: l.derrotas,
         golos_marcados: l.golos_marcados, golos_sofridos: l.golos_sofridos, pontos: l.pontos }
     : l.lado;
@@ -156,97 +157,92 @@ function Classificacao() {
       )}
 
       {tabela.length > 0 && (
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider"
-            style={{ background: `${active?.accent ?? "#888"}1F`, color: active?.accent }}>
-            {active?.emoji} {active?.name}
-          </span>
-          <span className="text-[11px] text-muted-foreground">
-            {tabela.length} equipas
-          </span>
-        </div>
-      )}
+        <>
+          {/* Os separadores. "Forma" é uma vista própria, como nos
+              sites de resultados — não uma coluna espremida ao lado
+              dos pontos. */}
+          <div className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1">
+            {([["geral", "Total"], ["casa", "Casa"], ["fora", "Fora"], ["forma", "Forma"]] as [Vista, string][])
+              .map(([v, rotulo]) => (
+                <button key={v} onClick={() => setVista(v)}
+                  className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-smooth ${
+                    vista === v ? "text-white" : "bg-secondary text-muted-foreground hover:text-foreground"
+                  }`}
+                  style={vista === v ? { background: active?.accent ?? "var(--gold)" } : undefined}>
+                  {rotulo}
+                </button>
+              ))}
+          </div>
 
-      {tabela.length > 0 && (
-        <div className="mb-3 inline-flex rounded-xl border border-border bg-card/60 p-1">
-          {([["geral", "Geral"], ["casa", "Em casa"], ["fora", "Fora"]] as [Vista, string][]).map(([v, rotulo]) => (
-            <button key={v} onClick={() => setVista(v)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-smooth ${
-                vista === v ? "text-background" : "text-muted-foreground hover:text-foreground"
-              }`}
-              style={vista === v ? { background: active?.accent ?? "var(--gold)" } : undefined}>
-              {rotulo}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {tabela.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl border border-border bg-card/70">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-[10px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-3 py-2.5 text-left font-bold">#</th>
-                <th className="px-2 py-2.5 text-left font-bold">Equipa</th>
-                <th className="px-1.5 py-2.5 text-center font-bold">J</th>
-                <th className="hidden px-2 py-2.5 text-center font-bold sm:table-cell">V</th>
-                <th className="hidden px-2 py-2.5 text-center font-bold sm:table-cell">E</th>
-                <th className="hidden px-2 py-2.5 text-center font-bold sm:table-cell">D</th>
-                <th className="hidden px-2 py-2.5 text-center font-bold md:table-cell">GM</th>
-                <th className="hidden px-2 py-2.5 text-center font-bold md:table-cell">GS</th>
-                <th className="px-1.5 py-2.5 text-center font-bold">DG</th>
-                <th className="px-2 py-2.5 text-center font-bold">Pts</th>
-                <th className="hidden px-3 py-2.5 text-left font-bold sm:table-cell">Forma</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {linhas.map(l => {
-                const d = dados(l);
-                return (
-                <tr key={l.team_id} className="transition-smooth hover:bg-accent/40">
-                  <td className="px-3 py-2.5">
-                    <span className="grid h-6 w-6 place-items-center rounded-lg text-xs font-bold"
-                      style={l.posicao <= 4
-                        ? { background: `color-mix(in srgb, ${active?.accent ?? "var(--gold)"} 20%, transparent)`, color: active?.accent }
-                        : { color: "var(--muted-foreground)" }}>
-                      {l.posicao}
-                    </span>
-                  </td>
-                  <td className="max-w-0 px-1.5 py-2.5">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <TeamBadge code={l.codigo} flag={null} name={l.nome} monogram={l.monograma} crest={l.emblema} size="sm" />
-                      <div className="min-w-0">
-                        <span className="block truncate font-semibold">{nomeCurto(l.nome)}</span>
-                        {/* No telemóvel não há coluna para a forma: fica
-                            aqui por baixo do nome, em miniatura. */}
-                        <span className="mt-1 block sm:hidden">
-                          <Forma forma={l.forma} mini />
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-1.5 py-2.5 text-center tabular-nums text-muted-foreground">{d.jogos}</td>
-                  <td className="hidden px-2 py-2.5 text-center tabular-nums sm:table-cell">{d.vitorias}</td>
-                  <td className="hidden px-2 py-2.5 text-center tabular-nums text-muted-foreground sm:table-cell">{d.empates}</td>
-                  <td className="hidden px-2 py-2.5 text-center tabular-nums text-muted-foreground sm:table-cell">{d.derrotas}</td>
-                  <td className="hidden px-2 py-2.5 text-center tabular-nums text-muted-foreground md:table-cell">{d.golos_marcados}</td>
-                  <td className="hidden px-2 py-2.5 text-center tabular-nums text-muted-foreground md:table-cell">{d.golos_sofridos}</td>
-                  <td className="px-1.5 py-2.5 text-center tabular-nums">
-                    {(() => { const dg = d.golos_marcados - d.golos_sofridos;
-                              return dg > 0 ? `+${dg}` : dg; })()}
-                  </td>
-                  <td className="px-2 py-2.5 text-center">
-                    <span className="font-display text-lg text-gold">{d.pontos}</span>
-                  </td>
-                  <td className="hidden px-3 py-2.5 sm:table-cell">
-                    <Forma forma={l.forma} />
-                  </td>
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/40 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <th className="w-10 py-2.5 pl-3 text-left font-bold">#</th>
+                  <th className="py-2.5 pl-1 pr-2 text-left font-bold">Equipa</th>
+                  {vista === "forma" ? (
+                    <th className="px-2 py-2.5 text-center font-bold">Últimos 5</th>
+                  ) : (
+                    <>
+                      <th className="w-10 px-1 py-2.5 text-center font-bold">PJ</th>
+                      <th className="w-16 px-1 py-2.5 text-center font-bold">G</th>
+                    </>
+                  )}
+                  <th className="w-12 py-2.5 pr-3 text-center font-bold">P</th>
                 </tr>
-              );})}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {linhas.map(l => {
+                  const d = dados(l);
+                  const zona = zonaDe(l.posicao, tabela.length, active);
+                  return (
+                    <tr key={l.team_id} className="transition-smooth hover:bg-accent/40">
+                      <td className="py-2.5 pl-3">
+                        <span className="grid h-6 w-6 place-items-center rounded-md text-[11px] font-bold tabular-nums"
+                          style={zona
+                            ? { background: zona.fundo, color: zona.texto }
+                            : { color: "var(--muted-foreground)" }}>
+                          {l.posicao}
+                        </span>
+                      </td>
+
+                      <td className="min-w-0 py-2.5 pl-1 pr-2">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <TeamBadge code={l.codigo} flag={null} name={l.nome}
+                            monogram={l.monograma} crest={l.emblema} size="sm" />
+                          <span className="truncate font-semibold">{nomeCurto(l.nome)}</span>
+                        </div>
+                      </td>
+
+                      {vista === "forma" ? (
+                        <td className="px-2 py-2.5">
+                          <div className="flex justify-center">
+                            <Forma forma={l.forma} />
+                          </div>
+                        </td>
+                      ) : (
+                        <>
+                          <td className="px-1 py-2.5 text-center tabular-nums text-muted-foreground">{d.jogos}</td>
+                          <td className="px-1 py-2.5 text-center text-[13px] tabular-nums text-muted-foreground">
+                            {d.golos_marcados}<span className="text-muted-foreground/40">:</span>{d.golos_sofridos}
+                          </td>
+                        </>
+                      )}
+
+                      <td className="py-2.5 pr-3 text-center">
+                        <span className="font-display text-lg leading-none">{d.pontos}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <Legenda comp={active} total={tabela.length} />
+        </>
       )}
+
     </div>
   );
 }
@@ -255,10 +251,13 @@ function Classificacao() {
  * Os últimos cinco jogos, do mais antigo à esquerda para o mais
  * recente à direita — a mesma direção em que o tempo se lê.
  *
+ * Tem separador próprio em vez de coluna: no telemóvel, espremida ao
+ * lado dos pontos, obrigava a cortar os nomes das equipas.
+ *
  * A letra fica lá dentro de propósito: só cor não chega a quem não
  * distingue verde de vermelho.
  */
-function Forma({ forma, mini = false }: { forma: string | null; mini?: boolean }) {
+function Forma({ forma }: { forma: string | null }) {
   if (!forma) return <span className="text-[11px] text-muted-foreground/40">—</span>;
 
   const cor: Record<string, string> = {
@@ -269,15 +268,66 @@ function Forma({ forma, mini = false }: { forma: string | null; mini?: boolean }
   const titulo: Record<string, string> = { V: "Vitória", E: "Empate", D: "Derrota" };
 
   return (
-    <span className={`flex items-center ${mini ? "gap-0.5" : "gap-1"}`}>
+    <span className="flex items-center gap-1">
       {forma.split("").map((r, i) => (
         <span key={i} title={titulo[r] ?? r}
-          className={`grid place-items-center rounded font-bold ${
-            mini ? "h-3 w-3 text-[7px]" : "h-5 w-5 rounded-md text-[10px]"
-          } ${cor[r] ?? "bg-muted"}`}>
+          className={`grid h-6 w-6 place-items-center rounded-md text-[10px] font-bold ${cor[r] ?? "bg-muted"}`}>
           {r}
         </span>
       ))}
     </span>
+  );
+}
+
+/**
+ * A cor da posição.
+ *
+ * Os limites vêm da competição, não daqui: as regras de apuramento
+ * mudam de época para época e não são minhas para inventar. Zero em
+ * qualquer uma delas desliga essa faixa.
+ */
+function zonaDe(posicao: number, total: number, comp: Competition | null) {
+  if (!comp) return null;
+  const acento = comp.accent ?? "var(--gold)";
+
+  if (comp.lugaresTop > 0 && posicao <= comp.lugaresTop) {
+    return { fundo: acento, texto: "#fff", rotulo: "Apuramento direto" };
+  }
+  if (comp.lugaresPlayoff > 0 && posicao <= comp.lugaresTop + comp.lugaresPlayoff) {
+    return { fundo: `${acento}2E`, texto: acento, rotulo: "Play-off" };
+  }
+  if (comp.lugaresDescida > 0 && posicao > total - comp.lugaresDescida) {
+    return { fundo: "oklch(0.58 0.24 27 / 0.18)", texto: "var(--wc-red)", rotulo: "Descida" };
+  }
+  return null;
+}
+
+/** Sem isto as cores são decoração. */
+function Legenda({ comp, total }: { comp: Competition | null; total: number }) {
+  if (!comp) return null;
+  const acento = comp.accent ?? "var(--gold)";
+  const faixas = [
+    comp.lugaresTop > 0 && { cor: acento, texto: `1º ao ${comp.lugaresTop}º · apuramento direto` },
+    comp.lugaresPlayoff > 0 && {
+      cor: `${acento}55`,
+      texto: `${comp.lugaresTop + 1}º ao ${comp.lugaresTop + comp.lugaresPlayoff}º · play-off`,
+    },
+    comp.lugaresDescida > 0 && total > comp.lugaresDescida && {
+      cor: "var(--wc-red)",
+      texto: `${total - comp.lugaresDescida + 1}º ao ${total}º · descida`,
+    },
+  ].filter(Boolean) as { cor: string; texto: string }[];
+
+  if (faixas.length === 0) return null;
+
+  return (
+    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+      {faixas.map(f => (
+        <span key={f.texto} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <span className="h-2.5 w-2.5 rounded-sm" style={{ background: f.cor }} />
+          {f.texto}
+        </span>
+      ))}
+    </div>
   );
 }

@@ -23,6 +23,12 @@ export interface Competition {
   tone: string;
   /** Enquadramento da arte oficial (object-position) */
   artPosition: string;
+  /** Lugares de apuramento direto, na classificação */
+  lugaresTop: number;
+  /** Lugares de acesso condicionado (play-off), a seguir aos de cima */
+  lugaresPlayoff: number;
+  /** Lugares de descida, contados de baixo para cima */
+  lugaresDescida: number;
 }
 
 /**
@@ -30,7 +36,7 @@ export interface Competition {
  * Liga Portugal Betclic — manual de normas gráficas.
  * UEFA Champions League — identidade "Kick of Light" (2024–27).
  */
-const THEMES: Record<string, Omit<Competition, "id" | "slug" | "name" | "short" | "emoji">> = {
+const THEMES: Record<string, Omit<Competition, "id" | "slug" | "name" | "short" | "emoji" | "lugaresTop" | "lugaresPlayoff" | "lugaresDescida">> = {
   "liga-portugal": {
     accent: "#E10014",                       // vermelho Magma
     deep: "#82000A",                         // vermelho profundo
@@ -72,7 +78,7 @@ export function useCompetitions() {
     queryFn: async (): Promise<Competition[]> => {
       const { data } = await (supabase as any)
         .from("competitions")
-        .select("id,slug,name,short_name,emoji,sort_order")
+        .select("id,slug,name,short_name,emoji,sort_order,lugares_top,lugares_playoff,lugares_descida")
         .order("sort_order");
 
       return ((data ?? []) as any[]).map((c) => ({
@@ -81,6 +87,9 @@ export function useCompetitions() {
         name: c.name,
         short: c.short_name ?? c.name,
         emoji: c.emoji ?? "⚽",
+        lugaresTop: c.lugares_top ?? 0,
+        lugaresPlayoff: c.lugares_playoff ?? 0,
+        lugaresDescida: c.lugares_descida ?? 0,
         ...(THEMES[c.slug] ?? FALLBACK),
       }));
     },

@@ -1,0 +1,14 @@
+-- Zonas da classificação. APLICADA a 2026-09-08.
+--
+-- A tabela marca a posição com um quadrado de cor. As regras de
+-- apuramento não são para inventar em código — mudam de época para
+-- época — por isso vivem em colunas da competição:
+--
+--   lugares_top      apuramento direto
+--   lugares_playoff  acesso condicionado, a seguir aos de cima
+--   lugares_descida  os últimos, contados de baixo
+--
+-- Liga Portugal: 3 / 2 / 2.
+-- Champions, fase de liga: 8 passam direto, 16 a play-off, 12 fora.
+--
+-- Corrigem-se com um update, e zero desliga a marcação da zona.

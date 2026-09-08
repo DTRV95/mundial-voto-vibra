@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/useAuth";
-import { formatDate, formatTime, votingStatus, PHASE_LABEL } from "@/lib/format";
+import { formatDate, formatTime, votingStatus } from "@/lib/format";
 import { toast } from "sonner";
 import { BotaoVerBancada, PainelBancada, DesfechoBancada, type LinhaBancada } from "@/components/dna/VerBancada";
 import { Lock, Users2, Info, TrendingUp, ChevronDown, Share2, Check, Trophy, Target, CalendarClock, Wand2, X } from "lucide-react";
 import { UserAvatar } from "@/components/AvatarPicker";
 import { TeamBadge } from "@/lib/teamColors.tsx";
+import { coresDoClube, nomeCurto } from "@/lib/clubBadge";
 import { BoletimJogo } from "@/components/BoletimJogo";
 import { MatchCard, type MatchCardData } from "@/components/MatchCard";
 
@@ -38,7 +39,7 @@ function JogoPage() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,phase,voting_open,is_official,home_score,away_score,qualifier,round:round_id(label),home:home_team_id(name,flag,code,monogram,crest_url,estadio),away:away_team_id(name,flag,code,monogram,crest_url)")
+        .select("id,kickoff_at,phase,voting_open,is_official,home_score,away_score,qualifier,round:round_id(label,number),home:home_team_id(name,flag,code,monogram,crest_url,estadio),away:away_team_id(name,flag,code,monogram,crest_url)")
         .eq("id", id).maybeSingle();
       return data;
     },
@@ -409,6 +410,8 @@ function JogoPage() {
 
   const home = (match.home as any) ?? { name: "?", flag: "⚽", code: "" };
   const away = (match.away as any) ?? { name: "?", flag: "⚽", code: "" };
+  const corCasa = coresDoClube(home.name).primaria;
+  const corFora = coresDoClube(away.name).primaria;
 
   return (
     <div className="px-4 pt-4 pb-10 md:px-8">
@@ -424,41 +427,85 @@ function JogoPage() {
         </button>
       </div>
 
-      {/* Match header */}
-      <header className="mt-3 overflow-hidden rounded-3xl relative">
-        {/* tricolor bar */}
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,#E61D25 0%,#3CAC3B 50%,#2A398D 100%)" }} />
-        {/* dark pitch bg */}
-        <div className="relative px-5 pt-5 pb-0" style={{ background: "linear-gradient(160deg, oklch(0.22 0.09 155) 0%, oklch(0.16 0.06 165) 100%)" }}>
-          {/* subtle pitch grid */}
-          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 29px,rgba(255,255,255,1) 29px,rgba(255,255,255,1) 30px),repeating-linear-gradient(90deg,transparent,transparent 29px,rgba(255,255,255,1) 29px,rgba(255,255,255,1) 30px)" }} />
+      {/* Cabeçalho do jogo.
+          Era um retângulo verde com uma grelha por cima — um relvado
+          desenhado à pressa, igual para todos os jogos, e sobra do
+          Mundial. Agora é um estádio à noite vestido dos dois clubes:
+          os holofotes vêm de cima, a cor de cada equipa entra pelo seu
+          lado, e o relvado com as faixas do corte fica em baixo.
 
-          {/* Phase + status row */}
-          <div className="relative flex items-center justify-between mb-5">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-white/40">{PHASE_LABEL[match.phase] ?? match.phase}</span>
-            <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+          Não há fotografia nenhuma aqui. Não existe fonte de imagens
+          de estádios que se possa usar sem licença, e uma foto errada
+          ou repetida seria pior do que isto. */}
+      <header className="relative mt-3 overflow-hidden rounded-3xl">
+        {/* A fita dos dois clubes, cortada ao meio */}
+        <div className="h-1 w-full" style={{
+          background: `linear-gradient(90deg, ${corCasa} 0%, ${corCasa} 44%, transparent 48%, transparent 52%, ${corFora} 56%, ${corFora} 100%)`,
+        }} />
+
+        <div className="relative isolate px-5 pt-5" style={{ background: "#070A10" }}>
+
+          {/* ── O estádio ──────────────────────────────────── */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+            {/* Holofotes: dois cones de luz vindos do topo */}
+            <div className="absolute -top-1/2 left-[8%] h-[160%] w-[42%] -rotate-12"
+              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.16), transparent 62%)", filter: "blur(26px)" }} />
+            <div className="absolute -top-1/2 right-[8%] h-[160%] w-[42%] rotate-12"
+              style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.16), transparent 62%)", filter: "blur(26px)" }} />
+
+            {/* A cor de cada clube entra pelo seu lado */}
+            <div className="absolute inset-0" style={{
+              background:
+                `radial-gradient(75% 95% at 0% 45%, ${corCasa}55 0%, ${corCasa}18 38%, transparent 68%),` +
+                `radial-gradient(75% 95% at 100% 45%, ${corFora}55 0%, ${corFora}18 38%, transparent 68%)`,
+            }} />
+
+            {/* A bancada: um pontilhado fino que sugere gente sem a desenhar */}
+            <div className="absolute inset-x-0 top-0 h-[55%] opacity-[0.16]" style={{
+              backgroundImage: "radial-gradient(rgba(255,255,255,0.7) 0.5px, transparent 0.6px)",
+              backgroundSize: "7px 7px",
+            }} />
+
+            {/* O relvado, com as faixas do corte a abrir em perspetiva */}
+            <div className="absolute inset-x-0 bottom-0 h-[38%]" style={{
+              background: "linear-gradient(180deg, transparent, rgba(10,40,22,0.55) 45%, rgba(8,32,18,0.85) 100%)",
+            }} />
+            <div className="absolute inset-x-0 bottom-0 h-[38%] opacity-[0.10]" style={{
+              backgroundImage: "repeating-linear-gradient(97deg, rgba(255,255,255,0.9) 0 2px, transparent 2px 46px)",
+            }} />
+            {/* A linha do meio-campo */}
+            <div className="absolute bottom-0 left-1/2 h-[38%] w-px -translate-x-1/2 bg-white/10" />
+          </div>
+
+          {/* Jornada + estado da votação */}
+          <div className="relative mb-5 flex items-center justify-between gap-2">
+            <span className="truncate text-[11px] font-bold uppercase tracking-[0.2em] text-white/45">
+              {(match as any).round?.label
+                ?? ((match as any).round?.number ? `Jornada ${(match as any).round.number}` : "Jogo")}
+            </span>
+            <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
               status?.tone === "primary" ? "border-wc-green/50 bg-wc-green/15 text-wc-green"
                 : status?.tone === "gold" ? "border-gold/50 bg-gold/15 text-gold"
                 : "border-red-500/50 bg-red-500/15 text-red-400"
             }`}>{status?.label}</span>
           </div>
 
-          {/* Teams + score */}
-          <div className="relative flex items-center justify-between gap-2 pb-6">
+          {/* As equipas */}
+          <div className="relative flex items-center justify-between gap-2 pb-7">
             <TeamBlock flag={home.flag} name={home.name} code={home.code} monogram={home.monogram} crest={home.crest_url} />
-            <div className="flex flex-col items-center gap-1 shrink-0">
+            <div className="flex shrink-0 flex-col items-center gap-1 px-1">
               {match.home_score != null && match.away_score != null ? (
                 <>
-                  <div className="font-display text-5xl leading-none text-white tabular-nums">
-                    {match.home_score} <span className="text-white/30">:</span> {match.away_score}
+                  <div className="font-display text-5xl leading-none tabular-nums text-white md:text-6xl">
+                    {match.home_score}<span className="mx-2 text-white/25">:</span>{match.away_score}
                   </div>
-                  <div className="text-[9px] uppercase tracking-[0.18em] text-gold font-bold mt-1">Resultado Final</div>
-                  <div className="text-[9px] uppercase tracking-widest text-white/30 mt-0.5">{formatDate(match.kickoff_at)}</div>
+                  <div className="mt-1 text-[9px] font-bold uppercase tracking-[0.18em] text-gold">Resultado final</div>
+                  <div className="mt-0.5 text-[9px] uppercase tracking-widest text-white/30">{formatDate(match.kickoff_at)}</div>
                 </>
               ) : (
                 <>
-                  <div className="font-display text-4xl text-gold leading-none">{formatTime(match.kickoff_at)}</div>
-                  <div className="text-[9px] uppercase tracking-widest text-white/40 mt-1">{formatDate(match.kickoff_at)}</div>
+                  <div className="font-display text-4xl leading-none text-white md:text-5xl">{formatTime(match.kickoff_at)}</div>
+                  <div className="mt-1 text-[9px] uppercase tracking-widest text-white/40">{formatDate(match.kickoff_at)}</div>
                 </>
               )}
             </div>
@@ -986,8 +1033,10 @@ function TeamBlock({ flag, name, code, monogram, crest }: {
           nunca o recebia, e o emblema oficial nunca chegava a aparecer
           nesta página — caía sempre no emblema gerado. */}
       <TeamBadge code={code ?? null} flag={flag} name={name}
-        monogram={monogram} crest={crest} size="lg" />
-      <span className="text-xs font-bold text-center text-white leading-tight line-clamp-2 px-1">{name}</span>
+        monogram={monogram} crest={crest} size="xl" />
+      <span className="w-full truncate px-1 text-center font-display text-lg uppercase leading-none text-white md:text-2xl">
+        {nomeCurto(name)}
+      </span>
     </div>
   );
 }

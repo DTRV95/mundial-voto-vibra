@@ -12,6 +12,7 @@ import { useNotifications } from "@/lib/useNotifications";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { MenuMobile } from "@/components/MenuMobile";
+import { EscolherClubeModal } from "@/components/EscolherClubeModal";
 import { supabase } from "@/integrations/supabase/client";
 import { ShieldCheck as Shield, CircleHelp as HelpCircle, Menu } from "lucide-react";
 import logoSvg from "@/assets/logo.svg";
@@ -130,6 +131,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <MenuMobile aberto={menuAberto} fechar={() => setMenuAberto(false)} />
       <BottomNav />
       <OnboardingModal />
+      {loggedIn && <EscolherClubeModal />}
       <CookieBanner />
       {loggedIn && <FeedbackModal />}
     </div>

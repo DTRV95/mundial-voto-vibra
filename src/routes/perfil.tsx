@@ -15,6 +15,8 @@ import { BadgeShelf } from "@/components/Badges";
 import { CartaoDnaCompacto } from "@/components/dna/CartaoDnaCompacto";
 import { useEstatisticas, usePosicaoGeral } from "@/lib/useEstatisticas";
 import { divisaoDe } from "@/lib/divisoes";
+import { coresDoClube } from "@/lib/clubBadge";
+import { useClubeFavorito } from "@/lib/useDna";
 import { DefinicoesDna } from "@/components/dna/DefinicoesDna";
 
 export const Route = createFileRoute("/perfil")({
@@ -76,6 +78,7 @@ function Perfil() {
   });
 
   // Fonte única: as mesmas somas que alimentam os rankings.
+  const { data: clubeFavorito } = useClubeFavorito(user?.id);
   const { data: stats } = useEstatisticas(user?.id);
   const { data: myGlobalRank } = usePosicaoGeral(user?.id);
 
@@ -154,6 +157,13 @@ function Perfil() {
   if (!user) return null;
 
   const acc = stats?.acertoPct ?? 0;
+
+  // A cor do cartão vem do clube de quem o está a ver. Sem clube
+  // escolhido, o dourado da casa.
+  const corClube = clubeFavorito?.nome
+    ? coresDoClube(clubeFavorito.nome).primaria
+    : "#C8960C";
+  const emblemaClube = clubeFavorito?.crest_url ?? null;
 
   const pointsHistory = history.filter((h: any) => h.points != null && h.points > 0);
   const bestGame = pointsHistory.length > 0
@@ -276,16 +286,30 @@ function Perfil() {
       )}
 
       {/* Hero card */}
-      <div className="relative overflow-hidden rounded-3xl mb-8"
-        style={{ background: "linear-gradient(160deg,#0d2a12 0%,#0a1a2e 60%,#1a1000 100%)" }}>
-        {/* WC tricolor stripe */}
-        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,#E61D25 0%,#3CAC3B 50%,#2A398D 100%)" }} />
-        {/* Pitch grid overlay */}
-        <div className="pointer-events-none absolute inset-0 opacity-[0.035] select-none"
-          style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 28px,white 28px,white 29px),repeating-linear-gradient(90deg,transparent,transparent 28px,white 28px,white 29px)" }} />
-        {/* Radial glow behind avatar */}
-        <div className="pointer-events-none absolute -top-12 -left-12 h-64 w-64 rounded-full opacity-20"
-          style={{ background: "radial-gradient(circle,#c8960c 0%,transparent 70%)" }} />
+      {/* O cartão de adepto.
+          Era um retângulo verde-e-azul com a barra tricolor do Mundial
+          e uma grelha de relvado por cima — igual para toda a gente e
+          já sem significado nenhum.
+
+          Agora veste-se do clube da pessoa: o azul de quem é do Porto,
+          o vermelho de quem é do Benfica. Quem ainda não escolheu leva
+          o dourado da casa. */}
+      <div className="relative isolate mb-8 overflow-hidden rounded-3xl"
+        style={{ background: "#0A0E15" }}>
+        <div className="h-1 w-full" style={{
+          background: `linear-gradient(90deg, ${corClube} 0%, ${corClube}00 90%)`,
+        }} />
+
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute inset-0" style={{
+            background: `radial-gradient(90% 120% at 0% 0%, ${corClube}66 0%, ${corClube}1A 42%, transparent 72%)`,
+          }} />
+          {/* O emblema do clube, enorme e quase apagado, a servir de marca de água */}
+          {emblemaClube && (
+            <img src={emblemaClube} alt="" aria-hidden
+              className="absolute -right-6 -top-8 h-52 w-52 object-contain opacity-[0.07]" />
+          )}
+        </div>
 
         <div className="relative px-5 pt-6 pb-0">
           {/* Action buttons top-right */}
@@ -358,8 +382,14 @@ function Perfil() {
                 </div>
               )}
 
-              {/* Rank + division pills */}
+              {/* Rank + divisão + clube */}
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                {clubeFavorito?.crest_url && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/8 py-0.5 pl-1 pr-2.5 text-[11px] font-semibold text-white/75">
+                    <img src={clubeFavorito.crest_url} alt="" className="h-4 w-4 object-contain" />
+                    {clubeFavorito.nome}
+                  </span>
+                )}
                 {myGlobalRank != null && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-gold/20 border border-gold/35 px-2.5 py-0.5 text-[11px] font-bold text-gold">
                     🏆 #{myGlobalRank}º global
@@ -378,7 +408,7 @@ function Perfil() {
           </div>
 
           {/* Stats strip */}
-          <div className="grid grid-cols-3 border-t border-white/8 mt-2">
+          <div className="mt-4 grid grid-cols-3 border-t border-white/10">
             {[
               { label: "Pontos", value: stats?.pontos ?? 0, color: "text-gold" },
               { label: "Previsões", value: stats?.previsoes ?? 0, color: "text-white" },

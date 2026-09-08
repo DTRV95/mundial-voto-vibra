@@ -80,15 +80,26 @@ function JogoPage() {
     queryFn: async () => {
       const { data } = await (supabase as any)
         .from("matches")
-        .select("id,kickoff_at,phase,status,voting_open,home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url),predictions(count)")
+        .select("id,kickoff_at,phase,status,voting_open,home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url)")
         .eq("is_official", true)
         .eq("voting_open", true)
         .neq("id", id)
         .order("kickoff_at")
         .limit(4);
-      return ((data as any) ?? [])
-        .filter((m: any) => m.home && m.away)
-        .map((m: any) => ({ ...m, votes_count: m.predictions?.[0]?.count ?? 0 }));
+      const jogos = ((data as any) ?? []).filter((m: any) => m.home && m.away);
+      if (jogos.length === 0) return [];
+
+      // Contagem à parte: ver **quantos** votaram é público, ver
+      // **no quê** é que já não é.
+      const { data: contagens } = await (supabase as any)
+        .from("v_votos_jogo")
+        .select("match_id,votos")
+        .in("match_id", jogos.map((m: any) => m.id));
+      const votos = new Map<string, number>(
+        ((contagens ?? []) as any[]).map(c => [c.match_id, c.votos ?? 0]),
+      );
+
+      return jogos.map((m: any) => ({ ...m, votes_count: votos.get(m.id) ?? 0 }));
     },
   }) as { data: MatchCardData[] };
 

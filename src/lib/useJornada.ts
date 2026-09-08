@@ -39,7 +39,7 @@ export function useJornadas(competitionId: string | null | undefined, userId?: s
         .select(
           "id,kickoff_at,phase,status,voting_open,official_position,highlight_tag," +
           "home:home_team_id(name,flag,code,monogram,crest_url),away:away_team_id(name,flag,code,monogram,crest_url)," +
-          "round:round_id!inner(id,number,label,status),predictions(count)"
+          "round:round_id!inner(id,number,label,status)"
         )
         .eq("competition_id", competitionId)
         .eq("is_official", true)
@@ -48,6 +48,20 @@ export function useJornadas(competitionId: string | null | undefined, userId?: s
 
       const linhas = ((data ?? []) as any[]).filter(m => m.home && m.away && m.round);
       if (linhas.length === 0) return [];
+
+      // Quantas pessoas votaram em cada jogo.
+      //
+      // Vem de uma vista à parte porque as previsões dos outros
+      // deixaram de ser legíveis antes de votarmos — um `count`
+      // sobre a tabela devolveria zero nos jogos por votar, que são
+      // justamente aqueles onde o número serve de empurrão.
+      const { data: contagens } = await (supabase as any)
+        .from("v_votos_jogo")
+        .select("match_id,votos")
+        .in("match_id", linhas.map(m => m.id));
+      const votos = new Map<string, number>(
+        ((contagens ?? []) as any[]).map(c => [c.match_id, c.votos ?? 0]),
+      );
 
       // Em que jogos é que este utilizador já votou
       let votados = new Set<string>();
@@ -70,7 +84,7 @@ export function useJornadas(competitionId: string | null | undefined, userId?: s
           voting_open: m.voting_open,
           home: m.home,
           away: m.away,
-          votes_count: m.predictions?.[0]?.count ?? 0,
+          votes_count: votos.get(m.id) ?? 0,
           already_voted: votados.has(m.id),
           is_official: true,
           round_label: m.round.label ?? (m.round.number ? `Jornada ${m.round.number}` : null),

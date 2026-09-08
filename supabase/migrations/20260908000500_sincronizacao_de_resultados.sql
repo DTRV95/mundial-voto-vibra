@@ -1,0 +1,15 @@
+-- Sincronização automática dos resultados. APLICADA a 2026-09-08.
+--
+-- De 15 em 15 minutos, `sincronizar_resultados()` chama a Edge Function
+-- `sincronizar-resultados`, que pergunta à football-data como acabaram
+-- os jogos oficiais cujo apito passou há mais de duas horas, escreve o
+-- resultado e manda apurar.
+--
+-- Os segredos vivem no Vault, nunca em ficheiro:
+--   url_sincronizacao — endereço da Edge Function
+--   chave_servico     — service_role key do projeto
+--
+-- E a Edge Function precisa do secret FOOTBALL_DATA_KEY.
+--
+-- Sem os segredos a função não rebenta: escreve um aviso e devolve
+-- null, e o cron continua a correr em vazio.

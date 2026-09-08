@@ -1,0 +1,15 @@
+-- Pontuação automática. APLICADA a 2026-09-08.
+--
+-- O elo que faltava. O `apurar_jornada` lia `predictions.points` a
+-- contar que já estivesse preenchida; quem a preenchia era um botão no
+-- /admin. Resultado: o cron de apuramento correu 168 vezes em sete dias
+-- sem fazer nada.
+--
+--   resultado no jogo  ->  pontos atribuídos  ->  jornada apurada
+--
+-- `matches.pontuado_em` e `pontuado_placar` guardam o momento e o
+-- resultado com que se pontuou. Se alguém corrigir o resultado, deixa
+-- de bater certo e o jogo volta a ser pontuado — sem isso, uma correção
+-- ficava por aplicar em silêncio.
+--
+-- O apuramento passou a correr de 10 em 10 minutos.

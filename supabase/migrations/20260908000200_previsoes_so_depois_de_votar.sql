@@ -1,0 +1,17 @@
+-- As previsões dos outros deixam de ser públicas. APLICADA a 2026-09-08.
+--
+-- A política era `using (true)`: qualquer pessoa, mesmo sem conta, lia
+-- as previsões de toda a gente para jogos por começar. Dava para copiar
+-- o líder antes do apito, e tornava o Contra a Bancada decorativo —
+-- espreitar sem ficar registado custava um pedido HTTP.
+--
+-- Regra nova: vês as tuas sempre; as dos outros só depois de teres
+-- votado nesse jogo, ou depois de o jogo ter começado (a partir daí já
+-- ninguém pode votar, e sem esta parte o /adepto/:id, os melhores
+-- pontuadores e a bancada dos jogos terminados ficavam vazios).
+--
+-- A política precisa da função `ja_votei`: uma política sobre
+-- `predictions` que consulte `predictions` entra em recursão infinita.
+--
+-- Efeito colateral tratado na migração seguinte: o `count` embutido
+-- passou a contar só as linhas visíveis.

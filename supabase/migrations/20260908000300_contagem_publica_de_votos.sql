@@ -1,0 +1,6 @@
+-- Vista `v_votos_jogo`. APLICADA a 2026-09-08.
+--
+-- Quantas pessoas votaram num jogo nunca foi informação sensível: o que
+-- era preciso esconder é *no que* votaram. Sem esta vista, os cartões
+-- mostrariam "0 previsões" justamente nos jogos por votar — onde o
+-- número serve de empurrão.

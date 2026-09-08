@@ -1,0 +1,20 @@
+-- Fechar as funções de escrita ao público. APLICADA a 2026-09-08.
+--
+-- Treze funções SECURITY DEFINER tinham EXECUTE concedido ao papel
+-- `anon`. A chave anónima está no bundle do site, como tem de estar —
+-- portanto qualquer pessoa podia apurar uma jornada, congelar o resumo
+-- de um mês ou reescrever pontos com um pedido HTTP.
+--
+-- Ficam abertas a quem tem sessão apenas quatro: ver_bancada e
+-- definir_clube_favorito (validam auth.uid() e só agem sobre quem
+-- chama), progresso_missao (é STABLE, só lê) e calculate_match_points,
+-- que o painel de admin precisa e que passou a ter o travão de admin
+-- dentro do corpo — a permissão do Postgres não distingue admins.
+--
+-- As funções de trigger levaram as permissões de volta: o Postgres não
+-- verifica EXECUTE quando um trigger dispara, e uma função que devolve
+-- `trigger` não é exposta pelo PostgREST. Fechá-las não protegia nada
+-- e arriscava o registo de utilizadores.
+--
+-- Os cron jobs correm como `postgres`, dono das funções: não foram
+-- afetados.

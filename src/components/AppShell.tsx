@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { BottomNav } from "./BottomNav";
 import { SideNav } from "./SideNav";
 import { TopNav } from "./TopNav";
 import { Footer } from "./Footer";
@@ -82,15 +83,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="absolute -bottom-0.5 -right-0.5 grid h-3.5 w-3.5 place-items-center rounded-full border border-background bg-foreground/85">
                 <Menu className="h-2 w-2 text-background" strokeWidth={3} />
               </span>
-              {/* O aviso de novidades vivia no avatar da barra de baixo.
-                  Sem essa barra, um admin — que no cabeçalho vê o crachá
-                  de administração em vez do avatar — deixaria de saber
-                  que tem algo por ler. */}
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -left-1 flex h-4 w-4 items-center justify-center rounded-full bg-wc-red text-[9px] font-bold text-white ring-2 ring-background">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
             </span>
             <span className="leading-tight">
               <span className="block font-display text-base tracking-wide text-foreground">UMA GERAÇÃO</span>
@@ -126,7 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       {/* ── CONTEÚDO ─────────────────────────────────────────── */}
-      <main className={`pb-12 md:pb-10 ${loggedIn ? "md:ml-56" : ""}`}>
+      <main className={`pb-24 md:pb-10 ${loggedIn ? "md:ml-56" : ""}`}>
         <div key={typeof window !== "undefined" ? window.location.pathname : ""} className={`mx-auto page-enter ${loggedIn ? "max-w-6xl" : "max-w-7xl"}`}>
           {children}
         </div>
@@ -136,6 +128,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Footer />
       </div>
       <MenuMobile aberto={menuAberto} fechar={() => setMenuAberto(false)} />
+      <BottomNav />
       <OnboardingModal />
       <CookieBanner />
       {loggedIn && <FeedbackModal />}
